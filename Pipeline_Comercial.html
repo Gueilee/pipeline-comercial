@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>PIPELINE COMERCIAL</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+Chart.register(ChartDataLabels);
+</script>
+
+<style>
+:root{
+--grafite:#414042;
+--lilas:#422c76;
+--offwhite:#faf9f5;
+}
+
+body{
+margin:0;
+font-family:Segoe UI, sans-serif;
+background:var(--offwhite);
+color:var(--grafite);
+overflow-x:hidden;
+}
+
+header{
+background:white;
+color:var(--lilas);
+padding:18px 30px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+
+.header-left{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.logo{
+height:40px;
+width:auto;
+}
+
+header h1{
+margin:0;
+letter-spacing:2px;
+font-size:18px;
+color:var(--lilas);
+}
+
+.upload-btn{
+background:var(--lilas);
+color:white;
+padding:8px 16px;
+border-radius:20px;
+cursor:pointer;
+font-weight:bold;
+border:none;
+transition:0.3s;
+font-size:12px;
+}
+
+.upload-btn:hover{
+background:#2f1f57;
+}
+
+.container{
+padding:20px 30px;
+max-width:1500px;
+margin:auto;
+}
+
+.filters{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+margin-bottom:20px;
+}
+
+select{
+padding:6px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:12px;
+}
+
+.kpis{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:15px;
+margin-bottom:30px;
+}
+
+.kpi{
+background:white;
+padding:14px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.kpi h3{
+margin:0;
+color:var(--lilas);
+font-size:12px;
+}
+
+.kpi p{
+font-size:16px;
+font-weight:bold;
+margin-top:6px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.charts{
+display:grid;
+grid-template-columns:1fr;
+gap:35px;
+margin-bottom:35px;
+}
+
+canvas{
+background:white;
+padding:12px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+height:420px !important;
+max-height:420px !important;
+width:100% !important;
+}
+
+.kanban{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+overflow:hidden;
+}
+
+.column{
+padding:10px;
+border-radius:10px;
+min-width:unset;
+}
+
+.column h4{
+text-align:center;
+margin-top:0;
+font-size:13px;
+}
+
+.card{
+background:white;
+padding:8px;
+margin:6px 0;
+border-radius:8px;
+font-size:11px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="header-left">
+<img src="Logo novo.jpg" class="logo">
+<h1>PIPELINE COMERCIAL</h1>
+</div>
+
+<label class="upload-btn">
+Carregar Planilha
+<input type="file" id="upload" accept=".xlsx,.xls" hidden>
+</label>
+</header>
+
+<div class="container">
+
+<div class="filters">
+<select id="filtroVendedor"><option value="">Todos Vendedores</option></select>
+<select id="filtroArea"><option value="">Todas Áreas</option></select>
+<select id="filtroStatus"><option value="">Todos Status</option></select>
+</div>
+
+<div class="kpis">
+<div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+<div class="kpi"><h3>Pipeline Total (Anual)</h3><p id="pipelineTotal">R$ 0</p></div>
+<div class="kpi"><h3>MRR Total (Mensal)</h3><p id="mrrTotal">R$ 0</p></div>
+<div class="kpi"><h3>Conversão (%)</h3><p id="conversao">0%</p></div>
+<div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+</div>
+
+<div class="charts">
+<canvas id="chartStatus"></canvas>
+<canvas id="chartVendedor"></canvas>
+</div>
+
+<h2 style="font-size:15px;">KANBAN POR STATUS</h2>
+<div class="kanban" id="kanban"></div>
+
+</div>
+
+<script>
+let base=[];
+let filtrado=[];
+let charts={};
+
+function formatarAbreviado(valor){
+if(!valor) return "R$ 0";
+let abs=Math.abs(valor);
+if(abs>=1e9) return "R$ "+(valor/1e9).toFixed(1).replace(".",",")+"B";
+if(abs>=1e6) return "R$ "+(valor/1e6).toFixed(1).replace(".",",")+"M";
+if(abs>=1e3) return "R$ "+(valor/1e3).toFixed(1).replace(".",",")+"K";
+return "R$ "+valor.toLocaleString();
+}
+
+document.getElementById("upload").addEventListener("change",function(e){
+let reader=new FileReader();
+reader.onload=function(evt){
+let wb=XLSX.read(evt.target.result,{type:'binary'});
+let ws=wb.Sheets[wb.SheetNames[0]];
+base=XLSX.utils.sheet_to_json(ws);
+popularFiltros();
+aplicarFiltros();
+}
+reader.readAsBinaryString(e.target.files[0]);
+});
+
+function popularFiltros(){
+let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
+let areas=[...new Set(base.map(x=>x["Área"]))];
+let status=[...new Set(base.map(x=>x["Status"]))];
+
+filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
+filtroArea.innerHTML='<option value="">Todas Áreas</option>';
+filtroStatus.innerHTML='<option value="">Todos Status</option>';
+
+vendedores.forEach(v=>filtroVendedor.innerHTML+=`<option>${v}</option>`);
+areas.forEach(a=>filtroArea.innerHTML+=`<option>${a}</option>`);
+status.forEach(s=>filtroStatus.innerHTML+=`<option>${s}</option>`);
+
+filtroVendedor.onchange=aplicarFiltros;
+filtroArea.onchange=aplicarFiltros;
+filtroStatus.onchange=aplicarFiltros;
+}
+
+function aplicarFiltros(){
+filtrado=base.filter(r=>
+(!filtroVendedor.value||r["Vendedor"]?.toString().trim()==filtroVendedor.value) &&
+(!filtroArea.value||r["Área"]==filtroArea.value) &&
+(!filtroStatus.value||r["Status"]==filtroStatus.value)
+);
+calcular();
+}
+
+function calcular(){
+let receita=0,pipeline=0,mrr=0,ganhos=0,perdidos=0;
+let statusCount={},vendedorValor={};
+
+filtrado.forEach(r=>{
+let anual=parseFloat(r["Valor estimado no Ano"])||0;
+let mensalRec=parseFloat(r["Valor Mensal Recorrente"])||0;
+
+pipeline+=anual;
+mrr+=mensalRec;
+
+if(r["Status"]==="GANHO"){ receita+=anual; ganhos++; }
+if(r["Status"]==="PERDIDO"){ perdidos++; }
+
+statusCount[r["Status"]]=(statusCount[r["Status"]]||0)+1;
+vendedorValor[r["Vendedor"]?.toString().trim()] =
+(vendedorValor[r["Vendedor"]?.toString().trim()]||0)+anual;
+});
+
+document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
+document.getElementById("pipelineTotal").innerText=formatarAbreviado(pipeline);
+document.getElementById("mrrTotal").innerText=formatarAbreviado(mrr);
+document.getElementById("conversao").innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
+document.getElementById("ticket").innerText=formatarAbreviado(ganhos?receita/ganhos:0);
+
+gerarGrafico("chartStatus","doughnut",statusCount,"Status das Oportunidades",true);
+gerarGraficoVendedor(vendedorValor);
+gerarKanban();
+}
+
+function gerarGrafico(id,tipo,obj,titulo,mostrarLegenda){
+if(charts[id]) charts[id].destroy();
+
+let labels=Object.keys(obj);
+let valores=Object.values(obj);
+
+charts[id]=new Chart(document.getElementById(id),{
+type:tipo,
+data:{
+labels:labels,
+datasets:[{
+data:valores,
+backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"],
+borderWidth:1
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+title:{display:true,text:titulo,font:{size:18,weight:'bold'}},
+legend:{display:mostrarLegenda,position:"bottom"},
+datalabels:{
+color:"#000",
+font:{size:12,weight:"bold"},
+formatter:(value)=>formatarAbreviado(value)
+}
+}
+}
+});
+}
+
+function gerarGraficoVendedor(obj){
+if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
+
+let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+
+ranking=ranking.map((item,index)=>{
+if(index===0) return ["🥇 "+item[0],item[1]];
+if(index===1) return ["🥈 "+item[0],item[1]];
+if(index===2) return ["🥉 "+item[0],item[1]];
+return item;
+});
+
+charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
+type:"bar",
+data:{
+labels:ranking.map(r=>r[0]),
+datasets:[{
+data:ranking.map(r=>r[1]),
+backgroundColor:"#422c76",
+barPercentage:0.7,
+categoryPercentage:0.7
+}]
+},
+options:{
+indexAxis:'y',
+responsive:true,
+maintainAspectRatio:false,
+layout:{
+padding:{top:20,right:40,bottom:20,left:20}
+},
+plugins:{
+title:{display:true,text:"Pipeline por Vendedor",font:{size:18,weight:'bold'}},
+legend:{display:false},
+datalabels:{
+anchor:'end',
+align:'right',
+offset:8,
+color:"#000",
+font:{weight:"bold"},
+formatter:(value)=>formatarAbreviado(value),
+clip:false
+}
+},
+scales:{
+x:{display:false,grid:{display:false}},
+y:{grid:{display:false}}
+}
+}
+});
+}
+
+function gerarKanban(){
+kanban.innerHTML="";
+let grupos={};
+
+filtrado.forEach(r=>{
+if(!grupos[r["Status"]]) grupos[r["Status"]]=[];
+grupos[r["Status"]].push(r);
+});
+
+Object.keys(grupos).forEach(status=>{
+let col=document.createElement("div");
+col.className="column";
+col.style.backgroundColor="hsl("+Math.random()*360+",70%,85%)";
+col.innerHTML="<h4>"+status+"</h4>";
+
+grupos[status].forEach(item=>{
+let card=document.createElement("div");
+card.className="card";
+card.innerHTML="<b>"+item["Cliente"]+"</b><br>"+formatarAbreviado(item["Valor estimado no Ano"]||0);
+col.appendChild(card);
+});
+
+kanban.appendChild(col);
+});
+}
+</script>
+
+</body>
+</html>
