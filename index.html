@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 Chart.register(ChartDataLabels);
@@ -206,6 +207,12 @@ Carregar Planilha
 </div>
 
 <script>
+
+const SUPABASE_URL = https://geojgcncmtbjebftosor.supabase.co;
+const SUPABASE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA;
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
 let base=[];
 let filtrado=[];
 let charts={};
@@ -400,6 +407,7 @@ kanban.appendChild(col);
 </body>
 </html>
  
+
 
 
 
