@@ -182,7 +182,9 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* AJUSTE NECESSÁRIO PARA SUPABASE V2 */
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[];
 let filtrado=[];
@@ -190,7 +192,7 @@ let charts={};
 
 async function carregarDados(){
 
-const { data, error } = await supabase
+const { data, error } = await supabaseClient
 .from('pipeline_comercial')
 .select('*');
 
