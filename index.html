@@ -208,14 +208,43 @@ Carregar Planilha
 
 <script>
 
-const SUPABASE_URL = https://geojgcncmtbjebftosor.supabase.co;
-const SUPABASE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA;
+const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
- 
+
 let base=[];
 let filtrado=[];
 let charts={};
+
+async function carregarDados(){
+
+const { data, error } = await supabase
+.from('pipeline_comercial')
+.select('*');
+
+if(error){
+console.error("Erro ao carregar dados:", error);
+return;
+}
+
+base = data.map(item => ({
+"Oportunidade": item.oportunidade,
+"Cliente": item.cliente,
+"Breve Descrição": item.breve_descricao,
+"Vendedor": item.vendedor,
+"Data da Oportunidade": item.data_oportunidade,
+"Previsão de Fechamento": item.previsao_fechamento,
+"Valor estimado no Ano": item.valor_estimado_ano,
+"Valor Mensal Recorrente": item.valor_mensal_recorrente,
+"Status": item.status,
+"Área": item.area
+}));
+
+popularFiltros();
+aplicarFiltros();
+
+}
 
 function formatarAbreviado(valor){
 if(!valor) return "R$ 0";
@@ -403,15 +432,9 @@ col.appendChild(card);
 kanban.appendChild(col);
 });
 }
- 
+
+carregarDados();
+
 </script>
-
 </body>
-
 </html>
- 
-
-
-
-
-
