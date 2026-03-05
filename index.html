@@ -6,7 +6,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -46,29 +45,6 @@ gap:15px;
 .logo{
 height:40px;
 width:auto;
-}
-
-header h1{
-margin:0;
-letter-spacing:2px;
-font-size:18px;
-color:var(--lilas);
-}
-
-.upload-btn{
-background:var(--lilas);
-color:white;
-padding:8px 16px;
-border-radius:20px;
-cursor:pointer;
-font-weight:bold;
-border:none;
-transition:0.3s;
-font-size:12px;
-}
-
-.upload-btn:hover{
-background:#2f1f57;
 }
 
 .container{
@@ -173,11 +149,6 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 <div class="header-left">
 <img src="Pipeline.png" class="logo">
 </div>
-
-<label class="upload-btn">
-Carregar Planilha
-<input type="file" id="upload" accept=".xlsx,.xls" hidden>
-</label>
 </header>
 
 <div class="container">
@@ -255,18 +226,6 @@ if(abs>=1e3) return "R$ "+(valor/1e3).toFixed(1).replace(".",",")+"K";
 return "R$ "+valor.toLocaleString();
 }
 
-document.getElementById("upload").addEventListener("change",function(e){
-let reader=new FileReader();
-reader.onload=function(evt){
-let wb=XLSX.read(evt.target.result,{type:'binary'});
-let ws=wb.Sheets[wb.SheetNames[0]];
-base=XLSX.utils.sheet_to_json(ws);
-popularFiltros();
-aplicarFiltros();
-}
-reader.readAsBinaryString(e.target.files[0]);
-});
-
 function popularFiltros(){
 let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
 let areas=[...new Set(base.map(x=>x["Área"]))];
@@ -332,27 +291,8 @@ let valores=Object.values(obj);
 
 charts[id]=new Chart(document.getElementById(id),{
 type:tipo,
-data:{
-labels:labels,
-datasets:[{
-data:valores,
-backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"],
-borderWidth:1
-}]
-},
-options:{
-responsive:true,
-maintainAspectRatio:false,
-plugins:{
-title:{display:true,text:titulo,font:{size:18,weight:'bold'}},
-legend:{display:mostrarLegenda,position:"bottom"},
-datalabels:{
-color:"#000",
-font:{size:12,weight:"bold"},
-formatter:(value)=>formatarAbreviado(value)
-}
-}
-}
+data:{labels:labels,datasets:[{data:valores,backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:mostrarLegenda}}}
 });
 }
 
@@ -361,49 +301,10 @@ if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
 
 let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
 
-ranking=ranking.map((item,index)=>{
-if(index===0) return ["🥇 "+item[0],item[1]];
-if(index===1) return ["🥈 "+item[0],item[1]];
-if(index===2) return ["🥉 "+item[0],item[1]];
-return item;
-});
-
 charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
 type:"bar",
-data:{
-labels:ranking.map(r=>r[0]),
-datasets:[{
-data:ranking.map(r=>r[1]),
-backgroundColor:"#422c76",
-barPercentage:0.7,
-categoryPercentage:0.7
-}]
-},
-options:{
-indexAxis:'y',
-responsive:true,
-maintainAspectRatio:false,
-layout:{
-padding:{top:20,right:40,bottom:20,left:20}
-},
-plugins:{
-title:{display:true,text:"Pipeline por Vendedor",font:{size:18,weight:'bold'}},
-legend:{display:false},
-datalabels:{
-anchor:'end',
-align:'right',
-offset:8,
-color:"#000",
-font:{weight:"bold"},
-formatter:(value)=>formatarAbreviado(value),
-clip:false
-}
-},
-scales:{
-x:{display:false,grid:{display:false}},
-y:{grid:{display:false}}
-}
-}
+data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}
 });
 }
 
@@ -436,8 +337,6 @@ kanban.appendChild(col);
 carregarDados();
 
 </script>
-  
-</body>
-  
-</html>
 
+</body>
+</html>
