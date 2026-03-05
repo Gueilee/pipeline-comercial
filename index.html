@@ -1,222 +1,13 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>PIPELINE COMERCIAL</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-Chart.register(ChartDataLabels);
-</script>
-
-<style>
-
-:root{
---grafite:#414042;
---lilas:#422c76;
---offwhite:#faf9f5;
-}
-
-body{
-margin:0;
-font-family:Segoe UI;
-background:var(--offwhite);
-color:var(--grafite);
-}
-
-header{
-background:white;
-padding:18px 30px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.logo{height:40px;}
-
-.btn{
-background:var(--lilas);
-color:white;
-border:none;
-padding:8px 14px;
-border-radius:6px;
-cursor:pointer;
-}
-
-.container{
-padding:20px 30px;
-max-width:1500px;
-margin:auto;
-}
-
-.filters{
-display:flex;
-gap:10px;
-margin-bottom:20px;
-}
-
-select{
-padding:6px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-.kpis{
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:15px;
-margin-bottom:30px;
-}
-
-.kpi{
-background:white;
-padding:14px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-}
-
-.charts{
-display:grid;
-grid-template-columns:1fr;
-gap:35px;
-margin-bottom:35px;
-}
-
-canvas{
-background:white;
-padding:12px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-height:420px !important;
-max-height:420px !important;
-width:100% !important;
-}
-
-.kanban{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
-}
-
-.column{
-padding:10px;
-border-radius:10px;
-min-height:200px;
-}
-
-.column h4{
-text-align:center;
-font-size:13px;
-}
-
-.card{
-background:white;
-padding:8px;
-margin:6px 0;
-border-radius:8px;
-font-size:11px;
-box-shadow:0 2px 6px rgba(0,0,0,0.1);
-cursor:pointer;
-}
-
-.modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.4);
-justify-content:center;
-align-items:center;
-}
-
-.modal-content{
-background:white;
-padding:20px;
-border-radius:10px;
-width:300px;
-}
-
-.modal input,
-.modal select{
-width:100%;
-margin-bottom:10px;
-padding:6px;
-}
-
-</style>
-</head>
-
-<body>
-
-<header>
-
-<img src="Pipeline.png" class="logo">
-
-<button class="btn" onclick="abrirNova()">+ Nova Oportunidade</button>
-
-</header>
-
-<div class="container">
-
-<div class="filters">
-<select id="filtroVendedor"><option value="">Todos Vendedores</option></select>
-<select id="filtroArea"><option value="">Todas Áreas</option></select>
-<select id="filtroStatus"><option value="">Todos Status</option></select>
-</div>
-
-<div class="kpis">
-
-<div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$0</p></div>
-<div class="kpi"><h3>Pipeline Total</h3><p id="pipelineTotal">R$0</p></div>
-<div class="kpi"><h3>MRR</h3><p id="mrrTotal">R$0</p></div>
-<div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-<div class="kpi"><h3>Ticket</h3><p id="ticket">R$0</p></div>
-
-</div>
-
-<div class="charts">
-<canvas id="chartStatus"></canvas>
-<canvas id="chartVendedor"></canvas>
-</div>
-
-<h2 style="font-size:15px;">KANBAN POR STATUS</h2>
-
-<div class="kanban" id="kanban"></div>
-
-</div>
-
-<div class="modal" id="modal">
-
-<div class="modal-content">
-
-<h3>Editar Oportunidade</h3>
-
-<input id="cliente" placeholder="Cliente">
-<input id="valor" placeholder="Valor anual">
-<input id="previsao" type="date">
-
-<select id="vendedor"></select>
-<select id="area"></select>
-<select id="status"></select>
-
-<button onclick="salvar()">Salvar</button>
-
-</div>
-
-</div>
-
-<script>
+console.log("PIPELINE INICIANDO...");
 
 const SUPABASE_URL="https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL,SUPABASE_KEY);
+console.log("Conectando ao Supabase...");
+
+const db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+console.log("Cliente criado:",db);
 
 let base=[];
 let vendedores=[];
@@ -226,20 +17,62 @@ let oportunidadeAtual=null;
 
 async function carregar(){
 
-const {data:op}=await db.from("oportunidades").select("*");
-const {data:vend}=await db.from("vendedores").select("*").eq("ativo",true);
-const {data:ar}=await db.from("areas").select("*").eq("ativo",true);
+console.log("==== INICIANDO CARREGAMENTO ====");
 
-base=op;
-vendedores=vend;
-areas=ar;
+try{
+
+console.log("Buscando oportunidades...");
+
+const {data:op,error:erroOp}=await db
+.from("oportunidades")
+.select("*");
+
+console.log("Resultado oportunidades:",op);
+console.log("Erro oportunidades:",erroOp);
+
+console.log("Buscando vendedores...");
+
+const {data:vend,error:erroVend}=await db
+.from("vendedores")
+.select("*")
+.eq("ativo",true);
+
+console.log("Resultado vendedores:",vend);
+console.log("Erro vendedores:",erroVend);
+
+console.log("Buscando areas...");
+
+const {data:ar,error:erroArea}=await db
+.from("areas")
+.select("*")
+.eq("ativo",true);
+
+console.log("Resultado areas:",ar);
+console.log("Erro areas:",erroArea);
+
+base=op||[];
+vendedores=vend||[];
+areas=ar||[];
+
+console.log("Total oportunidades:",base.length);
+console.log("Total vendedores:",vendedores.length);
+console.log("Total areas:",areas.length);
 
 popularFiltros();
+
 render();
+
+}catch(e){
+
+console.error("ERRO GERAL:",e);
+
+}
 
 }
 
 function popularFiltros(){
+
+console.log("Populando filtros");
 
 filtroVendedor.innerHTML="<option value=''>Todos Vendedores</option>";
 vendedores.forEach(v=>{
@@ -266,6 +99,8 @@ filtroStatus.onchange=render;
 
 function render(){
 
+console.log("Renderizando sistema");
+
 let filtrado=base.filter(r=>
 
 (!filtroVendedor.value || r.vendedor==filtroVendedor.value) &&
@@ -274,12 +109,16 @@ let filtrado=base.filter(r=>
 
 );
 
+console.log("Registros filtrados:",filtrado.length);
+
 gerarKanban(filtrado);
 calcular(filtrado);
 
 }
 
 function gerarKanban(dados){
+
+console.log("Gerando Kanban");
 
 kanban.innerHTML="";
 let grupos={};
@@ -331,77 +170,12 @@ async function moverCard(e,status){
 
 let id=e.dataTransfer.getData("id");
 
-await db.from("oportunidades")
+console.log("Movendo card",id,"para",status);
+
+await db
+.from("oportunidades")
 .update({status:status})
 .eq("id",id);
-
-carregar();
-
-}
-
-function abrirModal(item){
-
-modal.style.display="flex";
-
-oportunidadeAtual=item.id;
-
-cliente.value=item.cliente;
-valor.value=item.valor_estimado_ano;
-previsao.value=item.previsao_fechamento;
-
-vendedor.innerHTML="";
-vendedores.forEach(v=>{
-vendedor.innerHTML+=`<option ${v.nome==item.vendedor?"selected":""}>${v.nome}</option>`;
-});
-
-area.innerHTML="";
-areas.forEach(a=>{
-area.innerHTML+=`<option ${a.nome==item.area?"selected":""}>${a.nome}</option>`;
-});
-
-status.innerHTML=`
-<option ${item.status=="LEAD"?"selected":""}>LEAD</option>
-<option ${item.status=="AINDA FRIO"?"selected":""}>AINDA FRIO</option>
-<option ${item.status=="PROPOSTA ENVIADA - ACEITA"?"selected":""}>PROPOSTA ENVIADA - ACEITA</option>
-<option ${item.status=="EM ASSINATURA"?"selected":""}>EM ASSINATURA</option>
-<option ${item.status=="GANHO"?"selected":""}>GANHO</option>
-<option ${item.status=="PERDIDO"?"selected":""}>PERDIDO</option>
-`;
-
-}
-
-function abrirNova(){
-
-modal.style.display="flex";
-oportunidadeAtual=null;
-
-}
-
-async function salvar(){
-
-let dados={
-cliente:cliente.value,
-valor_estimado_ano:valor.value,
-previsao_fechamento:previsao.value,
-vendedor:vendedor.value,
-area:area.value,
-status:status.value
-};
-
-if(oportunidadeAtual){
-
-await db.from("oportunidades")
-.update(dados)
-.eq("id",oportunidadeAtual);
-
-}else{
-
-await db.from("oportunidades")
-.insert(dados);
-
-}
-
-modal.style.display="none";
 
 carregar();
 
@@ -420,6 +194,8 @@ return "R$"+v;
 
 function calcular(dados){
 
+console.log("Calculando KPIs");
+
 let receita=0,pipeline=0,ganhos=0,perdidos=0;
 let statusCount={},vendedorValor={};
 
@@ -429,8 +205,14 @@ let anual=parseFloat(r.valor_estimado_ano)||0;
 
 pipeline+=anual;
 
-if(r.status=="GANHO"){receita+=anual;ganhos++;}
-if(r.status=="PERDIDO"){perdidos++;}
+if(r.status=="GANHO"){
+receita+=anual;
+ganhos++;
+}
+
+if(r.status=="PERDIDO"){
+perdidos++;
+}
 
 statusCount[r.status]=(statusCount[r.status]||0)+1;
 
@@ -438,11 +220,11 @@ vendedorValor[r.vendedor]=(vendedorValor[r.vendedor]||0)+anual;
 
 });
 
+console.log("Pipeline:",pipeline);
+console.log("Receita:",receita);
+
 receitaGanha.innerText=formatar(receita);
 pipelineTotal.innerText=formatar(pipeline);
-mrrTotal.innerText=formatar(0);
-conversao.innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
-ticket.innerText=formatar(ganhos?receita/ganhos:0);
 
 gerarGrafico("chartStatus","doughnut",statusCount,"Status",true);
 gerarGraficoVendedor(vendedorValor);
@@ -457,9 +239,19 @@ charts[id]=new Chart(document.getElementById(id),{
 type:tipo,
 data:{
 labels:Object.keys(obj),
-datasets:[{data:Object.values(obj),backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]}]
+datasets:[{
+data:Object.values(obj),
+backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]
+}]
 },
-options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:legenda}}}
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+title:{display:true,text:titulo},
+legend:{display:legenda}
+}
+}
 });
 
 }
@@ -479,16 +271,22 @@ return r;
 
 charts.chartVendedor=new Chart(chartVendedor,{
 type:"bar",
-data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
-options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}
+data:{
+labels:ranking.map(r=>r[0]),
+datasets:[{
+data:ranking.map(r=>r[1]),
+backgroundColor:"#422c76"
+}]
+},
+options:{
+indexAxis:'y',
+responsive:true,
+maintainAspectRatio:false
+}
 });
 
 }
 
+console.log("Sistema pronto, carregando dados...");
+
 carregar();
-
-</script>
-
-</body>
-</html>
-
