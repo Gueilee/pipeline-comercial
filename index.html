@@ -13,7 +13,6 @@ Chart.register(ChartDataLabels);
 </script>
 
 <style>
-
 :root{
 --grafite:#414042;
 --lilas:#422c76;
@@ -22,28 +21,30 @@ Chart.register(ChartDataLabels);
 
 body{
 margin:0;
-font-family:Segoe UI;
+font-family:Segoe UI, sans-serif;
 background:var(--offwhite);
 color:var(--grafite);
+overflow-x:hidden;
 }
 
 header{
 background:white;
+color:var(--lilas);
 padding:18px 30px;
 display:flex;
-justify-content:space-between;
 align-items:center;
+justify-content:space-between;
 }
 
-.logo{height:40px;}
+.header-left{
+display:flex;
+align-items:center;
+gap:15px;
+}
 
-.btn{
-background:var(--lilas);
-color:white;
-border:none;
-padding:8px 14px;
-border-radius:6px;
-cursor:pointer;
+.logo{
+height:40px;
+width:auto;
 }
 
 .container{
@@ -54,7 +55,8 @@ margin:auto;
 
 .filters{
 display:flex;
-gap:10px;
+gap:12px;
+flex-wrap:wrap;
 margin-bottom:20px;
 }
 
@@ -62,6 +64,7 @@ select{
 padding:6px;
 border-radius:6px;
 border:1px solid #ccc;
+font-size:12px;
 }
 
 .kpis{
@@ -76,6 +79,21 @@ background:white;
 padding:14px;
 border-radius:10px;
 box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.kpi h3{
+margin:0;
+color:var(--lilas);
+font-size:12px;
+}
+
+.kpi p{
+font-size:16px;
+font-weight:bold;
+margin-top:6px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
 }
 
 .charts{
@@ -99,16 +117,18 @@ width:100% !important;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:15px;
+overflow:hidden;
 }
 
 .column{
 padding:10px;
 border-radius:10px;
-min-height:200px;
+min-width:unset;
 }
 
 .column h4{
 text-align:center;
+margin-top:0;
 font-size:13px;
 }
 
@@ -119,46 +139,16 @@ margin:6px 0;
 border-radius:8px;
 font-size:11px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
-cursor:pointer;
 }
-
-.modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.4);
-justify-content:center;
-align-items:center;
-}
-
-.modal-content{
-background:white;
-padding:20px;
-border-radius:10px;
-width:300px;
-}
-
-.modal input,
-.modal select{
-width:100%;
-margin-bottom:10px;
-padding:6px;
-}
-
 </style>
 </head>
 
 <body>
 
 <header>
-
+<div class="header-left">
 <img src="Pipeline.png" class="logo">
-
-<button class="btn" onclick="abrirNova()">+ Nova Oportunidade</button>
-
+</div>
 </header>
 
 <div class="container">
@@ -170,13 +160,11 @@ padding:6px;
 </div>
 
 <div class="kpis">
-
-<div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$0</p></div>
-<div class="kpi"><h3>Pipeline Total</h3><p id="pipelineTotal">R$0</p></div>
-<div class="kpi"><h3>MRR</h3><p id="mrrTotal">R$0</p></div>
-<div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-<div class="kpi"><h3>Ticket</h3><p id="ticket">R$0</p></div>
-
+<div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+<div class="kpi"><h3>Pipeline Total (Anual)</h3><p id="pipelineTotal">R$ 0</p></div>
+<div class="kpi"><h3>MRR Total (Mensal)</h3><p id="mrrTotal">R$ 0</p></div>
+<div class="kpi"><h3>Conversão (%)</h3><p id="conversao">0%</p></div>
+<div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
 </div>
 
 <div class="charts">
@@ -185,307 +173,170 @@ padding:6px;
 </div>
 
 <h2 style="font-size:15px;">KANBAN POR STATUS</h2>
-
 <div class="kanban" id="kanban"></div>
-
-</div>
-
-<div class="modal" id="modal">
-
-<div class="modal-content">
-
-<h3>Editar Oportunidade</h3>
-
-<input id="cliente" placeholder="Cliente">
-<input id="valor" placeholder="Valor anual">
-<input id="previsao" type="date">
-
-<select id="vendedor"></select>
-<select id="area"></select>
-<select id="status"></select>
-
-<button onclick="salvar()">Salvar</button>
-
-</div>
 
 </div>
 
 <script>
 
-const SUPABASE_URL="https://geojgcncmtbjebftosor.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
+/* AJUSTE NECESSÁRIO PARA SUPABASE V2 */
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL,SUPABASE_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[];
-let vendedores=[];
-let areas=[];
+let filtrado=[];
 let charts={};
-let oportunidadeAtual=null;
 
-async function carregar(){
+async function carregarDados(){
 
-const {data:op}=await db.from("oportunidades").select("*");
-const {data:vend}=await db.from("vendedores").select("*").eq("ativo",true);
-const {data:ar}=await db.from("areas").select("*").eq("ativo",true);
+const { data, error } = await supabaseClient
+.from('oportunidades')
+.select('*');
 
-base=op;
-vendedores=vend;
-areas=ar;
+if(error){
+console.error("Erro ao carregar dados:", error);
+return;
+}
+
+base = data.map(item => ({
+"Oportunidade": item.oportunidade,
+"Cliente": item.cliente,
+"Breve Descrição": item.breve_descricao,
+"Vendedor": item.vendedor,
+"Data da Oportunidade": item.data_oportunidade,
+"Previsão de Fechamento": item.previsao_fechamento,
+"Valor estimado no Ano": item.valor_estimado_ano,
+"Valor Mensal Recorrente": item.valor_mensal_recorrente,
+"Status": item.status,
+"Área": item.area
+}));
 
 popularFiltros();
-render();
+aplicarFiltros();
 
+}
+
+function formatarAbreviado(valor){
+if(!valor) return "R$ 0";
+let abs=Math.abs(valor);
+if(abs>=1e9) return "R$ "+(valor/1e9).toFixed(1).replace(".",",")+"B";
+if(abs>=1e6) return "R$ "+(valor/1e6).toFixed(1).replace(".",",")+"M";
+if(abs>=1e3) return "R$ "+(valor/1e3).toFixed(1).replace(".",",")+"K";
+return "R$ "+valor.toLocaleString();
 }
 
 function popularFiltros(){
+let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
+let areas=[...new Set(base.map(x=>x["Área"]))];
+let status=[...new Set(base.map(x=>x["Status"]))];
 
-filtroVendedor.innerHTML="<option value=''>Todos Vendedores</option>";
-vendedores.forEach(v=>{
-filtroVendedor.innerHTML+=`<option>${v.nome}</option>`;
-});
+filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
+filtroArea.innerHTML='<option value="">Todas Áreas</option>';
+filtroStatus.innerHTML='<option value="">Todos Status</option>';
 
-filtroArea.innerHTML="<option value=''>Todas Áreas</option>";
-areas.forEach(a=>{
-filtroArea.innerHTML+=`<option>${a.nome}</option>`;
-});
+vendedores.forEach(v=>filtroVendedor.innerHTML+=`<option>${v}</option>`);
+areas.forEach(a=>filtroArea.innerHTML+=`<option>${a}</option>`);
+status.forEach(s=>filtroStatus.innerHTML+=`<option>${s}</option>`);
 
-let status=[...new Set(base.map(x=>x.status))];
-
-filtroStatus.innerHTML="<option value=''>Todos Status</option>";
-status.forEach(s=>{
-filtroStatus.innerHTML+=`<option>${s}</option>`;
-});
-
-filtroVendedor.onchange=render;
-filtroArea.onchange=render;
-filtroStatus.onchange=render;
-
+filtroVendedor.onchange=aplicarFiltros;
+filtroArea.onchange=aplicarFiltros;
+filtroStatus.onchange=aplicarFiltros;
 }
 
-function render(){
-
-let filtrado=base.filter(r=>
-
-(!filtroVendedor.value || r.vendedor==filtroVendedor.value) &&
-(!filtroArea.value || r.area==filtroArea.value) &&
-(!filtroStatus.value || r.status==filtroStatus.value)
-
+function aplicarFiltros(){
+filtrado=base.filter(r=>
+(!filtroVendedor.value||r["Vendedor"]?.toString().trim()==filtroVendedor.value) &&
+(!filtroArea.value||r["Área"]==filtroArea.value) &&
+(!filtroStatus.value||r["Status"]==filtroStatus.value)
 );
-
-gerarKanban(filtrado);
-calcular(filtrado);
-
+calcular();
 }
 
-function gerarKanban(dados){
-
-kanban.innerHTML="";
-let grupos={};
-
-dados.forEach(r=>{
-if(!grupos[r.status]) grupos[r.status]=[];
-grupos[r.status].push(r);
-});
-
-Object.keys(grupos).forEach(status=>{
-
-let col=document.createElement("div");
-col.className="column";
-col.dataset.status=status;
-col.style.background="hsl("+Math.random()*360+",70%,85%)";
-
-col.innerHTML="<h4>"+status+"</h4>";
-
-col.ondragover=e=>e.preventDefault();
-col.ondrop=e=>moverCard(e,status);
-
-grupos[status].forEach(item=>{
-
-let card=document.createElement("div");
-card.className="card";
-card.draggable=true;
-
-card.dataset.id=item.id;
-
-card.innerHTML="<b>"+item.cliente+"</b><br>"+formatar(item.valor_estimado_ano);
-
-card.onclick=()=>abrirModal(item);
-
-card.ondragstart=e=>{
-e.dataTransfer.setData("id",item.id);
-};
-
-col.appendChild(card);
-
-});
-
-kanban.appendChild(col);
-
-});
-
-}
-
-async function moverCard(e,status){
-
-let id=e.dataTransfer.getData("id");
-
-await db.from("oportunidades")
-.update({status:status})
-.eq("id",id);
-
-carregar();
-
-}
-
-function abrirModal(item){
-
-modal.style.display="flex";
-
-oportunidadeAtual=item.id;
-
-cliente.value=item.cliente;
-valor.value=item.valor_estimado_ano;
-previsao.value=item.previsao_fechamento;
-
-vendedor.innerHTML="";
-vendedores.forEach(v=>{
-vendedor.innerHTML+=`<option ${v.nome==item.vendedor?"selected":""}>${v.nome}</option>`;
-});
-
-area.innerHTML="";
-areas.forEach(a=>{
-area.innerHTML+=`<option ${a.nome==item.area?"selected":""}>${a.nome}</option>`;
-});
-
-status.innerHTML=`
-<option ${item.status=="LEAD"?"selected":""}>LEAD</option>
-<option ${item.status=="AINDA FRIO"?"selected":""}>AINDA FRIO</option>
-<option ${item.status=="PROPOSTA ENVIADA - ACEITA"?"selected":""}>PROPOSTA ENVIADA - ACEITA</option>
-<option ${item.status=="EM ASSINATURA"?"selected":""}>EM ASSINATURA</option>
-<option ${item.status=="GANHO"?"selected":""}>GANHO</option>
-<option ${item.status=="PERDIDO"?"selected":""}>PERDIDO</option>
-`;
-
-}
-
-function abrirNova(){
-
-modal.style.display="flex";
-oportunidadeAtual=null;
-
-}
-
-async function salvar(){
-
-let dados={
-cliente:cliente.value,
-valor_estimado_ano:valor.value,
-previsao_fechamento:previsao.value,
-vendedor:vendedor.value,
-area:area.value,
-status:status.value
-};
-
-if(oportunidadeAtual){
-
-await db.from("oportunidades")
-.update(dados)
-.eq("id",oportunidadeAtual);
-
-}else{
-
-await db.from("oportunidades")
-.insert(dados);
-
-}
-
-modal.style.display="none";
-
-carregar();
-
-}
-
-function formatar(v){
-
-if(!v) return "R$0";
-
-if(v>1000000) return "R$"+(v/1000000).toFixed(1)+"M";
-if(v>1000) return "R$"+(v/1000).toFixed(1)+"K";
-
-return "R$"+v;
-
-}
-
-function calcular(dados){
-
-let receita=0,pipeline=0,ganhos=0,perdidos=0;
+function calcular(){
+let receita=0,pipeline=0,mrr=0,ganhos=0,perdidos=0;
 let statusCount={},vendedorValor={};
 
-dados.forEach(r=>{
-
-let anual=parseFloat(r.valor_estimado_ano)||0;
+filtrado.forEach(r=>{
+let anual=parseFloat(r["Valor estimado no Ano"])||0;
+let mensalRec=parseFloat(r["Valor Mensal Recorrente"])||0;
 
 pipeline+=anual;
+mrr+=mensalRec;
 
-if(r.status=="GANHO"){receita+=anual;ganhos++;}
-if(r.status=="PERDIDO"){perdidos++;}
+if(r["Status"]==="GANHO"){ receita+=anual; ganhos++; }
+if(r["Status"]==="PERDIDO"){ perdidos++; }
 
-statusCount[r.status]=(statusCount[r.status]||0)+1;
-
-vendedorValor[r.vendedor]=(vendedorValor[r.vendedor]||0)+anual;
-
+statusCount[r["Status"]]=(statusCount[r["Status"]]||0)+1;
+vendedorValor[r["Vendedor"]?.toString().trim()] =
+(vendedorValor[r["Vendedor"]?.toString().trim()]||0)+anual;
 });
 
-receitaGanha.innerText=formatar(receita);
-pipelineTotal.innerText=formatar(pipeline);
-mrrTotal.innerText=formatar(0);
-conversao.innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
-ticket.innerText=formatar(ganhos?receita/ganhos:0);
+document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
+document.getElementById("pipelineTotal").innerText=formatarAbreviado(pipeline);
+document.getElementById("mrrTotal").innerText=formatarAbreviado(mrr);
+document.getElementById("conversao").innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
+document.getElementById("ticket").innerText=formatarAbreviado(ganhos?receita/ganhos:0);
 
-gerarGrafico("chartStatus","doughnut",statusCount,"Status",true);
+gerarGrafico("chartStatus","doughnut",statusCount,"Status das Oportunidades",true);
 gerarGraficoVendedor(vendedorValor);
-
+gerarKanban();
 }
 
-function gerarGrafico(id,tipo,obj,titulo,legenda){
-
+function gerarGrafico(id,tipo,obj,titulo,mostrarLegenda){
 if(charts[id]) charts[id].destroy();
+
+let labels=Object.keys(obj);
+let valores=Object.values(obj);
 
 charts[id]=new Chart(document.getElementById(id),{
 type:tipo,
-data:{
-labels:Object.keys(obj),
-datasets:[{data:Object.values(obj),backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]}]
-},
-options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:legenda}}}
+data:{labels:labels,datasets:[{data:valores,backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]}]},
+options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:mostrarLegenda}}}
 });
-
 }
 
 function gerarGraficoVendedor(obj){
-
-if(charts.chartVendedor) charts.chartVendedor.destroy();
+if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
 
 let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
 
-ranking=ranking.map((r,i)=>{
-if(i==0) return ["🥇 "+r[0],r[1]];
-if(i==1) return ["🥈 "+r[0],r[1]];
-if(i==2) return ["🥉 "+r[0],r[1]];
-return r;
-});
-
-charts.chartVendedor=new Chart(chartVendedor,{
+charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
 type:"bar",
 data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
 options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}
 });
-
 }
 
-carregar();
+function gerarKanban(){
+kanban.innerHTML="";
+let grupos={};
+
+filtrado.forEach(r=>{
+if(!grupos[r["Status"]]) grupos[r["Status"]]=[];
+grupos[r["Status"]].push(r);
+});
+
+Object.keys(grupos).forEach(status=>{
+let col=document.createElement("div");
+col.className="column";
+col.style.backgroundColor="hsl("+Math.random()*360+",70%,85%)";
+col.innerHTML="<h4>"+status+"</h4>";
+
+grupos[status].forEach(item=>{
+let card=document.createElement("div");
+card.className="card";
+card.innerHTML="<b>"+item["Cliente"]+"</b><br>"+formatarAbreviado(item["Valor estimado no Ano"]||0);
+col.appendChild(card);
+});
+
+kanban.appendChild(col);
+});
+}
+
+carregarDados();
 
 </script>
 
