@@ -319,7 +319,6 @@ function renderizar(){
         options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom' } } }
     });
 
-    // --- AJUSTE MODERNO DO GRÁFICO DE VENDEDOR ---
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
@@ -328,15 +327,16 @@ function renderizar(){
             labels: sv.map(x=>x[0]), 
             datasets: [{ 
                 data: sv.map(x=>x[1]), 
-                backgroundColor: 'rgba(66, 44, 118, 0.85)', // Lilás Vendemmia suave
-                borderRadius: 8,      // Bordas arredondadas
-                barThickness: 22,    // Barra mais fina
+                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
+                borderRadius: 8,      
+                barThickness: 22,    
                 maxBarThickness: 30
             }] 
         },
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false, 
+            layout: { padding: { right: 50 } }, // Padding maior para evitar corte no nome/barra
             scales: { 
                 x: { display: false }, 
                 y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
@@ -344,10 +344,11 @@ function renderizar(){
             plugins: { 
                 legend: { display: false }, 
                 datalabels: { 
-                    color: '#414042', 
+                    color: '#fff', 
                     anchor: 'end', 
-                    align: 'right', 
-                    offset: 10,
+                    align: 'start', 
+                    offset: 5,
+                    font: { weight: 'bold' },
                     formatter: v => "R$ " + v.toLocaleString('pt-BR') 
                 } 
             } 
