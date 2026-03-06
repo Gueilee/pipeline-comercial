@@ -16,7 +16,7 @@
 --verde-sucesso: #28a745;
 }
 
-body{ margin:0; font-family:Segoe UI, sans-serif; background:var(--offwhite); color:var(--grafite); }
+body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
 header{
 background:white;
@@ -26,6 +26,8 @@ align-items:center;
 justify-content:space-between;
 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
+
+.logo-header { height: 40px; width: auto; display: block; }
 
 .header-right{ display:flex; gap:10px; }
 
@@ -41,12 +43,11 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 
 .btn-novo-op { background-color: var(--lilas); color: white; }
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
-.btn-header:hover { opacity: 0.8; }
 
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
 
 .filters{ display:flex; gap:12px; margin-bottom:20px; }
-select { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; min-width: 120px; }
+select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; min-width: 150px; }
 
 .kpis{
 display:grid;
@@ -67,7 +68,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 .charts-grid {
     display: grid;
-    grid-template-columns: 350px 1fr;
+    grid-template-columns: 380px 1fr;
     gap: 25px;
     margin-bottom: 35px;
 }
@@ -77,20 +78,21 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    height: 450px;
+    height: 400px;
     display: flex;
     flex-direction: column;
 }
 
-.chart-card h4 { margin: 0 0 20px 0; color: #333; font-size: 16px; text-align: left; }
+.chart-card h4 { margin: 0 0 15px 0; color: #333; font-size: 16px; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
 .column{ background:#eaebed; padding:12px; border-radius:10px; min-height:400px; }
 .column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
 .card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
 
+/* Modal */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 8% auto; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+.modal-content { background: white; margin: 8% auto; padding: 30px; border-radius: 12px; width: 400px; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
 .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
@@ -101,7 +103,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 <body>
 
 <header>
-    <img src="https://www.vendemmia.com.br/wp-content/uploads/2021/04/Logo-Vendemmia-Horizontal.png" style="height:35px;" alt="Vendemmia">
+    <img src="https://www.vendemmia.com.br/wp-content/uploads/2021/04/Logo-Vendemmia-Horizontal.png" class="logo-header" alt="Vendemmia">
     <div class="header-right">
         <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
@@ -111,9 +113,9 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 <div class="container">
     <div class="filters">
-        <select id="filtroVendedor"><option value="">Vendedores</option></select>
-        <select id="filtroArea"><option value="">Áreas</option></select>
-        <select id="filtroStatus">
+        <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedores</option></select>
+        <select id="filtroArea" onchange="renderizar()"><option value="">Áreas</option></select>
+        <select id="filtroStatus" onchange="renderizar()">
             <option value="">Status</option>
             <option value="LEAD">LEAD</option>
             <option value="AINDA FRIO">AINDA FRIO</option>
@@ -135,80 +137,29 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     <div class="charts-grid">
         <div class="chart-card">
             <h4>Status das Oportunidades</h4>
-            <div style="flex:1; position: relative;"><canvas id="chartStatus"></canvas></div>
+            <div style="flex:1;"><canvas id="chartStatus"></canvas></div>
         </div>
         <div class="chart-card">
             <h4>Ranking por Vendedor</h4>
-            <div style="flex:1; position: relative;"><canvas id="chartVendedor"></canvas></div>
+            <div style="flex:1;"><canvas id="chartVendedor"></canvas></div>
         </div>
     </div>
 
     <div class="kanban" id="kanban"></div>
 </div>
 
-<div id="modalVendedor" class="modal">
-    <div class="modal-content">
-        <h3>Cadastrar Vendedor</h3>
-        <form id="formVendedor">
-            <div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div>
-            <div class="modal-footer">
-                <button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="modalArea" class="modal">
-    <div class="modal-content">
-        <h3>Cadastrar Área</h3>
-        <form id="formArea">
-            <div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div>
-            <div class="modal-footer">
-                <button type="button" onclick="fecharModal('modalArea')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<div id="modalOportunidade" class="modal">
-    <div class="modal-content" style="width:450px;">
-        <h3>Nova Oportunidade</h3>
-        <form id="formOportunidade">
-            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div>
-                <div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div>
-            </div>
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" step="0.01" id="vAno" required></div>
-                <div class="form-group" style="flex:1"><label>Status</label>
-                    <select id="status" required>
-                        <option value="LEAD">LEAD</option>
-                        <option value="AINDA FRIO">AINDA FRIO</option>
-                        <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                        <option value="EM ASSINATURA">EM ASSINATURA</option>
-                        <option value="GANHO">GANHO</option>
-                        <option value="PERDIDO">PERDIDO</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar</button>
-            </div>
-        </form>
-    </div>
-</div>
+<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalOportunidade" class="modal"><div class="modal-content" style="width:450px;"><h3>Nova Oportunidade</h3><form id="formOportunidade"><div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div><div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div><div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div></div><div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" step="0.01" id="vAno" required></div><div class="form-group" style="flex:1"><label>Status</label><select id="status" required><option value="LEAD">LEAD</option><option value="AINDA FRIO">AINDA FRIO</option><option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option><option value="EM ASSINATURA">EM ASSINATURA</option><option value="GANHO">GANHO</option><option value="PERDIDO">PERDIDO</option></select></div></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 
 <script>
+// Registro Global do Plugin de Labels
+Chart.register(ChartDataLabels);
+
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-Chart.register(ChartDataLabels); // Ativa o plugin de rótulos
 
 let base=[];
 let charts={};
@@ -234,18 +185,14 @@ async function carregarAuxiliares(){
 
 document.getElementById('formArea').onsubmit = async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('nomeArea').value;
-    const { error } = await supabaseClient.from('areas').insert([{ nome, ativo: true }]);
-    if(error) alert("Erro: " + error.message);
-    else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
+    const { error } = await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]);
+    if(!error) { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
 };
 
 document.getElementById('formVendedor').onsubmit = async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('nomeVendedor').value;
-    const { error } = await supabaseClient.from('vendedores').insert([{ nome, ativo: true }]);
-    if(error) alert("Erro: " + error.message);
-    else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
+    const { error } = await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]);
+    if(!error) { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
 };
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
@@ -259,7 +206,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         data_oportunidade: new Date().toISOString().split('T')[0]
     };
     const { error } = await supabaseClient.from('oportunidades').insert([payload]);
-    if(error) alert(error.message); else { fecharModal('modalOportunidade'); carregarDados(); }
+    if(!error) { fecharModal('modalOportunidade'); carregarDados(); }
 };
 
 async function carregarDados(){
@@ -273,6 +220,7 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
 
+    // Filtro CORRIGIDO
     const filtrados = base.filter(r => 
         (!fV || r.vendedor === fV) &&
         (!fA || r.area === fA) &&
@@ -289,7 +237,7 @@ function renderizar(){
         if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
         
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + v;
+        vendVal[r.vendedor || "Não Atribuído"] = (vendVal[r.vendedor || "Não Atribuído"] || 0) + v;
     });
 
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
@@ -303,10 +251,13 @@ function renderizar(){
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } }
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } 
+        }
     });
 
-    // Gráfico de Ranking (Vendedores) - AJUSTADO CONFORME PEDIDO
+    // Gráfico de Ranking (Vendedores) - LIMPO E COM LABELS
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
@@ -316,23 +267,25 @@ function renderizar(){
             datasets: [{ 
                 data: sortedVendors.map(x=>x[1]), 
                 backgroundColor: '#422c76',
-                borderRadius: 5
+                borderRadius: 4
             }]
         },
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false,
             scales: {
-                x: { display: false }, // Remove eixo horizontal e grade X
-                y: { grid: { display: false }, border: { display: false } } // Remove grade Y
+                x: { display: false, grid: { display: false } },
+                y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12, weight: 'bold' }, color: '#333' } }
             },
             plugins: {
-                legend: { display: false }, // Remove legenda
-                datalabels: { // Configura rótulos brancos dentro das barras
+                legend: { display: false },
+                datalabels: {
+                    display: true,
                     anchor: 'end',
                     align: 'left',
-                    color: '#ffffff',
-                    font: { weight: 'bold', size: 12 },
+                    color: '#ffffff', // COR BRANCA
+                    offset: 10,
+                    font: { weight: 'bold', size: 11 },
                     formatter: (value) => "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0})
                 }
             }
@@ -353,7 +306,6 @@ function renderizar(){
     });
 }
 
-document.querySelectorAll('select').forEach(s => s.onchange = renderizar);
 carregarAuxiliares();
 carregarDados();
 </script>
