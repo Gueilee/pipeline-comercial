@@ -58,7 +58,6 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
-/* CORES DE FUNDO DAS COLUNAS (SÓLIDAS E CLARAS) */
 .col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
 .col-frio { background-color: #e1f5f7; } .col-frio h4 { background-color: var(--bg-frio); }
 .col-proposta { background-color: #fef5e7; } .col-proposta h4 { background-color: var(--bg-proposta); }
@@ -320,11 +319,39 @@ function renderizar(){
         options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom' } } }
     });
 
+    // --- AJUSTE MODERNO DO GRÁFICO DE VENDEDOR ---
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: '#422c76' }] },
-        options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
+        type: 'bar', 
+        data: { 
+            labels: sv.map(x=>x[0]), 
+            datasets: [{ 
+                data: sv.map(x=>x[1]), 
+                backgroundColor: 'rgba(66, 44, 118, 0.85)', // Lilás Vendemmia suave
+                borderRadius: 8,      // Bordas arredondadas
+                barThickness: 22,    // Barra mais fina
+                maxBarThickness: 30
+            }] 
+        },
+        options: { 
+            indexAxis: 'y', 
+            maintainAspectRatio: false, 
+            scales: { 
+                x: { display: false }, 
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
+            }, 
+            plugins: { 
+                legend: { display: false }, 
+                datalabels: { 
+                    color: '#414042', 
+                    anchor: 'end', 
+                    align: 'right', 
+                    offset: 10,
+                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
+                } 
+            } 
+        }
     });
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
