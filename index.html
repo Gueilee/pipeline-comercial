@@ -20,38 +20,66 @@
 --bg-ganho: #27ae60;
 --bg-perdido: #c0392b;
 --ia-gold: #d4af37;
+--pure-white: #ffffff;
 }
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN */
+/* --- NOVO ESTILO DA TELA DE LOGIN --- */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--lilas);
+    /* IMAGEM FUTURISTA GERADA IMPLANTADA NO FUNDO */
+    background-image: url('https://i.ibb.co/X3k79XN/vendemmia-futuristic-pipeline.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex; align-items: center; justify-content: center;
     z-index: 10000;
 }
+
+/* Efeito Glassmorphism na caixa de login */
 .login-box {
-    background: white; padding: 40px; border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    width: 320px; text-align: center;
+    background: rgba(255, 255, 255, 0.85); /* Fundo branco semi-transparente */
+    backdrop-filter: blur(10px); /* Desfoque do fundo */
+    padding: 50px 40px; border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    width: 380px; text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
-.login-box img { width: 150px; margin-bottom: 20px; }
-.login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; }
+
+.login-box img.login-logo { width: 180px; margin-bottom: 30px; height: auto; display: inline-block;}
+.login-box h2 { color: var(--lilas); margin-bottom: 30px; font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+
+.login-box .input-group { position: relative; margin-bottom: 20px; }
+
 .login-box input {
-    width: 100%; padding: 12px; margin-bottom: 15px;
-    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
+    width: 100%; padding: 15px 15px 15px 15px;
+    border: 1px solid #e0e0e0; border-radius: 8px; box-sizing: border-box;
+    font-size: 14px; background: rgba(255, 255, 255, 0.9);
+    transition: 0.3s; color: var(--grafite);
 }
+.login-box input:focus {
+    border-color: var(--lilas);
+    box-shadow: 0 0 0 3px rgba(66, 44, 120, 0.1);
+    outline: none;
+}
+
 .btn-login {
-    width: 100%; padding: 12px; background: var(--lilas);
-    color: white; border: none; border-radius: 6px;
-    font-weight: bold; cursor: pointer; transition: 0.3s;
+    width: 100%; padding: 15px; background: var(--lilas);
+    color: white; border: none; border-radius: 8px;
+    font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s;
+    text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
 }
-.btn-login:hover { background: #32215a; }
-#login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; }
+.btn-login:hover { background: #32215a; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(66, 44, 120, 0.3); }
+
+#login-error { color: #c0392b; font-size: 13px; margin-bottom: 15px; display: none; background: rgba(192, 57, 43, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(192, 57, 43, 0.3);}
+
+/* Footer simples na tela de login */
+.login-footer { margin-top: 30px; font-size: 11px; color: #888; border-top: 1px solid #eee; padding-top: 20px; }
 
 /* ESCONDER SISTEMA INICIALMENTE */
 #main-system { display: none; }
+/* ---------------------------------- */
 
 header{ background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .logo { height: 50px; width: auto; }
@@ -78,16 +106,16 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
-.modal-content { 
-    background: white; 
-    margin: 2vh auto; 
-    padding: 30px; 
-    border-radius: 12px; 
-    width: 500px; 
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
-    position: relative; 
-    max-height: 92vh; 
-    overflow-y: auto; 
+.modal-content { 
+    background: white; 
+    margin: 2vh auto; 
+    padding: 30px; 
+    border-radius: 12px; 
+    width: 500px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+    position: relative; 
+    max-height: 92vh; 
+    overflow-y: auto; 
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
@@ -126,153 +154,173 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 
 <div id="login-overlay">
     <div class="login-box">
-        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Acesso ao Pipeline</h2>
+        <img src="https://i.ibb.co/6P05WfV/logo-vendemmia-lilas.png" alt="Vendemmia Logo" class="login-logo" onerror="this.style.display='none'">
+        <h2>Pipeline Comercial</h2>
+        
         <div id="login-error">Usuário ou senha incorretos!</div>
-        <input type="text" id="login_user" placeholder="Usuário">
-        <input type="password" id="login_pass" placeholder="Senha">
-        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
+        
+        <div class="input-group">
+            <input type="text" id="login_user" placeholder="Usuário">
+        </div>
+        <div class="input-group">
+            <input type="password" id="login_pass" placeholder="Senha">
+        </div>
+        
+        <button class="btn-login" onclick="autenticar()">ACESSAR SISTEMA</button>
+        
+        <div class="login-footer">
+            © Vendemmia 2024 | Política de Privacidade
+        </div>
     </div>
 </div>
 
 <div id="main-system">
     <header>
-        <img src="Pipeline.png" class="logo">
-        <div class="header-right">
-            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
-            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
-            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
-            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
-        </div>
-    </header>
+        <img src="Pipeline.png" class="logo">
+        <div class="header-right">
+            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
+        </div>
+    </header>
 
-    <div class="container">
-        <div class="filters">
-            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
-            <datalist id="listaClientes"></datalist>
-            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
-            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
-            <select id="filtroStatus" onchange="renderizar()">
-                <option value="">Status</option>
-                <option value="LEAD">LEAD</option>
-                <option value="AINDA FRIO">AINDA FRIO</option>
-                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                <option value="EM ASSINATURA">EM ASSINATURA</option>
-                <option value="GANHO">GANHO</option>
-                <option value="PERDIDO">PERDIDO</option>
-            </select>
-        </div>
+    <div class="container">
+        <div class="filters">
+            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+            <datalist id="listaClientes"></datalist>
+            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
+            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+            <select id="filtroStatus" onchange="renderizar()">
+                <option value="">Status</option>
+                <option value="LEAD">LEAD</option>
+                <option value="AINDA FRIO">AINDA FRIO</option>
+                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                <option value="EM ASSINATURA">EM ASSINATURA</option>
+                <option value="GANHO">GANHO</option>
+                <option value="PERDIDO">PERDIDO</option>
+            </select>
+        </div>
 
-        <div class="kpis">
-            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
-        </div>
+        <div class="kpis">
+            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+        </div>
 
-        <div class="charts-grid">
-            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
-        </div>
+        <div class="charts-grid">
+            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+        </div>
 
-        <div class="kanban" id="kanban"></div>
-    </div>
+        <div class="kanban" id="kanban"></div>
+    </div>
 </div>
 
 <div id="modalIA" class="modal">
-    <div class="modal-content" style="width: 650px;">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
-        <div class="form-group">
-            <label>Empresa ou Site</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
-            </div>
-        </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
-        <div id="ia_resultado" class="ia-result-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
-            </div>
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
-        </div>
-    </div>
+    <div class="modal-content" style="width: 650px;">
+        <h3>✨ Inteligência de Prospecção</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
+        
+        <div class="form-group">
+            <label>Empresa ou Site</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
+                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+            </div>
+        </div>
+
+        <div id="ia_loading" class="ia_loading">
+            🔍 Analisando presença digital e notícias...
+        </div>
+
+        <div id="ia_resultado" class="ia-result-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
+                <span class="ia-badge">Insights IA</span>
+            </div>
+            
+            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
+            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
+
+            <div class="ia-section-title">SEGMENTO E PORTE</div>
+            <p id="res_segmento" style="font-size: 13px;"></p>
+
+            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
+            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <div id="modalVendedor" class="modal">
-    <div class="modal-content">
-        <h3>Novo Vendedor</h3>
-        <form id="formVendedor">
-            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
-            </div>
-        </form>
-    </div>
+    <div class="modal-content">
+        <h3>Novo Vendedor</h3>
+        <form id="formVendedor">
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div id="modalArea" class="modal">
-    <div class="modal-content">
-        <h3>Nova Área</h3>
-        <form id="formArea">
-            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
-            </div>
-        </form>
-    </div>
+    <div class="modal-content">
+        <h3>Nova Área</h3>
+        <form id="formArea">
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content" style="width: 600px;">
-        <h3 id="modalTitulo">Nova Oportunidade</h3>
-        <form id="formOportunidade">
-            <input type="hidden" id="op_id">
-            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
-                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
-            </div>
-            <div class="form-group">
-                <label>Status</label>
-                <select id="op_status" required>
-                    <option value="LEAD">LEAD</option>
-                    <option value="AINDA FRIO">AINDA FRIO</option>
-                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                    <option value="EM ASSINATURA">EM ASSINATURA</option>
-                    <option value="GANHO">GANHO</option>
-                    <option value="PERDIDO">PERDIDO</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="btnExcluir" class="btn-header btn-danger" onclick="deletarOportunidade()">Excluir</button>
-                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
-            </div>
-        </form>
-    </div>
+    <div class="modal-content" style="width: 600px;">
+        <h3 id="modalTitulo">Nova Oportunidade</h3>
+        <form id="formOportunidade">
+            <input type="hidden" id="op_id">
+            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="op_status" required>
+                    <option value="LEAD">LEAD</option>
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                    <option value="EM ASSINATURA">EM ASSINATURA</option>
+                    <option value="GANHO">GANHO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnExcluir" class="btn-header btn-danger" onclick="deletarOportunidade()">Excluir</button>
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -281,20 +329,23 @@ function autenticar() {
     const user = document.getElementById('login_user').value;
     const pass = document.getElementById('login_pass').value;
 
-    // Login Simples - Altere aqui se desejar
+    // LOGIN PADRÃO CONFIGURADO
     if(user === "admin" && pass === "vendemmia2024") {
+        // Esconde o login e mostra o sistema
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
         
-        // Inicia o carregamento dos dados após o login
+        // Inicia o carregamento dos dados reais do Supabase
         carregarAuxiliares(); 
         carregarDados();
     } else {
+        // Mostra mensagem de erro
         document.getElementById('login-error').style.display = 'block';
+        document.getElementById('login_pass').value = ""; // Limpa a senha
     }
 }
 
-// Listener para a tecla Enter no login
+// Listener para permitir entrar apertando a tecla Enter
 document.addEventListener('keypress', function (e) {
     if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
         autenticar();
@@ -499,8 +550,6 @@ function renderizar(){
         kan.appendChild(col);
     });
 }
-
-// Removi o auto-load do final para ele só carregar após o login na função autenticar()
 </script>
 </body>
 </html>
