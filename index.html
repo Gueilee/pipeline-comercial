@@ -24,6 +24,35 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
+/* ESTILOS DA TELA DE LOGIN */
+#login-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--lilas);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
+}
+.login-box {
+    background: white; padding: 40px; border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 320px; text-align: center;
+}
+.login-box img { width: 150px; margin-bottom: 20px; }
+.login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; }
+.login-box input {
+    width: 100%; padding: 12px; margin-bottom: 15px;
+    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
+}
+.btn-login {
+    width: 100%; padding: 12px; background: var(--lilas);
+    color: white; border: none; border-radius: 6px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+}
+.btn-login:hover { background: #32215a; }
+#login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; }
+
+/* ESCONDER SISTEMA INICIALMENTE */
+#main-system { display: none; }
+
 header{ background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .logo { height: 50px; width: auto; }
 .header-right{ display:flex; gap:10px; }
@@ -95,54 +124,66 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 
 <body>
 
-<header>
-    <img src="Pipeline.png" class="logo">
-    <div class="header-right">
-        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
-        <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
-        <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
-        <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
+<div id="login-overlay">
+    <div class="login-box">
+        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>Acesso ao Pipeline</h2>
+        <div id="login-error">Usuário ou senha incorretos!</div>
+        <input type="text" id="login_user" placeholder="Usuário">
+        <input type="password" id="login_pass" placeholder="Senha">
+        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
     </div>
-</header>
+</div>
 
-<div class="container">
-    <div class="filters">
-        <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
-        <datalist id="listaClientes"></datalist>
-        <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
-        <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
-        <select id="filtroStatus" onchange="renderizar()">
-            <option value="">Status</option>
-            <option value="LEAD">LEAD</option>
-            <option value="AINDA FRIO">AINDA FRIO</option>
-            <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-            <option value="EM ASSINATURA">EM ASSINATURA</option>
-            <option value="GANHO">GANHO</option>
-            <option value="PERDIDO">PERDIDO</option>
-        </select>
+<div id="main-system">
+    <header>
+        <img src="Pipeline.png" class="logo">
+        <div class="header-right">
+            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+            <datalist id="listaClientes"></datalist>
+            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
+            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+            <select id="filtroStatus" onchange="renderizar()">
+                <option value="">Status</option>
+                <option value="LEAD">LEAD</option>
+                <option value="AINDA FRIO">AINDA FRIO</option>
+                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                <option value="EM ASSINATURA">EM ASSINATURA</option>
+                <option value="GANHO">GANHO</option>
+                <option value="PERDIDO">PERDIDO</option>
+            </select>
+        </div>
+
+        <div class="kpis">
+            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+        </div>
+
+        <div class="kanban" id="kanban"></div>
     </div>
-
-    <div class="kpis">
-        <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-        <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-        <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-        <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-        <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
-    </div>
-
-    <div class="charts-grid">
-        <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-        <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
-    </div>
-
-    <div class="kanban" id="kanban"></div>
 </div>
 
 <div id="modalIA" class="modal">
     <div class="modal-content" style="width: 650px;">
         <h3>✨ Inteligência de Prospecção</h3>
         <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
-        
         <div class="form-group">
             <label>Empresa ou Site</label>
             <div style="display:flex; gap:10px;">
@@ -150,27 +191,19 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
                 <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
             </div>
         </div>
-
-        <div id="ia_loading" class="ia_loading">
-            🔍 Analisando presença digital e notícias...
-        </div>
-
+        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
                 <span class="ia-badge">Insights IA</span>
             </div>
-            
             <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
             <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-
             <div class="ia-section-title">SEGMENTO E PORTE</div>
             <p id="res_segmento" style="font-size: 13px;"></p>
-
             <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
             <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
         </div>
-
         <div class="modal-footer">
             <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
         </div>
@@ -243,6 +276,31 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 </div>
 
 <script>
+// LÓGICA DE AUTENTICAÇÃO
+function autenticar() {
+    const user = document.getElementById('login_user').value;
+    const pass = document.getElementById('login_pass').value;
+
+    // Login Simples - Altere aqui se desejar
+    if(user === "admin" && pass === "vendemmia2024") {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-system').style.display = 'block';
+        
+        // Inicia o carregamento dos dados após o login
+        carregarAuxiliares(); 
+        carregarDados();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+    }
+}
+
+// Listener para a tecla Enter no login
+document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
+        autenticar();
+    }
+});
+
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
@@ -254,22 +312,16 @@ let base=[]; let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-/* FUNÇÃO PARA DESENHO E SIMULAÇÃO DA IA */
 function simularBuscaIA() {
     const termo = document.getElementById('ia_termo').value;
     if(!termo) return alert("Digite o nome ou site!");
-
     const loader = document.getElementById('ia_loading');
     const resultado = document.getElementById('ia_resultado');
-    
     loader.style.display = 'block';
     resultado.style.display = 'none';
-
-    // Simulando delay de pesquisa na web
     setTimeout(() => {
         loader.style.display = 'none';
         resultado.style.display = 'block';
-        
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
         document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
         document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
@@ -447,7 +499,8 @@ function renderizar(){
         kan.appendChild(col);
     });
 }
-carregarAuxiliares(); carregarDados();
+
+// Removi o auto-load do final para ele só carregar após o login na função autenticar()
 </script>
 </body>
 </html>
