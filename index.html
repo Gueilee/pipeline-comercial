@@ -5,6 +5,7 @@
 <title>PIPELINE COMERCIAL - VENDEMMIA</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -45,9 +46,8 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
 
 .filters{ display:flex; gap:12px; margin-bottom:20px; }
-select { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; }
+select { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; min-width: 120px; }
 
-/* KPIs Estilizados conforme imagem */
 .kpis{
 display:grid;
 grid-template-columns:repeat(5,1fr);
@@ -65,10 +65,9 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 .kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
 .kpi p{ font-size:22px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
-/* LAYOUT DOS GRÁFICOS IGUAL À IMAGEM */
 .charts-grid {
     display: grid;
-    grid-template-columns: 350px 1fr; /* Pizza menor à esquerda, Barra maior à direita */
+    grid-template-columns: 350px 1fr;
     gap: 25px;
     margin-bottom: 35px;
 }
@@ -85,13 +84,11 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 .chart-card h4 { margin: 0 0 20px 0; color: #333; font-size: 16px; text-align: left; }
 
-/* Kanban */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
 .column{ background:#eaebed; padding:12px; border-radius:10px; min-height:400px; }
 .column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
 .card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
 
-/* Modais */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
 .modal-content { background: white; margin: 8% auto; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
 .form-group { margin-bottom: 15px; }
@@ -116,7 +113,15 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     <div class="filters">
         <select id="filtroVendedor"><option value="">Vendedores</option></select>
         <select id="filtroArea"><option value="">Áreas</option></select>
-        <select id="filtroStatus"><option value="">Status</option></select>
+        <select id="filtroStatus">
+            <option value="">Status</option>
+            <option value="LEAD">LEAD</option>
+            <option value="AINDA FRIO">AINDA FRIO</option>
+            <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+            <option value="EM ASSINATURA">EM ASSINATURA</option>
+            <option value="GANHO">GANHO</option>
+            <option value="PERDIDO">PERDIDO</option>
+        </select>
     </div>
 
     <div class="kpis">
@@ -203,6 +208,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+Chart.register(ChartDataLabels); // Ativa o plugin de rótulos
+
 let base=[];
 let charts={};
 
@@ -212,6 +219,7 @@ function fecharModal(id){ document.getElementById(id).style.display='none'; }
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
     const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
+    
     const sV = document.getElementById('vendedor');
     const sA = document.getElementById('area');
     const fV = document.getElementById('filtroVendedor');
@@ -224,7 +232,6 @@ async function carregarAuxiliares(){
     sA.innerHTML = optsA; fA.innerHTML = optsA;
 }
 
-// CORREÇÃO ÁREAS: Removido ID para evitar duplicate key
 document.getElementById('formArea').onsubmit = async (e) => {
     e.preventDefault();
     const nome = document.getElementById('nomeArea').value;
@@ -272,41 +279,64 @@ function renderizar(){
         (!fS || r.status === fS)
     );
 
-    let recGan = 0, pipeTot = 0, mrrTot = 0, ganhos = 0, total = 0;
+    let recGan = 0, pipeTot = 0, ganhos = 0, totalFechados = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
         const v = parseFloat(r.valor_estimado_ano) || 0;
         pipeTot += v;
-        mrrTot += (v / 12);
         if(r.status === 'GANHO') { recGan += v; ganhos++; }
-        if(r.status === 'GANHO' || r.status === 'PERDIDO') total++;
+        if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
         
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
         vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + v;
     });
 
-    // Atualiza KPIs
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTot.toLocaleString('pt-BR', {maximumFractionDigits:0});
-    document.getElementById('conversao').innerText = total > 0 ? ((ganhos/total)*100).toFixed(0) + "%" : "0%";
+    document.getElementById('mrrTotal').innerText = "R$ " + (pipeTot / 12).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // Gráficos
+    // Gráfico de Pizza (Status)
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } }
     });
 
+    // Gráfico de Ranking (Vendedores) - AJUSTADO CONFORME PEDIDO
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ label: 'Valor R$', data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76' }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false }
+        data: { 
+            labels: sortedVendors.map(x=>x[0]), 
+            datasets: [{ 
+                data: sortedVendors.map(x=>x[1]), 
+                backgroundColor: '#422c76',
+                borderRadius: 5
+            }]
+        },
+        options: { 
+            indexAxis: 'y', 
+            maintainAspectRatio: false,
+            scales: {
+                x: { display: false }, // Remove eixo horizontal e grade X
+                y: { grid: { display: false }, border: { display: false } } // Remove grade Y
+            },
+            plugins: {
+                legend: { display: false }, // Remove legenda
+                datalabels: { // Configura rótulos brancos dentro das barras
+                    anchor: 'end',
+                    align: 'left',
+                    color: '#ffffff',
+                    font: { weight: 'bold', size: 12 },
+                    formatter: (value) => "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0})
+                }
+            }
+        }
     });
 
     // Kanban
