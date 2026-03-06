@@ -31,7 +31,7 @@ overflow-x:hidden;
 header{
 background:white;
 color:var(--lilas);
-padding:18px 30px;
+padding:15px 30px;
 display:flex;
 align-items:center;
 justify-content:space-between;
@@ -44,23 +44,30 @@ align-items:center;
 gap:15px;
 }
 
+.header-right{
+display:flex;
+gap:10px;
+}
+
 .logo{
 height:40px;
 width:auto;
 }
 
-.btn-novo {
-    background-color: var(--lilas);
-    color: white;
+/* Estilo dos Botões */
+.btn-header {
     border: none;
-    padding: 10px 20px;
+    padding: 8px 15px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 13px;
     transition: opacity 0.2s;
 }
 
-.btn-novo:hover { opacity: 0.9; }
+.btn-novo-op { background-color: var(--lilas); color: white; }
+.btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ccc; }
+.btn-header:hover { opacity: 0.8; }
 
 .container{
 padding:20px 30px;
@@ -106,9 +113,6 @@ font-size:12px;
 font-size:16px;
 font-weight:bold;
 margin-top:6px;
-white-space:nowrap;
-overflow:hidden;
-text-overflow:ellipsis;
 }
 
 .charts{
@@ -132,7 +136,6 @@ width:100% !important;
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:15px;
-overflow:hidden;
 }
 
 .column{
@@ -156,7 +159,7 @@ font-size:11px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Modal */
+/* Modais */
 .modal {
     display: none;
     position: fixed;
@@ -170,26 +173,23 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
 
 .modal-content {
     background-color: white;
-    margin: 5% auto;
+    margin: 10% auto;
     padding: 25px;
     border-radius: 12px;
-    width: 480px;
-    max-width: 95%;
+    width: 400px;
+    max-width: 90%;
 }
 
-.modal-content h2 { color: var(--lilas); margin-top: 0; }
+.modal-content h2 { color: var(--lilas); margin-top: 0; font-size: 18px; }
 
 .form-group { margin-bottom: 12px; }
-
-.form-group label { display: block; font-size: 11px; margin-bottom: 4px; font-weight: bold; color: var(--grafite); }
-
+.form-group label { display: block; font-size: 11px; margin-bottom: 4px; font-weight: bold; }
 .form-group input, .form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
-    font-size: 13px;
 }
 
 .modal-footer {
@@ -199,8 +199,7 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
     margin-top: 20px;
 }
 
-.btn-cancelar { background: #eee; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; color: #555; }
-
+.btn-cancelar { background: #eee; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
 .btn-salvar { background: var(--verde-sucesso); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
 </style>
@@ -212,80 +211,54 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
     <div class="header-left">
         <img src="Pipeline.png" class="logo">
     </div>
-    <button class="btn-novo" onclick="abrirModal()">+ Nova Oportunidade</button>
+    <div class="header-right">
+        <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+        <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+        <button class="btn-header btn-novo-op" onclick="abrirModal('modalOportunidade')">+ Nova Oportunidade</button>
+    </div>
 </header>
 
 <div class="container">
+    <div class="filters">
+        <select id="filtroVendedor"><option value="">Todos Vendedores</option></select>
+        <select id="filtroArea"><option value="">Todas Áreas</option></select>
+        <select id="filtroStatus"><option value="">Todos Status</option></select>
+    </div>
 
-<div class="filters">
-<select id="filtroVendedor"><option value="">Todos Vendedores</option></select>
-<select id="filtroArea"><option value="">Todas Áreas</option></select>
-<select id="filtroStatus"><option value="">Todos Status</option></select>
-</div>
+    <div class="kpis">
+        <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+        <div class="kpi"><h3>Pipeline Total (Anual)</h3><p id="pipelineTotal">R$ 0</p></div>
+        <div class="kpi"><h3>MRR Total (Mensal)</h3><p id="mrrTotal">R$ 0</p></div>
+        <div class="kpi"><h3>Conversão (%)</h3><p id="conversao">0%</p></div>
+        <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+    </div>
 
-<div class="kpis">
-<div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-<div class="kpi"><h3>Pipeline Total (Anual)</h3><p id="pipelineTotal">R$ 0</p></div>
-<div class="kpi"><h3>MRR Total (Mensal)</h3><p id="mrrTotal">R$ 0</p></div>
-<div class="kpi"><h3>Conversão (%)</h3><p id="conversao">0%</p></div>
-<div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
-</div>
+    <div class="charts">
+        <canvas id="chartStatus"></canvas>
+        <canvas id="chartVendedor"></canvas>
+    </div>
 
-<div class="charts">
-<canvas id="chartStatus"></canvas>
-<canvas id="chartVendedor"></canvas>
-</div>
-
-<h2 style="font-size:15px;">KANBAN POR STATUS</h2>
-<div class="kanban" id="kanban"></div>
-
+    <h2 style="font-size:15px;">KANBAN POR STATUS</h2>
+    <div class="kanban" id="kanban"></div>
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 480px;">
         <h2>Nova Oportunidade</h2>
         <form id="formOportunidade">
-            <div class="form-group">
-                <label>Cliente</label>
-                <input type="text" id="cliente" required placeholder="Nome da empresa/cliente">
-            </div>
-            <div class="form-group">
-                <label>Breve Descrição</label>
-                <input type="text" id="breve_descricao" placeholder="Ex: Projeto de infraestrutura">
+            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><input type="text" id="breve_descricao"></div>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;"><label>Vendedor</label><select id="vendedor" required></select></div>
+                <div class="form-group" style="flex: 1;"><label>Área</label><select id="area" required></select></div>
             </div>
             <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Vendedor</label>
-                    <select id="vendedor" required>
-                        <option value="">Carregando...</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Área</label>
-                    <select id="area" required>
-                        <option value="">Carregando...</option>
-                    </select>
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Data Oportunidade</label><input type="date" id="data_oportunidade" required></div>
+                <div class="form-group" style="flex: 1;"><label>Previsão Fechamento</label><input type="date" id="previsao_fechamento"></div>
             </div>
             <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Data Oportunidade</label>
-                    <input type="date" id="data_oportunidade" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Previsão Fechamento</label>
-                    <input type="date" id="previsao_fechamento">
-                </div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Valor Estimado (Ano)</label>
-                    <input type="number" step="0.01" id="valor_estimado_ano" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Valor Mensal (MRR)</label>
-                    <input type="number" step="0.01" id="valor_mensal_recorrente">
-                </div>
+                <div class="form-group" style="flex: 1;"><label>Valor Estimado (Ano)</label><input type="number" step="0.01" id="valor_estimado_ano" required></div>
+                <div class="form-group" style="flex: 1;"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="valor_mensal_recorrente"></div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -299,15 +272,40 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
                 </select>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
-                <button type="submit" class="btn-salvar">Salvar Dados</button>
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-salvar">Salvar Oportunidade</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalVendedor" class="modal">
+    <div class="modal-content">
+        <h2>Novo Vendedor</h2>
+        <form id="formVendedor">
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="nomeVendedor" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalVendedor')">Cancelar</button>
+                <button type="submit" class="btn-salvar">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalArea" class="modal">
+    <div class="modal-content">
+        <h2>Nova Área</h2>
+        <form id="formArea">
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="fecharModal('modalArea')">Cancelar</button>
+                <button type="submit" class="btn-salvar">Cadastrar</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
@@ -315,11 +313,10 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[];
-let filtrado=[];
 let charts={};
 
 async function carregarDados(){
-    const { data, error } = await supabaseClient.from('oportunidades').select('*');
+    const { data, error } = await supabaseClient.from('oportunidades').select('*').order('id', { ascending: true });
     if(error){ console.error("Erro:", error); return; }
 
     base = data.map(item => ({
@@ -336,38 +333,52 @@ async function carregarDados(){
     }));
 
     popularFiltros();
-    aplicarFiltros();
     carregarListasAuxiliares();
+    aplicarFiltros();
 }
 
-// Carrega Vendedores e Áreas das outras tabelas
 async function carregarListasAuxiliares() {
-    const { data: vds } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
-    const { data: ars } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
+    const { data: vds } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
+    const { data: ars } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
 
-    const selectVendedor = document.getElementById('vendedor');
-    const selectArea = document.getElementById('area');
+    const sV = document.getElementById('vendedor');
+    const sA = document.getElementById('area');
 
-    if(vds) {
-        selectVendedor.innerHTML = '<option value="">Selecione...</option>';
-        vds.forEach(v => selectVendedor.innerHTML += `<option value="${v.nome}">${v.nome}</option>`);
-    }
-    if(ars) {
-        selectArea.innerHTML = '<option value="">Selecione...</option>';
-        ars.forEach(a => selectArea.innerHTML += `<option value="${a.nome}">${a.nome}</option>`);
-    }
+    sV.innerHTML = '<option value="">Selecione...</option>';
+    sA.innerHTML = '<option value="">Selecione...</option>';
+
+    if(vds) vds.forEach(v => sV.innerHTML += `<option value="${v.nome}">${v.nome}</option>`);
+    if(ars) ars.forEach(a => sA.innerHTML += `<option value="${a.nome}">${a.nome}</option>`);
 }
 
-function abrirModal() { document.getElementById('modalOportunidade').style.display = 'block'; }
-function fecharModal() { document.getElementById('modalOportunidade').style.display = 'none'; }
+// Funções dos Modais
+function abrirModal(id) { document.getElementById(id).style.display = 'block'; }
+function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
 
-window.onclick = function(event) {
-    if (event.target == document.getElementById('modalOportunidade')) fecharModal();
-}
+// Fechar modal ao clicar fora
+window.onclick = (e) => { if(e.target.className === 'modal') e.target.style.display = 'none'; }
 
+// Salvar Vendedor
+document.getElementById('formVendedor').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('nomeVendedor').value;
+    const { error } = await supabaseClient.from('vendedores').insert([{ nome, ativo: true }]);
+    if (error) alert(error.message);
+    else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarListasAuxiliares(); }
+};
+
+// Salvar Área
+document.getElementById('formArea').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('nomeArea').value;
+    const { error } = await supabaseClient.from('areas').insert([{ nome, ativo: true }]);
+    if (error) alert(error.message);
+    else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarListasAuxiliares(); }
+};
+
+// Salvar Oportunidade
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
-    
     const novaOp = {
         cliente: document.getElementById('cliente').value,
         breve_descricao: document.getElementById('breve_descricao').value,
@@ -379,16 +390,9 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         status: document.getElementById('status').value,
         area: document.getElementById('area').value
     };
-
     const { error } = await supabaseClient.from('oportunidades').insert([novaOp]);
-
-    if (error) {
-        alert("Erro ao salvar: " + error.message);
-    } else {
-        fecharModal();
-        document.getElementById('formOportunidade').reset();
-        await carregarDados(); 
-    }
+    if (error) alert(error.message);
+    else { fecharModal('modalOportunidade'); document.getElementById('formOportunidade').reset(); carregarDados(); }
 };
 
 function formatarAbreviado(valor){
@@ -401,17 +405,17 @@ function formatarAbreviado(valor){
 }
 
 function popularFiltros(){
-    let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
-    let areas=[...new Set(base.map(x=>x["Área"]))];
-    let status=[...new Set(base.map(x=>x["Status"]))];
+    const vs = [...new Set(base.map(x=>x["Vendedor"]))].filter(Boolean);
+    const as = [...new Set(base.map(x=>x["Área"]))].filter(Boolean);
+    const ss = [...new Set(base.map(x=>x["Status"]))].filter(Boolean);
 
     filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
     filtroArea.innerHTML='<option value="">Todas Áreas</option>';
     filtroStatus.innerHTML='<option value="">Todos Status</option>';
 
-    vendedores.forEach(v=> { if(v) filtroVendedor.innerHTML+=`<option value="${v}">${v}</option>` });
-    areas.forEach(a=> { if(a) filtroArea.innerHTML+=`<option value="${a}">${a}</option>` });
-    status.forEach(s=> { if(s) filtroStatus.innerHTML+=`<option value="${s}">${s}</option>` });
+    vs.forEach(v => filtroVendedor.innerHTML+=`<option value="${v}">${v}</option>`);
+    as.forEach(a => filtroArea.innerHTML+=`<option value="${a}">${a}</option>`);
+    ss.forEach(s => filtroStatus.innerHTML+=`<option value="${s}">${s}</option>`);
 
     filtroVendedor.onchange=aplicarFiltros;
     filtroArea.onchange=aplicarFiltros;
@@ -419,30 +423,27 @@ function popularFiltros(){
 }
 
 function aplicarFiltros(){
-    filtrado=base.filter(r=>
-        (!filtroVendedor.value||r["Vendedor"]?.toString().trim()==filtroVendedor.value) &&
+    const filtrado = base.filter(r=>
+        (!filtroVendedor.value||r["Vendedor"]==filtroVendedor.value) &&
         (!filtroArea.value||r["Área"]==filtroArea.value) &&
         (!filtroStatus.value||r["Status"]==filtroStatus.value)
     );
-    calcular();
+    calcular(filtrado);
 }
 
-function calcular(){
-    let receita=0,pipeline=0,mrr=0,ganhos=0,perdidos=0;
-    let statusCount={},vendedorValor={};
+function calcular(dados){
+    let receita=0, pipeline=0, mrr=0, ganhos=0, perdidos=0;
+    let statusCount={}, vendedorValor={};
 
-    filtrado.forEach(r=>{
+    dados.forEach(r=>{
         let anual=parseFloat(r["Valor estimado no Ano"])||0;
-        let mensalRec=parseFloat(r["Valor Mensal Recorrente"])||0;
-        pipeline+=anual;
-        mrr+=mensalRec;
-
+        let mensal=parseFloat(r["Valor Mensal Recorrente"])||0;
+        pipeline += anual;
+        mrr += mensal;
         if(r["Status"]==="GANHO"){ receita+=anual; ganhos++; }
         if(r["Status"]==="PERDIDO"){ perdidos++; }
-
         statusCount[r["Status"]]=(statusCount[r["Status"]]||0)+1;
-        let vend = r["Vendedor"]?.toString().trim() || "Sem Vendedor";
-        vendedorValor[vend] = (vendedorValor[vend]||0)+anual;
+        vendedorValor[r["Vendedor"]] = (vendedorValor[r["Vendedor"]]||0)+anual;
     });
 
     document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
@@ -453,17 +454,14 @@ function calcular(){
 
     gerarGrafico("chartStatus","doughnut",statusCount,"Status das Oportunidades",true);
     gerarGraficoVendedor(vendedorValor);
-    gerarKanban();
+    gerarKanban(dados);
 }
 
 function gerarGrafico(id,tipo,obj,titulo,mostrarLegenda){
     if(charts[id]) charts[id].destroy();
-    let labels=Object.keys(obj);
-    let valores=Object.values(obj);
-
     charts[id]=new Chart(document.getElementById(id),{
         type:tipo,
-        data:{labels:labels,datasets:[{data:valores,backgroundColor:["#422c76","#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff"]}]},
+        data:{labels:Object.keys(obj),datasets:[{data:Object.values(obj),backgroundColor:["#422c76","#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff"]}]},
         options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:mostrarLegenda}}}
     });
 }
@@ -471,7 +469,6 @@ function gerarGrafico(id,tipo,obj,titulo,mostrarLegenda){
 function gerarGraficoVendedor(obj){
     if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
     let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
-
     charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
         type:"bar",
         data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
@@ -479,28 +476,19 @@ function gerarGraficoVendedor(obj){
     });
 }
 
-function gerarKanban(){
+function gerarKanban(dados){
     kanban.innerHTML="";
-    let grupos={};
-    
-    // Ordenação sugerida para as colunas do Kanban
-    const ordemStatus = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
-    
-    ordemStatus.forEach(st => grupos[st] = []);
-    filtrado.forEach(r=>{ if(grupos[r["Status"]]) grupos[r["Status"]].push(r); });
-
-    Object.keys(grupos).forEach(status=>{
-        if(grupos[status].length === 0 && (status !== "LEAD" && status !== "GANHO")) return;
-
+    const ordem = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
+    ordem.forEach(status=>{
+        let lista = dados.filter(d=>d["Status"]===status);
         let col=document.createElement("div");
         col.className="column";
-        col.style.backgroundColor="#f0f0f0";
-        col.innerHTML=`<h4 style="border-bottom:2px solid var(--lilas); padding-bottom:5px;">${status}</h4>`;
-
-        grupos[status].forEach(item=>{
+        col.style.background="#f4f4f4";
+        col.innerHTML=`<h4 style="border-bottom:2px solid var(--lilas)">${status}</h4>`;
+        lista.forEach(item=>{
             let card=document.createElement("div");
             card.className="card";
-            card.innerHTML=`<b>${item["Cliente"]}</b><br><small>${item["Vendedor"]}</small><br><b>${formatarAbreviado(item["Valor estimado no Ano"]||0)}</b>`;
+            card.innerHTML=`<b>${item["Cliente"]}</b><br>${item["Vendedor"]}<br><b>${formatarAbreviado(item["Valor estimado no Ano"])}</b>`;
             col.appendChild(card);
         });
         kanban.appendChild(col);
@@ -510,6 +498,5 @@ function gerarKanban(){
 carregarDados();
 
 </script>
-
 </body>
 </html>
