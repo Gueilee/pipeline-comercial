@@ -123,18 +123,18 @@ select { min-width: 160px; }
         <form id="formOportunidade">
             <input type="hidden" id="op_id">
             <div class="form-group full"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-            <div class="form-group full"><label>Breve Descrição</label><textarea id="op_descricao" rows="2"></textarea></div>
+            <div class="form-group full"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
             <div class="form-row">
                 <div class="form-group"><label>Vendedor</label><select id="op_vendedor" required></select></div>
                 <div class="form-group"><label>Área</label><select id="op_area" required></select></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Data da Oportunidade</label><input type="date" id="op_data_criacao" required></div>
-                <div class="form-group"><label>Previsão de Fechamento</label><input type="date" id="op_data_previsao"></div>
+                <div class="form-group"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mes" readonly style="background:#f4f4f4;"></div>
+                <div class="form-group"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_Valor_rensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
             <div class="form-group full">
                 <label>Status</label>
@@ -156,9 +156,6 @@ select { min-width: 160px; }
     </div>
 </div>
 
-<div id="modalVendedor" class="modal"><div class="modal-content"><h3>+ Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nv_nome" required></div><div class="modal-footer"><button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-header btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalArea" class="modal"><div class="modal-content"><h3>+ Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="na_nome" required></div><div class="modal-footer"><button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-header btn-novo-op">Salvar</button></div></form></div></div>
-
 <script>
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
@@ -170,14 +167,17 @@ let base=[]; let charts={};
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
-function calcularMRR() { const v = parseFloat(document.getElementById('op_valor_ano').value) || 0; document.getElementById('op_valor_mes').value = (v / 12).toFixed(2); }
+function calcularMRR() { 
+    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
+    document.getElementById('op_Valor_rensal_recorrente').value = (v / 12).toFixed(2); 
+}
 
 function prepararNovo() {
     document.getElementById('formOportunidade').reset();
-    document.getElementById('op_id').value = ""; // Importante: limpar ID
+    document.getElementById('op_id').value = "";
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
-    document.getElementById('op_data_criacao').valueAsDate = new Date();
+    document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     abrirModal('modalOportunidade');
 }
 
@@ -186,13 +186,13 @@ function editarOportunidade(id) {
     if(!item) return;
     document.getElementById('op_id').value = item.id;
     document.getElementById('op_cliente').value = item.cliente;
-    document.getElementById('op_descricao').value = item.descricao || "";
+    document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
     document.getElementById('op_vendedor').value = item.vendedor;
     document.getElementById('op_area').value = item.area;
-    document.getElementById('op_data_criacao').value = item.data_oportunidade;
-    document.getElementById('op_data_previsao').value = item.previsao_fechamento || "";
-    document.getElementById('op_valor_ano').value = item.valor_estimado_ano;
-    document.getElementById('op_valor_mes').value = (item.valor_estimado_ano / 12).toFixed(2);
+    document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
+    document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
+    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
+    document.getElementById('op_Valor_rensal_recorrente').value = item.Valor_rensal_recorrente || (item.valor_estimado_ano / 12).toFixed(2);
     document.getElementById('op_status').value = item.status;
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
@@ -207,53 +207,36 @@ async function deletarOportunidade() {
     }
 }
 
-// CORREÇÃO CRÍTICA DO SALVAMENTO
+// SALVAMENTO AJUSTADO COM "previsao_fechamento" (SEM TIL)
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
-    const previsao = document.getElementById('op_data_previsao').value;
     
-    // Montagem do Objeto de Dados
     const payload = {
         cliente: document.getElementById('op_cliente').value,
-        descricao: document.getElementById('op_descricao').value,
+        breve_descricao: document.getElementById('op_breve_descricao').value,
         vendedor: document.getElementById('op_vendedor').value,
         area: document.getElementById('op_area').value,
-        data_oportunidade: document.getElementById('op_data_criacao').value,
-        previsao_fechamento: (previsao && previsao !== "") ? previsao : null,
-        valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value) || 0,
-        mrr_total: parseFloat(document.getElementById('op_valor_mes').value) || 0,
+        data_oportunidade: document.getElementById('op_data_oportunidade').value,
+        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
+        Valor_rensal_recorrente: parseFloat(document.getElementById('op_Valor_rensal_recorrente').value) || 0,
         status: document.getElementById('op_status').value
     };
 
-    try {
-        if(idValue && idValue !== "") {
-            // Se tem ID, é UPDATE
-            const { error } = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-            if(error) throw error;
-        } else {
-            // Se NÃO tem ID, é INSERT puro (garantindo que o objeto não leve o campo 'id')
-            const { error } = await supabaseClient.from('oportunidades').insert([payload]);
-            if(error) throw error;
-        }
-        
-        fecharModal('modalOportunidade');
-        await carregarDados(); // Recarrega Kanban e Dados
-    } catch (err) {
-        console.error("Falha no Supabase:", err.message);
-        alert("Erro ao salvar! Verifique se todos os campos obrigatórios estão preenchidos.");
+    let result;
+    if(idValue) {
+        result = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    } else {
+        result = await supabaseClient.from('oportunidades').insert([payload]);
     }
-};
 
-document.getElementById('formVendedor').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nv_nome').value, ativo: true }]);
-    fecharModal('modalVendedor'); carregarAuxiliares();
-};
-document.getElementById('formArea').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('areas').insert([{ nome: document.getElementById('na_nome').value, ativo: true }]);
-    fecharModal('modalArea'); carregarAuxiliares();
+    if(result.error) {
+        alert("Erro no Banco de Dados: " + result.error.message);
+    } else {
+        fecharModal('modalOportunidade');
+        await carregarDados();
+    }
 };
 
 async function carregarAuxiliares(){
@@ -286,7 +269,8 @@ function renderizar(){
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; pipeTot += vA; mrrTotal += (vA/12);
+        const vA = parseFloat(r.valor_estimado_ano) || 0; pipeTot += vA; 
+        const vM = parseFloat(r.Valor_rensal_recorrente) || (vA/12); mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
