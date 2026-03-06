@@ -43,7 +43,7 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
-/* MODAL (PRESERVADO CONFORME SOLICITADO) */
+/* MODAIS */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
 .modal-content { background: white; margin: 30px auto; padding: 30px; border-radius: 12px; width: 600px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
@@ -54,12 +54,11 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
-/* KANBAN CORRIGIDO */
+/* KANBAN CORES CORRIGIDAS */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
 .column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
-/* CLASSES DE CORES DO KANBAN */
 .col-lead h4 { background-color: var(--bg-lead); }
 .col-frio h4 { background-color: var(--bg-frio); }
 .col-proposta h4 { background-color: var(--bg-proposta); }
@@ -87,7 +86,15 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     <div class="filters">
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedores</option></select>
         <select id="filtroArea" onchange="renderizar()"><option value="">Áreas</option></select>
-        <select id="filtroStatus" onchange="renderizar()"><option value="">Status</option></select>
+        <select id="filtroStatus" onchange="renderizar()">
+            <option value="">Status</option>
+            <option value="LEAD">LEAD</option>
+            <option value="AINDA FRIO">AINDA FRIO</option>
+            <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+            <option value="EM ASSINATURA">EM ASSINATURA</option>
+            <option value="GANHO">GANHO</option>
+            <option value="PERDIDO">PERDIDO</option>
+        </select>
     </div>
 
     <div class="kpis">
@@ -143,8 +150,31 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     </div>
 </div>
 
-<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nv_nome" required></div><div class="modal-footer"><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalArea" class="modal"><div class="modal-content"><h3>Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="na_nome" required></div><div class="modal-footer"><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalVendedor" class="modal">
+    <div class="modal-content">
+        <h3>Cadastrar Vendedor</h3>
+        <form id="formVendedor">
+            <div class="form-group"><label>Nome</label><input type="text" id="nv_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalArea" class="modal">
+    <div class="modal-content">
+        <h3>Cadastrar Área</h3>
+        <form id="formArea">
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="na_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
 Chart.register(ChartDataLabels);
@@ -165,6 +195,7 @@ function calcularMRR() {
     document.getElementById('op_valor_mes').value = (v / 12).toFixed(2); 
 }
 
+// OPORTUNIDADE
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const payload = {
@@ -179,10 +210,12 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         status: document.getElementById('op_status').value
     };
     await supabaseClient.from('oportunidades').insert([payload]);
-    fecharModal('modalOportunidade');
-    document.getElementById('formOportunidade').reset();
-    carregarDados();
+    fecharModal('modalOportunidade'); carregarDados();
 };
+
+// VENDEDOR E AREA
+document.getElementById('formVendedor').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nv_nome').value, ativo: true }]); fecharModal('modalVendedor'); carregarAuxiliares(); };
+document.getElementById('formArea').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('areas').insert([{ nome: document.getElementById('na_nome').value, ativo: true }]); fecharModal('modalArea'); carregarAuxiliares(); };
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome');
@@ -193,10 +226,6 @@ async function carregarAuxiliares(){
     };
     fill('op_vendedor', v); fill('filtroVendedor', v);
     fill('op_area', a); fill('filtroArea', a);
-    
-    // Filtro de Status
-    const elS = document.getElementById('filtroStatus');
-    elS.innerHTML = '<option value="">Filtrar Status</option>' + ["LEAD","AINDA FRIO","PROPOSTA ENVIADA - ACEITA","EM ASSINATURA","GANHO","PERDIDO"].map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
 async function carregarDados(){ 
@@ -209,7 +238,12 @@ function renderizar(){
     const fV = document.getElementById('filtroVendedor').value;
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    
+    const filtrados = base.filter(r => 
+        (!fV || r.vendedor === fV) && 
+        (!fA || r.area === fA) && 
+        (!fS || r.status === fS)
+    );
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
@@ -229,7 +263,6 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    // GRÁFICOS
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
@@ -245,20 +278,20 @@ function renderizar(){
         options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
     });
 
-    // KANBAN COM CLASSES FIXAS PARA CORES
+    // KANBAN COM CLASSES FIXAS
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [
-        {nome:"LEAD", classe:"col-lead"},
-        {nome:"AINDA FRIO", classe:"col-frio"},
-        {nome:"PROPOSTA ENVIADA - ACEITA", classe:"col-proposta"},
-        {nome:"EM ASSINATURA", classe:"col-assinatura"},
-        {nome:"GANHO", classe:"col-ganho"},
-        {nome:"PERDIDO", classe:"col-perdido"}
+        {nome:"LEAD", cl:"col-lead"},
+        {nome:"AINDA FRIO", cl:"col-frio"},
+        {nome:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta"},
+        {nome:"EM ASSINATURA", cl:"col-assinatura"},
+        {nome:"GANHO", cl:"col-ganho"},
+        {nome:"PERDIDO", cl:"col-perdido"}
     ];
 
     colunas.forEach(s => {
         const col = document.createElement('div'); 
-        col.className = `column ${s.classe}`;
+        col.className = `column ${s.cl}`;
         col.innerHTML = `<h4>${s.nome}</h4><div class="column-body"></div>`;
         const b = col.querySelector('.column-body');
         
