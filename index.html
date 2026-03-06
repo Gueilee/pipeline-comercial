@@ -27,12 +27,7 @@ justify-content:space-between;
 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* Retornando a classe que você usava para a logo */
-.logo {
-    height: 50px;
-    width: auto;
-    display: block;
-}
+.logo { height: 50px; width: auto; display: block; }
 
 .header-right{ display:flex; gap:10px; }
 
@@ -69,7 +64,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
 .kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
-.kpi p{ font-size:22px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
+.kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
 .charts-grid {
     display: grid;
@@ -95,13 +90,12 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 .column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
 .card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
 
-/* Modal */
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 8% auto; padding: 30px; border-radius: 12px; width: 400px; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
-.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
+.modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 500px; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; color: #666; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 </style>
 </head>
 
@@ -135,8 +129,8 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
     <div class="kpis">
         <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-        <div class="kpi"><h3>Pipeline Total</h3><p id="pipelineTotal">R$ 0</p></div>
-        <div class="kpi"><h3>MRR Total</h3><p id="mrrTotal">R$ 0</p></div>
+        <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+        <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
         <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
         <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
     </div>
@@ -157,10 +151,50 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 <div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 <div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalOportunidade" class="modal"><div class="modal-content" style="width:450px;"><h3>Nova Oportunidade</h3><form id="formOportunidade"><div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div><div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div><div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div></div><div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" step="0.01" id="vAno" required></div><div class="form-group" style="flex:1"><label>Status</label><select id="status" required><option value="LEAD">LEAD</option><option value="AINDA FRIO">AINDA FRIO</option><option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option><option value="EM ASSINATURA">EM ASSINATURA</option><option value="GANHO">GANHO</option><option value="PERDIDO">PERDIDO</option></select></div></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+
+<div id="modalOportunidade" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Nova Oportunidade</h3>
+        <form id="formOportunidade">
+            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><textarea id="descricao" rows="2"></textarea></div>
+            
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Data Oportunidade</label><input type="date" id="data_op" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão Fechamento</label><input type="date" id="previsao"></div>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" oninput="calcMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" readonly style="background:#f9f9f9"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select id="status" required>
+                    <option value="LEAD">LEAD</option>
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                    <option value="EM ASSINATURA">EM ASSINATURA</option>
+                    <option value="GANHO">GANHO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-novo-op">Salvar Oportunidade</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-// Registro Global do Plugin de Labels
 Chart.register(ChartDataLabels);
 
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
@@ -171,8 +205,18 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 let base=[];
 let charts={};
 
-function abrirModal(id){ document.getElementById(id).style.display='block'; }
+function abrirModal(id){ 
+    document.getElementById(id).style.display='block'; 
+    if(id === 'modalOportunidade') {
+        document.getElementById('data_op').valueAsDate = new Date();
+    }
+}
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
+
+function calcMRR() {
+    const ano = document.getElementById('vAno').value;
+    document.getElementById('vMes').value = ano ? (ano / 12).toFixed(2) : "";
+}
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
@@ -206,14 +250,18 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const payload = {
         cliente: document.getElementById('cliente').value,
+        breve_descricao: document.getElementById('descricao').value,
         vendedor: document.getElementById('vendedor').value,
         area: document.getElementById('area').value,
+        data_oportunidade: document.getElementById('data_op').value,
+        previsao_fechamento: document.getElementById('previsao').value,
         valor_estimado_ano: parseFloat(document.getElementById('vAno').value),
-        status: document.getElementById('status').value,
-        data_oportunidade: new Date().toISOString().split('T')[0]
+        mrr_total: parseFloat(document.getElementById('vMes').value),
+        status: document.getElementById('status').value
     };
     const { error } = await supabaseClient.from('oportunidades').insert([payload]);
-    if(!error) { fecharModal('modalOportunidade'); carregarDados(); }
+    if(!error) { fecharModal('modalOportunidade'); document.getElementById('formOportunidade').reset(); carregarDados(); }
+    else { alert(error.message); }
 };
 
 async function carregarDados(){
@@ -233,12 +281,13 @@ function renderizar(){
         (!fS || r.status === fS)
     );
 
-    let recGan = 0, pipeTot = 0, ganhos = 0, totalFechados = 0;
+    let recGan = 0, pipeTot = 0, mrrTot = 0, ganhos = 0, totalFechados = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
         const v = parseFloat(r.valor_estimado_ano) || 0;
         pipeTot += v;
+        mrrTot += (v/12);
         if(r.status === 'GANHO') { recGan += v; ganhos++; }
         if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
         
@@ -248,41 +297,39 @@ function renderizar(){
 
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + (pipeTot / 12).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTot.toLocaleString('pt-BR', {maximumFractionDigits:0});
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // Gráfico de Pizza (Status)
+    // Gráfico de Pizza (Status) com Labels Brancos
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
         options: { 
             maintainAspectRatio: false, 
-            plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } 
+            plugins: { 
+                legend: { position: 'bottom' }, 
+                datalabels: { 
+                    display: true, 
+                    color: '#fff', 
+                    font: { weight: 'bold' },
+                    formatter: (value) => value
+                } 
+            } 
         }
     });
 
-    // Gráfico de Ranking - LIMPO E COM LABELS BRANCAS
+    // Gráfico de Ranking
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { 
-            labels: sortedVendors.map(x=>x[0]), 
-            datasets: [{ 
-                data: sortedVendors.map(x=>x[1]), 
-                backgroundColor: '#422c76',
-                borderRadius: 4
-            }]
-        },
+        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4 }] },
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false,
-            scales: {
-                x: { display: false, grid: { display: false } },
-                y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12, weight: 'bold' }, color: '#333' } }
-            },
+            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } } },
             plugins: {
                 legend: { display: false },
                 datalabels: {
@@ -291,7 +338,7 @@ function renderizar(){
                     align: 'left',
                     color: '#ffffff',
                     offset: 10,
-                    font: { weight: 'bold', size: 11 },
+                    font: { weight: 'bold' },
                     formatter: (value) => value > 0 ? "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0}) : ""
                 }
             }
