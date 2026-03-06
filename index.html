@@ -174,7 +174,7 @@ function calcularMRR() { const v = parseFloat(document.getElementById('op_valor_
 
 function prepararNovo() {
     document.getElementById('formOportunidade').reset();
-    document.getElementById('op_id').value = "";
+    document.getElementById('op_id').value = ""; // Importante: limpar ID
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_criacao').valueAsDate = new Date();
@@ -207,37 +207,41 @@ async function deletarOportunidade() {
     }
 }
 
-// FORMULÁRIO PRINCIPAL - AJUSTADO PARA GARANTIR INSERÇÃO
+// CORREÇÃO CRÍTICA DO SALVAMENTO
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
-    const id = document.getElementById('op_id').value;
+    const idValue = document.getElementById('op_id').value;
     const previsao = document.getElementById('op_data_previsao').value;
     
+    // Montagem do Objeto de Dados
     const payload = {
         cliente: document.getElementById('op_cliente').value,
         descricao: document.getElementById('op_descricao').value,
         vendedor: document.getElementById('op_vendedor').value,
         area: document.getElementById('op_area').value,
         data_oportunidade: document.getElementById('op_data_criacao').value,
-        previsao_fechamento: previsao && previsao !== "" ? previsao : null,
+        previsao_fechamento: (previsao && previsao !== "") ? previsao : null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value) || 0,
         mrr_total: parseFloat(document.getElementById('op_valor_mes').value) || 0,
         status: document.getElementById('op_status').value
     };
 
     try {
-        if(id && id !== "") {
-            await supabaseClient.from('oportunidades').update(payload).eq('id', id);
+        if(idValue && idValue !== "") {
+            // Se tem ID, é UPDATE
+            const { error } = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+            if(error) throw error;
         } else {
-            // INSERT EXPLÍCITO SEM ID
+            // Se NÃO tem ID, é INSERT puro (garantindo que o objeto não leve o campo 'id')
             const { error } = await supabaseClient.from('oportunidades').insert([payload]);
             if(error) throw error;
         }
+        
         fecharModal('modalOportunidade');
-        await carregarDados(); 
+        await carregarDados(); // Recarrega Kanban e Dados
     } catch (err) {
-        console.error("Erro ao salvar no Supabase:", err);
-        alert("Erro ao salvar! Verifique o console.");
+        console.error("Falha no Supabase:", err.message);
+        alert("Erro ao salvar! Verifique se todos os campos obrigatórios estão preenchidos.");
     }
 };
 
@@ -264,8 +268,7 @@ async function carregarAuxiliares(){
 }
 
 async function carregarDados(){ 
-    const { data, error } = await supabaseClient.from('oportunidades').select('*'); 
-    if(error) console.error("Erro ao buscar dados:", error);
+    const { data } = await supabaseClient.from('oportunidades').select('*'); 
     base = data || []; 
     const datalist = document.getElementById('listaClientes');
     const clientesUnicos = [...new Set(base.map(x => x.cliente))];
