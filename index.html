@@ -98,7 +98,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 <header>
     <img src="Pipeline.png" class="logo">
     <div class="header-right">
-        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ PROSPECÇÃO IA</button>
+        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
         <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
@@ -246,7 +246,9 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
-const GEMINI_API_KEY = "AIzaSyAN498FjqobNitlOfONrKAnIcOiWpay_zo";
+
+// SUA NOVA CHAVE SEGURA ABAIXO
+const GEMINI_API_KEY = "AIzaSyCZjR86p1DqRdVOybPnkb2fJ8xmpgyi_2s";
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -256,10 +258,10 @@ let base=[]; let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-/* CONEXÃO REAL COM A IA GEMINI */
+/* FUNÇÃO DE CONEXÃO REAL COM A IA GEMINI */
 async function buscarDadosIA() {
     const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
+    if(!termo) return alert("Digite o nome ou site da empresa!");
 
     const loader = document.getElementById('ia_loading');
     const resultado = document.getElementById('ia_resultado');
@@ -268,11 +270,11 @@ async function buscarDadosIA() {
     resultado.style.display = 'none';
 
     try {
-        const prompt = `Atue como um analista de prospecção comercial B2B. Analise a empresa "${termo}". 
-        Forneça um JSON puro (sem markdown) com os campos: 
-        "resumo" (foco no que vendem), 
-        "segmento" (setor e porte), 
-        "noticias" (array com 3 ganchos comerciais ou notícias recentes).
+        const prompt = `Analise a empresa comercialmente: "${termo}". 
+        Retorne um JSON estrito (apenas o objeto, sem Markdown) com os campos: 
+        "resumo" (uma breve descrição do que eles fazem), 
+        "segmento" (setor de atuação e porte estimado), 
+        "noticias" (lista com 3 fatos recentes ou motivos para abordá-los agora). 
         Idioma: Português.`;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -283,10 +285,14 @@ async function buscarDadosIA() {
             })
         });
 
+        if (!response.ok) throw new Error('Falha na resposta da API');
+
         const data = await response.json();
-        const textoResponse = data.candidates[0].content.parts[0].text;
-        const cleanJson = textoResponse.replace(/```json/g, "").replace(/```/g, "").trim();
-        const obj = JSON.parse(cleanJson);
+        const rawText = data.candidates[0].content.parts[0].text;
+        
+        // Limpa possíveis marcações de código markdown do JSON
+        const cleanText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        const obj = JSON.parse(cleanText);
 
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
         document.getElementById('res_descricao').innerText = obj.resumo;
@@ -295,9 +301,10 @@ async function buscarDadosIA() {
 
         loader.style.display = 'none';
         resultado.style.display = 'block';
-    } catch (e) {
-        console.error(e);
-        alert("Erro na consulta da IA. Verifique sua chave ou conexão.");
+
+    } catch (error) {
+        console.error("Erro IA:", error);
+        alert("Erro ao consultar a IA. Certifique-se que a chave é válida e tente novamente.");
         loader.style.display = 'none';
     }
 }
@@ -472,4 +479,3 @@ carregarAuxiliares(); carregarDados();
 </script>
 </body>
 </html>
-
