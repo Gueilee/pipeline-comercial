@@ -67,11 +67,11 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .card-ganho { border-left-color: var(--bg-ganho); }
 .card-perdido { border-left-color: var(--bg-perdido); }
 
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
+.modal-content { background: white; margin: 2% auto; padding: 30px; border-radius: 12px; width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; color: #666; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 </style>
 </head>
@@ -126,15 +126,45 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 
 <div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 <div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+
 <div id="modalOportunidade" class="modal">
     <div class="modal-content">
         <h3>Nova Oportunidade</h3>
         <form id="formOportunidade">
             <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
-            <div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div><div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div></div>
-            <div style="display:flex; gap:10px"><div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" id="vAno" oninput="calcularMRR()" required></div><div class="form-group" style="flex:1"><label>MRR</label><input type="number" id="vMes" readonly style="background:#f4f4f4;"></div></div>
-            <div class="form-group"><label>Status</label><select id="status" required><option value="LEAD">LEAD</option><option value="AINDA FRIO">AINDA FRIO</option><option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option><option value="EM ASSINATURA">EM ASSINATURA</option><option value="GANHO">GANHO</option><option value="PERDIDO">PERDIDO</option></select></div>
-            <div class="modal-footer"><button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div>
+            <div class="form-group"><label>Breve Descrição</label><textarea id="descricao" rows="2"></textarea></div>
+            
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="data_op" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="data_prev"></div>
+            </div>
+
+            <div style="display:flex; gap:10px">
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" id="vAno" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" id="vMes" readonly style="background:#f4f4f4;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select id="status" required>
+                    <option value="LEAD">LEAD</option>
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                    <option value="EM ASSINATURA">EM ASSINATURA</option>
+                    <option value="GANHO">GANHO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-novo-op">Salvar Oportunidade</button>
+            </div>
         </form>
     </div>
 </div>
@@ -149,13 +179,38 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; let charts={};
 
-function abrirModal(id){ document.getElementById(id).style.display='block'; }
+function abrirModal(id){ 
+    document.getElementById(id).style.display='block'; 
+    if(id === 'modalOportunidade') {
+        document.getElementById('data_op').valueAsDate = new Date();
+    }
+}
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 function calcularMRR() { const v = parseFloat(document.getElementById('vAno').value) || 0; document.getElementById('vMes').value = (v / 12).toFixed(2); }
 
+// FORMULÁRIO DE OPORTUNIDADE ATUALIZADO
+document.getElementById('formOportunidade').onsubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+        cliente: document.getElementById('cliente').value,
+        descricao: document.getElementById('descricao').value,
+        vendedor: document.getElementById('vendedor').value,
+        area: document.getElementById('area').value,
+        data_oportunidade: document.getElementById('data_op').value,
+        previsao_fechamento: document.getElementById('data_prev').value,
+        valor_estimado_ano: parseFloat(document.getElementById('vAno').value),
+        mrr_total: parseFloat(document.getElementById('vMes').value),
+        status: document.getElementById('status').value
+    };
+    const { error } = await supabaseClient.from('oportunidades').insert([payload]);
+    if(error) alert("Erro ao salvar: " + error.message);
+    fecharModal('modalOportunidade'); 
+    carregarDados();
+};
+
+// ... Restante das funções (Vendedores, Áreas, Renderização) permanecem iguais ...
 document.getElementById('formVendedor').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]); fecharModal('modalVendedor'); carregarAuxiliares(); };
 document.getElementById('formArea').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]); fecharModal('modalArea'); carregarAuxiliares(); };
-document.getElementById('formOportunidade').onsubmit = async (e) => { e.preventDefault(); const payload = { cliente: document.getElementById('cliente').value, vendedor: document.getElementById('vendedor').value, area: document.getElementById('area').value, valor_estimado_ano: parseFloat(document.getElementById('vAno').value), mrr_total: parseFloat(document.getElementById('vMes').value), status: document.getElementById('status').value, data_oportunidade: new Date() }; await supabaseClient.from('oportunidades').insert([payload]); fecharModal('modalOportunidade'); carregarDados(); };
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
@@ -180,22 +235,14 @@ function renderizar(){
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; 
         const vM = parseFloat(r.mrr_total) || (vA/12);
-        pipeTot += vA; 
-        mrrTotal += vM;
-
+        pipeTot += vA; mrrTotal += vM;
         const s = (r.status || "").toUpperCase();
-        if(s === 'GANHO') {
-            recGan += vA;
-            nGanhos++;
-        } else if(s === 'PERDIDO') {
-            nPerdidos++;
-        }
-
+        if(s === 'GANHO') { recGan += vA; nGanhos++; } 
+        else if(s === 'PERDIDO') { nPerdidos++; }
         statusCont[s] = (statusCont[s] || 0) + 1;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
-    // CÁLCULO KPIS CORRIGIDO
     const totalDecidido = nGanhos + nPerdidos;
     const conv = totalDecidido > 0 ? (nGanhos / totalDecidido) * 100 : 0;
     const ticket = nGanhos > 0 ? (recGan / nGanhos) : 0;
@@ -206,12 +253,11 @@ function renderizar(){
     document.getElementById('conversao').innerText = conv.toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + ticket.toLocaleString('pt-BR', {maximumFractionDigits: 0});
 
-    // GRÁFICOS PRESERVADOS
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 20, left: 10, right: 10 } }, plugins: { datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } }, legend: { position: 'bottom', align: 'center', labels: { boxWidth: 8, padding: 8, font: { size: 9 }, usePointStyle: true } } } }
+        options: { maintainAspectRatio: false, layout: { padding: { bottom: 20, left: 10, right: 10 } }, plugins: { datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } }, legend: { position: 'bottom', align: 'center', labels: { boxWidth: 8, padding: 8, font: { size: 9 }, usePointStyle: true } } } }
     });
 
     if(charts.vd) charts.vd.destroy();
