@@ -207,28 +207,40 @@ async function deletarOportunidade() {
     }
 }
 
-// FORMULÁRIO PRINCIPAL
+// FORMULÁRIO PRINCIPAL - AJUSTADO PARA GARANTIR INSERÇÃO
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('op_id').value;
     const previsao = document.getElementById('op_data_previsao').value;
+    
     const payload = {
         cliente: document.getElementById('op_cliente').value,
         descricao: document.getElementById('op_descricao').value,
         vendedor: document.getElementById('op_vendedor').value,
         area: document.getElementById('op_area').value,
         data_oportunidade: document.getElementById('op_data_criacao').value,
-        previsao_fechamento: previsao !== "" ? previsao : null,
-        valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value),
-        mrr_total: parseFloat(document.getElementById('op_valor_mes').value),
+        previsao_fechamento: previsao && previsao !== "" ? previsao : null,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value) || 0,
+        mrr_total: parseFloat(document.getElementById('op_valor_mes').value) || 0,
         status: document.getElementById('op_status').value
     };
-    if(id) { await supabaseClient.from('oportunidades').update(payload).eq('id', id); } 
-    else { await supabaseClient.from('oportunidades').insert([payload]); }
-    fecharModal('modalOportunidade'); carregarDados();
+
+    try {
+        if(id && id !== "") {
+            await supabaseClient.from('oportunidades').update(payload).eq('id', id);
+        } else {
+            // INSERT EXPLÍCITO SEM ID
+            const { error } = await supabaseClient.from('oportunidades').insert([payload]);
+            if(error) throw error;
+        }
+        fecharModal('modalOportunidade');
+        await carregarDados(); 
+    } catch (err) {
+        console.error("Erro ao salvar no Supabase:", err);
+        alert("Erro ao salvar! Verifique o console.");
+    }
 };
 
-// FORMULÁRIOS AUXILIARES
 document.getElementById('formVendedor').onsubmit = async (e) => {
     e.preventDefault();
     await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nv_nome').value, ativo: true }]);
@@ -252,7 +264,8 @@ async function carregarAuxiliares(){
 }
 
 async function carregarDados(){ 
-    const { data } = await supabaseClient.from('oportunidades').select('*'); 
+    const { data, error } = await supabaseClient.from('oportunidades').select('*'); 
+    if(error) console.error("Erro ao buscar dados:", error);
     base = data || []; 
     const datalist = document.getElementById('listaClientes');
     const clientesUnicos = [...new Set(base.map(x => x.cliente))];
