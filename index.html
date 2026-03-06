@@ -174,7 +174,7 @@ function renderizar(){
     const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0;
-    let totalGanhos = 0, totalPerdidos = 0;
+    let nGanhos = 0, nPerdidos = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
@@ -183,62 +183,45 @@ function renderizar(){
         pipeTot += vA; 
         mrrTotal += vM;
 
-        if(r.status === 'GANHO') {
+        const s = (r.status || "").toUpperCase();
+        if(s === 'GANHO') {
             recGan += vA;
-            totalGanhos++;
-        }
-        if(r.status === 'PERDIDO') {
-            totalPerdidos++;
+            nGanhos++;
+        } else if(s === 'PERDIDO') {
+            nPerdidos++;
         }
 
-        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+        statusCont[s] = (statusCont[s] || 0) + 1;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
-    // CÁLCULOS DOS KPIS
-    const convRate = (totalGanhos + totalPerdidos) > 0 ? (totalGanhos / (totalGanhos + totalPerdidos)) * 100 : 0;
-    const tktMedio = totalGanhos > 0 ? (recGan / totalGanhos) : 0;
+    // CÁLCULO KPIS CORRIGIDO
+    const totalDecidido = nGanhos + nPerdidos;
+    const conv = totalDecidido > 0 ? (nGanhos / totalDecidido) * 100 : 0;
+    const ticket = nGanhos > 0 ? (recGan / nGanhos) : 0;
 
     document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('conversao').innerText = convRate.toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + tktMedio.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+    document.getElementById('conversao').innerText = conv.toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + ticket.toLocaleString('pt-BR', {maximumFractionDigits: 0});
 
-    // GRÁFICO STATUS (PRESERVADO)
+    // GRÁFICOS PRESERVADOS
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { 
-            maintainAspectRatio: false,
-            layout: { padding: { top: 0, bottom: 20, left: 10, right: 10 } },
-            plugins: { 
-                datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } },
-                legend: { position: 'bottom', align: 'center', labels: { boxWidth: 8, padding: 8, font: { size: 9 }, usePointStyle: true } }
-            } 
-        }
+        options: { maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 20, left: 10, right: 10 } }, plugins: { datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } }, legend: { position: 'bottom', align: 'center', labels: { boxWidth: 8, padding: 8, font: { size: 9 }, usePointStyle: true } } } }
     });
 
-    // GRÁFICO RANKING (PRESERVADO)
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
         data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4, barThickness: 25 }] },
-        options: { 
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            layout: { padding: { right: 60 } },
-            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12, weight: 'bold' }, color: '#414042' } } },
-            plugins: { 
-                legend: { display: false },
-                datalabels: { color: '#ffffff', anchor: 'end', align: 'left', offset: 5, font: { weight: 'bold', size: 11 }, formatter: v => "R$ " + v.toLocaleString('pt-BR', {maximumFractionDigits:0}) }
-            } 
-        }
+        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 60 } }, scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12, weight: 'bold' }, color: '#414042' } } }, plugins: { legend: { display: false }, datalabels: { color: '#ffffff', anchor: 'end', align: 'left', offset: 5, font: { weight: 'bold', size: 11 }, formatter: v => "R$ " + v.toLocaleString('pt-BR', {maximumFractionDigits:0}) } } }
     });
 
-    // KANBAN
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const stats = [{n:"LEAD",c:"col-lead",cc:"card-lead"},{n:"AINDA FRIO",c:"col-frio",cc:"card-frio"},{n:"PROPOSTA ENVIADA - ACEITA",c:"col-proposta",cc:"card-proposta"},{n:"EM ASSINATURA",c:"col-assinatura",cc:"card-assinatura"},{n:"GANHO",c:"col-ganho",cc:"card-ganho"},{n:"PERDIDO",c:"col-perdido",cc:"card-perdido"}];
     stats.forEach(s => {
