@@ -66,10 +66,9 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 .kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
 .kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
-/* AJUSTE DE PROPORÇÃO DOS GRÁFICOS */
 .charts-grid {
     display: grid;
-    grid-template-columns: 480px 1fr; /* Aumentado de 380px para 480px */
+    grid-template-columns: 480px 1fr;
     gap: 25px;
     margin-bottom: 35px;
 }
@@ -79,7 +78,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    height: 420px; /* Leve aumento na altura total */
+    height: 420px;
     display: flex;
     flex-direction: column;
 }
@@ -168,8 +167,8 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
                 <div class="form-group" style="flex:1"><label>Previsão Fechamento</label><input type="date" id="previsao"></div>
             </div>
             <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" oninput="calcularMRRAutomático()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" readonly style="background:#f0f0f0;" required></div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -206,6 +205,12 @@ function abrirModal(id){
     if(id === 'modalOportunidade') document.getElementById('data_op').valueAsDate = new Date();
 }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
+
+// Função para cálculo automático no popup
+function calcularMRRAutomático() {
+    const valorAno = parseFloat(document.getElementById('vAno').value) || 0;
+    document.getElementById('vMes').value = (valorAno / 12).toFixed(2);
+}
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
@@ -264,26 +269,27 @@ function renderizar(){
         (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS)
     );
 
-    let recGan = 0, pipeTot = 0, mrrTot = 0, ganhos = 0, totalFechados = 0;
+    let recGan = 0, pipeTot = 0, mrrTotalCalculado = 0, ganhos = 0, totalFechados = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
-        const v = parseFloat(r.valor_estimado_ano) || 0;
-        const m = parseFloat(r.mrr_total) || 0;
-        pipeTot += v; mrrTot += m;
-        if(r.status === 'GANHO') { recGan += v; ganhos++; }
+        const vAno = parseFloat(r.valor_estimado_ano) || 0;
+        const vMes = parseFloat(r.mrr_total) || 0; // Pega o valor da coluna correta
+        pipeTot += vAno;
+        mrrTotalCalculado += vMes;
+        
+        if(r.status === 'GANHO') { recGan += vAno; ganhos++; }
         if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        vendVal[r.vendedor || "Não Atribuído"] = (vendVal[r.vendedor || "Não Atribuído"] || 0) + v;
+        vendVal[r.vendedor || "Não Atribuído"] = (vendVal[r.vendedor || "Não Atribuído"] || 0) + vAno;
     });
 
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTot.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotalCalculado.toLocaleString('pt-BR');
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // GRÁFICO DE PIZZA (STATUS) - AJUSTADO
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
@@ -292,21 +298,12 @@ function renderizar(){
             maintainAspectRatio: false, 
             layout: { padding: 10 },
             plugins: { 
-                legend: { 
-                    position: 'bottom',
-                    labels: { boxWidth: 12, padding: 15, font: { size: 11 } } 
-                }, 
-                datalabels: { 
-                    display: true, 
-                    color: '#fff', 
-                    font: { weight: 'bold', size: 12 },
-                    formatter: (value) => value
-                } 
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } }, 
+                datalabels: { display: true, color: '#fff', font: { weight: 'bold', size: 12 } } 
             } 
         }
     });
 
-    // GRÁFICO DE RANKING - AJUSTADO
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
@@ -315,19 +312,11 @@ function renderizar(){
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false,
-            scales: { 
-                x: { display: false }, 
-                y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } } 
-            },
+            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } } },
             plugins: {
                 legend: { display: false },
                 datalabels: {
-                    display: true,
-                    anchor: 'end',
-                    align: 'left',
-                    color: '#ffffff',
-                    offset: 5,
-                    font: { weight: 'bold', size: 11 },
+                    display: true, anchor: 'end', align: 'left', color: '#ffffff', offset: 5, font: { weight: 'bold', size: 11 },
                     formatter: (value) => value > 0 ? "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0}) : ""
                 }
             }
