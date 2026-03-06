@@ -70,7 +70,6 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .form-row { display: flex; gap: 15px; }
 
-/* Estilo visual quando arrastando por cima da coluna */
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 </style>
 </head>
@@ -198,7 +197,7 @@ function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.d
 
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('vend_nome').value;
+    const nome = document.getElementById('vend_nome').value.toUpperCase(); // AJUSTE MAIÚSCULO
     const { error } = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
     if(error) alert("Erro: " + error.message);
     else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
@@ -206,7 +205,7 @@ document.getElementById('formVendedor').addEventListener('submit', async (e) => 
 
 document.getElementById('formArea').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('area_nome').value;
+    const nome = document.getElementById('area_nome').value.toUpperCase(); // AJUSTE MAIÚSCULO
     const { error } = await supabaseClient.from('areas').insert([{ nome: nome }]);
     if(error) alert("Erro: " + error.message);
     else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
@@ -256,8 +255,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
     const payload = {
-        cliente: document.getElementById('op_cliente').value,
-        breve_descricao: document.getElementById('op_breve_descricao').value,
+        cliente: document.getElementById('op_cliente').value.toUpperCase(), // AJUSTE MAIÚSCULO
+        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(), // AJUSTE MAIÚSCULO
         vendedor: document.getElementById('op_vendedor').value,
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
         previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
@@ -291,7 +290,6 @@ async function carregarDados(){
     renderizar(); 
 }
 
-/* --- FUNÇÕES DRAG AND DROP --- */
 function drag(ev) {
     ev.dataTransfer.setData("text", ev.target.id);
 }
@@ -348,7 +346,6 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    // --- GRÁFICO DE STATUS (ROSCAS) - AJUSTE DE LEGENDA ---
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
@@ -365,11 +362,7 @@ function renderizar(){
                 datalabels: { color: '#fff' }, 
                 legend: { 
                     position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 15,
-                        font: { size: 11 } // Legenda menor para caber melhor
-                    }
+                    labels: { boxWidth: 12, padding: 15, font: { size: 11 } }
                 } 
             } 
         }
