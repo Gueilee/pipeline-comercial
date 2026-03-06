@@ -310,7 +310,6 @@ async function drop(ev, novoStatus) {
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
     
-    // Atualiza no Supabase
     const { error } = await supabaseClient
         .from('oportunidades')
         .update({ status: novoStatus })
@@ -319,7 +318,7 @@ async function drop(ev, novoStatus) {
     if (error) {
         alert("Erro ao mover: " + error.message);
     } else {
-        carregarDados(); // Recarrega para atualizar gráficos e posição
+        carregarDados(); 
     }
 }
 
@@ -349,10 +348,31 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
+    // --- GRÁFICO DE STATUS (ROSCAS) - AJUSTE DE LEGENDA ---
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom' } } }
+        type: 'doughnut', 
+        data: { 
+            labels: Object.keys(statusCont), 
+            datasets: [{ 
+                data: Object.values(statusCont), 
+                backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] 
+            }]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { color: '#fff' }, 
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: { size: 11 } // Legenda menor para caber melhor
+                    }
+                } 
+            } 
+        }
     });
 
     if(charts.vd) charts.vd.destroy();
@@ -404,8 +424,6 @@ function renderizar(){
     colunas.forEach(s => {
         const col = document.createElement('div'); 
         col.className = `column ${s.cl}`;
-        
-        // Atribui eventos de Drop à coluna
         col.ondragover = allowDrop;
         col.ondragleave = leaveDrop;
         col.ondrop = (e) => drop(e, s.n);
@@ -419,9 +437,7 @@ function renderizar(){
             card.id = `card-${i.id}`;
             card.draggable = true;
             card.ondragstart = drag;
-            
             card.style.borderLeftColor = s.border;
-            // Clique simples abre edição, arrastar move
             card.onclick = (e) => {
                 if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id);
             };
