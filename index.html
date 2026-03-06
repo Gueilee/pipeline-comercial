@@ -45,8 +45,19 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
-.modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 500px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); position: relative; }
+/* AJUSTE NO MODAL PARA CENTRALIZAR E NÃO CORTAR */
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
+.modal-content { 
+    background: white; 
+    margin: 2vh auto; /* Subiu a posição inicial */
+    padding: 30px; 
+    border-radius: 12px; 
+    width: 500px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+    position: relative; 
+    max-height: 92vh; /* Garante que não ultrapasse a tela */
+    overflow-y: auto; /* Adiciona scroll interno se necessário */
+}
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
@@ -197,7 +208,7 @@ function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.d
 
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('vend_nome').value.toUpperCase(); // AJUSTE MAIÚSCULO
+    const nome = document.getElementById('vend_nome').value.toUpperCase();
     const { error } = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
     if(error) alert("Erro: " + error.message);
     else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
@@ -205,7 +216,7 @@ document.getElementById('formVendedor').addEventListener('submit', async (e) => 
 
 document.getElementById('formArea').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const nome = document.getElementById('area_nome').value.toUpperCase(); // AJUSTE MAIÚSCULO
+    const nome = document.getElementById('area_nome').value.toUpperCase();
     const { error } = await supabaseClient.from('areas').insert([{ nome: nome }]);
     if(error) alert("Erro: " + error.message);
     else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
@@ -255,8 +266,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
     const payload = {
-        cliente: document.getElementById('op_cliente').value.toUpperCase(), // AJUSTE MAIÚSCULO
-        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(), // AJUSTE MAIÚSCULO
+        cliente: document.getElementById('op_cliente').value.toUpperCase(),
+        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
         vendedor: document.getElementById('op_vendedor').value,
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
         previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
@@ -290,34 +301,17 @@ async function carregarDados(){
     renderizar(); 
 }
 
-function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.id);
-}
-
-function allowDrop(ev) {
-    ev.preventDefault();
-    ev.currentTarget.classList.add('column-over');
-}
-
-function leaveDrop(ev) {
-    ev.currentTarget.classList.remove('column-over');
-}
+function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
+function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
 async function drop(ev, novoStatus) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    
-    const { error } = await supabaseClient
-        .from('oportunidades')
-        .update({ status: novoStatus })
-        .eq('id', cardId);
-
-    if (error) {
-        alert("Erro ao mover: " + error.message);
-    } else {
-        carregarDados(); 
-    }
+    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
+    if (error) alert("Erro ao mover: " + error.message);
+    else carregarDados();
 }
 
 function renderizar(){
@@ -349,21 +343,12 @@ function renderizar(){
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
-        data: { 
-            labels: Object.keys(statusCont), 
-            datasets: [{ 
-                data: Object.values(statusCont), 
-                backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] 
-            }]
-        },
+        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
         options: { 
             maintainAspectRatio: false, 
             plugins: { 
                 datalabels: { color: '#fff' }, 
-                legend: { 
-                    position: 'bottom',
-                    labels: { boxWidth: 12, padding: 15, font: { size: 11 } }
-                } 
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } }
             } 
         }
     });
@@ -372,69 +357,21 @@ function renderizar(){
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar', 
-        data: { 
-            labels: sv.map(x=>x[0]), 
-            datasets: [{ 
-                data: sv.map(x=>x[1]), 
-                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
-                borderRadius: 8,      
-                barThickness: 22,    
-                maxBarThickness: 30
-            }] 
-        },
-        options: { 
-            indexAxis: 'y', 
-            maintainAspectRatio: false, 
-            layout: { padding: { right: 50 } }, 
-            scales: { 
-                x: { display: false }, 
-                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
-            }, 
-            plugins: { 
-                legend: { display: false }, 
-                datalabels: { 
-                    color: '#fff', 
-                    anchor: 'end', 
-                    align: 'start', 
-                    offset: 5,
-                    font: { weight: 'bold' },
-                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
-                } 
-            } 
-        }
+        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
+        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
     });
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [
-        {n:"LEAD", cl:"col-lead", border:"#6c757d"},
-        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
-        {n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},
-        {n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},
-        {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
-        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
-    ];
+    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
     
     colunas.forEach(s => {
-        const col = document.createElement('div'); 
-        col.className = `column ${s.cl}`;
-        col.ondragover = allowDrop;
-        col.ondragleave = leaveDrop;
-        col.ondrop = (e) => drop(e, s.n);
-
+        const col = document.createElement('div'); col.className = `column ${s.cl}`;
+        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
-        
         filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); 
-            card.className = 'card';
-            card.id = `card-${i.id}`;
-            card.draggable = true;
-            card.ondragstart = drag;
-            card.style.borderLeftColor = s.border;
-            card.onclick = (e) => {
-                if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id);
-            };
-
+            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
+            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
