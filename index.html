@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>PIPELINE COMERCIAL - CORRIGIDO</title>
+<title>PIPELINE COMERCIAL - VENDEMMIA</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -35,83 +35,76 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     cursor: pointer;
     font-weight: bold;
     font-size: 13px;
+    transition: 0.2s;
 }
 
 .btn-novo-op { background-color: var(--lilas); color: white; }
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
+.btn-header:hover { opacity: 0.8; }
 
-.container{ padding:20px 30px; max-width:1600px; margin:auto; }
+.container{ padding:20px 30px; max-width:1650px; margin:auto; }
 
 .filters{ display:flex; gap:12px; margin-bottom:20px; }
+select { padding:6px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; }
 
+/* KPIs Estilizados conforme imagem */
 .kpis{
 display:grid;
 grid-template-columns:repeat(5,1fr);
-gap:15px;
+gap:20px;
 margin-bottom:30px;
 }
 
 .kpi{
 background:white;
-padding:14px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
+padding:20px;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,0.05);
 }
 
-.kpi h3{ margin:0; font-size:12px; color:var(--lilas); }
-.kpi p{ font-size:18px; font-weight:bold; margin: 5px 0 0 0; }
+.kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
+.kpi p{ font-size:22px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
-/* --- CORREÇÃO DEFINITIVA DOS GRÁFICOS --- */
-.charts-wrapper {
-    display: flex;
-    gap: 20px;
+/* LAYOUT DOS GRÁFICOS IGUAL À IMAGEM */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr; /* Pizza menor à esquerda, Barra maior à direita */
+    gap: 25px;
     margin-bottom: 35px;
-    align-items: flex-start;
 }
 
-.chart-container-pizza {
+.chart-card {
     background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    width: 400px; /* Largura fixa para a pizza */
-    height: 400px; /* Altura fixa para a pizza */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: 450px;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
-.chart-container-barra {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    flex: 1; /* A barra ocupa o resto do espaço */
-    height: 400px;
-}
-
-canvas { width: 100% !important; height: 100% !important; }
+.chart-card h4 { margin: 0 0 20px 0; color: #333; font-size: 16px; text-align: left; }
 
 /* Kanban */
-.kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-top: 20px;}
-.column{ background:#eaebed; padding:12px; border-radius:10px; min-height:300px; }
-.column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:5px; text-transform: uppercase; }
-.card{ background:white; padding:10px; margin:10px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid var(--lilas); }
+.kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
+.column{ background:#eaebed; padding:12px; border-radius:10px; min-height:400px; }
+.column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
+.card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
 
 /* Modais */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-.modal-content { background: white; margin: 10% auto; padding: 30px; border-radius: 12px; width: 400px; position: relative;}
+.modal-content { background: white; margin: 8% auto; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; }
-.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
 </style>
 </head>
 
 <body>
 
 <header>
-    <img src="Pipeline.png" style="height:40px;">
+    <img src="https://www.vendemmia.com.br/wp-content/uploads/2021/04/Logo-Vendemmia-Horizontal.png" style="height:35px;" alt="Vendemmia">
     <div class="header-right">
         <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
@@ -134,29 +127,28 @@ canvas { width: 100% !important; height: 100% !important; }
         <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
     </div>
 
-    <div class="charts-wrapper">
-        <div class="chart-container-pizza">
-            <h4 style="margin:0 0 10px 0; font-size:14px;">Status das Oportunidades</h4>
-            <canvas id="chartStatus"></canvas>
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h4>Status das Oportunidades</h4>
+            <div style="flex:1; position: relative;"><canvas id="chartStatus"></canvas></div>
         </div>
-        <div class="chart-container-barra">
-            <h4 style="margin:0 0 10px 0; font-size:14px;">Ranking por Vendedor</h4>
-            <canvas id="chartVendedor"></canvas>
+        <div class="chart-card">
+            <h4>Ranking por Vendedor</h4>
+            <div style="flex:1; position: relative;"><canvas id="chartVendedor"></canvas></div>
         </div>
     </div>
 
-    <h2 style="font-size:16px; margin-bottom:15px;">Pipeline / Kanban</h2>
     <div class="kanban" id="kanban"></div>
 </div>
 
 <div id="modalVendedor" class="modal">
     <div class="modal-content">
-        <h3>Novo Vendedor</h3>
+        <h3>Cadastrar Vendedor</h3>
         <form id="formVendedor">
-            <div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div>
+            <div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div>
             <div class="modal-footer">
                 <button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Vendedor</button>
+                <button type="submit" class="btn-novo-op">Salvar</button>
             </div>
         </form>
     </div>
@@ -164,12 +156,12 @@ canvas { width: 100% !important; height: 100% !important; }
 
 <div id="modalArea" class="modal">
     <div class="modal-content">
-        <h3>Nova Área</h3>
+        <h3>Cadastrar Área</h3>
         <form id="formArea">
             <div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div>
             <div class="modal-footer">
                 <button type="button" onclick="fecharModal('modalArea')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Área</button>
+                <button type="submit" class="btn-novo-op">Salvar</button>
             </div>
         </form>
     </div>
@@ -186,8 +178,7 @@ canvas { width: 100% !important; height: 100% !important; }
             </div>
             <div style="display:flex; gap:10px">
                 <div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" step="0.01" id="vAno" required></div>
-                <div class="form-group" style="flex:1">
-                    <label>Status</label>
+                <div class="form-group" style="flex:1"><label>Status</label>
                     <select id="status" required>
                         <option value="LEAD">LEAD</option>
                         <option value="AINDA FRIO">AINDA FRIO</option>
@@ -223,36 +214,31 @@ async function carregarAuxiliares(){
     const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
     const sV = document.getElementById('vendedor');
     const sA = document.getElementById('area');
-    sV.innerHTML = '<option value="">Selecione...</option>';
-    sA.innerHTML = '<option value="">Selecione...</option>';
-    v?.forEach(i => sV.innerHTML += `<option value="${i.nome}">${i.nome}</option>`);
-    a?.forEach(i => sA.innerHTML += `<option value="${i.nome}">${i.nome}</option>`);
+    const fV = document.getElementById('filtroVendedor');
+    const fA = document.getElementById('filtroArea');
+
+    const optsV = '<option value="">Vendedores</option>' + v?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+    const optsA = '<option value="">Áreas</option>' + a?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+    
+    sV.innerHTML = optsV; fV.innerHTML = optsV;
+    sA.innerHTML = optsA; fA.innerHTML = optsA;
 }
 
-// SOLUÇÃO DO ERRO DE DUPLICATE KEY:
-// Se o erro persistir, execute este comando no SQL Editor do Supabase:
-// SELECT setval(pg_get_serial_sequence('vendedores', 'id'), coalesce(max(id),0) + 1, false) FROM vendedores;
-
-document.getElementById('formVendedor').onsubmit = async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('nomeVendedor').value;
-    // Inserimos apenas o nome, o ID é automático.
-    const { error } = await supabaseClient.from('vendedores').insert([{ nome, ativo: true }]);
-    if(error) {
-        alert("Erro Supabase: " + error.message + "\n\nSe o erro for 'duplicate key', reinicie a contagem (Identity) no painel do Supabase.");
-    } else {
-        fecharModal('modalVendedor');
-        document.getElementById('formVendedor').reset();
-        carregarAuxiliares();
-    }
-};
-
+// CORREÇÃO ÁREAS: Removido ID para evitar duplicate key
 document.getElementById('formArea').onsubmit = async (e) => {
     e.preventDefault();
     const nome = document.getElementById('nomeArea').value;
     const { error } = await supabaseClient.from('areas').insert([{ nome, ativo: true }]);
     if(error) alert("Erro: " + error.message);
     else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
+};
+
+document.getElementById('formVendedor').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('nomeVendedor').value;
+    const { error } = await supabaseClient.from('vendedores').insert([{ nome, ativo: true }]);
+    if(error) alert("Erro: " + error.message);
+    else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
 };
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
@@ -276,51 +262,68 @@ async function carregarDados(){
 }
 
 function renderizar(){
-    let ganho = 0, statusCont = {}, vendVal = {};
-    base.forEach(r => {
-        const v = r.valor_estimado_ano || 0;
-        if(r.status === 'GANHO') ganho += v;
+    const fV = document.getElementById('filtroVendedor').value;
+    const fA = document.getElementById('filtroArea').value;
+    const fS = document.getElementById('filtroStatus').value;
+
+    const filtrados = base.filter(r => 
+        (!fV || r.vendedor === fV) &&
+        (!fA || r.area === fA) &&
+        (!fS || r.status === fS)
+    );
+
+    let recGan = 0, pipeTot = 0, mrrTot = 0, ganhos = 0, total = 0;
+    let statusCont = {}, vendVal = {};
+
+    filtrados.forEach(r => {
+        const v = parseFloat(r.valor_estimado_ano) || 0;
+        pipeTot += v;
+        mrrTot += (v / 12);
+        if(r.status === 'GANHO') { recGan += v; ganhos++; }
+        if(r.status === 'GANHO' || r.status === 'PERDIDO') total++;
+        
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        vendVal[r.vendedor || "Sem Vendedor"] = (vendVal[r.vendedor || "Sem Vendedor"] || 0) + v;
+        vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + v;
     });
 
-    document.getElementById('receitaGanha').innerText = "R$ " + ganho.toLocaleString('pt-BR');
+    // Atualiza KPIs
+    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
+    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTot.toLocaleString('pt-BR', {maximumFractionDigits:0});
+    document.getElementById('conversao').innerText = total > 0 ? ((ganhos/total)*100).toFixed(0) + "%" : "0%";
+    document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // GRÁFICO DE STATUS - TRAVADO
+    // Gráficos
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
-        options: { 
-            maintainAspectRatio: false,
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
-        }
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
-    // GRÁFICO DE VENDEDOR
     if(charts.vd) charts.vd.destroy();
+    const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: Object.keys(vendVal), datasets: [{ label: 'Valor R$', data: Object.values(vendVal), backgroundColor: '#422c76' }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true }
+        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ label: 'Valor R$', data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76' }]},
+        options: { indexAxis: 'y', maintainAspectRatio: false }
     });
 
-    // KANBAN
+    // Kanban
     const kan = document.getElementById('kanban');
     kan.innerHTML = "";
-    const colunas = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
-    colunas.forEach(s => {
+    ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"].forEach(s => {
         const col = document.createElement('div');
         col.className = 'column';
         col.innerHTML = `<h4>${s}</h4>`;
-        base.filter(f => f.status === s).forEach(item => {
-            col.innerHTML += `<div class="card"><b>${item.cliente}</b><br>R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</div>`;
+        filtrados.filter(f => f.status === s).forEach(item => {
+            col.innerHTML += `<div class="card"><b>${item.cliente}</b><br><small>${item.vendedor}</small><br>R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</div>`;
         });
         kan.appendChild(col);
     });
 }
 
+document.querySelectorAll('select').forEach(s => s.onchange = renderizar);
 carregarAuxiliares();
 carregarDados();
 </script>
