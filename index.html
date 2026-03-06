@@ -19,6 +19,7 @@
 --bg-assinatura: #8e44ad;
 --bg-ganho: #27ae60;
 --bg-perdido: #c0392b;
+--ia-gold: #d4af37;
 }
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
@@ -28,6 +29,8 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .header-right{ display:flex; gap:10px; }
 .btn-header { border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; z-index: 10; }
 .btn-novo-op { background-color: var(--lilas); color: white; }
+.btn-ia { background-color: var(--ia-gold); color: white; display: flex; align-items: center; gap: 5px; }
+.btn-ia:hover { background-color: #b8962d; }
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
 .btn-danger { background-color: #c0392b; color: white; display: none; }
 
@@ -45,20 +48,25 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
-/* AJUSTE NO MODAL PARA CENTRALIZAR E NÃO CORTAR */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
     background: white; 
-    margin: 2vh auto; /* Subiu a posição inicial */
+    margin: 2vh auto; 
     padding: 30px; 
     border-radius: 12px; 
     width: 500px; 
     box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
     position: relative; 
-    max-height: 92vh; /* Garante que não ultrapasse a tela */
-    overflow-y: auto; /* Adiciona scroll interno se necessário */
+    max-height: 92vh; 
+    overflow-y: auto; 
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
+
+/* ESTILOS ESPECÍFICOS DO RESUMO IA */
+.ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
+.ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+.ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
+.ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
@@ -90,6 +98,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 <header>
     <img src="Pipeline.png" class="logo">
     <div class="header-right">
+        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
         <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
@@ -127,6 +136,45 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
     </div>
 
     <div class="kanban" id="kanban"></div>
+</div>
+
+<div id="modalIA" class="modal">
+    <div class="modal-content" style="width: 650px;">
+        <h3>✨ Inteligência de Prospecção</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
+        
+        <div class="form-group">
+            <label>Empresa ou Site</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
+                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+            </div>
+        </div>
+
+        <div id="ia_loading" class="ia_loading">
+            🔍 Analisando presença digital e notícias...
+        </div>
+
+        <div id="ia_resultado" class="ia-result-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
+                <span class="ia-badge">Insights IA</span>
+            </div>
+            
+            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
+            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
+
+            <div class="ia-section-title">SEGMENTO E PORTE</div>
+            <p id="res_segmento" style="font-size: 13px;"></p>
+
+            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
+            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <div id="modalVendedor" class="modal">
@@ -205,6 +253,33 @@ let base=[]; let charts={};
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
+
+/* FUNÇÃO PARA DESENHO E SIMULAÇÃO DA IA */
+function simularBuscaIA() {
+    const termo = document.getElementById('ia_termo').value;
+    if(!termo) return alert("Digite o nome ou site!");
+
+    const loader = document.getElementById('ia_loading');
+    const resultado = document.getElementById('ia_resultado');
+    
+    loader.style.display = 'block';
+    resultado.style.display = 'none';
+
+    // Simulando delay de pesquisa na web
+    setTimeout(() => {
+        loader.style.display = 'none';
+        resultado.style.display = 'block';
+        
+        document.getElementById('res_empresa').innerText = termo.toUpperCase();
+        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
+        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
+        document.getElementById('res_noticias').innerHTML = `
+            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
+            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
+            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
+        `;
+    }, 1500);
+}
 
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -344,13 +419,7 @@ function renderizar(){
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                datalabels: { color: '#fff' }, 
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } }
-            } 
-        }
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }
     });
 
     if(charts.vd) charts.vd.destroy();
