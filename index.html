@@ -26,34 +26,34 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 
 /* ESTILOS DA TELA DE LOGIN AJUSTADOS */
 #login-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-image: url('fundo-login.jpg'); 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    display: flex; 
-    align-items: center; 
-    justify-content: flex-start; /* Ajustado para a esquerda */
-    z-index: 10000;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('fundo-login.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-start; /* Ajustado para a esquerda */
+    z-index: 10000;
 }
 .login-box {
-    background: #ffffff; /* Fundo branco sólido */
-    padding: 40px; border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    width: 320px; text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    margin-left: 10%; /* Afastamento da borda esquerda */
+    background: #ffffff; /* Fundo branco sólido */
+    padding: 40px; border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    width: 320px; text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-left: 10%; /* Afastamento da borda esquerda */
 }
 .login-box img { width: 150px; margin-bottom: 20px; }
 .login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; font-weight: bold; }
 .login-box input {
-    width: 100%; padding: 12px; margin-bottom: 15px;
-    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
+    width: 100%; padding: 12px; margin-bottom: 15px;
+    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
 }
 .btn-login {
-    width: 100%; padding: 12px; background: var(--lilas);
-    color: white; border: none; border-radius: 6px;
-    font-weight: bold; cursor: pointer; transition: 0.3s;
+    width: 100%; padding: 12px; background: var(--lilas);
+    color: white; border: none; border-radius: 6px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
 }
 .btn-login:hover { background: #32215a; transform: translateY(-1px); }
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
@@ -86,20 +86,19 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
-.modal-content { 
-    background: white; 
-    margin: 2vh auto; 
-    padding: 30px; 
-    border-radius: 12px; 
-    width: 500px; 
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
-    position: relative; 
-    max-height: 92vh; 
-    overflow-y: auto; 
+.modal-content { 
+    background: white; 
+    margin: 2vh auto; 
+    padding: 30px; 
+    border-radius: 12px; 
+    width: 500px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+    position: relative; 
+    max-height: 92vh; 
+    overflow-y: auto; 
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
-/* ESTILOS ESPECÍFICOS DO RESUMO IA */
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 .ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
@@ -128,198 +127,192 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 
-/* Estilos para a lista de gerenciamento nos modais */
-.mgmt-list { list-style: none; padding: 0; margin-top: 20px; border-top: 1px solid #eee; max-height: 200px; overflow-y: auto; }
-.mgmt-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
-.mgmt-item:hover { background-color: #f9f9f9; }
-.mgmt-actions { display: flex; gap: 5px; }
-.btn-mgmt { padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; border: 1px solid #ccc; background: white; transition: 0.2s; }
-.btn-mgmt-edit { color: var(--lilas); border-color: var(--lilas); }
-.btn-mgmt-edit:hover { background-color: #f0edf5; }
-.btn-mgmt-del { color: #c0392b; border-color: #c0392b; }
-.btn-mgmt-del:hover { background-color: #fdedec; }
+/* ESTILOS NOVOS PARA LISTAGEM AUXILIAR */
+.lista-auxiliar { margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+.item-auxiliar { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #fafafa; font-size: 13px; }
+.btn-mini { padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; margin-left: 5px; }
+.btn-edit-mini { background: #e1f5fe; color: #0288d1; }
+.btn-del-mini { background: #ffebee; color: #c62828; }
 </style>
 </head>
 
 <body>
 
 <div id="login-overlay">
-    <div class="login-box">
-        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Acesso ao Pipeline</h2>
-        <div id="login-error">Usuário ou senha incorretos!</div>
-        <input type="text" id="login_user" placeholder="Usuário">
-        <input type="password" id="login_pass" placeholder="Senha">
-        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
-    </div>
+    <div class="login-box">
+        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>Acesso ao Pipeline</h2>
+        <div id="login-error">Usuário ou senha incorretos!</div>
+        <input type="text" id="login_user" placeholder="Usuário">
+        <input type="password" id="login_pass" placeholder="Senha">
+        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
+    </div>
 </div>
 
 <div id="main-system">
-    <header>
-        <img src="Pipeline.png" class="logo">
-        <div class="header-right">
-            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
-            <button type="button" class="btn-header btn-aux" onclick="abrirModalVendedor()">Gerenciar Vendedores</button>
-            <button type="button" class="btn-header btn-aux" onclick="abrirModalArea()">Gerenciar Áreas</button>
-            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
-        </div>
-    </header>
+    <header>
+        <img src="Pipeline.png" class="logo">
+        <div class="header-right">
+            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+            <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
+        </div>
+    </header>
 
-    <div class="container">
-        <div class="filters">
-            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
-            <datalist id="listaClientes"></datalist>
-            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
-            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
-            <select id="filtroStatus" onchange="renderizar()">
-                <option value="">Status</option>
-                <option value="LEAD">LEAD</option>
-                <option value="AINDA FRIO">AINDA FRIO</option>
-                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                <option value="EM ASSINATURA">EM ASSINATURA</option>
-                <option value="GANHO">GANHO</option>
-                <option value="PERDIDO">PERDIDO</option>
-            </select>
-        </div>
+    <div class="container">
+        <div class="filters">
+            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+            <datalist id="listaClientes"></datalist>
+            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
+            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+            <select id="filtroStatus" onchange="renderizar()">
+                <option value="">Status</option>
+                <option value="LEAD">LEAD</option>
+                <option value="AINDA FRIO">AINDA FRIO</option>
+                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                <option value="EM ASSINATURA">EM ASSINATURA</option>
+                <option value="GANHO">GANHO</option>
+                <option value="PERDIDO">PERDIDO</option>
+            </select>
+        </div>
 
-        <div class="kpis">
-            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
-        </div>
+        <div class="kpis">
+            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+        </div>
 
-        <div class="charts-grid">
-            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
-        </div>
+        <div class="charts-grid">
+            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+        </div>
 
-        <div class="kanban" id="kanban"></div>
-    </div>
+        <div class="kanban" id="kanban"></div>
+    </div>
 </div>
 
 <div id="modalIA" class="modal">
-    <div class="modal-content" style="width: 650px;">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
-        <div class="form-group">
-            <label>Empresa ou Site</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
-            </div>
-        </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
-        <div id="ia_resultado" class="ia-result-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
-            </div>
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
-        </div>
-    </div>
+    <div class="modal-content" style="width: 650px;">
+        <h3>✨ Inteligência de Prospecção</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
+        <div class="form-group">
+            <label>Empresa ou Site</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
+                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+            </div>
+        </div>
+        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
+        <div id="ia_resultado" class="ia-result-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
+                <span class="ia-badge">Insights IA</span>
+            </div>
+            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
+            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
+            <div class="ia-section-title">SEGMENTO E PORTE</div>
+            <p id="res_segmento" style="font-size: 13px;"></p>
+            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
+            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <div id="modalVendedor" class="modal">
-    <div class="modal-content">
-        <h3 id="tituloModalVendedor">Gerenciar Vendedores</h3>
-        <form id="formVendedor">
+    <div class="modal-content">
+        <h3>Vendedores</h3>
+        <form id="formVendedor">
             <input type="hidden" id="vend_id">
-            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header btn-aux" onclick="fecharModalVendedor()">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op" id="btnSalvarVendedor">Salvar Vendedor</button>
-            </div>
-        </form>
-        <ul id="listaVendedoresMgmt" class="mgmt-list">
-            </ul>
-    </div>
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value='';">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+            </div>
+        </form>
+        <div class="lista-auxiliar" id="listaVendedoresGerenciamento"></div>
+    </div>
 </div>
 
 <div id="modalArea" class="modal">
-    <div class="modal-content">
-        <h3 id="tituloModalArea">Gerenciar Áreas</h3>
-        <form id="formArea">
+    <div class="modal-content">
+        <h3>Áreas</h3>
+        <form id="formArea">
             <input type="hidden" id="area_id">
-            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header btn-aux" onclick="fecharModalArea()">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op" id="btnSalvarArea">Salvar Área</button>
-            </div>
-        </form>
-        <ul id="listaAreasMgmt" class="mgmt-list">
-            </ul>
-    </div>
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea'); document.getElementById('formArea').reset(); document.getElementById('area_id').value='';">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+            </div>
+        </form>
+        <div class="lista-auxiliar" id="listaAreasGerenciamento"></div>
+    </div>
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content" style="width: 600px;">
-        <h3 id="modalTitulo">Nova Oportunidade</h3>
-        <form id="formOportunidade">
-            <input type="hidden" id="op_id">
-            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
-                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
-            </div>
-            <div class="form-group">
-                <label>Status</label>
-                <select id="op_status" required>
-                    <option value="LEAD">LEAD</option>
-                    <option value="AINDA FRIO">AINDA FRIO</option>
-                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                    <option value="EM ASSINATURA">EM ASSINATURA</option>
-                    <option value="GANHO">GANHO</option>
-                    <option value="PERDIDO">PERDIDO</option>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="btnExcluir" class="btn-header btn-danger" onclick="deletarOportunidade()">Excluir</button>
-                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
-            </div>
-        </form>
-    </div>
+    <div class="modal-content" style="width: 600px;">
+        <h3 id="modalTitulo">Nova Oportunidade</h3>
+        <form id="formOportunidade">
+            <input type="hidden" id="op_id">
+            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="op_status" required>
+                    <option value="LEAD">LEAD</option>
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                    <option value="EM ASSINATURA">EM ASSINATURA</option>
+                    <option value="GANHO">GANHO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnExcluir" class="btn-header btn-danger" onclick="deletarOportunidade()">Excluir</button>
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
 // LÓGICA DE AUTENTICAÇÃO
 function autenticar() {
-    const user = document.getElementById('login_user').value;
-    const pass = document.getElementById('login_pass').value;
+    const user = document.getElementById('login_user').value;
+    const pass = document.getElementById('login_pass').value;
 
-    if(user === "admin" && pass === "vendemmia2024") {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-system').style.display = 'block';
-        carregarAuxiliares(); 
-        carregarDados();
-    } else {
-        document.getElementById('login-error').style.display = 'block';
-    }
+    if(user === "admin" && pass === "vendemmia2024") {
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-system').style.display = 'block';
+        carregarAuxiliares(); 
+        carregarDados();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+    }
 }
 
 document.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
-        autenticar();
-    }
+    if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
+        autenticar();
+    }
 });
 
 Chart.register(ChartDataLabels);
@@ -329,341 +322,191 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; let charts={};
-let listaVendedoresLocal = [];
-let listaAreasLocal = [];
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-// Funções específicas para modais auxiliares para gerenciar estado de edição
-function abrirModalVendedor() {
-    document.getElementById('formVendedor').reset();
-    document.getElementById('vend_id').value = '';
-    document.getElementById('tituloModalVendedor').innerText = 'Gerenciar Vendedores';
-    document.getElementById('btnSalvarVendedor').innerText = 'Salvar Vendedor';
-    renderizarListaMgmtVendedores();
-    abrirModal('modalVendedor');
-}
-
-function fecharModalVendedor() {
-    fecharModal('modalVendedor');
-}
-
-function abrirModalArea() {
-    document.getElementById('formArea').reset();
-    document.getElementById('area_id').value = '';
-    document.getElementById('tituloModalArea').innerText = 'Gerenciar Áreas';
-    document.getElementById('btnSalvarArea').innerText = 'Salvar Área';
-    renderizarListaMgmtAreas();
-    abrirModal('modalArea');
-}
-
-function fecharModalArea() {
-    fecharModal('modalArea');
-}
-
 function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
-    const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    loader.style.display = 'block';
-    resultado.style.display = 'none';
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
-}
-
-// Renderizar listas de gerenciamento com botões editar/excluir
-function renderizarListaMgmtVendedores() {
-    const listaUl = document.getElementById('listaVendedoresMgmt');
-    listaUl.innerHTML = '';
-    listaVendedoresLocal.forEach(v => {
-        const li = document.createElement('li');
-        li.className = 'mgmt-item';
-        li.innerHTML = `
-            <span>${v.nome}</span>
-            <div class="mgmt-actions">
-                <button class="btn-mgmt btn-mgmt-edit" onclick="prepararEdicaoVendedor('${v.id}', '${v.nome}')">Editar</button>
-                <button class="btn-mgmt btn-mgmt-del" onclick="deletarVendedor('${v.id}', '${v.nome}')">Excluir</button>
-            </div>
+    const termo = document.getElementById('ia_termo').value;
+    if(!termo) return alert("Digite o nome ou site!");
+    const loader = document.getElementById('ia_loading');
+    const resultado = document.getElementById('ia_resultado');
+    loader.style.display = 'block';
+    resultado.style.display = 'none';
+    setTimeout(() => {
+        loader.style.display = 'none';
+        resultado.style.display = 'block';
+        document.getElementById('res_empresa').innerText = termo.toUpperCase();
+        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
+        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
+        document.getElementById('res_noticias').innerHTML = `
+            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
+            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
+            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
         `;
-        listaUl.appendChild(li);
-    });
+    }, 1500);
 }
 
-function renderizarListaMgmtAreas() {
-    const listaUl = document.getElementById('listaAreasMgmt');
-    listaUl.innerHTML = '';
-    listaAreasLocal.forEach(a => {
-        const li = document.createElement('li');
-        li.className = 'mgmt-item';
-        li.innerHTML = `
-            <span>${a.nome}</span>
-            <div class="mgmt-actions">
-                <button class="btn-mgmt btn-mgmt-edit" onclick="prepararEdicaoArea('${a.id}', '${a.nome}')">Editar</button>
-                <button class="btn-mgmt btn-mgmt-del" onclick="deletarArea('${a.id}', '${a.nome}')">Excluir</button>
-            </div>
-        `;
-        listaUl.appendChild(li);
-    });
+// GERENCIAMENTO DE VENDEDORES
+document.getElementById('formVendedor').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('vend_id').value;
+    const nome = document.getElementById('vend_nome').value.toUpperCase();
+    
+    let res;
+    if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
+    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
+
+    if(res.error) alert("Erro: " + res.error.message);
+    else { 
+        document.getElementById('formVendedor').reset(); 
+        document.getElementById('vend_id').value = "";
+        carregarAuxiliares(); 
+    }
+});
+
+async function deletarVendedor(id) {
+    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
+        await supabaseClient.from('vendedores').delete().eq('id', id);
+        carregarAuxiliares();
+    }
 }
 
-// Funções CRUD Vendedor
 function prepararEdicaoVendedor(id, nome) {
     document.getElementById('vend_id').value = id;
     document.getElementById('vend_nome').value = nome;
-    document.getElementById('tituloModalVendedor').innerText = 'Editar Vendedor';
-    document.getElementById('btnSalvarVendedor').innerText = 'Atualizar Nome';
-    document.getElementById('vend_nome').focus();
 }
 
-async function deletarVendedor(id, nome) {
-    // Verificar se vendedor está em uso
-    const emUso = base.some(op => op.vendedor === nome);
-    if (emUso) {
-        alert(`Não é possível excluir o vendedor "${nome}" pois ele possui oportunidades vinculadas no pipeline.`);
-        return;
-    }
-
-    if (confirm(`Deseja realmente excluir o vendedor "${nome}"?`)) {
-        const { error } = await supabaseClient.from('vendedores').delete().eq('id', id);
-        if (error) alert("Erro ao excluir: " + error.message);
-        else {
-            // Se o vendedor excluído for o filtro atual, limpa o filtro
-            if (document.getElementById('filtroVendedor').value === nome) {
-                document.getElementById('filtroVendedor').value = '';
-            }
-            await carregarAuxiliares();
-            renderizarListaMgmtVendedores();
-            renderizar(); // Atualiza kanban/graficos caso filtro tenha mudado
-        }
-    }
-}
-
-document.getElementById('formVendedor').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('vend_id').value;
-    const nomeNovo = document.getElementById('vend_nome').value.toUpperCase().trim();
+// GERENCIAMENTO DE ÁREAS
+document.getElementById('formArea').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('area_id').value;
+    const nome = document.getElementById('area_nome').value.toUpperCase();
     
-    if(!nomeNovo) return;
+    let res;
+    if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
+    else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
 
-    if (id) {
-        // Modo Edição
-        const vendedorAntigo = listaVendedoresLocal.find(v => v.id == id);
-        const nomeAntigo = vendedorAntigo ? vendedorAntigo.nome : null;
-
-        const emUso = base.some(op => op.vendedor === nomeAntigo);
-        if (emUso && nomeNovo !== nomeAntigo) {
-             alert(`Não é possível alterar o nome do vendedor "${nomeAntigo}" para "${nomeNovo}" porque ele possui oportunidades vinculadas. Para manter a consistência histórica, exclua as oportunidades ou altere-as manualmente antes de renomear o vendedor.`);
-             // Opcional: resetar o campo nome Novo para o antigo
-             document.getElementById('vend_nome').value = nomeAntigo;
-             return;
-        }
-
-        const { error } = await supabaseClient.from('vendedores').update({ nome: nomeNovo }).eq('id', id);
-        if (error) alert("Erro ao atualizar: " + error.message);
-        else {
-             // Se alterou nome de vendedor usado no filtro, atualiza o filtro
-            if (document.getElementById('filtroVendedor').value === nomeAntigo) {
-                document.getElementById('filtroVendedor').value = nomeNovo;
-            }
-            document.getElementById('vend_id').value = ''; // Limpa modo edição
-            document.getElementById('tituloModalVendedor').innerText = 'Gerenciar Vendedores';
-            document.getElementById('btnSalvarVendedor').innerText = 'Salvar Vendedor';
-        }
-
-    } else {
-        // Modo Inserção
-        const { error } = await supabaseClient.from('vendedores').insert([{ nome: nomeNovo }]);
-        if(error) alert("Erro ao salvar: " + error.message);
+    if(res.error) alert("Erro: " + res.error.message);
+    else { 
+        document.getElementById('formArea').reset(); 
+        document.getElementById('area_id').value = "";
+        carregarAuxiliares(); 
     }
-    
-    document.getElementById('formVendedor').reset(); 
-    await carregarAuxiliares(); 
-    renderizarListaMgmtVendedores();
-    renderizar(); // Atualiza kanban/graficos caso filtro tenha mudado
 });
 
-// Funções CRUD Área
+async function deletarArea(id) {
+    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
+        await supabaseClient.from('areas').delete().eq('id', id);
+        carregarAuxiliares();
+    }
+}
+
 function prepararEdicaoArea(id, nome) {
     document.getElementById('area_id').value = id;
     document.getElementById('area_nome').value = nome;
-    document.getElementById('tituloModalArea').innerText = 'Editar Área';
-    document.getElementById('btnSalvarArea').innerText = 'Atualizar Nome';
-    document.getElementById('area_nome').focus();
 }
 
-async function deletarArea(id, nome) {
-    // Verificar se área está em uso
-    const emUso = base.some(op => op.area === nome);
-    if (emUso) {
-        alert(`Não é possível excluir a área "${nome}" pois ela possui oportunidades vinculadas no pipeline.`);
-        return;
-    }
-
-    if (confirm(`Deseja realmente excluir a área "${nome}"?`)) {
-        const { error } = await supabaseClient.from('areas').delete().eq('id', id);
-        if (error) alert("Erro ao excluir: " + error.message);
-        else {
-             // Se a área excluída for o filtro atual, limpa o filtro
-            if (document.getElementById('filtroArea').value === nome) {
-                document.getElementById('filtroArea').value = '';
-            }
-            await carregarAuxiliares();
-            renderizarListaMgmtAreas();
-            renderizar(); // Atualiza kanban/graficos caso filtro tenha mudado
-        }
-    }
-}
-
-document.getElementById('formArea').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('area_id').value;
-    const nomeNovo = document.getElementById('area_nome').value.toUpperCase().trim();
-    
-    if(!nomeNovo) return;
-
-    if (id) {
-        // Modo Edição
-        const areaAntiga = listaAreasLocal.find(a => a.id == id);
-        const nomeAntigo = areaAntiga ? areaAntiga.nome : null;
-
-        const emUso = base.some(op => op.area === nomeAntigo);
-        if (emUso && nomeNovo !== nomeAntigo) {
-             alert(`Não é possível alterar o nome da área "${nomeAntigo}" para "${nomeNovo}" porque ela possui oportunidades vinculadas. Altere as oportunidades antes de renomear a área.`);
-             document.getElementById('area_nome').value = nomeAntigo;
-             return;
-        }
-
-        const { error } = await supabaseClient.from('areas').update({ nome: nomeNovo }).eq('id', id);
-        if (error) alert("Erro ao atualizar: " + error.message);
-        else {
-            // Se alterou nome de área usada no filtro, atualiza o filtro
-            if (document.getElementById('filtroArea').value === nomeAntigo) {
-                document.getElementById('filtroArea').value = nomeNovo;
-            }
-            document.getElementById('area_id').value = ''; // Limpa modo edição
-            document.getElementById('tituloModalArea').innerText = 'Gerenciar Áreas';
-            document.getElementById('btnSalvarArea').innerText = 'Salvar Área';
-        }
-    } else {
-        // Modo Inserção
-        const { error } = await supabaseClient.from('areas').insert([{ nome: nomeNovo }]);
-        if(error) alert("Erro ao salvar: " + error.message);
-    }
-
-    document.getElementById('formArea').reset(); 
-    await carregarAuxiliares(); 
-    renderizarListaMgmtAreas();
-    renderizar(); // Atualiza kanban/graficos caso filtro tenha mudado
-});
-
-function calcularMRR() { 
-    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
-    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
+function calcularMRR() { 
+    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
+    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
 }
 
 function prepararNovo() {
-    document.getElementById('formOportunidade').reset();
-    document.getElementById('op_id').value = "";
-    document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
-    document.getElementById('btnExcluir').style.display = "none";
-    document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    abrirModal('modalOportunidade');
+    document.getElementById('formOportunidade').reset();
+    document.getElementById('op_id').value = "";
+    document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
+    document.getElementById('btnExcluir').style.display = "none";
+    document.getElementById('op_data_oportunidade').valueAsDate = new Date();
+    abrirModal('modalOportunidade');
 }
 
 function editarOportunidade(id) {
-    const item = base.find(x => x.id == id);
-    if(!item) return;
-    document.getElementById('op_id').value = item.id;
-    document.getElementById('op_cliente').value = item.cliente;
-    document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
-    document.getElementById('op_vendedor').value = item.vendedor;
-    document.getElementById('op_area').value = item.area;
-    document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
-    document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
-    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
-    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
-    document.getElementById('op_status').value = item.status;
-    document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
-    document.getElementById('btnExcluir').style.display = "block";
-    abrirModal('modalOportunidade');
+    const item = base.find(x => x.id == id);
+    if(!item) return;
+    document.getElementById('op_id').value = item.id;
+    document.getElementById('op_cliente').value = item.cliente;
+    document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
+    document.getElementById('op_vendedor').value = item.vendedor;
+    document.getElementById('op_area').value = item.area;
+    document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
+    document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
+    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
+    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
+    document.getElementById('op_status').value = item.status;
+    document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
+    document.getElementById('btnExcluir').style.display = "block";
+    abrirModal('modalOportunidade');
 }
 
 async function deletarOportunidade() {
-    const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        await supabaseClient.from('oportunidades').delete().eq('id', id);
-        fecharModal('modalOportunidade'); carregarDados();
-    }
+    const id = document.getElementById('op_id').value;
+    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
+        await supabaseClient.from('oportunidades').delete().eq('id', id);
+        fecharModal('modalOportunidade'); carregarDados();
+    }
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
-    e.preventDefault();
-    const idValue = document.getElementById('op_id').value;
-    const payload = {
-        cliente: document.getElementById('op_cliente').value.toUpperCase(),
-        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
-        vendedor: document.getElementById('op_vendedor').value,
-        data_oportunidade: document.getElementById('op_data_oportunidade').value,
-        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
-        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
-        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
-        status: document.getElementById('op_status').value,
-        area: document.getElementById('op_area').value
-    };
-    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-    else await supabaseClient.from('oportunidades').insert([payload]);
-    fecharModal('modalOportunidade'); carregarDados();
+    e.preventDefault();
+    const idValue = document.getElementById('op_id').value;
+    const payload = {
+        cliente: document.getElementById('op_cliente').value.toUpperCase(),
+        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
+        vendedor: document.getElementById('op_vendedor').value,
+        data_oportunidade: document.getElementById('op_data_oportunidade').value,
+        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
+        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
+        status: document.getElementById('op_status').value,
+        area: document.getElementById('op_area').value
+    };
+    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    else await supabaseClient.from('oportunidades').insert([payload]);
+    fecharModal('modalOportunidade'); carregarDados();
 };
 
 async function carregarAuxiliares(){
-    // Guarda os valores atuais dos filtros para tentar readicioná-los depois
-    const filtroVendedorAtual = document.getElementById('filtroVendedor').value;
-    const filtroAreaAtual = document.getElementById('filtroAreaAtual');
-
-    const { data: v } = await supabaseClient.from('vendedores').select('id, nome').order('nome');
-    const { data: a } = await supabaseClient.from('areas').select('id, nome').order('nome');
+    const { data: v } = await supabaseClient.from('vendedores').select('*');
+    const { data: a } = await supabaseClient.from('areas').select('*');
     
-    listaVendedoresLocal = v || [];
-    listaAreasLocal = a || [];
+    const fill = (id, d, label) => { 
+        const el = document.getElementById(id); 
+        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    };
 
-    const fill = (id, d, label, valorSelecionar) => { 
-        const el = document.getElementById(id); 
-        if(el) {
-            el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
-            if (valorSelecionar && d.some(i => i.nome === valorSelecionar)) {
-                el.value = valorSelecionar;
-            }
-        }
-    };
-    
-    // Preenche selects do formulário de oportunidade (sempre resetam para "Selecione...")
-    fill('op_vendedor', listaVendedoresLocal, "Selecione..."); 
-    fill('op_area', listaAreasLocal, "Selecione..."); 
+    fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
+    fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
 
-    // Preenche filtros mantendo seleção se possível
- fill('filtroVendedor', listaVendedoresLocal, "Vendedor", filtroVendedorAtual);
- fill('filtroArea', listaAreasLocal, "Área", filtroAreaAtual);
+    // Renderizar Listas de Gerenciamento
+    const listV = document.getElementById('listaVendedoresGerenciamento');
+    if(listV) listV.innerHTML = (v || []).map(i => `
+        <div class="item-auxiliar">
+            <span>${i.nome}</span>
+            <div>
+                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button>
+                <button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button>
+            </div>
+        </div>`).join('');
+
+    const listA = document.getElementById('listaAreasGerenciamento');
+    if(listA) listA.innerHTML = (a || []).map(i => `
+        <div class="item-auxiliar">
+            <span>${i.nome}</span>
+            <div>
+                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button>
+                <button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button>
+            </div>
+        </div>`).join('');
 }
 
-async function carregarDados(){ 
-    const { data } = await supabaseClient.from('oportunidades').select('*'); 
-    base = data || []; 
-    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
-    const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
-    renderizar(); 
+async function carregarDados(){ 
+    const { data } = await supabaseClient.from('oportunidades').select('*'); 
+    base = data || []; 
+    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
+    const dl = document.getElementById('listaClientes');
+    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    renderizar(); 
 }
 
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
@@ -671,79 +514,71 @@ function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('co
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
 async function drop(ev, novoStatus) {
-    ev.preventDefault();
-    ev.currentTarget.classList.remove('column-over');
-    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
-    if (error) alert("Erro ao mover: " + error.message);
-    else carregarDados();
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('column-over');
+    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
+    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
+    if (error) alert("Erro ao mover: " + error.message);
+    else carregarDados();
 }
 
 function renderizar(){
-    // Verifica se os elementos de filtro existem antes de ler o valor (pode quebrar no onload dependendo da ordem)
-    const elC = document.getElementById('filtroCliente');
-    const elV = document.getElementById('filtroVendedor');
-    const elA = document.getElementById('filtroArea');
-    const elS = document.getElementById('filtroStatus');
+    const fC = document.getElementById('filtroCliente').value.toLowerCase();
+    const fV = document.getElementById('filtroVendedor').value;
+    const fA = document.getElementById('filtroArea').value;
+    const fS = document.getElementById('filtroStatus').value;
+    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
-    if (!elC || !elV || !elA || !elS) return;
+    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
+    let statusCont = {}, vendVal = {};
+    
+    filtrados.forEach(r => {
+        const vA = parseFloat(r.valor_estimado_ano) || 0; 
+        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
+        pipeTot += vA; mrrTotal += vM;
+        if(r.status === 'GANHO') { recGan += vA; nG++; }
+        if(r.status === 'PERDIDO') nP++;
+        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
+    });
 
-    const fC = elC.value.toLowerCase();
-    const fV = elV.value;
-    const fA = elA.value;
-    const fS = elS.value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
+    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
-    
-    filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; 
-        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'GANHO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
-        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
-    });
+    if(charts.st) charts.st.destroy();
+    charts.st = new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut', 
+        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }
+    });
 
-    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    if(charts.vd) charts.vd.destroy();
+    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
+    charts.vd = new Chart(document.getElementById('chartVendedor'), {
+        type: 'bar', 
+        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
+        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
+    });
 
-    if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut', 
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }
-    });
-
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
-    });
-
-    const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
-    
-    colunas.forEach(s => {
-        const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
-        const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
-            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
-            b.appendChild(card);
-        });
-        kan.appendChild(col);
-    });
+    const kan = document.getElementById('kanban'); kan.innerHTML = "";
+    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
+    
+    colunas.forEach(s => {
+        const col = document.createElement('div'); col.className = `column ${s.cl}`;
+        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
+        const b = col.querySelector('.column-body');
+        filtrados.filter(f => f.status === s.n).forEach(i => {
+            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
+            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
+            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
+            b.appendChild(card);
+        });
+        kan.appendChild(col);
+    });
 }
 </script>
 </body>
