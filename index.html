@@ -248,7 +248,11 @@ const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 
 // SUA NOVA CHAVE SEGURA ABAIXO
-const GEMINI_API_KEY = "AIzaSyCZjR86p1DqRdVOybPnkb2fJ8xmpgyi_2s";
+let GEMINI_API_KEY = localStorage.getItem('gemini_key');
+if (!GEMINI_API_KEY) {
+    GEMINI_API_KEY = prompt("Por segurança, cole sua API KEY do Gemini aqui (isso será feito apenas uma vez):");
+    if (GEMINI_API_KEY) localStorage.setItem('gemini_key', GEMINI_API_KEY);
+}
 
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -479,3 +483,4 @@ carregarAuxiliares(); carregarDados();
 </script>
 </body>
 </html>
+
