@@ -20,14 +20,20 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 
 header{
 background:white;
-padding:15px 30px;
+padding:10px 30px;
 display:flex;
 align-items:center;
 justify-content:space-between;
 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.logo-header { height: 40px; width: auto; display: block; }
+/* Ajuste da Logo */
+.logo-header { 
+    height: 50px; 
+    width: auto; 
+    display: block;
+    object-fit: contain;
+}
 
 .header-right{ display:flex; gap:10px; }
 
@@ -103,7 +109,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 <body>
 
 <header>
-    <img src="https://www.vendemmia.com.br/wp-content/uploads/2021/04/Logo-Vendemmia-Horizontal.png" class="logo-header" alt="Vendemmia">
+    <img src="Pipeline.png" class="logo-header" alt="Logo Pipeline" onerror="this.src='https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/Pipeline.png'">
     <div class="header-right">
         <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
@@ -220,7 +226,6 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
 
-    // Filtro CORRIGIDO
     const filtrados = base.filter(r => 
         (!fV || r.vendedor === fV) &&
         (!fA || r.area === fA) &&
@@ -246,18 +251,15 @@ function renderizar(){
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // Gráfico de Pizza (Status)
+    // Gráfico de Pizza
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } 
-        }
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } }
     });
 
-    // Gráfico de Ranking (Vendedores) - LIMPO E COM LABELS
+    // Gráfico de Ranking - LIMPO E COM LABELS BRANCAS
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
@@ -283,7 +285,7 @@ function renderizar(){
                     display: true,
                     anchor: 'end',
                     align: 'left',
-                    color: '#ffffff', // COR BRANCA
+                    color: '#ffffff',
                     offset: 10,
                     font: { weight: 'bold', size: 11 },
                     formatter: (value) => "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0})
