@@ -55,7 +55,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
+.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s; }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
 .col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
@@ -65,9 +65,13 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .col-ganho { background-color: #e8f5e9; } .col-ganho h4 { background-color: var(--bg-ganho); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
-.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card:active { cursor: grabbing; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .form-row { display: flex; gap: 15px; }
+
+/* Estilo visual quando arrastando por cima da coluna */
+.column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 </style>
 </head>
 
@@ -287,6 +291,38 @@ async function carregarDados(){
     renderizar(); 
 }
 
+/* --- FUNÇÕES DRAG AND DROP --- */
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.add('column-over');
+}
+
+function leaveDrop(ev) {
+    ev.currentTarget.classList.remove('column-over');
+}
+
+async function drop(ev, novoStatus) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('column-over');
+    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
+    
+    // Atualiza no Supabase
+    const { error } = await supabaseClient
+        .from('oportunidades')
+        .update({ status: novoStatus })
+        .eq('id', cardId);
+
+    if (error) {
+        alert("Erro ao mover: " + error.message);
+    } else {
+        carregarDados(); // Recarrega para atualizar gráficos e posição
+    }
+}
+
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
     const fV = document.getElementById('filtroVendedor').value;
@@ -336,7 +372,7 @@ function renderizar(){
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false, 
-            layout: { padding: { right: 50 } }, // Padding maior para evitar corte no nome/barra
+            layout: { padding: { right: 50 } }, 
             scales: { 
                 x: { display: false }, 
                 y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
@@ -364,14 +400,32 @@ function renderizar(){
         {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
         {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
     ];
+    
     colunas.forEach(s => {
-        const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:100px;"></div>`;
+        const col = document.createElement('div'); 
+        col.className = `column ${s.cl}`;
+        
+        // Atribui eventos de Drop à coluna
+        col.ondragover = allowDrop;
+        col.ondragleave = leaveDrop;
+        col.ondrop = (e) => drop(e, s.n);
+
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
+        
         filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card';
+            const card = document.createElement('div'); 
+            card.className = 'card';
+            card.id = `card-${i.id}`;
+            card.draggable = true;
+            card.ondragstart = drag;
+            
             card.style.borderLeftColor = s.border;
-            card.onclick = () => editarOportunidade(i.id);
+            // Clique simples abre edição, arrastar move
+            card.onclick = (e) => {
+                if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id);
+            };
+
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
