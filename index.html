@@ -24,27 +24,13 @@
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
 header{
-background:white;
-padding:15px 30px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-.logo { height: 50px; width: auto; display: block; }
+.logo { height: 50px; width: auto; }
 .header-right{ display:flex; gap:10px; }
 
-.btn-header {
-    border: none;
-    padding: 10px 18px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 13px;
-    transition: 0.2s;
-}
-
+.btn-header { border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
 .btn-novo-op { background-color: var(--lilas); color: white; }
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
 
@@ -52,43 +38,16 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 .filters{ display:flex; gap:12px; margin-bottom:20px; }
 select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; min-width: 150px; }
 
-.kpis{
-display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:20px;
-margin-bottom:30px;
-}
-
-.kpi{
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.05);
-}
-
+.kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-bottom:30px; }
+.kpi{ background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
 .kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
 .kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
-.charts-grid {
-    display: grid;
-    grid-template-columns: 480px 1fr;
-    gap: 25px;
-    margin-bottom: 35px;
-}
-
-.chart-card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    height: 420px;
-    display: flex;
-    flex-direction: column;
-}
-
+.charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
+.chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; }
 .chart-card h4 { margin: 0 0 15px 0; color: #333; font-size: 16px; }
 
-/* KANBAN COLORIDO */
+/* KANBAN */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
 .column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
@@ -109,16 +68,12 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 .card-ganho { border-left-color: var(--bg-ganho); }
 .card-perdido { border-left-color: var(--bg-perdido); }
 
-.card b { display: block; font-size: 12px; color: #333; margin-bottom: 3px; }
-.card span { display: block; color: #666; margin-bottom: 3px; }
-.card .valor { font-weight: bold; color: var(--lilas); }
-
 /* Modais */
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-.modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 500px; }
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+.modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; color: #666; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 </style>
 </head>
@@ -126,9 +81,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 <body>
 
 <header>
-    <div class="header-left">
-        <img src="Pipeline.png" class="logo">
-    </div>
+    <img src="Pipeline.png" class="logo">
     <div class="header-right">
         <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
@@ -160,14 +113,8 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     </div>
 
     <div class="charts-grid">
-        <div class="chart-card">
-            <h4>Status das Oportunidades</h4>
-            <div style="flex:1; position: relative;"><canvas id="chartStatus"></canvas></div>
-        </div>
-        <div class="chart-card">
-            <h4>Ranking por Vendedor</h4>
-            <div style="flex:1; position: relative;"><canvas id="chartVendedor"></canvas></div>
-        </div>
+        <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+        <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
     </div>
 
     <div class="kanban" id="kanban"></div>
@@ -177,10 +124,10 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     <div class="modal-content">
         <h3>Cadastrar Vendedor</h3>
         <form id="formVendedor">
-            <div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div>
+            <div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div>
             <div class="modal-footer">
                 <button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Vendedor</button>
+                <button type="submit" class="btn-novo-op">Salvar</button>
             </div>
         </form>
     </div>
@@ -193,7 +140,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
             <div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div>
             <div class="modal-footer">
                 <button type="button" onclick="fecharModal('modalArea')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Área</button>
+                <button type="submit" class="btn-novo-op">Salvar</button>
             </div>
         </form>
     </div>
@@ -201,21 +148,16 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 <div id="modalOportunidade" class="modal">
     <div class="modal-content">
-        <h3 style="margin-top:0">Nova Oportunidade</h3>
+        <h3>Nova Oportunidade</h3>
         <form id="formOportunidade">
             <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
-            <div class="form-group"><label>Breve Descrição</label><textarea id="descricao" rows="2"></textarea></div>
             <div style="display:flex; gap:10px">
                 <div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div>
                 <div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div>
             </div>
             <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Data Oportunidade</label><input type="date" id="data_op" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão Fechamento</label><input type="date" id="previsao"></div>
-            </div>
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" readonly style="background:#f4f4f4;" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Anual</label><input type="number" id="vAno" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>MRR (Mensal)</label><input type="number" id="vMes" readonly style="background:#f4f4f4;"></div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -230,7 +172,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
             </div>
             <div class="modal-footer">
                 <button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Oportunidade</button>
+                <button type="submit" class="btn-novo-op">Salvar</button>
             </div>
         </form>
     </div>
@@ -247,58 +189,50 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 let base=[];
 let charts={};
 
-function abrirModal(id){ 
-    document.getElementById(id).style.display='block'; 
-}
-function fecharModal(id){ 
-    document.getElementById(id).style.display='none'; 
-}
-
+function abrirModal(id){ document.getElementById(id).style.display='block'; }
+function fecharModal(id){ document.getElementById(id).style.display='none'; }
 function calcularMRR() {
-    const valorAno = parseFloat(document.getElementById('vAno').value) || 0;
-    document.getElementById('vMes').value = (valorAno / 12).toFixed(2);
+    const v = parseFloat(document.getElementById('vAno').value) || 0;
+    document.getElementById('vMes').value = (v / 12).toFixed(2);
 }
 
-// CADASTRO VENDEDOR E ÁREA
+// Funções de Cadastro
 document.getElementById('formVendedor').onsubmit = async (e) => {
     e.preventDefault();
     await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]);
-    fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares();
+    fecharModal('modalVendedor'); carregarAuxiliares();
 };
-
 document.getElementById('formArea').onsubmit = async (e) => {
     e.preventDefault();
     await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]);
-    fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares();
+    fecharModal('modalArea'); carregarAuxiliares();
 };
-
-async function carregarAuxiliares(){
-    const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
-    const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
-    const sV = document.getElementById('vendedor'); const sA = document.getElementById('area');
-    const fV = document.getElementById('filtroVendedor'); const fA = document.getElementById('filtroArea');
-    const optsV = '<option value="">Vendedores</option>' + v?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-    const optsA = '<option value="">Áreas</option>' + a?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
-    sV.innerHTML = optsV; fV.innerHTML = optsV;
-    sA.innerHTML = optsA; fA.innerHTML = optsA;
-}
-
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const payload = {
         cliente: document.getElementById('cliente').value,
-        breve_descricao: document.getElementById('descricao').value,
         vendedor: document.getElementById('vendedor').value,
         area: document.getElementById('area').value,
-        data_oportunidade: document.getElementById('data_op').value,
-        previsao_fechamento: document.getElementById('previsao').value,
         valor_estimado_ano: parseFloat(document.getElementById('vAno').value),
         mrr_total: parseFloat(document.getElementById('vMes').value),
-        status: document.getElementById('status').value
+        status: document.getElementById('status').value,
+        data_oportunidade: new Date()
     };
     await supabaseClient.from('oportunidades').insert([payload]);
-    fecharModal('modalOportunidade'); document.getElementById('formOportunidade').reset(); carregarDados();
+    fecharModal('modalOportunidade'); carregarDados();
 };
+
+async function carregarAuxiliares(){
+    const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
+    const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
+    const fill = (el, d, label) => {
+        el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
+    };
+    fill(document.getElementById('vendedor'), v, 'Selecione');
+    fill(document.getElementById('filtroVendedor'), v, 'Vendedores');
+    fill(document.getElementById('area'), a, 'Selecione');
+    fill(document.getElementById('filtroArea'), a, 'Áreas');
+}
 
 async function carregarDados(){
     const { data } = await supabaseClient.from('oportunidades').select('*');
@@ -313,87 +247,67 @@ function renderizar(){
 
     const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
-    let recGan = 0, pipeTot = 0, mrrTotal = 0, ganhos = 0, totalFechados = 0;
+    let mrrTotal = 0, pipeTot = 0, recGan = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
-        const vAno = parseFloat(r.valor_estimado_ano) || 0;
-        const vMes = parseFloat(r.mrr_total) || (vAno / 12);
-        pipeTot += vAno; mrrTotal += vMes;
-        if(r.status === 'GANHO') { recGan += vAno; ganhos++; }
-        if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
+        const vA = r.valor_estimado_ano || 0;
+        const vM = r.mrr_total || (vA/12);
+        pipeTot += vA; mrrTotal += vM;
+        if(r.status === 'GANHO') recGan += vA;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        vendVal[r.vendedor || "Não Atribuído"] = (vendVal[r.vendedor || "Não Atribuído"] || 0) + vAno;
+        vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
-    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-    document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
-    document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
+    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
 
-    const coresStatus = ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'];
-
-    // GRÁFICO STATUS COM RÓTULO BRANCO
+    // GRÁFICOS COM RÓTULOS BRANCOS
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: coresStatus }]},
+        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
         options: { 
-            maintainAspectRatio: false, 
             plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-                datalabels: { display: true, color: '#ffffff', font: { weight: 'bold', size: 12 } }
+                datalabels: { color: '#ffffff', font: { weight: 'bold' } },
+                legend: { position: 'bottom' }
             } 
         }
     });
 
-    // GRÁFICO VENDEDOR COM RÓTULO BRANCO
     if(charts.vd) charts.vd.destroy();
-    const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4 }] },
+        data: { labels: Object.keys(vendVal), datasets: [{ data: Object.values(vendVal), backgroundColor: '#422c76' }]},
         options: { 
-            indexAxis: 'y', 
-            maintainAspectRatio: false,
-            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false } } },
+            indexAxis: 'y',
             plugins: { 
-                legend: { display: false }, 
-                datalabels: { 
-                    display: true, 
-                    anchor: 'end', 
-                    align: 'left', 
-                    color: '#ffffff', 
-                    font: { weight: 'bold' },
-                    formatter: v => "R$ " + v.toLocaleString('pt-BR', {maximumFractionDigits:0}) 
-                } 
-            }
+                datalabels: { color: '#ffffff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') }
+            } 
         }
     });
 
-    // KANBAN COLORIDO
     const kan = document.getElementById('kanban');
     kan.innerHTML = "";
-    const statuses = [
-        { nome: "LEAD", css: "col-lead", cardCss: "card-lead" },
-        { nome: "AINDA FRIO", css: "col-frio", cardCss: "card-frio" },
-        { nome: "PROPOSTA ENVIADA - ACEITA", css: "col-proposta", cardCss: "card-proposta" },
-        { nome: "EM ASSINATURA", css: "col-assinatura", cardCss: "card-assinatura" },
-        { nome: "GANHO", css: "col-ganho", cardCss: "card-ganho" },
-        { nome: "PERDIDO", css: "col-perdido", cardCss: "card-perdido" }
+    const stats = [
+        {n: "LEAD", c: "col-lead", cc: "card-lead"},
+        {n: "AINDA FRIO", c: "col-frio", cc: "card-frio"},
+        {n: "PROPOSTA ENVIADA - ACEITA", c: "col-proposta", cc: "card-proposta"},
+        {n: "EM ASSINATURA", c: "col-assinatura", cc: "card-assinatura"},
+        {n: "GANHO", c: "col-ganho", cc: "card-ganho"},
+        {n: "PERDIDO", c: "col-perdido", cc: "card-perdido"}
     ];
-
-    statuses.forEach(s => {
+    stats.forEach(s => {
         const col = document.createElement('div');
-        col.className = `column ${s.css}`;
-        col.innerHTML = `<h4>${s.nome}</h4><div class="column-body"></div>`;
-        const body = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.nome).forEach(item => {
+        col.className = `column ${s.c}`;
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body"></div>`;
+        const b = col.querySelector('.column-body');
+        filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div');
-            card.className = `card ${s.cardCss}`;
-            card.innerHTML = `<b>${item.cliente}</b><span>${item.vendedor}</span><span class="valor">R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</span>`;
-            body.appendChild(card);
+            card.className = `card ${s.cc}`;
+            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br><b>R$ ${i.valor_estimado_ano.toLocaleString('pt-BR')}</b>`;
+            b.appendChild(card);
         });
         kan.appendChild(col);
     });
