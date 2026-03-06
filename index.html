@@ -48,10 +48,9 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
 .modal-content { background: white; margin: 30px auto; padding: 30px; border-radius: 12px; width: 600px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
-.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
-.form-group { flex: 1; display: flex; flex-direction: column; }
+.form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
@@ -65,6 +64,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .col-perdido h4 { background-color: var(--bg-perdido); }
 
 .card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; }
+.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
 </style>
 </head>
 
@@ -112,26 +112,52 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
     <div class="kanban" id="kanban"></div>
 </div>
 
+<div id="modalVendedor" class="modal">
+    <div class="modal-content">
+        <h3>Novo Vendedor</h3>
+        <form id="formVendedor">
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="modalArea" class="modal">
+    <div class="modal-content">
+        <h3>Nova Área</h3>
+        <form id="formArea">
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div id="modalOportunidade" class="modal">
     <div class="modal-content">
         <h3 id="modalTitulo">Nova Oportunidade</h3>
         <form id="formOportunidade">
             <input type="hidden" id="op_id">
-            <div class="form-group" style="margin-bottom:15px;"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-            <div class="form-group" style="margin-bottom:15px;"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
             <div class="form-row">
-                <div class="form-group"><label>Vendedor</label><select id="op_vendedor" required></select></div>
-                <div class="form-group"><label>Área</label><select id="op_area" required></select></div>
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
-                <div class="form-group"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
+                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
-            <div class="form-group" style="margin-top:15px;">
+            <div class="form-group">
                 <label>Status</label>
                 <select id="op_status" required>
                     <option value="LEAD">LEAD</option>
@@ -162,6 +188,7 @@ let base=[]; let charts={};
 
 function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
+
 function calcularMRR() { 
     const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
     document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
@@ -175,6 +202,24 @@ function prepararNovo() {
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     abrirModal('modalOportunidade');
 }
+
+// LOGICA VENDEDOR
+document.getElementById('formVendedor').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('vend_nome').value;
+    const { error } = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
+    if(error) alert("Erro: " + error.message);
+    else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
+};
+
+// LOGICA AREA
+document.getElementById('formArea').onsubmit = async (e) => {
+    e.preventDefault();
+    const nome = document.getElementById('area_nome').value;
+    const { error } = await supabaseClient.from('areas').insert([{ nome: nome }]);
+    if(error) alert("Erro: " + error.message);
+    else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
+};
 
 function editarOportunidade(id) {
     const item = base.find(x => x.id == id);
@@ -205,8 +250,6 @@ async function deletarOportunidade() {
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
-    
-    // PAYLOAD 100% MINÚSCULO CONFORME O BANCO
     const payload = {
         cliente: document.getElementById('op_cliente').value,
         breve_descricao: document.getElementById('op_breve_descricao').value,
@@ -218,20 +261,9 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         status: document.getElementById('op_status').value,
         area: document.getElementById('op_area').value
     };
-
-    let res;
-    if(idValue) {
-        res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-    } else {
-        res = await supabaseClient.from('oportunidades').insert([payload]);
-    }
-
-    if(res.error) {
-        alert("Erro Supabase: " + res.error.message);
-    } else {
-        fecharModal('modalOportunidade');
-        carregarDados();
-    }
+    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    else await supabaseClient.from('oportunidades').insert([payload]);
+    fecharModal('modalOportunidade'); carregarDados();
 };
 
 async function carregarAuxiliares(){
@@ -264,8 +296,7 @@ function renderizar(){
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; 
         const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; 
-        mrrTotal += vM;
+        pipeTot += vA; mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
