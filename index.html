@@ -23,13 +23,9 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-header{
-background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
+header{ background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .logo { height: 50px; width: auto; }
 .header-right{ display:flex; gap:10px; }
-
 .btn-header { border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; }
 .btn-novo-op { background-color: var(--lilas); color: white; }
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
@@ -47,32 +43,31 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
+/* MODAL CORRIGIDO */
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
+.modal-content { background: white; margin: 2% auto; padding: 25px; border-radius: 12px; width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.modal-content h3 { margin-top: 0; color: var(--lilas); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; color: #666; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+.row-flex { display: flex; gap: 15px; margin-bottom: 15px; }
+.row-flex .form-group { flex: 1; margin-bottom: 0; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+
+/* KANBAN */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
 .column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
-
 .col-lead h4 { background-color: var(--bg-lead); }
 .col-frio h4 { background-color: var(--bg-frio); }
 .col-proposta h4 { background-color: var(--bg-proposta); }
 .col-assinatura h4 { background-color: var(--bg-assinatura); }
 .col-ganho h4 { background-color: var(--bg-ganho); }
 .col-perdido h4 { background-color: var(--bg-perdido); }
-
 .column-body { padding: 10px; }
 .card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
-.card-lead { border-left-color: var(--bg-lead); }
-.card-frio { border-left-color: var(--bg-frio); }
-.card-proposta { border-left-color: var(--bg-proposta); }
-.card-assinatura { border-left-color: var(--bg-assinatura); }
 .card-ganho { border-left-color: var(--bg-ganho); }
 .card-perdido { border-left-color: var(--bg-perdido); }
-
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-.modal-content { background: white; margin: 2% auto; padding: 30px; border-radius: 12px; width: 500px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-.form-group { margin-bottom: 12px; }
-.form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; color: #666; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 </style>
 </head>
 
@@ -124,34 +119,56 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     <div class="kanban" id="kanban"></div>
 </div>
 
-<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-
 <div id="modalOportunidade" class="modal">
     <div class="modal-content">
         <h3>Nova Oportunidade</h3>
         <form id="formOportunidade">
-            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
-            <div class="form-group"><label>Breve Descrição</label><textarea id="descricao" rows="2"></textarea></div>
+            <div class="form-group">
+                <label>Cliente</label>
+                <input type="text" id="cliente" placeholder="Nome da empresa/cliente" required>
+            </div>
             
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="vendedor" required></select></div>
-                <div class="form-group" style="flex:1"><label>Área</label><select id="area" required></select></div>
+            <div class="form-group">
+                <label>Breve Descrição</label>
+                <textarea id="descricao" rows="2" placeholder="Resumo da negociação..."></textarea>
+            </div>
+            
+            <div class="row-flex">
+                <div class="form-group">
+                    <label>Vendedor</label>
+                    <select id="vendedor" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Área</label>
+                    <select id="area_modal" required></select>
+                </div>
             </div>
 
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="data_op" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="data_prev"></div>
+            <div class="row-flex">
+                <div class="form-group">
+                    <label>Data da Oportunidade</label>
+                    <input type="date" id="data_op" required>
+                </div>
+                <div class="form-group">
+                    <label>Previsão de Fechamento</label>
+                    <input type="date" id="data_prev">
+                </div>
             </div>
 
-            <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" id="vAno" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" id="vMes" readonly style="background:#f4f4f4;"></div>
+            <div class="row-flex">
+                <div class="form-group">
+                    <label>Valor Estimado no Ano</label>
+                    <input type="number" id="vAno" oninput="calcularMRR()" placeholder="Ex: 120000" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor Mensal (MRR)</label>
+                    <input type="number" id="vMes" readonly style="background:#f9f9f9;" placeholder="Automático">
+                </div>
             </div>
 
             <div class="form-group">
                 <label>Status</label>
-                <select id="status" required>
+                <select id="status_modal" required>
                     <option value="LEAD">LEAD</option>
                     <option value="AINDA FRIO">AINDA FRIO</option>
                     <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
@@ -162,12 +179,15 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
             </div>
 
             <div class="modal-footer">
-                <button type="button" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-novo-op">Salvar Oportunidade</button>
+                <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
             </div>
         </form>
     </div>
 </div>
+
+<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 
 <script>
 Chart.register(ChartDataLabels);
@@ -186,41 +206,61 @@ function abrirModal(id){
     }
 }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
-function calcularMRR() { const v = parseFloat(document.getElementById('vAno').value) || 0; document.getElementById('vMes').value = (v / 12).toFixed(2); }
+function calcularMRR() { 
+    const v = parseFloat(document.getElementById('vAno').value) || 0; 
+    document.getElementById('vMes').value = (v / 12).toFixed(2); 
+}
 
-// FORMULÁRIO DE OPORTUNIDADE ATUALIZADO
+// SALVAR OPORTUNIDADE
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const payload = {
         cliente: document.getElementById('cliente').value,
         descricao: document.getElementById('descricao').value,
         vendedor: document.getElementById('vendedor').value,
-        area: document.getElementById('area').value,
+        area: document.getElementById('area_modal').value,
         data_oportunidade: document.getElementById('data_op').value,
         previsao_fechamento: document.getElementById('data_prev').value,
         valor_estimado_ano: parseFloat(document.getElementById('vAno').value),
         mrr_total: parseFloat(document.getElementById('vMes').value),
-        status: document.getElementById('status').value
+        status: document.getElementById('status_modal').value
     };
+    
     const { error } = await supabaseClient.from('oportunidades').insert([payload]);
-    if(error) alert("Erro ao salvar: " + error.message);
-    fecharModal('modalOportunidade'); 
-    carregarDados();
+    if(error) {
+        alert("Erro ao salvar: " + error.message);
+    } else {
+        fecharModal('modalOportunidade');
+        document.getElementById('formOportunidade').reset();
+        carregarDados();
+    }
 };
 
-// ... Restante das funções (Vendedores, Áreas, Renderização) permanecem iguais ...
+// AUXILIARES (VENDEDOR/AREA)
 document.getElementById('formVendedor').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]); fecharModal('modalVendedor'); carregarAuxiliares(); };
 document.getElementById('formArea').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]); fecharModal('modalArea'); carregarAuxiliares(); };
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
     const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
-    const fill = (el, d, label) => { el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); };
-    fill(document.getElementById('vendedor'), v, 'Selecione'); fill(document.getElementById('filtroVendedor'), v, 'Vendedores');
-    fill(document.getElementById('area'), a, 'Selecione'); fill(document.getElementById('filtroArea'), a, 'Áreas');
+    
+    const fill = (elId, d, label) => { 
+        const el = document.getElementById(elId);
+        if(!el) return;
+        el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    };
+    
+    fill('vendedor', v, 'Selecione o Vendedor');
+    fill('filtroVendedor', v, 'Filtrar Vendedor');
+    fill('area_modal', a, 'Selecione a Área');
+    fill('filtroArea', a, 'Filtrar Área');
 }
 
-async function carregarDados(){ const { data } = await supabaseClient.from('oportunidades').select('*'); base = data || []; renderizar(); }
+async function carregarDados(){ 
+    const { data } = await supabaseClient.from('oportunidades').select('*'); 
+    base = data || []; 
+    renderizar(); 
+}
 
 function renderizar(){
     const fV = document.getElementById('filtroVendedor').value;
@@ -243,21 +283,18 @@ function renderizar(){
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
-    const totalDecidido = nGanhos + nPerdidos;
-    const conv = totalDecidido > 0 ? (nGanhos / totalDecidido) * 100 : 0;
-    const ticket = nGanhos > 0 ? (recGan / nGanhos) : 0;
-
     document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('conversao').innerText = conv.toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + ticket.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+    document.getElementById('conversao').innerText = (nGanhos + nPerdidos > 0 ? (nGanhos / (nGanhos + nPerdidos)) * 100 : 0).toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nGanhos > 0 ? (recGan / nGanhos) : 0).toLocaleString('pt-BR', {maximumFractionDigits: 0});
 
+    // GRÁFICOS (PRESERVADOS)
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, layout: { padding: { bottom: 20, left: 10, right: 10 } }, plugins: { datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } }, legend: { position: 'bottom', align: 'center', labels: { boxWidth: 8, padding: 8, font: { size: 9 }, usePointStyle: true } } } }
+        options: { maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, usePointStyle: true } } } }
     });
 
     if(charts.vd) charts.vd.destroy();
@@ -265,22 +302,24 @@ function renderizar(){
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
         data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4, barThickness: 25 }] },
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 60 } }, scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 12, weight: 'bold' }, color: '#414042' } } }, plugins: { legend: { display: false }, datalabels: { color: '#ffffff', anchor: 'end', align: 'left', offset: 5, font: { weight: 'bold', size: 11 }, formatter: v => "R$ " + v.toLocaleString('pt-BR', {maximumFractionDigits:0}) } } }
+        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 60 } }, scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
     });
 
+    // KANBAN
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const stats = [{n:"LEAD",c:"col-lead",cc:"card-lead"},{n:"AINDA FRIO",c:"col-frio",cc:"card-frio"},{n:"PROPOSTA ENVIADA - ACEITA",c:"col-proposta",cc:"card-proposta"},{n:"EM ASSINATURA",c:"col-assinatura",cc:"card-assinatura"},{n:"GANHO",c:"col-ganho",cc:"card-ganho"},{n:"PERDIDO",c:"col-perdido",cc:"card-perdido"}];
+    const stats = [{n:"LEAD",c:"col-lead"},{n:"AINDA FRIO",c:"col-frio"},{n:"PROPOSTA ENVIADA - ACEITA",c:"col-proposta"},{n:"EM ASSINATURA",c:"col-assinatura"},{n:"GANHO",c:"col-ganho"},{n:"PERDIDO",c:"col-perdido"}];
     stats.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.c}`; col.innerHTML = `<h4>${s.n}</h4><div class="column-body"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = `card ${s.cc}`;
+            const card = document.createElement('div'); card.className = `card`;
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br><b>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}</b>`;
             b.appendChild(card);
         });
         kan.appendChild(col);
     });
 }
+
 carregarAuxiliares(); carregarDados();
 </script>
 </body>
