@@ -13,14 +13,13 @@
 --grafite:#414042;
 --lilas:#422c76;
 --offwhite:#faf9f5;
---verde-sucesso: #28a745;
-/* Cores do Kanban */
---color-lead: #6c757d;
---color-frio: #17a2b8;
---color-proposta: #ffc107;
---color-assinatura: #422c76;
---color-ganho: #28a745;
---color-perdido: #dc3545;
+/* Cores do Kanban - Tons da Imagem */
+--bg-lead: #6c757d;
+--bg-frio: #17a2b8;
+--bg-proposta: #f39c12;
+--bg-assinatura: #8e44ad;
+--bg-ganho: #27ae60;
+--bg-perdido: #c0392b;
 }
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
@@ -90,41 +89,51 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 .chart-card h4 { margin: 0 0 15px 0; color: #333; font-size: 16px; }
 
-/* ESTILIZAÇÃO KANBAN COLORIDO */
+/* KANBAN COLORIDO AJUSTADO */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ background:#f0f1f3; padding:12px; border-radius:10px; min-height:500px; border-top: 5px solid #ccc; }
+.column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-.column[data-status="LEAD"] { border-top-color: var(--color-lead); }
-.column[data-status="AINDA FRIO"] { border-top-color: var(--color-frio); }
-.column[data-status="PROPOSTA ENVIADA - ACEITA"] { border-top-color: var(--color-proposta); }
-.column[data-status="EM ASSINATURA"] { border-top-color: var(--color-assinatura); }
-.column[data-status="GANHO"] { border-top-color: var(--color-ganho); }
-.column[data-status="PERDIDO"] { border-top-color: var(--color-perdido); }
+.column h4 { 
+    margin: 0; 
+    padding: 12px; 
+    text-align: center; 
+    font-size: 12px; 
+    color: white; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+}
 
-.column h4{ text-align:center; font-size:11px; margin: 0 0 15px 0; padding-bottom:8px; text-transform: uppercase; color: #444; font-weight: 800; border-bottom: 1px solid #ddd; }
+/* Cores dos Cabeçalhos */
+.col-lead h4 { background-color: var(--bg-lead); }
+.col-frio h4 { background-color: var(--bg-frio); }
+.col-proposta h4 { background-color: var(--bg-proposta); }
+.col-assinatura h4 { background-color: var(--bg-assinatura); }
+.col-ganho h4 { background-color: var(--bg-ganho); }
+.col-perdido h4 { background-color: var(--bg-perdido); }
+
+.column-body { padding: 10px; }
 
 .card{ 
     background:white; 
     padding:12px; 
     margin-bottom:12px; 
-    border-radius:8px; 
+    border-radius:6px; 
     font-size:11px; 
     box-shadow:0 2px 4px rgba(0,0,0,0.05); 
-    border-left: 4px solid #ccc;
-    transition: transform 0.2s;
+    border-left: 5px solid #ccc;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-.card[data-status="LEAD"] { border-left-color: var(--color-lead); }
-.card[data-status="AINDA FRIO"] { border-left-color: var(--color-frio); }
-.card[data-status="PROPOSTA ENVIADA - ACEITA"] { border-left-color: var(--color-proposta); }
-.card[data-status="EM ASSINATURA"] { border-left-color: var(--color-assinatura); }
-.card[data-status="GANHO"] { border-left-color: var(--color-ganho); }
-.card[data-status="PERDIDO"] { border-left-color: var(--color-perdido); }
+/* Cores das Bordas dos Cards */
+.card-lead { border-left-color: var(--bg-lead); }
+.card-frio { border-left-color: var(--bg-frio); }
+.card-proposta { border-left-color: var(--bg-proposta); }
+.card-assinatura { border-left-color: var(--bg-assinatura); }
+.card-ganho { border-left-color: var(--bg-ganho); }
+.card-perdido { border-left-color: var(--bg-perdido); }
 
-.card b { display: block; font-size: 12px; margin-bottom: 4px; color: #222; }
-.card .vendedor-tag { color: #666; font-style: italic; margin-bottom: 4px; display: block; }
-.card .valor-tag { font-weight: bold; color: var(--lilas); font-size: 12px; }
+.card b { display: block; font-size: 12px; color: #333; margin-bottom: 3px; }
+.card span { display: block; color: #666; margin-bottom: 3px; }
+.card .valor { font-weight: bold; color: var(--lilas); }
 
 /* Modal */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
@@ -185,9 +194,6 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
     <div class="kanban" id="kanban"></div>
 </div>
-
-<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome Completo</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 
 <div id="modalOportunidade" class="modal">
     <div class="modal-content">
@@ -251,10 +257,8 @@ function calcularMRR() {
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
     const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
-    const sV = document.getElementById('vendedor');
-    const sA = document.getElementById('area');
-    const fV = document.getElementById('filtroVendedor');
-    const fA = document.getElementById('filtroArea');
+    const sV = document.getElementById('vendedor'); const sA = document.getElementById('area');
+    const fV = document.getElementById('filtroVendedor'); const fA = document.getElementById('filtroArea');
     const optsV = '<option value="">Vendedores</option>' + v?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
     const optsA = '<option value="">Áreas</option>' + a?.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
     sV.innerHTML = optsV; fV.innerHTML = optsV;
@@ -289,9 +293,7 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
 
-    const filtrados = base.filter(r => 
-        (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS)
-    );
+    const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
     let recGan = 0, pipeTot = 0, mrrTotal = 0, ganhos = 0, totalFechados = 0;
     let statusCont = {}, vendVal = {};
@@ -312,54 +314,51 @@ function renderizar(){
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // Charts
+    // Charts com cores sincronizadas
+    const cores = ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'];
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#ffc107','#422c76','#28a745','#dc3545'] }]},
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-                datalabels: { display: true, color: '#fff', font: { weight: 'bold' } }
-            } 
-        }
+        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: cores }]},
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
     if(charts.vd) charts.vd.destroy();
     const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4 }] },
-        options: { 
-            indexAxis: 'y', 
-            maintainAspectRatio: false,
-            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false } } },
-            plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'end', align: 'left', color: '#fff', formatter: v => "R$ " + v.toLocaleString('pt-BR') } }
-        }
+        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76' }] },
+        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
-    // KANBAN RENDER COM CORES
+    // RENDERIZAÇÃO KANBAN COLORIDO
     const kan = document.getElementById('kanban');
     kan.innerHTML = "";
-    const statusList = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
     
-    statusList.forEach(s => {
+    const statuses = [
+        { nome: "LEAD", css: "col-lead", cardCss: "card-lead" },
+        { nome: "AINDA FRIO", css: "col-frio", cardCss: "card-frio" },
+        { nome: "PROPOSTA ENVIADA - ACEITA", css: "col-proposta", cardCss: "card-proposta" },
+        { nome: "EM ASSINATURA", css: "col-assinatura", cardCss: "card-assinatura" },
+        { nome: "GANHO", css: "col-ganho", cardCss: "card-ganho" },
+        { nome: "PERDIDO", css: "col-perdido", cardCss: "card-perdido" }
+    ];
+
+    statuses.forEach(s => {
         const col = document.createElement('div');
-        col.className = 'column';
-        col.setAttribute('data-status', s);
-        col.innerHTML = `<h4>${s}</h4>`;
+        col.className = `column ${s.css}`;
+        col.innerHTML = `<h4>${s.nome}</h4><div class="column-body"></div>`;
+        const body = col.querySelector('.column-body');
         
-        filtrados.filter(f => f.status === s).forEach(item => {
+        filtrados.filter(f => f.status === s.nome).forEach(item => {
             const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('data-status', s);
+            card.className = `card ${s.cardCss}`;
             card.innerHTML = `
                 <b>${item.cliente}</b>
-                <span class="vendedor-tag">${item.vendedor}</span>
-                <span class="valor-tag">R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</span>
+                <span>${item.vendedor}</span>
+                <span class="valor">R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</span>
             `;
-            col.appendChild(card);
+            body.appendChild(card);
         });
         kan.appendChild(col);
     });
