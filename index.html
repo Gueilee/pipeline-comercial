@@ -22,7 +22,7 @@
 --ia-gold: #d4af37;
 }
 
-body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); overflow-x: hidden; }
+body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
 header{ background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .logo { height: 50px; width: auto; }
@@ -48,7 +48,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
-/* MODAL CENTRALIZADO COM SCROLL INTERNO */
+/* MODAL AJUSTADO: CENTRALIZADO E COM SCROLL INTERNO */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
     background: white; 
@@ -63,7 +63,6 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
-/* ESTILOS RESULTADO IA */
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 #ia_loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; animation: pulse 1.5s infinite; }
@@ -77,7 +76,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
+.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s; }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
 .col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
@@ -87,9 +86,12 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .col-ganho { background-color: #e8f5e9; } .col-ganho h4 { background-color: var(--bg-ganho); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
-.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card:active { cursor: grabbing; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .form-row { display: flex; gap: 15px; }
+
+.column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 </style>
 </head>
 
@@ -132,7 +134,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 
     <div class="charts-grid">
         <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-        <div class="chart-card"><h4>Ranking por Vendedor (R$)</h4><canvas id="chartVendedor"></canvas></div>
+        <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
     </div>
 
     <div class="kanban" id="kanban"></div>
@@ -140,29 +142,29 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 
 <div id="modalIA" class="modal">
     <div class="modal-content">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 12px; color: #666; margin-top: -10px;">Pesquise dados estratégicos sobre novas empresas no Google via IA.</p>
+        <h3>✨ IA Prospect - Vendemmia</h3>
+        <p style="font-size: 12px; color: #666; margin-top: -10px;">Busque dados estratégicos sobre novas empresas.</p>
         
         <div class="form-group">
             <label>Empresa ou Site</label>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: AMBEV ou www.ambev.com.br" style="flex:1;">
+                <input type="text" id="ia_termo" placeholder="Ex: Mercado Livre ou www.mercadolivre.com.br" style="flex:1;">
                 <button type="button" class="btn-header btn-ia" onclick="buscarDadosIA()">PESQUISAR</button>
             </div>
         </div>
 
-        <div id="ia_loading">🔍 A IA está analisando fontes corporativas em tempo real...</div>
+        <div id="ia_loading">🔍 A IA está pesquisando fontes em tempo real...</div>
 
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME</h4>
+                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
                 <span class="ia-badge">Insights Gemini IA</span>
             </div>
             
-            <div class="ia-section-title">CORE BUSINESS</div>
+            <div class="ia-section-title">SOBRE A EMPRESA</div>
             <p id="res_descricao" style="font-size: 13px; line-height: 1.4; white-space: pre-wrap; margin: 5px 0;"></p>
 
-            <div class="ia-section-title">PRESENÇA E PORTE</div>
+            <div class="ia-section-title">MERCADO E PORTE</div>
             <p id="res_segmento" style="font-size: 13px; margin: 5px 0;"></p>
 
             <div class="ia-section-title">GANCHOS PARA O VENDEDOR</div>
@@ -254,7 +256,7 @@ let base=[]; let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-// FUNÇÃO DE BUSCA IA REAL COM REFORÇO DE SEGURANÇA E JSON
+// FUNÇÃO DE BUSCA IA AJUSTADA PARA EVITAR ERRO DE 'UNDEFINED'
 async function buscarDadosIA() {
     const termo = document.getElementById('ia_termo').value;
     if(!termo) return alert("Digite o nome da empresa!");
@@ -266,11 +268,10 @@ async function buscarDadosIA() {
 
     try {
         const prompt = `Atue como um especialista em inteligência de mercado. Analise a empresa "${termo}". 
-        Forneça uma análise corporativa neutra e objetiva. 
-        Retorne APENAS um JSON puro (sem blocos de código markdown) com estas chaves: 
-        "resumo": (breve descrição do negócio), 
-        "mercado": (setor, porte e sede), 
-        "insights": (3 ganchos comerciais de abordagem). 
+        Retorne APENAS um JSON puro (sem markdown e sem explicações) com estas chaves: 
+        "resumo": (breve descrição do que fazem), 
+        "mercado": (porte, setor e onde atuam), 
+        "insights": (3 ganchos comerciais de abordagem baseados em fatos recentes). 
         Idioma: Português Brasileiro.`;
 
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -279,18 +280,19 @@ async function buscarDadosIA() {
             body: JSON.stringify({ 
                 contents: [{ parts: [{ text: prompt }] }],
                 safetySettings: [
-                    { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                 ]
             })
         });
 
         const data = await response.json();
-
-        if (data.candidates && data.candidates[0].finishReason === "SAFETY") {
-            throw new Error("A pesquisa para este termo foi filtrada por segurança. Tente um termo mais específico.");
+        
+        // Proteção contra erro de 'undefined' se a IA não responder adequadamente
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error("A IA não conseguiu gerar uma resposta para este termo. Tente outro nome.");
         }
 
         const textoRaw = data.candidates[0].content.parts[0].text;
@@ -363,18 +365,6 @@ function editarOportunidade(id) {
     abrirModal('modalOportunidade');
 }
 
-document.getElementById('formVendedor').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('vend_nome').value.toUpperCase() }]);
-    fecharModal('modalVendedor'); carregarAuxiliares();
-};
-
-document.getElementById('formArea').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('areas').insert([{ nome: document.getElementById('area_nome').value.toUpperCase() }]);
-    fecharModal('modalArea'); carregarAuxiliares();
-};
-
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('op_id').value;
@@ -402,49 +392,25 @@ async function deletarOportunidade() {
 
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-
-    const filtrados = base.filter(r => 
-        (!fC || r.cliente.toLowerCase().includes(fC)) &&
-        (!fV || r.vendedor === fV) &&
-        (!fA || r.area === fA) &&
-        (!fS || r.status === fS)
-    );
+    const filtrados = base.filter(r => !fC || r.cliente.toLowerCase().includes(fC));
     
-    let pipeTot = 0, recGan = 0, mrrTotal = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
-
+    // Atualização de KPIs e Gráficos
+    let pipeTot = 0, recGan = 0;
+    let statusCont = {};
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0;
-        pipeTot += vA;
-        mrrTotal += (vA/12);
-        if(r.status === 'GANHO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
+        pipeTot += parseFloat(r.valor_estimado_ano) || 0;
+        if(r.status === 'GANHO') recGan += parseFloat(r.valor_estimado_ano) || 0;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {maximumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100).toFixed(1) : 0) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? (recGan/nG).toLocaleString('pt-BR', {maximumFractionDigits:0}) : 0);
 
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom'} } }
-    });
-
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: '#422c76' }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#fff' } } }
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' } } }
     });
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
