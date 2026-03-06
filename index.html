@@ -28,7 +28,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .logo { height: 50px; width: auto; display: block; }
-
 .header-right{ display:flex; gap:10px; }
 
 .btn-header {
@@ -45,7 +44,6 @@ box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
 
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
-
 .filters{ display:flex; gap:12px; margin-bottom:20px; }
 select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; background: white; min-width: 150px; }
 
@@ -90,6 +88,7 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 .column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
 .card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
 
+/* Modal */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
 .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 12px; width: 500px; }
 .form-group { margin-bottom: 12px; }
@@ -167,8 +166,8 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
                 <div class="form-group" style="flex:1"><label>Previsão Fechamento</label><input type="date" id="previsao"></div>
             </div>
             <div style="display:flex; gap:10px">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" oninput="calcularMRRAutomático()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" readonly style="background:#f0f0f0;" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="vAno" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="vMes" readonly style="background:#f4f4f4;" required></div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -206,10 +205,11 @@ function abrirModal(id){
 }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
-// Função para cálculo automático no popup
-function calcularMRRAutomático() {
+// FUNÇÃO DE CÁLCULO CORRIGIDA
+function calcularMRR() {
     const valorAno = parseFloat(document.getElementById('vAno').value) || 0;
-    document.getElementById('vMes').value = (valorAno / 12).toFixed(2);
+    const mensal = valorAno / 12;
+    document.getElementById('vMes').value = mensal.toFixed(2);
 }
 
 async function carregarAuxiliares(){
@@ -224,18 +224,6 @@ async function carregarAuxiliares(){
     sV.innerHTML = optsV; fV.innerHTML = optsV;
     sA.innerHTML = optsA; fA.innerHTML = optsA;
 }
-
-document.getElementById('formArea').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]);
-    fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares();
-};
-
-document.getElementById('formVendedor').onsubmit = async (e) => {
-    e.preventDefault();
-    await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]);
-    fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares();
-};
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
@@ -269,14 +257,15 @@ function renderizar(){
         (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS)
     );
 
-    let recGan = 0, pipeTot = 0, mrrTotalCalculado = 0, ganhos = 0, totalFechados = 0;
+    let recGan = 0, pipeTot = 0, mrrTotal = 0, ganhos = 0, totalFechados = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
         const vAno = parseFloat(r.valor_estimado_ano) || 0;
-        const vMes = parseFloat(r.mrr_total) || 0; // Pega o valor da coluna correta
+        const vMes = parseFloat(r.mrr_total) || (vAno / 12); // Fallback caso o banco esteja vazio
+        
         pipeTot += vAno;
-        mrrTotalCalculado += vMes;
+        mrrTotal += vMes;
         
         if(r.status === 'GANHO') { recGan += vAno; ganhos++; }
         if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
@@ -286,7 +275,7 @@ function renderizar(){
 
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotalCalculado.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
