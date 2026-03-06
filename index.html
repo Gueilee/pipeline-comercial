@@ -51,7 +51,6 @@ select { min-width: 160px; }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
 .form-group { flex: 1; display: flex; flex-direction: column; }
-.form-group.full { width: 100%; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
 .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
@@ -66,9 +65,7 @@ select { min-width: 160px; }
 .col-ganho h4 { background-color: var(--bg-ganho); }
 .col-perdido h4 { background-color: var(--bg-perdido); }
 
-.column-body { padding: 10px; min-height: 100px; }
 .card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; }
-.card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 </style>
 </head>
 
@@ -87,7 +84,6 @@ select { min-width: 160px; }
     <div class="filters">
         <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite ou selecione o cliente..." oninput="renderizar()" list="listaClientes">
         <datalist id="listaClientes"></datalist>
-        
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
         <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
         <select id="filtroStatus" onchange="renderizar()">
@@ -122,8 +118,8 @@ select { min-width: 160px; }
         <h3 id="modalTitulo">Nova Oportunidade</h3>
         <form id="formOportunidade">
             <input type="hidden" id="op_id">
-            <div class="form-group full"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-            <div class="form-group full"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            <div class="form-group" style="margin-bottom:15px;"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+            <div class="form-group" style="margin-bottom:15px;"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
             <div class="form-row">
                 <div class="form-group"><label>Vendedor</label><select id="op_vendedor" required></select></div>
                 <div class="form-group"><label>Área</label><select id="op_area" required></select></div>
@@ -136,7 +132,7 @@ select { min-width: 160px; }
                 <div class="form-group"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
                 <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_Valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
-            <div class="form-group full">
+            <div class="form-group" style="margin-top:15px;">
                 <label>Status</label>
                 <select id="op_status" required>
                     <option value="LEAD">LEAD</option>
@@ -192,7 +188,7 @@ function editarOportunidade(id) {
     document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
     document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
-    document.getElementById('op_Valor_mensal_recorrente').value = item.Valor_mensal_recorrente || (item.valor_estimado_ano / 12).toFixed(2);
+    document.getElementById('op_Valor_mensal_recorrente').value = item.Valor_mensal_recorrente;
     document.getElementById('op_status').value = item.status;
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
@@ -207,35 +203,35 @@ async function deletarOportunidade() {
     }
 }
 
-// SALVAMENTO AJUSTADO COM COLUNAS EXATAS: Valor_mensal_recorrente
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
     
+    // OBJETO DE SALVAMENTO COM NOMES DE COLUNAS 100% REVISADOS
     const payload = {
         cliente: document.getElementById('op_cliente').value,
         breve_descricao: document.getElementById('op_breve_descricao').value,
         vendedor: document.getElementById('op_vendedor').value,
-        area: document.getElementById('op_area').value,
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
         previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
         Valor_mensal_recorrente: parseFloat(document.getElementById('op_Valor_mensal_recorrente').value) || 0,
-        status: document.getElementById('op_status').value
+        status: document.getElementById('op_status').value,
+        area: document.getElementById('op_area').value
     };
 
-    let result;
+    let res;
     if(idValue) {
-        result = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+        res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     } else {
-        result = await supabaseClient.from('oportunidades').insert([payload]);
+        res = await supabaseClient.from('oportunidades').insert([payload]);
     }
 
-    if(result.error) {
-        alert("Erro no Banco de Dados: " + result.error.message);
+    if(res.error) {
+        alert("Erro Supabase: " + res.error.message);
     } else {
         fecharModal('modalOportunidade');
-        await carregarDados();
+        carregarDados();
     }
 };
 
@@ -253,9 +249,6 @@ async function carregarAuxiliares(){
 async function carregarDados(){ 
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
     base = data || []; 
-    const datalist = document.getElementById('listaClientes');
-    const clientesUnicos = [...new Set(base.map(x => x.cliente))];
-    datalist.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
     renderizar(); 
 }
 
@@ -268,9 +261,12 @@ function renderizar(){
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
+    
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; pipeTot += vA; 
-        const vM = parseFloat(r.Valor_mensal_recorrente) || (vA/12); mrrTotal += vM;
+        const vA = parseFloat(r.valor_estimado_ano) || 0; 
+        const vM = parseFloat(r.Valor_mensal_recorrente) || 0;
+        pipeTot += vA; 
+        mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
@@ -288,6 +284,7 @@ function renderizar(){
         type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
         options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom' } } }
     });
+
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
@@ -299,10 +296,11 @@ function renderizar(){
     const colunas = [{n:"LEAD", cl:"col-lead"},{n:"AINDA FRIO", cl:"col-frio"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta"},{n:"EM ASSINATURA", cl:"col-assinatura"},{n:"GANHO", cl:"col-ganho"},{n:"PERDIDO", cl:"col-perdido"}];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body"></div>`;
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:100px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card';
+            card.style.backgroundColor = 'white'; card.style.padding = '12px'; card.style.marginBottom = '12px'; card.style.borderRadius = '6px'; card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'; card.style.borderLeft = '5px solid #ccc'; card.style.cursor = 'pointer';
             card.onclick = () => editarOportunidade(i.id);
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
