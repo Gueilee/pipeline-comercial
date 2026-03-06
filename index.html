@@ -55,16 +55,16 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
+.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
-/* CORES DAS COLUNAS (Background suave para o corpo) */
-.col-lead { background-color: rgba(108, 117, 125, 0.1); } .col-lead h4 { background-color: var(--bg-lead); }
-.col-frio { background-color: rgba(23, 162, 184, 0.1); } .col-frio h4 { background-color: var(--bg-frio); }
-.col-proposta { background-color: rgba(243, 156, 18, 0.1); } .col-proposta h4 { background-color: var(--bg-proposta); }
-.col-assinatura { background-color: rgba(142, 68, 173, 0.1); } .col-assinatura h4 { background-color: var(--bg-assinatura); }
-.col-ganho { background-color: rgba(39, 174, 96, 0.1); } .col-ganho h4 { background-color: var(--bg-ganho); }
-.col-perdido { background-color: rgba(192, 57, 43, 0.1); } .col-perdido h4 { background-color: var(--bg-perdido); }
+/* CORES DE FUNDO DAS COLUNAS (SÓLIDAS E CLARAS) */
+.col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
+.col-frio { background-color: #e1f5f7; } .col-frio h4 { background-color: var(--bg-frio); }
+.col-proposta { background-color: #fef5e7; } .col-proposta h4 { background-color: var(--bg-proposta); }
+.col-assinatura { background-color: #f4ecf7; } .col-assinatura h4 { background-color: var(--bg-assinatura); }
+.col-ganho { background-color: #e8f5e9; } .col-ganho h4 { background-color: var(--bg-ganho); }
+.col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
 .card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -73,6 +73,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 </head>
 
 <body>
+
 <header>
     <img src="Pipeline.png" class="logo">
     <div class="header-right">
