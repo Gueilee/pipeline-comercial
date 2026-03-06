@@ -218,7 +218,7 @@ header {
     <header>
         <img src="Pipeline.png" class="logo">
         <div class="header-right">
-            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> IA PROSPECT</button>
+            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
             <button type="button" class="btn-header" onclick="abrirModal('modalVendedor')"><span>👥</span> Vendedores</button>
             <button type="button" class="btn-header" onclick="abrirModal('modalArea')"><span>🏢</span> Áreas</button>
             <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()"><span>➕</span> Nova Oportunidade</button>
@@ -415,7 +415,7 @@ function simularBuscaIA() {
         loader.style.display = 'none';
         resultado.style.display = 'block';
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
+        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
         document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
         document.getElementById('res_noticias').innerHTML = `
             <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
@@ -661,3 +661,4 @@ function renderizar(){
 </script>
 </body>
 </html>
+
