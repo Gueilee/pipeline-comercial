@@ -85,7 +85,8 @@ select { min-width: 160px; }
 
 <div class="container">
     <div class="filters">
-        <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Buscar por Cliente..." oninput="renderizar()">
+        <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Buscar ou Selecionar Cliente..." oninput="renderizar()" list="listaClientes">
+        <datalist id="listaClientes"></datalist>
         
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedores</option></select>
         <select id="filtroArea" onchange="renderizar()"><option value="">Áreas</option></select>
@@ -161,6 +162,9 @@ select { min-width: 160px; }
     </div>
 </div>
 
+<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nv_nome" required></div><div class="modal-footer"><button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-header btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalArea" class="modal"><div class="modal-content"><h3>Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="na_nome" required></div><div class="modal-footer"><button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-header btn-novo-op">Salvar</button></div></form></div></div>
+
 <script>
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
@@ -212,13 +216,17 @@ async function deletarOportunidade() {
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const id = document.getElementById('op_id').value;
+    
+    // Tratamento para evitar erro de data vazia no Supabase
+    const previsao = document.getElementById('op_data_previsao').value;
+
     const payload = {
         cliente: document.getElementById('op_cliente').value,
         descricao: document.getElementById('op_descricao').value,
         vendedor: document.getElementById('op_vendedor').value,
         area: document.getElementById('op_area').value,
         data_oportunidade: document.getElementById('op_data_criacao').value,
-        previsao_fechamento: document.getElementById('op_data_previsao').value || null,
+        previsao_fechamento: previsao !== "" ? previsao : null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value),
         mrr_total: parseFloat(document.getElementById('op_valor_mes').value),
         status: document.getElementById('op_status').value
@@ -227,12 +235,16 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     if(id) {
         await supabaseClient.from('oportunidades').update(payload).eq('id', id);
     } else {
-        // CORREÇÃO: Garante o insert limpando o ID nulo
-        await supabaseClient.from('oportunidades').insert([payload]);
+        const { data, error } = await supabaseClient.from('oportunidades').insert([payload]).select();
+        if(error) { console.error("Erro ao salvar:", error); alert("Erro ao salvar!"); }
     }
+    
     fecharModal('modalOportunidade'); 
-    carregarDados(); // Recarrega o Kanban imediatamente
+    carregarDados();
 };
+
+document.getElementById('formVendedor').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nv_nome').value, ativo: true }]); fecharModal('modalVendedor'); carregarAuxiliares(); };
+document.getElementById('formArea').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('areas').insert([{ nome: document.getElementById('na_nome').value, ativo: true }]); fecharModal('modalArea'); carregarAuxiliares(); };
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('nome');
@@ -241,7 +253,17 @@ async function carregarAuxiliares(){
     fill('op_vendedor', v); fill('filtroVendedor', v); fill('op_area', a); fill('filtroArea', a);
 }
 
-async function carregarDados(){ const { data } = await supabaseClient.from('oportunidades').select('*'); base = data || []; renderizar(); }
+async function carregarDados(){ 
+    const { data } = await supabaseClient.from('oportunidades').select('*'); 
+    base = data || []; 
+    
+    // Atualiza a lista de autocompletar clientes
+    const datalist = document.getElementById('listaClientes');
+    const clientesUnicos = [...new Set(base.map(x => x.cliente))];
+    datalist.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    
+    renderizar(); 
+}
 
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
@@ -306,4 +328,4 @@ function renderizar(){
 carregarAuxiliares(); carregarDados();
 </script>
 </body>
-</html>    
+</html>
