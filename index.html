@@ -20,19 +20,18 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 
 header{
 background:white;
-padding:10px 30px;
+padding:15px 30px;
 display:flex;
 align-items:center;
 justify-content:space-between;
 box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* Ajuste da Logo */
-.logo-header { 
-    height: 50px; 
-    width: auto; 
+/* Retornando a classe que você usava para a logo */
+.logo {
+    height: 50px;
+    width: auto;
     display: block;
-    object-fit: contain;
 }
 
 .header-right{ display:flex; gap:10px; }
@@ -109,7 +108,9 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 <body>
 
 <header>
-    <img src="Pipeline.png" class="logo-header" alt="Logo Pipeline" onerror="this.src='https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPOSITORIO/main/Pipeline.png'">
+    <div class="header-left">
+        <img src="Pipeline.png" class="logo">
+    </div>
     <div class="header-right">
         <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
@@ -143,11 +144,11 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
     <div class="charts-grid">
         <div class="chart-card">
             <h4>Status das Oportunidades</h4>
-            <div style="flex:1;"><canvas id="chartStatus"></canvas></div>
+            <div style="flex:1; position: relative;"><canvas id="chartStatus"></canvas></div>
         </div>
         <div class="chart-card">
             <h4>Ranking por Vendedor</h4>
-            <div style="flex:1;"><canvas id="chartVendedor"></canvas></div>
+            <div style="flex:1; position: relative;"><canvas id="chartVendedor"></canvas></div>
         </div>
     </div>
 
@@ -251,12 +252,15 @@ function renderizar(){
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
-    // Gráfico de Pizza
+    // Gráfico de Pizza (Status)
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } }
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { legend: { position: 'bottom' }, datalabels: { display: false } } 
+        }
     });
 
     // Gráfico de Ranking - LIMPO E COM LABELS BRANCAS
@@ -288,7 +292,7 @@ function renderizar(){
                     color: '#ffffff',
                     offset: 10,
                     font: { weight: 'bold', size: 11 },
-                    formatter: (value) => "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0})
+                    formatter: (value) => value > 0 ? "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0}) : ""
                 }
             }
         }
