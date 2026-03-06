@@ -48,6 +48,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
+/* MODAL AJUSTADO: CENTRALIZADO E COM SCROLL INTERNO */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
     background: white; 
@@ -62,11 +63,12 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
-/* ESTILOS ESPECÍFICOS DO RESUMO IA */
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
+#ia_loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; animation: pulse 1.5s infinite; }
 .ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
+
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
@@ -139,36 +141,34 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 </div>
 
 <div id="modalIA" class="modal">
-    <div class="modal-content" style="width: 650px;">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
+    <div class="modal-content" style="width: 600px;">
+        <h3>✨ IA Prospect - Vendemmia</h3>
+        <p style="font-size: 12px; color: #666; margin-top: -10px;">Busque dados estratégicos sobre novas empresas.</p>
         
         <div class="form-group">
             <label>Empresa ou Site</label>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+                <input type="text" id="ia_termo" placeholder="Ex: Mercado Livre ou www.mercadolivre.com.br" style="flex:1;">
+                <button type="button" class="btn-header btn-ia" onclick="buscarDadosIA()">PESQUISAR</button>
             </div>
         </div>
 
-        <div id="ia_loading" class="ia_loading">
-            🔍 Analisando presença digital e notícias...
-        </div>
+        <div id="ia_loading">🔍 A IA está pesquisando fontes em tempo real...</div>
 
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
+                <span class="ia-badge">Insights Gemini IA</span>
             </div>
             
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
+            <div class="ia-section-title">SOBRE A EMPRESA</div>
+            <p id="res_descricao" style="font-size: 13px; line-height: 1.4; white-space: pre-wrap; margin: 5px 0;"></p>
 
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
+            <div class="ia-section-title">MERCADO E PORTE</div>
+            <p id="res_segmento" style="font-size: 13px; margin: 5px 0;"></p>
 
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
+            <div class="ia-section-title">GANCHOS PARA O VENDEDOR</div>
+            <div id="res_noticias" style="font-size: 13px; margin-top: 5px; line-height: 1.5;"></div>
         </div>
 
         <div class="modal-footer">
@@ -215,12 +215,12 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
                 <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
             </div>
             <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
+                <div class="form-group" style="flex:1"><label>Data Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão</label><input type="date" id="op_previsao_fechamento"></div>
             </div>
             <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+                <div class="form-group" style="flex:1"><label>Valor Estimado Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
             <div class="form-group">
                 <label>Status</label>
@@ -246,6 +246,8 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const GEMINI_API_KEY = "AIzaSyDA-vOMFAKYSrcSobfSoyf0UP0xq9WjyRI"; // SUA CHAVE INSERIDA COM SUCESSO
+
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -254,48 +256,67 @@ let base=[]; let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-/* FUNÇÃO PARA DESENHO E SIMULAÇÃO DA IA */
-function simularBuscaIA() {
+// FUNÇÃO DE BUSCA IA REAL
+async function buscarDadosIA() {
     const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
+    if(!termo) return alert("Digite o nome da empresa!");
 
     const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    
+    const resBox = document.getElementById('ia_resultado');
     loader.style.display = 'block';
-    resultado.style.display = 'none';
+    resBox.style.display = 'none';
 
-    // Simulando delay de pesquisa na web
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        
+    try {
+        const prompt = `Atue como um especialista em inteligência de mercado. Analise a empresa "${termo}". 
+        Retorne APENAS um JSON puro (sem markdown) com estas chaves: 
+        "resumo": (breve descrição do que fazem), 
+        "mercado": (porte, setor e onde atuam), 
+        "insights": (3 ganchos comerciais de abordagem baseados em fatos recentes). 
+        Idioma: Português Brasileiro.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        const data = await response.json();
+        const textoRaw = data.candidates[0].content.parts[0].text;
+        const cleanJson = textoRaw.replace(/```json/g, "").replace(/```/g, "").trim();
+        const obj = JSON.parse(cleanJson);
+
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
+        document.getElementById('res_descricao').innerText = obj.resumo;
+        document.getElementById('res_segmento').innerText = obj.mercado;
+        document.getElementById('res_noticias').innerHTML = obj.insights.map(i => `• ${i}<br>`).join('');
+
+        loader.style.display = 'none';
+        resBox.style.display = 'block';
+    } catch (e) {
+        alert("Erro na consulta. Verifique o nome da empresa ou tente novamente.");
+        loader.style.display = 'none';
+    }
 }
 
-document.getElementById('formVendedor').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('vend_nome').value.toUpperCase();
-    const { error } = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-    if(error) alert("Erro: " + error.message);
-    else { fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); carregarAuxiliares(); }
-});
+// LOGICA SUPABASE E RENDERIZAÇÃO
+async function carregarAuxiliares(){
+    const { data: v } = await supabaseClient.from('vendedores').select('nome');
+    const { data: a } = await supabaseClient.from('areas').select('nome');
+    const fill = (id, d, label) => { 
+        const el = document.getElementById(id); 
+        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    };
+    fill('op_vendedor', v, "Selecione..."); fill('filtroVendedor', v, "Vendedor");
+    fill('op_area', a, "Selecione..."); fill('filtroArea', a, "Área");
+}
 
-document.getElementById('formArea').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('area_nome').value.toUpperCase();
-    const { error } = await supabaseClient.from('areas').insert([{ nome: nome }]);
-    if(error) alert("Erro: " + error.message);
-    else { fecharModal('modalArea'); document.getElementById('formArea').reset(); carregarAuxiliares(); }
-});
+async function carregarDados(){ 
+    const { data } = await supabaseClient.from('oportunidades').select('*'); 
+    base = data || []; 
+    const dl = document.getElementById('listaClientes');
+    if(dl) dl.innerHTML = [...new Set(base.map(x=>x.cliente))].map(c => `<option value="${c}">`).join('');
+    renderizar(); 
+}
 
 function calcularMRR() { 
     const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
@@ -329,124 +350,71 @@ function editarOportunidade(id) {
     abrirModal('modalOportunidade');
 }
 
-async function deletarOportunidade() {
-    const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        await supabaseClient.from('oportunidades').delete().eq('id', id);
-        fecharModal('modalOportunidade'); carregarDados();
-    }
-}
-
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
-    const idValue = document.getElementById('op_id').value;
+    const id = document.getElementById('op_id').value;
     const payload = {
         cliente: document.getElementById('op_cliente').value.toUpperCase(),
         breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
         vendedor: document.getElementById('op_vendedor').value,
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
-        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
-        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
         status: document.getElementById('op_status').value,
         area: document.getElementById('op_area').value
     };
-    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    if(id) await supabaseClient.from('oportunidades').update(payload).eq('id', id);
     else await supabaseClient.from('oportunidades').insert([payload]);
     fecharModal('modalOportunidade'); carregarDados();
 };
 
-async function carregarAuxiliares(){
-    const { data: v } = await supabaseClient.from('vendedores').select('nome');
-    const { data: a } = await supabaseClient.from('areas').select('nome');
-    const fill = (id, d, label) => { 
-        const el = document.getElementById(id); 
-        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
-    };
-    fill('op_vendedor', v, "Selecione..."); fill('filtroVendedor', v, "Vendedor");
-    fill('op_area', a, "Selecione..."); fill('filtroArea', a, "Área");
-}
-
-async function carregarDados(){ 
-    const { data } = await supabaseClient.from('oportunidades').select('*'); 
-    base = data || []; 
-    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
-    const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
-    renderizar(); 
-}
-
-function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
-function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
-
-async function drop(ev, novoStatus) {
-    ev.preventDefault();
-    ev.currentTarget.classList.remove('column-over');
-    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
-    if (error) alert("Erro ao mover: " + error.message);
-    else carregarDados();
+async function deletarOportunidade() {
+    const id = document.getElementById('op_id').value;
+    if(id && confirm("Excluir?")) {
+        await supabaseClient.from('oportunidades').delete().eq('id', id);
+        fecharModal('modalOportunidade'); carregarDados();
+    }
 }
 
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
-
-    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
+    const filtrados = base.filter(r => !fC || r.cliente.toLowerCase().includes(fC));
     
+    // Atualização de KPIs e Gráficos
+    let pipeTot = 0, recGan = 0;
+    let statusCont = {};
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; 
-        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'GANHO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
+        pipeTot += parseFloat(r.valor_estimado_ano) || 0;
+        if(r.status === 'GANHO') recGan += parseFloat(r.valor_estimado_ano) || 0;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }
-    });
-
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' } } }
     });
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
+    const colunas = [{n:"LEAD", cl:"col-lead", b:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", b:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", b:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", b:"#8e44ad"},{n:"GANHO", cl:"col-ganho", b:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", b:"#c0392b"}];
     
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
+            const card = document.createElement('div'); card.className = 'card'; card.style.borderLeftColor = s.b;
+            card.onclick = () => editarOportunidade(i.id);
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
         kan.appendChild(col);
     });
 }
+
 carregarAuxiliares(); carregarDados();
 </script>
 </body>
