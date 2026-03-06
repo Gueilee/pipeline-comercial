@@ -196,7 +196,6 @@ function calcularMRR() {
     document.getElementById('vMes').value = (v / 12).toFixed(2);
 }
 
-// Funções de Cadastro
 document.getElementById('formVendedor').onsubmit = async (e) => {
     e.preventDefault();
     await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]);
@@ -256,34 +255,53 @@ function renderizar(){
         pipeTot += vA; mrrTotal += vM;
         if(r.status === 'GANHO') recGan += vA;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
+        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
     document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
 
-    // GRÁFICOS COM RÓTULOS BRANCOS
+    // GRÁFICO DE ROSCA (Status) - AJUSTADO PARA LEGENDA INTERNA E MENOR
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
         options: { 
+            maintainAspectRatio: false,
+            layout: { padding: 10 },
             plugins: { 
-                datalabels: { color: '#ffffff', font: { weight: 'bold' } },
-                legend: { position: 'bottom' }
+                datalabels: { color: '#ffffff', font: { weight: 'bold', size: 11 } },
+                legend: { 
+                    position: 'bottom', 
+                    labels: { boxWidth: 10, padding: 10, font: { size: 10 } } 
+                }
             } 
         }
     });
 
+    // GRÁFICO DE RANKING (Vendedor) - CLEAN SEM GRADES/EIXOS
     if(charts.vd) charts.vd.destroy();
+    const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: Object.keys(vendVal), datasets: [{ data: Object.values(vendVal), backgroundColor: '#422c76' }]},
+        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4 }] },
         options: { 
             indexAxis: 'y',
+            maintainAspectRatio: false,
+            scales: { 
+                x: { display: false, grid: { display: false } }, 
+                y: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } } 
+            },
             plugins: { 
-                datalabels: { color: '#ffffff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') }
+                legend: { display: false },
+                datalabels: { 
+                    color: '#ffffff', 
+                    anchor: 'end', 
+                    align: 'left', 
+                    offset: 10,
+                    formatter: v => "R$ " + v.toLocaleString('pt-BR', {maximumFractionDigits:0}) 
+                }
             } 
         }
     });
