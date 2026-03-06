@@ -134,7 +134,7 @@ select { min-width: 160px; }
             </div>
             <div class="form-row">
                 <div class="form-group"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_Valor_rensal_recorrente" readonly style="background:#f4f4f4;"></div>
+                <div class="form-group"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_Valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
             <div class="form-group full">
                 <label>Status</label>
@@ -169,7 +169,7 @@ function abrirModal(id){ document.getElementById(id).style.display='block'; }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 function calcularMRR() { 
     const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
-    document.getElementById('op_Valor_rensal_recorrente').value = (v / 12).toFixed(2); 
+    document.getElementById('op_Valor_mensal_recorrente').value = (v / 12).toFixed(2); 
 }
 
 function prepararNovo() {
@@ -192,7 +192,7 @@ function editarOportunidade(id) {
     document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
     document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
-    document.getElementById('op_Valor_rensal_recorrente').value = item.Valor_rensal_recorrente || (item.valor_estimado_ano / 12).toFixed(2);
+    document.getElementById('op_Valor_mensal_recorrente').value = item.Valor_mensal_recorrente || (item.valor_estimado_ano / 12).toFixed(2);
     document.getElementById('op_status').value = item.status;
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
@@ -207,7 +207,7 @@ async function deletarOportunidade() {
     }
 }
 
-// SALVAMENTO AJUSTADO COM "previsao_fechamento" (SEM TIL)
+// SALVAMENTO AJUSTADO COM COLUNAS EXATAS: Valor_mensal_recorrente
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
@@ -220,7 +220,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
         previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
-        Valor_rensal_recorrente: parseFloat(document.getElementById('op_Valor_rensal_recorrente').value) || 0,
+        Valor_mensal_recorrente: parseFloat(document.getElementById('op_Valor_mensal_recorrente').value) || 0,
         status: document.getElementById('op_status').value
     };
 
@@ -270,7 +270,7 @@ function renderizar(){
     let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; pipeTot += vA; 
-        const vM = parseFloat(r.Valor_rensal_recorrente) || (vA/12); mrrTotal += vM;
+        const vM = parseFloat(r.Valor_mensal_recorrente) || (vA/12); mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
