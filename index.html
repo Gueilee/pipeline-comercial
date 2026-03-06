@@ -14,6 +14,13 @@
 --lilas:#422c76;
 --offwhite:#faf9f5;
 --verde-sucesso: #28a745;
+/* Cores do Kanban */
+--color-lead: #6c757d;
+--color-frio: #17a2b8;
+--color-proposta: #ffc107;
+--color-assinatura: #422c76;
+--color-ganho: #28a745;
+--color-perdido: #dc3545;
 }
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
@@ -83,10 +90,41 @@ box-shadow:0 2px 10px rgba(0,0,0,0.05);
 
 .chart-card h4 { margin: 0 0 15px 0; color: #333; font-size: 16px; }
 
-.kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; }
-.column{ background:#eaebed; padding:12px; border-radius:10px; min-height:400px; }
-.column h4{ text-align:center; font-size:11px; margin-top:0; border-bottom:2px solid var(--lilas); padding-bottom:8px; text-transform: uppercase; color: var(--lilas); }
-.card{ background:white; padding:12px; margin:12px 0; border-radius:8px; font-size:11px; box-shadow:0 2px 5px rgba(0,0,0,0.08); border-left: 5px solid var(--lilas); }
+/* ESTILIZAÇÃO KANBAN COLORIDO */
+.kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
+.column{ background:#f0f1f3; padding:12px; border-radius:10px; min-height:500px; border-top: 5px solid #ccc; }
+
+.column[data-status="LEAD"] { border-top-color: var(--color-lead); }
+.column[data-status="AINDA FRIO"] { border-top-color: var(--color-frio); }
+.column[data-status="PROPOSTA ENVIADA - ACEITA"] { border-top-color: var(--color-proposta); }
+.column[data-status="EM ASSINATURA"] { border-top-color: var(--color-assinatura); }
+.column[data-status="GANHO"] { border-top-color: var(--color-ganho); }
+.column[data-status="PERDIDO"] { border-top-color: var(--color-perdido); }
+
+.column h4{ text-align:center; font-size:11px; margin: 0 0 15px 0; padding-bottom:8px; text-transform: uppercase; color: #444; font-weight: 800; border-bottom: 1px solid #ddd; }
+
+.card{ 
+    background:white; 
+    padding:12px; 
+    margin-bottom:12px; 
+    border-radius:8px; 
+    font-size:11px; 
+    box-shadow:0 2px 4px rgba(0,0,0,0.05); 
+    border-left: 4px solid #ccc;
+    transition: transform 0.2s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
+.card[data-status="LEAD"] { border-left-color: var(--color-lead); }
+.card[data-status="AINDA FRIO"] { border-left-color: var(--color-frio); }
+.card[data-status="PROPOSTA ENVIADA - ACEITA"] { border-left-color: var(--color-proposta); }
+.card[data-status="EM ASSINATURA"] { border-left-color: var(--color-assinatura); }
+.card[data-status="GANHO"] { border-left-color: var(--color-ganho); }
+.card[data-status="PERDIDO"] { border-left-color: var(--color-perdido); }
+
+.card b { display: block; font-size: 12px; margin-bottom: 4px; color: #222; }
+.card .vendedor-tag { color: #666; font-style: italic; margin-bottom: 4px; display: block; }
+.card .valor-tag { font-weight: bold; color: var(--lilas); font-size: 12px; }
 
 /* Modal */
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
@@ -205,11 +243,9 @@ function abrirModal(id){
 }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 
-// FUNÇÃO DE CÁLCULO CORRIGIDA
 function calcularMRR() {
     const valorAno = parseFloat(document.getElementById('vAno').value) || 0;
-    const mensal = valorAno / 12;
-    document.getElementById('vMes').value = mensal.toFixed(2);
+    document.getElementById('vMes').value = (valorAno / 12).toFixed(2);
 }
 
 async function carregarAuxiliares(){
@@ -262,11 +298,8 @@ function renderizar(){
 
     filtrados.forEach(r => {
         const vAno = parseFloat(r.valor_estimado_ano) || 0;
-        const vMes = parseFloat(r.mrr_total) || (vAno / 12); // Fallback caso o banco esteja vazio
-        
-        pipeTot += vAno;
-        mrrTotal += vMes;
-        
+        const vMes = parseFloat(r.mrr_total) || (vAno / 12);
+        pipeTot += vAno; mrrTotal += vMes;
         if(r.status === 'GANHO') { recGan += vAno; ganhos++; }
         if(r.status === 'GANHO' || r.status === 'PERDIDO') totalFechados++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
@@ -275,20 +308,20 @@ function renderizar(){
 
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     document.getElementById('conversao').innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(0) + "%" : "0%";
     document.getElementById('ticket').innerText = "R$ " + (ganhos > 0 ? (recGan/ganhos).toLocaleString('pt-BR', {maximumFractionDigits:0}) : "0");
 
+    // Charts
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#422c76','#ff6384','#36a2eb','#ffce56','#28a745','#6c757d'] }]},
+        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#ffc107','#422c76','#28a745','#dc3545'] }]},
         options: { 
             maintainAspectRatio: false, 
-            layout: { padding: 10 },
             plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } }, 
-                datalabels: { display: true, color: '#fff', font: { weight: 'bold', size: 12 } } 
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                datalabels: { display: true, color: '#fff', font: { weight: 'bold' } }
             } 
         }
     });
@@ -301,25 +334,32 @@ function renderizar(){
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false,
-            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } } },
-            plugins: {
-                legend: { display: false },
-                datalabels: {
-                    display: true, anchor: 'end', align: 'left', color: '#ffffff', offset: 5, font: { weight: 'bold', size: 11 },
-                    formatter: (value) => value > 0 ? "R$ " + value.toLocaleString('pt-BR', {maximumFractionDigits:0}) : ""
-                }
-            }
+            scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false } } },
+            plugins: { legend: { display: false }, datalabels: { display: true, anchor: 'end', align: 'left', color: '#fff', formatter: v => "R$ " + v.toLocaleString('pt-BR') } }
         }
     });
 
+    // KANBAN RENDER COM CORES
     const kan = document.getElementById('kanban');
     kan.innerHTML = "";
-    ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"].forEach(s => {
+    const statusList = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
+    
+    statusList.forEach(s => {
         const col = document.createElement('div');
         col.className = 'column';
+        col.setAttribute('data-status', s);
         col.innerHTML = `<h4>${s}</h4>`;
+        
         filtrados.filter(f => f.status === s).forEach(item => {
-            col.innerHTML += `<div class="card"><b>${item.cliente}</b><br><small>${item.vendedor}</small><br>R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</div>`;
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-status', s);
+            card.innerHTML = `
+                <b>${item.cliente}</b>
+                <span class="vendedor-tag">${item.vendedor}</span>
+                <span class="valor-tag">R$ ${item.valor_estimado_ano.toLocaleString('pt-BR')}</span>
+            `;
+            col.appendChild(card);
         });
         kan.appendChild(col);
     });
