@@ -49,7 +49,6 @@ height:40px;
 width:auto;
 }
 
-/* Botão Nova Oportunidade */
 .btn-novo {
     background-color: var(--lilas);
     color: white;
@@ -76,7 +75,7 @@ flex-wrap:wrap;
 margin-bottom:20px;
 }
 
-select{
+select, input{
 padding:6px;
 border-radius:6px;
 border:1px solid #ccc;
@@ -157,7 +156,7 @@ font-size:11px;
 box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Estilos do Modal */
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -174,22 +173,23 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
     margin: 5% auto;
     padding: 25px;
     border-radius: 12px;
-    width: 450px;
-    max-width: 90%;
+    width: 480px;
+    max-width: 95%;
 }
 
 .modal-content h2 { color: var(--lilas); margin-top: 0; }
 
 .form-group { margin-bottom: 12px; }
 
-.form-group label { display: block; font-size: 12px; margin-bottom: 4px; font-weight: bold; }
+.form-group label { display: block; font-size: 11px; margin-bottom: 4px; font-weight: bold; color: var(--grafite); }
 
 .form-group input, .form-group select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
+    font-size: 13px;
 }
 
 .modal-footer {
@@ -199,9 +199,9 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
     margin-top: 20px;
 }
 
-.btn-cancelar { background: #ccc; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+.btn-cancelar { background: #eee; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; color: #555; }
 
-.btn-salvar { background: var(--verde-sucesso); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+.btn-salvar { background: var(--verde-sucesso); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
 </style>
 </head>
@@ -247,15 +247,25 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
         <form id="formOportunidade">
             <div class="form-group">
                 <label>Cliente</label>
-                <input type="text" id="cliente" required>
+                <input type="text" id="cliente" required placeholder="Nome da empresa/cliente">
             </div>
             <div class="form-group">
                 <label>Breve Descrição</label>
-                <input type="text" id="breve_descricao">
+                <input type="text" id="breve_descricao" placeholder="Ex: Projeto de infraestrutura">
             </div>
-            <div class="form-group">
-                <label>Vendedor</label>
-                <input type="text" id="vendedor" required>
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Vendedor</label>
+                    <select id="vendedor" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Área</label>
+                    <select id="area" required>
+                        <option value="">Carregando...</option>
+                    </select>
+                </div>
             </div>
             <div style="display: flex; gap: 10px;">
                 <div class="form-group" style="flex: 1;">
@@ -277,26 +287,20 @@ box-shadow:0 2px 6px rgba(0,0,0,0.1);
                     <input type="number" step="0.01" id="valor_mensal_recorrente">
                 </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Status</label>
-                    <select id="status" required>
-                        <option value="PROSPECÇÃO">PROSPECÇÃO</option>
-                        <option value="QUALIFICAÇÃO">QUALIFICAÇÃO</option>
-                        <option value="PROPOSTA">PROPOSTA</option>
-                        <option value="NEGOCIAÇÃO">NEGOCIAÇÃO</option>
-                        <option value="GANHO">GANHO</option>
-                        <option value="PERDIDO">PERDIDO</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Área</label>
-                    <input type="text" id="area">
-                </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="status" required>
+                    <option value="LEAD">LEAD</option>
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+                    <option value="EM ASSINATURA">EM ASSINATURA</option>
+                    <option value="GANHO">GANHO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" onclick="fecharModal()">Cancelar</button>
-                <button type="submit" class="btn-salvar">Salvar Oportunidade</button>
+                <button type="submit" class="btn-salvar">Salvar Dados</button>
             </div>
         </form>
     </div>
@@ -315,17 +319,11 @@ let filtrado=[];
 let charts={};
 
 async function carregarDados(){
-    const { data, error } = await supabaseClient
-    .from('oportunidades')
-    .select('*');
-
-    if(error){
-        console.error("Erro ao carregar dados:", error);
-        return;
-    }
+    const { data, error } = await supabaseClient.from('oportunidades').select('*');
+    if(error){ console.error("Erro:", error); return; }
 
     base = data.map(item => ({
-        "Oportunidade": item.id, // ID vindo do banco
+        "Oportunidade": item.id,
         "Cliente": item.cliente,
         "Breve Descrição": item.breve_descricao,
         "Vendedor": item.vendedor,
@@ -339,19 +337,34 @@ async function carregarDados(){
 
     popularFiltros();
     aplicarFiltros();
+    carregarListasAuxiliares();
 }
 
-// Funções do Modal
+// Carrega Vendedores e Áreas das outras tabelas
+async function carregarListasAuxiliares() {
+    const { data: vds } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
+    const { data: ars } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
+
+    const selectVendedor = document.getElementById('vendedor');
+    const selectArea = document.getElementById('area');
+
+    if(vds) {
+        selectVendedor.innerHTML = '<option value="">Selecione...</option>';
+        vds.forEach(v => selectVendedor.innerHTML += `<option value="${v.nome}">${v.nome}</option>`);
+    }
+    if(ars) {
+        selectArea.innerHTML = '<option value="">Selecione...</option>';
+        ars.forEach(a => selectArea.innerHTML += `<option value="${a.nome}">${a.nome}</option>`);
+    }
+}
+
 function abrirModal() { document.getElementById('modalOportunidade').style.display = 'block'; }
 function fecharModal() { document.getElementById('modalOportunidade').style.display = 'none'; }
 
-// Fechar modal ao clicar fora dele
 window.onclick = function(event) {
-    let modal = document.getElementById('modalOportunidade');
-    if (event.target == modal) fecharModal();
+    if (event.target == document.getElementById('modalOportunidade')) fecharModal();
 }
 
-// Enviar formulário para o Supabase
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     
@@ -374,125 +387,124 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     } else {
         fecharModal();
         document.getElementById('formOportunidade').reset();
-        await carregarDados(); // Recarrega gráficos e kanban
+        await carregarDados(); 
     }
 };
 
 function formatarAbreviado(valor){
-if(!valor) return "R$ 0";
-let abs=Math.abs(valor);
-if(abs>=1e9) return "R$ "+(valor/1e9).toFixed(1).replace(".",",")+"B";
-if(abs>=1e6) return "R$ "+(valor/1e6).toFixed(1).replace(".",",")+"M";
-if(abs>=1e3) return "R$ "+(valor/1e3).toFixed(1).replace(".",",")+"K";
-return "R$ "+valor.toLocaleString();
+    if(!valor) return "R$ 0";
+    let abs=Math.abs(valor);
+    if(abs>=1e9) return "R$ "+(valor/1e9).toFixed(1).replace(".",",")+"B";
+    if(abs>=1e6) return "R$ "+(valor/1e6).toFixed(1).replace(".",",")+"M";
+    if(abs>=1e3) return "R$ "+(valor/1e3).toFixed(1).replace(".",",")+"K";
+    return "R$ "+valor.toLocaleString('pt-BR');
 }
 
 function popularFiltros(){
-let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
-let areas=[...new Set(base.map(x=>x["Área"]))];
-let status=[...new Set(base.map(x=>x["Status"]))];
+    let vendedores=[...new Set(base.map(x=>x["Vendedor"]?.toString().trim()))];
+    let areas=[...new Set(base.map(x=>x["Área"]))];
+    let status=[...new Set(base.map(x=>x["Status"]))];
 
-filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
-filtroArea.innerHTML='<option value="">Todas Áreas</option>';
-filtroStatus.innerHTML='<option value="">Todos Status</option>';
+    filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
+    filtroArea.innerHTML='<option value="">Todas Áreas</option>';
+    filtroStatus.innerHTML='<option value="">Todos Status</option>';
 
-vendedores.forEach(v=>filtroVendedor.innerHTML+=`<option value="${v}">${v}</option>`);
-areas.forEach(a=>filtroArea.innerHTML+=`<option value="${a}">${a}</option>`);
-status.forEach(s=>filtroStatus.innerHTML+=`<option value="${s}">${s}</option>`);
+    vendedores.forEach(v=> { if(v) filtroVendedor.innerHTML+=`<option value="${v}">${v}</option>` });
+    areas.forEach(a=> { if(a) filtroArea.innerHTML+=`<option value="${a}">${a}</option>` });
+    status.forEach(s=> { if(s) filtroStatus.innerHTML+=`<option value="${s}">${s}</option>` });
 
-filtroVendedor.onchange=aplicarFiltros;
-filtroArea.onchange=aplicarFiltros;
-filtroStatus.onchange=aplicarFiltros;
+    filtroVendedor.onchange=aplicarFiltros;
+    filtroArea.onchange=aplicarFiltros;
+    filtroStatus.onchange=aplicarFiltros;
 }
 
 function aplicarFiltros(){
-filtrado=base.filter(r=>
-(!filtroVendedor.value||r["Vendedor"]?.toString().trim()==filtroVendedor.value) &&
-(!filtroArea.value||r["Área"]==filtroArea.value) &&
-(!filtroStatus.value||r["Status"]==filtroStatus.value)
-);
-calcular();
+    filtrado=base.filter(r=>
+        (!filtroVendedor.value||r["Vendedor"]?.toString().trim()==filtroVendedor.value) &&
+        (!filtroArea.value||r["Área"]==filtroArea.value) &&
+        (!filtroStatus.value||r["Status"]==filtroStatus.value)
+    );
+    calcular();
 }
 
 function calcular(){
-let receita=0,pipeline=0,mrr=0,ganhos=0,perdidos=0;
-let statusCount={},vendedorValor={};
+    let receita=0,pipeline=0,mrr=0,ganhos=0,perdidos=0;
+    let statusCount={},vendedorValor={};
 
-filtrado.forEach(r=>{
-let anual=parseFloat(r["Valor estimado no Ano"])||0;
-let mensalRec=parseFloat(r["Valor Mensal Recorrente"])||0;
+    filtrado.forEach(r=>{
+        let anual=parseFloat(r["Valor estimado no Ano"])||0;
+        let mensalRec=parseFloat(r["Valor Mensal Recorrente"])||0;
+        pipeline+=anual;
+        mrr+=mensalRec;
 
-pipeline+=anual;
-mrr+=mensalRec;
+        if(r["Status"]==="GANHO"){ receita+=anual; ganhos++; }
+        if(r["Status"]==="PERDIDO"){ perdidos++; }
 
-if(r["Status"]==="GANHO"){ receita+=anual; ganhos++; }
-if(r["Status"]==="PERDIDO"){ perdidos++; }
+        statusCount[r["Status"]]=(statusCount[r["Status"]]||0)+1;
+        let vend = r["Vendedor"]?.toString().trim() || "Sem Vendedor";
+        vendedorValor[vend] = (vendedorValor[vend]||0)+anual;
+    });
 
-statusCount[r["Status"]]=(statusCount[r["Status"]]||0)+1;
-vendedorValor[r["Vendedor"]?.toString().trim()] =
-(vendedorValor[r["Vendedor"]?.toString().trim()]||0)+anual;
-});
+    document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
+    document.getElementById("pipelineTotal").innerText=formatarAbreviado(pipeline);
+    document.getElementById("mrrTotal").innerText=formatarAbreviado(mrr);
+    document.getElementById("conversao").innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
+    document.getElementById("ticket").innerText=formatarAbreviado(ganhos?receita/ganhos:0);
 
-document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
-document.getElementById("pipelineTotal").innerText=formatarAbreviado(pipeline);
-document.getElementById("mrrTotal").innerText=formatarAbreviado(mrr);
-document.getElementById("conversao").innerText=((ganhos/(ganhos+perdidos||1))*100).toFixed(1)+"%";
-document.getElementById("ticket").innerText=formatarAbreviado(ganhos?receita/ganhos:0);
-
-gerarGrafico("chartStatus","doughnut",statusCount,"Status das Oportunidades",true);
-gerarGraficoVendedor(vendedorValor);
-gerarKanban();
+    gerarGrafico("chartStatus","doughnut",statusCount,"Status das Oportunidades",true);
+    gerarGraficoVendedor(vendedorValor);
+    gerarKanban();
 }
 
 function gerarGrafico(id,tipo,obj,titulo,mostrarLegenda){
-if(charts[id]) charts[id].destroy();
+    if(charts[id]) charts[id].destroy();
+    let labels=Object.keys(obj);
+    let valores=Object.values(obj);
 
-let labels=Object.keys(obj);
-let valores=Object.values(obj);
-
-charts[id]=new Chart(document.getElementById(id),{
-type:tipo,
-data:{labels:labels,datasets:[{data:valores,backgroundColor:["#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff","#ff9f40"]}]},
-options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:mostrarLegenda}}}
-});
+    charts[id]=new Chart(document.getElementById(id),{
+        type:tipo,
+        data:{labels:labels,datasets:[{data:valores,backgroundColor:["#422c76","#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff"]}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{title:{display:true,text:titulo},legend:{display:mostrarLegenda}}}
+    });
 }
 
 function gerarGraficoVendedor(obj){
-if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
+    if(charts["chartVendedor"]) charts["chartVendedor"].destroy();
+    let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
 
-let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
-
-charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
-type:"bar",
-data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
-options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}
-});
+    charts["chartVendedor"]=new Chart(document.getElementById("chartVendedor"),{
+        type:"bar",
+        data:{labels:ranking.map(r=>r[0]),datasets:[{data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false}
+    });
 }
 
 function gerarKanban(){
-kanban.innerHTML="";
-let grupos={};
+    kanban.innerHTML="";
+    let grupos={};
+    
+    // Ordenação sugerida para as colunas do Kanban
+    const ordemStatus = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
+    
+    ordemStatus.forEach(st => grupos[st] = []);
+    filtrado.forEach(r=>{ if(grupos[r["Status"]]) grupos[r["Status"]].push(r); });
 
-filtrado.forEach(r=>{
-if(!grupos[r["Status"]]) grupos[r["Status"]]=[];
-grupos[r["Status"]].push(r);
-});
+    Object.keys(grupos).forEach(status=>{
+        if(grupos[status].length === 0 && (status !== "LEAD" && status !== "GANHO")) return;
 
-Object.keys(grupos).forEach(status=>{
-let col=document.createElement("div");
-col.className="column";
-col.style.backgroundColor="hsl("+Math.random()*360+",70%,85%)";
-col.innerHTML="<h4>"+status+"</h4>";
+        let col=document.createElement("div");
+        col.className="column";
+        col.style.backgroundColor="#f0f0f0";
+        col.innerHTML=`<h4 style="border-bottom:2px solid var(--lilas); padding-bottom:5px;">${status}</h4>`;
 
-grupos[status].forEach(item=>{
-let card=document.createElement("div");
-card.className="card";
-card.innerHTML="<b>"+item["Cliente"]+"</b><br>"+formatarAbreviado(item["Valor estimado no Ano"]||0);
-col.appendChild(card);
-});
-
-kanban.appendChild(col);
-});
+        grupos[status].forEach(item=>{
+            let card=document.createElement("div");
+            card.className="card";
+            card.innerHTML=`<b>${item["Cliente"]}</b><br><small>${item["Vendedor"]}</small><br><b>${formatarAbreviado(item["Valor estimado no Ano"]||0)}</b>`;
+            col.appendChild(card);
+        });
+        kanban.appendChild(col);
+    });
 }
 
 carregarDados();
