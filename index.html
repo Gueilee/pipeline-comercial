@@ -65,7 +65,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 /* ESTILOS ESPECÍFICOS DO RESUMO IA */
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
+.ia_loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
 .ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
@@ -98,7 +98,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 <header>
     <img src="Pipeline.png" class="logo">
     <div class="header-right">
-        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
+        <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ PROSPECÇÃO IA</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
         <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
@@ -147,7 +147,7 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
             <label>Empresa ou Site</label>
             <div style="display:flex; gap:10px;">
                 <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+                <button type="button" class="btn-header btn-ia" onclick="buscarDadosIA()">PESQUISAR</button>
             </div>
         </div>
 
@@ -246,6 +246,8 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 Chart.register(ChartDataLabels);
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const GEMINI_API_KEY = "AIzaSyDA-vOMFAKYSrcSobfSoyf0UP0xq9WjyRI";
+
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -254,8 +256,8 @@ let base=[]; let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-/* FUNÇÃO PARA DESENHO E SIMULAÇÃO DA IA */
-function simularBuscaIA() {
+/* CONEXÃO REAL COM A IA GEMINI */
+async function buscarDadosIA() {
     const termo = document.getElementById('ia_termo').value;
     if(!termo) return alert("Digite o nome ou site!");
 
@@ -265,20 +267,39 @@ function simularBuscaIA() {
     loader.style.display = 'block';
     resultado.style.display = 'none';
 
-    // Simulando delay de pesquisa na web
-    setTimeout(() => {
+    try {
+        const prompt = `Atue como um analista de prospecção comercial B2B. Analise a empresa "${termo}". 
+        Forneça um JSON puro (sem markdown) com os campos: 
+        "resumo" (foco no que vendem), 
+        "segmento" (setor e porte), 
+        "noticias" (array com 3 ganchos comerciais ou notícias recentes).
+        Idioma: Português.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data = await response.json();
+        const textoResponse = data.candidates[0].content.parts[0].text;
+        const cleanJson = textoResponse.replace(/```json/g, "").replace(/```/g, "").trim();
+        const obj = JSON.parse(cleanJson);
+
+        document.getElementById('res_empresa').innerText = termo.toUpperCase();
+        document.getElementById('res_descricao').innerText = obj.resumo;
+        document.getElementById('res_segmento').innerText = obj.segmento;
+        document.getElementById('res_noticias').innerHTML = obj.noticias.map(n => `<li>${n}</li>`).join('');
+
         loader.style.display = 'none';
         resultado.style.display = 'block';
-        
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Empresa líder no setor de logística e tecnologia, focada em soluções de transporte sustentável e automação de armazéns.";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
+    } catch (e) {
+        console.error(e);
+        alert("Erro na consulta da IA. Verifique sua chave ou conexão.");
+        loader.style.display = 'none';
+    }
 }
 
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
