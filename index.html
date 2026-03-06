@@ -55,22 +55,24 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
-.col-lead h4 { background-color: var(--bg-lead); }
-.col-frio h4 { background-color: var(--bg-frio); }
-.col-proposta h4 { background-color: var(--bg-proposta); }
-.col-assinatura h4 { background-color: var(--bg-assinatura); }
-.col-ganho h4 { background-color: var(--bg-ganho); }
-.col-perdido h4 { background-color: var(--bg-perdido); }
 
-.card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; }
+/* CORES DAS COLUNAS (Background suave para o corpo) */
+.col-lead { background-color: rgba(108, 117, 125, 0.1); } .col-lead h4 { background-color: var(--bg-lead); }
+.col-frio { background-color: rgba(23, 162, 184, 0.1); } .col-frio h4 { background-color: var(--bg-frio); }
+.col-proposta { background-color: rgba(243, 156, 18, 0.1); } .col-proposta h4 { background-color: var(--bg-proposta); }
+.col-assinatura { background-color: rgba(142, 68, 173, 0.1); } .col-assinatura h4 { background-color: var(--bg-assinatura); }
+.col-ganho { background-color: rgba(39, 174, 96, 0.1); } .col-ganho h4 { background-color: var(--bg-ganho); }
+.col-perdido { background-color: rgba(192, 57, 43, 0.1); } .col-perdido h4 { background-color: var(--bg-perdido); }
+
+.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .form-row { display: flex; gap: 15px; }
 </style>
 </head>
 
 <body>
-
 <header>
     <img src="Pipeline.png" class="logo">
     <div class="header-right">
@@ -84,7 +86,6 @@ header{ background:white; padding:15px 30px; display:flex; align-items:center; j
     <div class="filters">
         <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
         <datalist id="listaClientes"></datalist>
-        
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
         <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
         <select id="filtroStatus" onchange="renderizar()">
@@ -188,14 +189,8 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; let charts={};
 
-function abrirModal(id){ 
-    const m = document.getElementById(id);
-    if(m) m.style.display = 'block'; 
-}
-function fecharModal(id){ 
-    const m = document.getElementById(id);
-    if(m) m.style.display = 'none'; 
-}
+function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
+function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -286,12 +281,9 @@ async function carregarAuxiliares(){
 async function carregarDados(){ 
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
     base = data || []; 
-    
-    // ATUALIZA O AUTOCOMPLETE DE CLIENTES
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
-
     renderizar(); 
 }
 
@@ -335,13 +327,21 @@ function renderizar(){
     });
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead"},{n:"AINDA FRIO", cl:"col-frio"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta"},{n:"EM ASSINATURA", cl:"col-assinatura"},{n:"GANHO", cl:"col-ganho"},{n:"PERDIDO", cl:"col-perdido"}];
+    const colunas = [
+        {n:"LEAD", cl:"col-lead", border:"#6c757d"},
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},
+        {n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},
+        {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:100px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card';
+            card.style.borderLeftColor = s.border;
             card.onclick = () => editarOportunidade(i.id);
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
