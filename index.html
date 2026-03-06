@@ -1,436 +1,841 @@
 <!DOCTYPE html>
+
 <html lang="pt-br">
+
 <head>
+
 <meta charset="UTF-8">
+
 <title>PIPELINE COMERCIAL - VENDEMMIA</title>
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
+
 <style>
+
 :root{
+
 --grafite:#414042;
+
 --lilas:#422c76;
+
 --offwhite:#faf9f5;
+
 --bg-lead: #6c757d;
+
 --bg-frio: #17a2b8;
+
 --bg-proposta: #f39c12;
+
 --bg-assinatura: #8e44ad;
+
 --bg-ganho: #27ae60;
+
 --bg-perdido: #c0392b;
+
 --ia-gold: #d4af37;
+
 }
+
+
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
+
+
 header{ background:white; padding:15px 30px; display:flex; align-items:center; justify-content:space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
 .logo { height: 50px; width: auto; }
+
 .header-right{ display:flex; gap:10px; }
+
 .btn-header { border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.2s; z-index: 10; }
+
 .btn-novo-op { background-color: var(--lilas); color: white; }
+
 .btn-ia { background-color: var(--ia-gold); color: white; display: flex; align-items: center; gap: 5px; }
+
 .btn-ia:hover { background-color: #b8962d; }
+
 .btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ced4da; }
+
 .btn-danger { background-color: #c0392b; color: white; display: none; }
 
+
+
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
+
 .filters{ display:flex; gap:12px; margin-bottom:20px; align-items: center; flex-wrap: wrap; }
+
 .input-search, select { padding:10px; border-radius:6px; border:1px solid #ccc; font-size:13px; background: white; height: 40px; box-sizing: border-box; }
+
 .input-search { min-width: 300px; border: 2px solid var(--lilas); }
 
+
+
 .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-bottom:30px; }
+
 .kpi{ background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+
 .kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
+
 .kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
+
+
 .charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
+
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
+
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
+
+
 /* MODAL AJUSTADO: CENTRALIZADO E COM SCROLL INTERNO */
+
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
+
 .modal-content { 
+
     background: white; 
+
     margin: 2vh auto; 
+
     padding: 30px; 
+
     border-radius: 12px; 
-    width: 600px; 
+
+    width: 500px; 
+
     box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+
     position: relative; 
+
     max-height: 92vh; 
+
     overflow-y: auto; 
+
 }
+
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
+
+
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
+
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+
 #ia_loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; animation: pulse 1.5s infinite; }
+
 .ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
+
+
 
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+
+
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
+
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+
 .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
+
+
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
+
 .column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s; }
+
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
+
+
 .col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
+
 .col-frio { background-color: #e1f5f7; } .col-frio h4 { background-color: var(--bg-frio); }
+
 .col-proposta { background-color: #fef5e7; } .col-proposta h4 { background-color: var(--bg-proposta); }
+
 .col-assinatura { background-color: #f4ecf7; } .col-assinatura h4 { background-color: var(--bg-assinatura); }
+
 .col-ganho { background-color: #e8f5e9; } .col-ganho h4 { background-color: var(--bg-ganho); }
+
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
+
+
 .card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+
 .card:active { cursor: grabbing; }
+
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+
 .form-row { display: flex; gap: 15px; }
 
+
+
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
+
 </style>
+
 </head>
+
+
 
 <body>
 
+
+
 <header>
+
     <img src="Pipeline.png" class="logo">
+
     <div class="header-right">
+
         <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')">✨ IA PROSPECT</button>
+
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+
         <button type="button" class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+
         <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()">+ Nova Oportunidade</button>
+
     </div>
+
 </header>
 
+
+
 <div class="container">
+
     <div class="filters">
+
         <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+
         <datalist id="listaClientes"></datalist>
+
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
+
         <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+
         <select id="filtroStatus" onchange="renderizar()">
+
             <option value="">Status</option>
+
             <option value="LEAD">LEAD</option>
+
             <option value="AINDA FRIO">AINDA FRIO</option>
+
             <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+
             <option value="EM ASSINATURA">EM ASSINATURA</option>
+
             <option value="GANHO">GANHO</option>
+
             <option value="PERDIDO">PERDIDO</option>
+
         </select>
+
     </div>
+
+
 
     <div class="kpis">
+
         <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+
         <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+
         <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+
         <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+
         <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+
     </div>
+
+
 
     <div class="charts-grid">
+
         <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+
         <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+
     </div>
 
+
+
     <div class="kanban" id="kanban"></div>
+
 </div>
 
+
+
 <div id="modalIA" class="modal">
-    <div class="modal-content">
+
+    <div class="modal-content" style="width: 600px;">
+
         <h3>✨ IA Prospect - Vendemmia</h3>
+
         <p style="font-size: 12px; color: #666; margin-top: -10px;">Busque dados estratégicos sobre novas empresas.</p>
+
         
+
         <div class="form-group">
+
             <label>Empresa ou Site</label>
+
             <div style="display:flex; gap:10px;">
+
                 <input type="text" id="ia_termo" placeholder="Ex: Mercado Livre ou www.mercadolivre.com.br" style="flex:1;">
+
                 <button type="button" class="btn-header btn-ia" onclick="buscarDadosIA()">PESQUISAR</button>
+
             </div>
+
         </div>
+
+
 
         <div id="ia_loading">🔍 A IA está pesquisando fontes em tempo real...</div>
 
+
+
         <div id="ia_resultado" class="ia-result-box">
+
             <div style="display:flex; justify-content:space-between; align-items:center;">
+
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
+
                 <span class="ia-badge">Insights Gemini IA</span>
+
             </div>
+
             
+
             <div class="ia-section-title">SOBRE A EMPRESA</div>
+
             <p id="res_descricao" style="font-size: 13px; line-height: 1.4; white-space: pre-wrap; margin: 5px 0;"></p>
 
+
+
             <div class="ia-section-title">MERCADO E PORTE</div>
+
             <p id="res_segmento" style="font-size: 13px; margin: 5px 0;"></p>
 
+
+
             <div class="ia-section-title">GANCHOS PARA O VENDEDOR</div>
+
             <div id="res_noticias" style="font-size: 13px; margin-top: 5px; line-height: 1.5;"></div>
+
         </div>
+
+
 
         <div class="modal-footer">
+
             <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalIA')">Fechar</button>
+
         </div>
+
     </div>
+
 </div>
+
+
 
 <div id="modalVendedor" class="modal">
+
     <div class="modal-content">
+
         <h3>Novo Vendedor</h3>
+
         <form id="formVendedor">
+
             <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+
             <div class="modal-footer">
+
                 <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalVendedor')">Cancelar</button>
+
                 <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
+
+
 
 <div id="modalArea" class="modal">
+
     <div class="modal-content">
+
         <h3>Nova Área</h3>
+
         <form id="formArea">
+
             <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
+
             <div class="modal-footer">
+
                 <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalArea')">Cancelar</button>
+
                 <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
+
+
 
 <div id="modalOportunidade" class="modal">
+
     <div class="modal-content" style="width: 600px;">
+
         <h3 id="modalTitulo">Nova Oportunidade</h3>
+
         <form id="formOportunidade">
+
             <input type="hidden" id="op_id">
+
             <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+
             <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+
             <div class="form-row">
+
                 <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
+
                 <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
+
             </div>
+
             <div class="form-row">
+
                 <div class="form-group" style="flex:1"><label>Data Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+
                 <div class="form-group" style="flex:1"><label>Previsão</label><input type="date" id="op_previsao_fechamento"></div>
+
             </div>
+
             <div class="form-row">
+
                 <div class="form-group" style="flex:1"><label>Valor Estimado Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+
                 <div class="form-group" style="flex:1"><label>Valor Mensal (MRR)</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+
             </div>
+
             <div class="form-group">
+
                 <label>Status</label>
+
                 <select id="op_status" required>
+
                     <option value="LEAD">LEAD</option>
+
                     <option value="AINDA FRIO">AINDA FRIO</option>
+
                     <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
+
                     <option value="EM ASSINATURA">EM ASSINATURA</option>
+
                     <option value="GANHO">GANHO</option>
+
                     <option value="PERDIDO">PERDIDO</option>
+
                 </select>
+
             </div>
+
             <div class="modal-footer">
+
                 <button type="button" id="btnExcluir" class="btn-header btn-danger" onclick="deletarOportunidade()">Excluir</button>
+
                 <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+
                 <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
+
+
 <script>
+
 Chart.register(ChartDataLabels);
+
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
+
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
-const GEMINI_API_KEY = "AIzaSyDA-vOMFAKYSrcSobfSoyf0UP0xq9WjyRI"; 
+
+const GEMINI_API_KEY = "AIzaSyDA-vOMFAKYSrcSobfSoyf0UP0xq9WjyRI"; // SUA CHAVE INSERIDA COM SUCESSO
+
+
 
 const { createClient } = supabase;
+
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
 
 let base=[]; let charts={};
 
+
+
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
+
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-// FUNÇÃO DE BUSCA IA AJUSTADA PARA EVITAR ERRO DE 'UNDEFINED'
+
+
+// FUNÇÃO DE BUSCA IA REAL
+
 async function buscarDadosIA() {
+
     const termo = document.getElementById('ia_termo').value;
+
     if(!termo) return alert("Digite o nome da empresa!");
 
+
+
     const loader = document.getElementById('ia_loading');
+
     const resBox = document.getElementById('ia_resultado');
+
     loader.style.display = 'block';
+
     resBox.style.display = 'none';
 
+
+
     try {
+
         const prompt = `Atue como um especialista em inteligência de mercado. Analise a empresa "${termo}". 
-        Retorne APENAS um JSON puro (sem markdown e sem explicações) com estas chaves: 
+
+        Retorne APENAS um JSON puro (sem markdown) com estas chaves: 
+
         "resumo": (breve descrição do que fazem), 
+
         "mercado": (porte, setor e onde atuam), 
+
         "insights": (3 ganchos comerciais de abordagem baseados em fatos recentes). 
+
         Idioma: Português Brasileiro.`;
 
+
+
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+
             method: 'POST',
+
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                contents: [{ parts: [{ text: prompt }] }],
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ]
-            })
+
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+
         });
+
+
 
         const data = await response.json();
-        
-        // Proteção contra erro de 'undefined' se a IA não responder adequadamente
-        if (!data.candidates || data.candidates.length === 0) {
-            throw new Error("A IA não conseguiu gerar uma resposta para este termo. Tente outro nome.");
-        }
 
         const textoRaw = data.candidates[0].content.parts[0].text;
-        const cleanJson = textoRaw.replace(/```json/gi, "").replace(/```/gi, "").trim();
+
+        const cleanJson = textoRaw.replace(/```json/g, "").replace(/```/g, "").trim();
+
         const obj = JSON.parse(cleanJson);
 
+
+
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
+
         document.getElementById('res_descricao').innerText = obj.resumo;
+
         document.getElementById('res_segmento').innerText = obj.mercado;
+
         document.getElementById('res_noticias').innerHTML = obj.insights.map(i => `• ${i}<br>`).join('');
 
+
+
         loader.style.display = 'none';
+
         resBox.style.display = 'block';
+
     } catch (e) {
-        console.error(e);
-        alert("Erro na consulta: " + e.message);
+
+        alert("Erro na consulta. Verifique o nome da empresa ou tente novamente.");
+
         loader.style.display = 'none';
+
     }
+
 }
+
+
 
 // LOGICA SUPABASE E RENDERIZAÇÃO
+
 async function carregarAuxiliares(){
+
     const { data: v } = await supabaseClient.from('vendedores').select('nome');
+
     const { data: a } = await supabaseClient.from('areas').select('nome');
+
     const fill = (id, d, label) => { 
+
         const el = document.getElementById(id); 
+
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+
     };
+
     fill('op_vendedor', v, "Selecione..."); fill('filtroVendedor', v, "Vendedor");
+
     fill('op_area', a, "Selecione..."); fill('filtroArea', a, "Área");
+
 }
+
+
 
 async function carregarDados(){ 
+
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
+
     base = data || []; 
+
     const dl = document.getElementById('listaClientes');
+
     if(dl) dl.innerHTML = [...new Set(base.map(x=>x.cliente))].map(c => `<option value="${c}">`).join('');
+
     renderizar(); 
+
 }
+
+
 
 function calcularMRR() { 
+
     const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
+
     document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
+
 }
+
+
 
 function prepararNovo() {
+
     document.getElementById('formOportunidade').reset();
+
     document.getElementById('op_id').value = "";
+
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
+
     document.getElementById('btnExcluir').style.display = "none";
+
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
+
     abrirModal('modalOportunidade');
+
 }
+
+
 
 function editarOportunidade(id) {
+
     const item = base.find(x => x.id == id);
+
     if(!item) return;
+
     document.getElementById('op_id').value = item.id;
+
     document.getElementById('op_cliente').value = item.cliente;
+
     document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
+
     document.getElementById('op_vendedor').value = item.vendedor;
+
     document.getElementById('op_area').value = item.area;
+
     document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
+
     document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
+
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
+
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
+
     document.getElementById('op_status').value = item.status;
+
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
+
     document.getElementById('btnExcluir').style.display = "block";
+
     abrirModal('modalOportunidade');
+
 }
+
+
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
+
     e.preventDefault();
+
     const id = document.getElementById('op_id').value;
+
     const payload = {
+
         cliente: document.getElementById('op_cliente').value.toUpperCase(),
+
         breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
+
         vendedor: document.getElementById('op_vendedor').value,
+
         data_oportunidade: document.getElementById('op_data_oportunidade').value,
+
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
+
         status: document.getElementById('op_status').value,
+
         area: document.getElementById('op_area').value
+
     };
+
     if(id) await supabaseClient.from('oportunidades').update(payload).eq('id', id);
+
     else await supabaseClient.from('oportunidades').insert([payload]);
+
     fecharModal('modalOportunidade'); carregarDados();
+
 };
 
+
+
 async function deletarOportunidade() {
+
     const id = document.getElementById('op_id').value;
+
     if(id && confirm("Excluir?")) {
+
         await supabaseClient.from('oportunidades').delete().eq('id', id);
+
         fecharModal('modalOportunidade'); carregarDados();
+
     }
+
 }
+
+
 
 function renderizar(){
+
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
+
     const filtrados = base.filter(r => !fC || r.cliente.toLowerCase().includes(fC));
+
     
+
     // Atualização de KPIs e Gráficos
+
     let pipeTot = 0, recGan = 0;
+
     let statusCont = {};
+
     filtrados.forEach(r => {
+
         pipeTot += parseFloat(r.valor_estimado_ano) || 0;
+
         if(r.status === 'GANHO') recGan += parseFloat(r.valor_estimado_ano) || 0;
+
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+
     });
+
+
 
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
+
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
 
+
+
     if(charts.st) charts.st.destroy();
+
     charts.st = new Chart(document.getElementById('chartStatus'), {
+
         type: 'doughnut', 
+
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
+
         options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' } } }
+
     });
+
+
 
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
+
     const colunas = [{n:"LEAD", cl:"col-lead", b:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", b:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", b:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", b:"#8e44ad"},{n:"GANHO", cl:"col-ganho", b:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", b:"#c0392b"}];
+
     
+
     colunas.forEach(s => {
+
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
+
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
+
         const b = col.querySelector('.column-body');
+
         filtrados.filter(f => f.status === s.n).forEach(i => {
+
             const card = document.createElement('div'); card.className = 'card'; card.style.borderLeftColor = s.b;
+
             card.onclick = () => editarOportunidade(i.id);
+
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
+
             b.appendChild(card);
+
         });
+
         kan.appendChild(col);
+
     });
+
 }
 
+
+
 carregarAuxiliares(); carregarDados();
+
 </script>
+
 </body>
+
 </html>
