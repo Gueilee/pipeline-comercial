@@ -43,21 +43,25 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
-/* MODAL CORRIGIDO */
-.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
-.modal-content { background: white; margin: 2% auto; padding: 25px; border-radius: 12px; width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-.modal-content h3 { margin-top: 0; color: var(--lilas); border-bottom: 1px solid #eee; padding-bottom: 10px; }
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; color: #666; }
-.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
-.row-flex { display: flex; gap: 15px; margin-bottom: 15px; }
-.row-flex .form-group { flex: 1; margin-bottom: 0; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+/* MODAL REESTRUTURADO */
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: auto; }
+.modal-content { background: white; margin: 30px auto; padding: 30px; border-radius: 12px; width: 600px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); }
+.modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
+
+.form-row { display: flex; gap: 15px; margin-bottom: 15px; }
+.form-group { flex: 1; display: flex; flex-direction: column; }
+.form-group.full { width: 100%; margin-bottom: 15px; }
+
+.form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+.form-group input:focus { border-color: var(--lilas); outline: none; }
+
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 /* KANBAN */
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
-.column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
+.column{ background:#eee; padding:0; border-radius:10px; min-height:500px; overflow: hidden; }
+.column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; }
 .col-lead h4 { background-color: var(--bg-lead); }
 .col-frio h4 { background-color: var(--bg-frio); }
 .col-proposta h4 { background-color: var(--bg-proposta); }
@@ -65,9 +69,7 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 .col-ganho h4 { background-color: var(--bg-ganho); }
 .col-perdido h4 { background-color: var(--bg-perdido); }
 .column-body { padding: 10px; }
-.card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
-.card-ganho { border-left-color: var(--bg-ganho); }
-.card-perdido { border-left-color: var(--bg-perdido); }
+.card{ background:white; padding:12px; margin-bottom:12px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); }
 </style>
 </head>
 
@@ -86,15 +88,7 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     <div class="filters">
         <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedores</option></select>
         <select id="filtroArea" onchange="renderizar()"><option value="">Áreas</option></select>
-        <select id="filtroStatus" onchange="renderizar()">
-            <option value="">Status</option>
-            <option value="LEAD">LEAD</option>
-            <option value="AINDA FRIO">AINDA FRIO</option>
-            <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-            <option value="EM ASSINATURA">EM ASSINATURA</option>
-            <option value="GANHO">GANHO</option>
-            <option value="PERDIDO">PERDIDO</option>
-        </select>
+        <select id="filtroStatus" onchange="renderizar()"><option value="">Status</option></select>
     </div>
 
     <div class="kpis">
@@ -106,14 +100,8 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     </div>
 
     <div class="charts-grid">
-        <div class="chart-card">
-            <h4>Status das Oportunidades</h4>
-            <div style="flex:1; position:relative;"><canvas id="chartStatus"></canvas></div>
-        </div>
-        <div class="chart-card">
-            <h4>Ranking por Vendedor</h4>
-            <div style="flex:1; position:relative;"><canvas id="chartVendedor"></canvas></div>
-        </div>
+        <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+        <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
     </div>
 
     <div class="kanban" id="kanban"></div>
@@ -123,52 +111,52 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
     <div class="modal-content">
         <h3>Nova Oportunidade</h3>
         <form id="formOportunidade">
-            <div class="form-group">
+            <div class="form-group full">
                 <label>Cliente</label>
-                <input type="text" id="cliente" placeholder="Nome da empresa/cliente" required>
+                <input type="text" id="op_cliente" required placeholder="Nome da Empresa">
             </div>
-            
-            <div class="form-group">
+
+            <div class="form-group full">
                 <label>Breve Descrição</label>
-                <textarea id="descricao" rows="2" placeholder="Resumo da negociação..."></textarea>
+                <textarea id="op_descricao" rows="2" placeholder="Detalhes da solução ou serviço..."></textarea>
             </div>
-            
-            <div class="row-flex">
+
+            <div class="form-row">
                 <div class="form-group">
                     <label>Vendedor</label>
-                    <select id="vendedor" required></select>
+                    <select id="op_vendedor" required></select>
                 </div>
                 <div class="form-group">
                     <label>Área</label>
-                    <select id="area_modal" required></select>
+                    <select id="op_area" required></select>
                 </div>
             </div>
 
-            <div class="row-flex">
+            <div class="form-row">
                 <div class="form-group">
                     <label>Data da Oportunidade</label>
-                    <input type="date" id="data_op" required>
+                    <input type="date" id="op_data_criacao" required>
                 </div>
                 <div class="form-group">
                     <label>Previsão de Fechamento</label>
-                    <input type="date" id="data_prev">
+                    <input type="date" id="op_data_previsao">
                 </div>
             </div>
 
-            <div class="row-flex">
+            <div class="form-row">
                 <div class="form-group">
                     <label>Valor Estimado no Ano</label>
-                    <input type="number" id="vAno" oninput="calcularMRR()" placeholder="Ex: 120000" required>
+                    <input type="number" id="op_valor_ano" oninput="calcularMRR()" required placeholder="0.00">
                 </div>
                 <div class="form-group">
-                    <label>Valor Mensal (MRR)</label>
-                    <input type="number" id="vMes" readonly style="background:#f9f9f9;" placeholder="Automático">
+                    <label>Valor Mensal Recorrente</label>
+                    <input type="number" id="op_valor_mes" readonly style="background:#f4f4f4;">
                 </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group full">
                 <label>Status</label>
-                <select id="status_modal" required>
+                <select id="op_status" required>
                     <option value="LEAD">LEAD</option>
                     <option value="AINDA FRIO">AINDA FRIO</option>
                     <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
@@ -180,18 +168,17 @@ select { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:12px; 
 
             <div class="modal-footer">
                 <button type="button" class="btn-header btn-aux" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
+                <button type="submit" class="btn-header btn-novo-op">Criar Oportunidade</button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Cadastrar Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nomeVendedor" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalVendedor')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
-<div id="modalArea" class="modal"><div class="modal-content"><h3>Cadastrar Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div><div class="modal-footer"><button type="button" onclick="fecharModal('modalArea')">Cancelar</button><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalVendedor" class="modal"><div class="modal-content"><h3>Vendedor</h3><form id="formVendedor"><div class="form-group"><label>Nome</label><input type="text" id="nv_nome" required></div><div class="modal-footer"><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
+<div id="modalArea" class="modal"><div class="modal-content"><h3>Área</h3><form id="formArea"><div class="form-group"><label>Nome da Área</label><input type="text" id="na_nome" required></div><div class="modal-footer"><button type="submit" class="btn-novo-op">Salvar</button></div></form></div></div>
 
 <script>
 Chart.register(ChartDataLabels);
-
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 const { createClient } = supabase;
@@ -201,59 +188,43 @@ let base=[]; let charts={};
 
 function abrirModal(id){ 
     document.getElementById(id).style.display='block'; 
-    if(id === 'modalOportunidade') {
-        document.getElementById('data_op').valueAsDate = new Date();
-    }
+    if(id==='modalOportunidade') document.getElementById('op_data_criacao').valueAsDate = new Date();
 }
 function fecharModal(id){ document.getElementById(id).style.display='none'; }
 function calcularMRR() { 
-    const v = parseFloat(document.getElementById('vAno').value) || 0; 
-    document.getElementById('vMes').value = (v / 12).toFixed(2); 
+    const v = parseFloat(document.getElementById('op_valor_ano').value) || 0; 
+    document.getElementById('op_valor_mes').value = (v / 12).toFixed(2); 
 }
 
-// SALVAR OPORTUNIDADE
+// SALVAR OPORTUNIDADE (9 CAMPOS)
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const payload = {
-        cliente: document.getElementById('cliente').value,
-        descricao: document.getElementById('descricao').value,
-        vendedor: document.getElementById('vendedor').value,
-        area: document.getElementById('area_modal').value,
-        data_oportunidade: document.getElementById('data_op').value,
-        previsao_fechamento: document.getElementById('data_prev').value,
-        valor_estimado_ano: parseFloat(document.getElementById('vAno').value),
-        mrr_total: parseFloat(document.getElementById('vMes').value),
-        status: document.getElementById('status_modal').value
+        cliente: document.getElementById('op_cliente').value,
+        descricao: document.getElementById('op_descricao').value,
+        vendedor: document.getElementById('op_vendedor').value,
+        area: document.getElementById('op_area').value,
+        data_oportunidade: document.getElementById('op_data_criacao').value,
+        previsao_fechamento: document.getElementById('op_data_previsao').value,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_ano').value),
+        mrr_total: parseFloat(document.getElementById('op_valor_mes').value),
+        status: document.getElementById('op_status').value
     };
-    
-    const { error } = await supabaseClient.from('oportunidades').insert([payload]);
-    if(error) {
-        alert("Erro ao salvar: " + error.message);
-    } else {
-        fecharModal('modalOportunidade');
-        document.getElementById('formOportunidade').reset();
-        carregarDados();
-    }
+    await supabaseClient.from('oportunidades').insert([payload]);
+    fecharModal('modalOportunidade');
+    document.getElementById('formOportunidade').reset();
+    carregarDados();
 };
 
-// AUXILIARES (VENDEDOR/AREA)
-document.getElementById('formVendedor').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('vendedores').insert([{ nome: document.getElementById('nomeVendedor').value, ativo: true }]); fecharModal('modalVendedor'); carregarAuxiliares(); };
-document.getElementById('formArea').onsubmit = async (e) => { e.preventDefault(); await supabaseClient.from('areas').insert([{ nome: document.getElementById('nomeArea').value, ativo: true }]); fecharModal('modalArea'); carregarAuxiliares(); };
-
 async function carregarAuxiliares(){
-    const { data: v } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
-    const { data: a } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
-    
-    const fill = (elId, d, label) => { 
-        const el = document.getElementById(elId);
-        if(!el) return;
-        el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    const { data: v } = await supabaseClient.from('vendedores').select('nome');
+    const { data: a } = await supabaseClient.from('areas').select('nome');
+    const fill = (id, d) => {
+        const el = document.getElementById(id);
+        if(el) el.innerHTML = '<option value="">Selecione...</option>' + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join('');
     };
-    
-    fill('vendedor', v, 'Selecione o Vendedor');
-    fill('filtroVendedor', v, 'Filtrar Vendedor');
-    fill('area_modal', a, 'Selecione a Área');
-    fill('filtroArea', a, 'Filtrar Área');
+    fill('op_vendedor', v); fill('filtroVendedor', v);
+    fill('op_area', a); fill('filtroArea', a);
 }
 
 async function carregarDados(){ 
@@ -265,61 +236,54 @@ async function carregarDados(){
 function renderizar(){
     const fV = document.getElementById('filtroVendedor').value;
     const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    const filtrados = base.filter(r => (!fV || r.vendedor === fV) && (!fA || r.area === fA));
 
-    let mrrTotal = 0, pipeTot = 0, recGan = 0;
-    let nGanhos = 0, nPerdidos = 0;
+    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
 
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; 
-        const vM = parseFloat(r.mrr_total) || (vA/12);
-        pipeTot += vA; mrrTotal += vM;
-        const s = (r.status || "").toUpperCase();
-        if(s === 'GANHO') { recGan += vA; nGanhos++; } 
-        else if(s === 'PERDIDO') { nPerdidos++; }
-        statusCont[s] = (statusCont[s] || 0) + 1;
+        const vA = parseFloat(r.valor_estimado_ano) || 0;
+        pipeTot += vA; mrrTotal += (vA/12);
+        if(r.status === 'GANHO') { recGan += vA; nG++; }
+        if(r.status === 'PERDIDO') nP++;
+        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
 
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('conversao').innerText = (nGanhos + nPerdidos > 0 ? (nGanhos / (nGanhos + nPerdidos)) * 100 : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nGanhos > 0 ? (recGan / nGanhos) : 0).toLocaleString('pt-BR', {maximumFractionDigits: 0});
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    // GRÁFICOS (PRESERVADOS)
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut',
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, usePointStyle: true } } } }
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom' } } }
     });
 
     if(charts.vd) charts.vd.destroy();
-    const sortedVendors = Object.entries(vendVal).sort((a,b) => b[1]-a[1]);
+    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
         type: 'bar',
-        data: { labels: sortedVendors.map(x=>x[0]), datasets: [{ data: sortedVendors.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 4, barThickness: 25 }] },
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 60 } }, scales: { x: { display: false }, y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
+        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: '#422c76' }] },
+        options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'left', formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
     });
 
-    // KANBAN
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const stats = [{n:"LEAD",c:"col-lead"},{n:"AINDA FRIO",c:"col-frio"},{n:"PROPOSTA ENVIADA - ACEITA",c:"col-proposta"},{n:"EM ASSINATURA",c:"col-assinatura"},{n:"GANHO",c:"col-ganho"},{n:"PERDIDO",c:"col-perdido"}];
-    stats.forEach(s => {
-        const col = document.createElement('div'); col.className = `column ${s.c}`; col.innerHTML = `<h4>${s.n}</h4><div class="column-body"></div>`;
+    ["LEAD","AINDA FRIO","PROPOSTA ENVIADA - ACEITA","EM ASSINATURA","GANHO","PERDIDO"].forEach(s => {
+        const col = document.createElement('div'); col.className = `column col-${s.toLowerCase().split(' ')[0]}`;
+        col.innerHTML = `<h4>${s}</h4><div class="column-body"></div>`;
         const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = `card`;
-            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br><b>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}</b>`;
+        filtrados.filter(f => f.status === s).forEach(i => {
+            const card = document.createElement('div'); card.className = 'card';
+            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
         kan.appendChild(col);
     });
 }
-
 carregarAuxiliares(); carregarDados();
 </script>
 </body>
