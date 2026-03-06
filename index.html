@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>PIPELINE COMERCIAL - COMPLETO</title>
+<title>PIPELINE COMERCIAL</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
@@ -28,18 +28,14 @@ color:var(--grafite);
 overflow-x:hidden;
 }
 
-/* Ajuste no Header para garantir visibilidade dos botões */
 header{
 background:white;
 color:var(--lilas);
-padding:15px 30px;
+padding:18px 30px;
 display:flex;
 align-items:center;
-justify-content:space-between; /* Garante espaço entre logo e botões */
-box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-position: sticky;
-top: 0;
-z-index: 100;
+justify-content:space-between;
+box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .header-left{
@@ -49,8 +45,7 @@ align-items:center;
 
 .header-right{
 display:flex;
-gap:12px;
-align-items:center;
+gap:10px;
 }
 
 .logo{
@@ -58,25 +53,20 @@ height:40px;
 width:auto;
 }
 
-/* Estilo dos Botões do Cabeçalho */
+/* Botões do Cabeçalho */
 .btn-header {
     border: none;
-    padding: 10px 16px;
+    padding: 10px 18px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
     font-size: 13px;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    transition: opacity 0.2s;
 }
 
 .btn-novo-op { background-color: var(--lilas); color: white; }
-.btn-vendedor { background-color: #e9ecef; color: var(--grafite); border: 1px solid #ced4da; }
-.btn-area { background-color: #e9ecef; color: var(--grafite); border: 1px solid #ced4da; }
-
-.btn-header:hover { opacity: 0.8; transform: translateY(-1px); }
+.btn-aux { background-color: #f0f0f0; color: var(--grafite); border: 1px solid #ccc; }
+.btn-header:hover { opacity: 0.9; }
 
 .container{
 padding:20px 30px;
@@ -115,22 +105,23 @@ box-shadow:0 3px 10px rgba(0,0,0,0.08);
 .kpi h3{ margin:0; color:var(--lilas); font-size:12px; }
 .kpi p{ font-size:16px; font-weight:bold; margin-top:6px; }
 
+/* Ajuste de Layout dos Gráficos */
 .charts{
 display:grid;
-grid-template-columns:1fr;
-gap:35px;
+grid-template-columns: 1fr 1fr; /* Dois gráficos lado a lado */
+gap:30px;
 margin-bottom:35px;
 }
 
-canvas{
-background:white;
-padding:12px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-height:400px !important;
-width:100% !important;
+.chart-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    height: 400px; /* Altura fixa para o container */
 }
 
+/* Kanban */
 .kanban{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -141,7 +132,6 @@ gap:15px;
 padding:10px;
 border-radius:10px;
 background:#eaebed;
-min-height: 200px;
 }
 
 .column h4{ text-align:center; margin-top:0; font-size:13px; border-bottom: 2px solid var(--lilas); padding-bottom: 5px; }
@@ -152,20 +142,19 @@ padding:10px;
 margin:8px 0;
 border-radius:8px;
 font-size:11px;
-box-shadow:0 2px 4px rgba(0,0,0,0.05);
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
 
-/* Modais Estrutura */
+/* Modais */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1001;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(2px);
+    background-color: rgba(0,0,0,0.5);
 }
 
 .modal-content {
@@ -175,18 +164,15 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
     border-radius: 12px;
     width: 450px;
     max-width: 90%;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
 }
 
-.modal-content h2 { color: var(--lilas); margin-top: 0; font-size: 20px; margin-bottom: 20px; }
-
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: bold; color: var(--grafite); }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 11px; margin-bottom: 4px; font-weight: bold; }
 .form-group input, .form-group select {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
+    border-radius: 4px;
     box-sizing: border-box;
 }
 
@@ -194,11 +180,11 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 25px;
+    margin-top: 20px;
 }
 
-.btn-cancelar { background: #f8f9fa; border: 1px solid #ddd; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-.btn-salvar { background: var(--verde-sucesso); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.btn-cancelar { background: #eee; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; }
+.btn-salvar { background: var(--verde-sucesso); color: white; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 </style>
 </head>
 
@@ -206,12 +192,12 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
 
 <header>
     <div class="header-left">
-        <img src="Pipeline.png" class="logo" alt="Logo">
+        <img src="Pipeline.png" class="logo">
     </div>
     <div class="header-right">
-        <button type="button" class="btn-header btn-vendedor" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
-        <button type="button" class="btn-header btn-area" onclick="abrirModal('modalArea')">+ Área</button>
-        <button type="button" class="btn-header btn-novo-op" onclick="abrirModal('modalOportunidade')">+ Nova Oportunidade</button>
+        <button class="btn-header btn-aux" onclick="abrirModal('modalVendedor')">+ Vendedor</button>
+        <button class="btn-header btn-aux" onclick="abrirModal('modalArea')">+ Área</button>
+        <button class="btn-header btn-novo-op" onclick="abrirModal('modalOportunidade')">+ Nova Oportunidade</button>
     </div>
 </header>
 
@@ -231,23 +217,27 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
     </div>
 
     <div class="charts">
-        <canvas id="chartStatus"></canvas>
-        <canvas id="chartVendedor"></canvas>
+        <div class="chart-container">
+            <canvas id="chartStatus"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="chartVendedor"></canvas>
+        </div>
     </div>
 
-    <h2 style="font-size:16px; margin-top: 40px;">KANBAN POR STATUS</h2>
+    <h2 style="font-size:15px; margin-top: 20px;">KANBAN POR STATUS</h2>
     <div class="kanban" id="kanban"></div>
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content" style="width: 500px;">
+    <div class="modal-content" style="width: 480px;">
         <h2>Nova Oportunidade</h2>
         <form id="formOportunidade">
-            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required placeholder="Nome do Cliente"></div>
-            <div class="form-group"><label>Breve Descrição</label><input type="text" id="breve_descricao" placeholder="Resumo do projeto"></div>
+            <div class="form-group"><label>Cliente</label><input type="text" id="cliente" required></div>
+            <div class="form-group"><label>Breve Descrição</label><input type="text" id="breve_descricao"></div>
             <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;"><label>Vendedor</label><select id="vendedor" required><option value="">Carregando...</option></select></div>
-                <div class="form-group" style="flex: 1;"><label>Área</label><select id="area" required><option value="">Carregando...</option></select></div>
+                <div class="form-group" style="flex: 1;"><label>Vendedor</label><select id="vendedor" required></select></div>
+                <div class="form-group" style="flex: 1;"><label>Área</label><select id="area" required></select></div>
             </div>
             <div style="display: flex; gap: 10px;">
                 <div class="form-group" style="flex: 1;"><label>Data Oportunidade</label><input type="date" id="data_oportunidade" required></div>
@@ -278,15 +268,12 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
 
 <div id="modalVendedor" class="modal">
     <div class="modal-content">
-        <h2>Cadastrar Vendedor</h2>
+        <h2>Novo Vendedor</h2>
         <form id="formVendedor">
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" id="nomeVendedor" required placeholder="Nome do Vendedor">
-            </div>
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="nomeVendedor" required></div>
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" onclick="fecharModal('modalVendedor')">Cancelar</button>
-                <button type="submit" class="btn-salvar">Confirmar Cadastro</button>
+                <button type="submit" class="btn-salvar">Cadastrar</button>
             </div>
         </form>
     </div>
@@ -294,15 +281,12 @@ box-shadow:0 2px 4px rgba(0,0,0,0.05);
 
 <div id="modalArea" class="modal">
     <div class="modal-content">
-        <h2>Cadastrar Nova Área</h2>
+        <h2>Nova Área</h2>
         <form id="formArea">
-            <div class="form-group">
-                <label>Nome da Área</label>
-                <input type="text" id="nomeArea" required placeholder="Ex: Comercial, TI, etc.">
-            </div>
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="nomeArea" required></div>
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" onclick="fecharModal('modalArea')">Cancelar</button>
-                <button type="submit" class="btn-salvar">Confirmar Cadastro</button>
+                <button type="submit" class="btn-salvar">Cadastrar</button>
             </div>
         </form>
     </div>
@@ -318,10 +302,9 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 let base=[];
 let charts={};
 
-// Inicialização
 async function carregarDados(){
     const { data, error } = await supabaseClient.from('oportunidades').select('*');
-    if(error){ console.error("Erro Supabase:", error); return; }
+    if(error){ console.error("Erro:", error); return; }
 
     base = data.map(item => ({
         "id": item.id,
@@ -337,69 +320,39 @@ async function carregarDados(){
     }));
 
     carregarListasAuxiliares();
-    popularFiltrosIniciais();
-    atualizarInterface();
+    popularFiltros();
+    aplicarFiltros();
 }
 
-// Carrega Vendedores e Áreas das Tabelas do Supabase
 async function carregarListasAuxiliares() {
-    const { data: vds } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true).order('nome');
-    const { data: ars } = await supabaseClient.from('areas').select('nome').eq('ativo', true).order('nome');
-
-    const selV = document.getElementById('vendedor');
-    const selA = document.getElementById('area');
-
-    if(selV) {
-        selV.innerHTML = '<option value="">Selecione um Vendedor</option>';
-        if(vds) vds.forEach(v => selV.innerHTML += `<option value="${v.nome}">${v.nome}</option>`);
-    }
-    if(selA) {
-        selA.innerHTML = '<option value="">Selecione uma Área</option>';
-        if(ars) ars.forEach(a => selA.innerHTML += `<option value="${a.nome}">${a.nome}</option>`);
-    }
+    const { data: vds } = await supabaseClient.from('vendedores').select('nome').eq('ativo', true);
+    const { data: ars } = await supabaseClient.from('areas').select('nome').eq('ativo', true);
+    const sV = document.getElementById('vendedor');
+    const sA = document.getElementById('area');
+    sV.innerHTML = '<option value="">Selecione...</option>';
+    sA.innerHTML = '<option value="">Selecione...</option>';
+    if(vds) vds.forEach(v => sV.innerHTML += `<option value="${v.nome}">${v.nome}</option>`);
+    if(ars) ars.forEach(a => sA.innerHTML += `<option value="${a.nome}">${a.nome}</option>`);
 }
 
-// Controle de Modais
-function abrirModal(id) { 
-    document.getElementById(id).style.display = 'block'; 
-}
-function fecharModal(id) { 
-    document.getElementById(id).style.display = 'none'; 
-}
+function abrirModal(id) { document.getElementById(id).style.display = 'block'; }
+function fecharModal(id) { document.getElementById(id).style.display = 'none'; }
 
-window.onclick = function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-};
-
-// Cadastro de Vendedor
+// Cadastro Vendedor/Area/Oportunidade
 document.getElementById('formVendedor').onsubmit = async (e) => {
     e.preventDefault();
     const nome = document.getElementById('nomeVendedor').value;
     const { error } = await supabaseClient.from('vendedores').insert([{ nome, ativo: true }]);
-    if (error) alert("Erro: " + error.message);
-    else {
-        fecharModal('modalVendedor');
-        document.getElementById('formVendedor').reset();
-        await carregarListasAuxiliares();
-    }
+    if (error) alert(error.message); else { fecharModal('modalVendedor'); carregarListasAuxiliares(); }
 };
 
-// Cadastro de Área
 document.getElementById('formArea').onsubmit = async (e) => {
     e.preventDefault();
     const nome = document.getElementById('nomeArea').value;
     const { error } = await supabaseClient.from('areas').insert([{ nome, ativo: true }]);
-    if (error) alert("Erro: " + error.message);
-    else {
-        fecharModal('modalArea');
-        document.getElementById('formArea').reset();
-        await carregarListasAuxiliares();
-    }
+    if (error) alert(error.message); else { fecharModal('modalArea'); carregarListasAuxiliares(); }
 };
 
-// Cadastro de Oportunidade
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const novaOp = {
@@ -413,109 +366,120 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         status: document.getElementById('status').value,
         area: document.getElementById('area').value
     };
-
     const { error } = await supabaseClient.from('oportunidades').insert([novaOp]);
-    if (error) alert("Erro ao salvar: " + error.message);
-    else {
-        fecharModal('modalOportunidade');
-        document.getElementById('formOportunidade').reset();
-        await carregarDados();
-    }
+    if (error) alert(error.message); else { fecharModal('modalOportunidade'); carregarDados(); }
 };
 
-// Funções de Interface e Lógica
-function formatarMoeda(v) {
-    if(!v) return "R$ 0";
-    return "R$ " + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+function formatarAbreviado(valor){
+    if(!valor) return "R$ 0";
+    return "R$ " + valor.toLocaleString('pt-BR');
 }
 
-function popularFiltrosIniciais(){
-    const vends = [...new Set(base.map(x=>x.Vendedor))].filter(Boolean);
-    const areas = [...new Set(base.map(x=>x.Área))].filter(Boolean);
-    const stats = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
-
-    filtroVendedor.innerHTML = '<option value="">Todos Vendedores</option>' + vends.map(v=>`<option value="${v}">${v}</option>`).join('');
-    filtroArea.innerHTML = '<option value="">Todas Áreas</option>' + areas.map(a=>`<option value="${a}">${a}</option>`).join('');
-    filtroStatus.innerHTML = '<option value="">Todos Status</option>' + stats.map(s=>`<option value="${s}">${s}</option>`).join('');
-
-    [filtroVendedor, filtroArea, filtroStatus].forEach(f => f.onchange = atualizarInterface);
+function popularFiltros(){
+    const vs = [...new Set(base.map(x=>x.Vendedor))].filter(Boolean);
+    const as = [...new Set(base.map(x=>x.Área))].filter(Boolean);
+    const ss = [...new Set(base.map(x=>x.Status))].filter(Boolean);
+    filtroVendedor.innerHTML='<option value="">Todos Vendedores</option>';
+    filtroArea.innerHTML='<option value="">Todas Áreas</option>';
+    filtroStatus.innerHTML='<option value="">Todos Status</option>';
+    vs.forEach(v => filtroVendedor.innerHTML+=`<option value="${v}">${v}</option>`);
+    as.forEach(a => filtroArea.innerHTML+=`<option value="${a}">${a}</option>`);
+    ss.forEach(s => filtroStatus.innerHTML+=`<option value="${s}">${s}</option>`);
+    filtroVendedor.onchange=aplicarFiltros;
+    filtroArea.onchange=aplicarFiltros;
+    filtroStatus.onchange=aplicarFiltros;
 }
 
-function atualizarInterface(){
-    const filtrados = base.filter(r => 
-        (!filtroVendedor.value || r.Vendedor === filtroVendedor.value) &&
-        (!filtroArea.value || r.Área === filtroArea.value) &&
-        (!filtroStatus.value || r.Status === filtroStatus.value)
+function aplicarFiltros(){
+    const filtrado = base.filter(r=>
+        (!filtroVendedor.value||r.Vendedor==filtroVendedor.value) &&
+        (!filtroArea.value||r.Área==filtroArea.value) &&
+        (!filtroStatus.value||r.Status==filtroStatus.value)
     );
-
-    // Cálculos KPIs
-    let recGanha = 0, pipeTotal = 0, mrrTotal = 0, ganhos = 0, totalFechados = 0;
-    let statusConta = {}, vendValor = {};
-
-    filtrados.forEach(r => {
-        const vAno = parseFloat(r["Valor estimado no Ano"]) || 0;
-        pipeTotal += vAno;
-        mrrTotal += parseFloat(r["Valor Mensal Recorrente"]) || 0;
-        
-        if(r.Status === "GANHO") { recGanha += vAno; ganhos++; totalFechados++; }
-        if(r.Status === "PERDIDO") totalFechados++;
-
-        statusConta[r.Status] = (statusConta[r.Status] || 0) + 1;
-        vendValor[r.Vendedor] = (vendValor[r.Vendedor] || 0) + vAno;
-    });
-
-    document.getElementById("receitaGanha").innerText = formatarMoeda(recGanha);
-    document.getElementById("pipelineTotal").innerText = formatarMoeda(pipeTotal);
-    document.getElementById("mrrTotal").innerText = formatarMoeda(mrrTotal);
-    document.getElementById("conversao").innerText = totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(1)+"%" : "0%";
-    document.getElementById("ticket").innerText = formatarMoeda(ganhos > 0 ? recGanha/ganhos : 0);
-
-    renderizarGraficos(statusConta, vendValor);
-    renderizarKanban(filtrados);
+    calcular(filtrado);
 }
 
-function renderizarGraficos(st, vd){
+function calcular(dados){
+    let receita=0, pipeline=0, mrr=0, ganhos=0, totalFechados=0;
+    let statusCount={}, vendedorValor={};
+
+    dados.forEach(r=>{
+        let anual=parseFloat(r["Valor estimado no Ano"])||0;
+        pipeline += anual;
+        mrr += parseFloat(r["Valor Mensal Recorrente"])||0;
+        if(r.Status==="GANHO"){ receita+=anual; ganhos++; totalFechados++; }
+        if(r.Status==="PERDIDO"){ totalFechados++; }
+        statusCount[r.Status]=(statusCount[r.Status]||0)+1;
+        vendedorValor[r.Vendedor] = (vendedorValor[r.Vendedor]||0)+anual;
+    });
+
+    document.getElementById("receitaGanha").innerText=formatarAbreviado(receita);
+    document.getElementById("pipelineTotal").innerText=formatarAbreviado(pipeline);
+    document.getElementById("mrrTotal").innerText=formatarAbreviado(mrr);
+    document.getElementById("conversao").innerText=totalFechados > 0 ? ((ganhos/totalFechados)*100).toFixed(1)+"%" : "0%";
+    document.getElementById("ticket").innerText=formatarAbreviado(ganhos?receita/ganhos:0);
+
+    gerarGraficoStatus(statusCount);
+    gerarGraficoVendedor(vendedorValor);
+    gerarKanban(dados);
+}
+
+function gerarGraficoStatus(obj){
     if(charts.st) charts.st.destroy();
+    charts.st=new Chart(document.getElementById("chartStatus"),{
+        type:'doughnut',
+        data:{
+            labels:Object.keys(obj),
+            datasets:[{
+                data:Object.values(obj),
+                backgroundColor:["#422c76","#ff6384","#36a2eb","#ffce56","#4bc0c0","#9966ff"]
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio: true, // VOLTOU AO NORMAL
+            plugins:{title:{display:true,text:'Oportunidades por Status'}}
+        }
+    });
+}
+
+function gerarGraficoVendedor(obj){
     if(charts.vd) charts.vd.destroy();
-
-    charts.st = new Chart(document.getElementById("chartStatus"), {
-        type: 'doughnut',
-        data: { labels: Object.keys(st), datasets: [{ data: Object.values(st), backgroundColor: ["#422c76", "#ff6384", "#36a2eb", "#ffce56", "#4bc0c0", "#9966ff"] }]},
-        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Oportunidades por Status' }}}
-    });
-
-    const rankingV = Object.entries(vd).sort((a,b) => b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById("chartVendedor"), {
-        type: 'bar',
-        data: { labels: rankingV.map(x=>x[0]), datasets: [{ label: 'Valor Total', data: rankingV.map(x=>x[1]), backgroundColor: "#422c76" }]},
-        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+    let ranking=Object.entries(obj).sort((a,b)=>b[1]-a[1]);
+    charts.vd=new Chart(document.getElementById("chartVendedor"),{
+        type:'bar',
+        data:{
+            labels:ranking.map(r=>r[0]),
+            datasets:[{label: 'Valor Total', data:ranking.map(r=>r[1]),backgroundColor:"#422c76"}]
+        },
+        options:{
+            indexAxis:'y',
+            responsive:true,
+            maintainAspectRatio: true, // VOLTOU AO NORMAL
+            plugins:{title:{display:true,text:'Ranking por Vendedor'}}
+        }
     });
 }
 
-function renderizarKanban(dados){
-    const container = document.getElementById("kanban");
-    container.innerHTML = "";
-    const colunas = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
-
-    colunas.forEach(colNome => {
-        const divCol = document.createElement("div");
-        divCol.className = "column";
-        divCol.innerHTML = `<h4>${colNome}</h4>`;
-        
-        dados.filter(d => d.Status === colNome).forEach(item => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `<b>${item.Cliente}</b><br><small>${item.Vendedor}</small><br><strong>${formatarMoeda(item["Valor estimado no Ano"])}</strong>`;
-            divCol.appendChild(card);
+function gerarKanban(dados){
+    kanban.innerHTML="";
+    const ordem = ["LEAD", "AINDA FRIO", "PROPOSTA ENVIADA - ACEITA", "EM ASSINATURA", "GANHO", "PERDIDO"];
+    ordem.forEach(status=>{
+        let lista = dados.filter(d=>d.Status===status);
+        let col=document.createElement("div");
+        col.className="column";
+        col.innerHTML=`<h4>${status}</h4>`;
+        lista.forEach(item=>{
+            let card=document.createElement("div");
+            card.className="card";
+            card.innerHTML=`<b>${item.Cliente}</b><br>${item.Vendedor}<br><b>${formatarAbreviado(item["Valor estimado no Ano"])}</b>`;
+            col.appendChild(card);
         });
-        container.appendChild(divCol);
+        kanban.appendChild(col);
     });
 }
 
-// Iniciar
 carregarDados();
-
 </script>
-
 </body>
 </html>
