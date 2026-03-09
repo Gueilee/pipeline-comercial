@@ -199,8 +199,17 @@ header {
 .btn-edit-mini { background: #e1f5fe; color: #0288d1; }
 .btn-del-mini { background: #ffebee; color: #c62828; }
 
-/* AJUSTE PARA O HISTÓRICO */
-#op_historico { background: #fdfdfd; font-size: 12px; color: #555; line-height: 1.5; }
+/* AJUSTE PARA O HISTÓRICO - VISUALIZAÇÃO MELHORADA */
+#op_historico { 
+    background: #fdfdfd; 
+    font-size: 11px; 
+    color: #444; 
+    line-height: 1.6; 
+    border: 1px solid #eee;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap;
+    padding: 10px;
+}
 </style>
 </head>
 
@@ -367,7 +376,7 @@ header {
             
             <div class="form-group">
                 <label>Histórico de Alterações</label>
-                <textarea id="op_historico" rows="4" readonly placeholder="Nenhuma alteração registrada..."></textarea>
+                <textarea id="op_historico" rows="6" readonly placeholder="Nenhuma alteração registrada..."></textarea>
             </div>
 
             <div class="modal-footer">
@@ -610,16 +619,16 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         if(antigo) {
             let log = "";
             const agora = new Date();
-            const carimbo = `${agora.toLocaleDateString('pt-BR')} - ${agora.getHours()}H${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours()}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
 
-            if(antigo.cliente !== novo_cliente) log += `\n${carimbo} - ALTEROU CLIENTE DE "${antigo.cliente}" PARA "${novo_cliente}"`;
-            if(antigo.status !== novo_status) log += `\n${carimbo} - ALTEROU STATUS DE "${antigo.status}" PARA "${novo_status}"`;
-            if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n${carimbo} - ALTEROU VALOR ANUAL DE "R$ ${antigo.valor_estimado_ano}" PARA "R$ ${novo_valor}"`;
-            if(antigo.vendedor !== novo_vend) log += `\n${carimbo} - ALTEROU VENDEDOR DE "${antigo.vendedor}" PARA "${novo_vend}"`;
-            if(antigo.area !== nova_area) log += `\n${carimbo} - ALTEROU ÁREA DE "${antigo.area}" PARA "${nova_area}"`;
-            if(antigo.breve_descricao !== nova_desc) log += `\n${carimbo} - ALTEROU DESCRIÇÃO`;
-            if(antigo.data_oportunidade !== nova_data) log += `\n${carimbo} - ALTEROU DATA DA OP. DE "${antigo.data_oportunidade}" PARA "${nova_data}"`;
-            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n${carimbo} - ALTEROU PREVISÃO FECH. DE "${antigo.previsao_fechamento || 'VAZIO'}" PARA "${nova_prev || 'VAZIO'}"`;
+            if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
+            if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
+            if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
+            if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
+            if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
+            if(antigo.breve_descricao !== nova_desc) log += `\n[${carimbo}] DESCRIÇÃO FOI ALTERADA`;
+            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OP.: "${antigo.data_oportunidade}" → "${nova_data}"`;
+            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO: "${antigo.previsao_fechamento || 'VAZIO'}" → "${nova_prev || 'VAZIO'}"`;
             
             if(log !== "") {
                 historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
@@ -628,7 +637,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     } else {
         // SE FOR NOVO
         const agora = new Date();
-        historico_atual = `${agora.toLocaleDateString('pt-BR')} - ${agora.getHours()}H${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO} - CRIOU A OPORTUNIDADE`;
+        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours()}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+        historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
 
     const payload = {
