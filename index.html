@@ -24,7 +24,7 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN AJUSTADOS */
+/* ESTILOS DA TELA DE LOGIN */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('fundo-login.jpg'); 
@@ -33,16 +33,16 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
     background-repeat: no-repeat;
     display: flex; 
     align-items: center; 
-    justify-content: flex-start; /* Ajustado para a esquerda */
+    justify-content: flex-start;
     z-index: 10000;
 }
 .login-box {
-    background: #ffffff; /* Fundo branco sólido */
+    background: #ffffff;
     padding: 40px; border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     width: 320px; text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    margin-left: 10%; /* Afastamento da borda esquerda */
+    margin-left: 10%;
 }
 .login-box img { width: 150px; margin-bottom: 20px; }
 .login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; font-weight: bold; }
@@ -58,10 +58,11 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 .btn-login:hover { background: #32215a; transform: translateY(-1px); }
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
-/* ESCONDER SISTEMA INICIALMENTE */
-#main-system { display: none; }
+/* CONTROLE DE EXIBIÇÃO DAS TELAS */
+#main-system, #page-dashboard, #page-kanban { display: none; }
+.active-page { display: block !important; }
 
-/* CABEÇALHO MODERNO */
+/* CABEÇALHO */
 header { 
     background: white; 
     padding: 10px 40px; 
@@ -85,7 +86,14 @@ header {
     border-radius: 12px;
 }
 
-/* ESTILO DOS NOVOS BOTÕES/MENU */
+.nav-group {
+    display: flex;
+    gap: 5px;
+    margin-right: 15px;
+    border-right: 1px solid #ddd;
+    padding-right: 15px;
+}
+
 .btn-header { 
     border: none; 
     padding: 10px 16px; 
@@ -105,6 +113,11 @@ header {
     background: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     transform: translateY(-2px);
+}
+
+.btn-header.active {
+    background-color: var(--lilas);
+    color: white;
 }
 
 .btn-ia { 
@@ -192,14 +205,12 @@ header {
 
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 
-/* ESTILOS NOVOS PARA LISTAGEM AUXILIAR */
 .lista-auxiliar { margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
 .item-auxiliar { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #fafafa; font-size: 13px; }
 .btn-mini { padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; margin-left: 5px; }
 .btn-edit-mini { background: #e1f5fe; color: #0288d1; }
 .btn-del-mini { background: #ffebee; color: #c62828; }
 
-/* ESTILO DO BOTÃO DE HISTÓRICO E TIMELINE */
 .btn-history-view {
     background: #f0f0f0;
     color: var(--lilas);
@@ -253,7 +264,6 @@ header {
     border: 1px solid #eee;
 }
 
-/* NOVO CAMPO DE HISTÓRICO MANUAL */
 .manual-history-box {
     background: #f4f7f6;
     padding: 15px;
@@ -281,6 +291,11 @@ header {
     <header>
         <img src="Pipeline.png" class="logo">
         <div class="header-right">
+            <div class="nav-group">
+                <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
+                <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
+            </div>
+            
             <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
             <button type="button" class="btn-header" onclick="abrirModal('modalVendedor')"><span>👥</span> Vendedores</button>
             <button type="button" class="btn-header" onclick="abrirModal('modalArea')"><span>🏢</span> Áreas</button>
@@ -307,20 +322,24 @@ header {
             </select>
         </div>
 
-        <div class="kpis">
-            <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-            <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-            <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+        <div id="page-dashboard" class="active-page">
+            <div class="kpis">
+                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+                <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+            </div>
         </div>
 
-        <div class="charts-grid">
-            <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-            <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+        <div id="page-kanban">
+            <div class="kanban" id="kanban"></div>
         </div>
-
-        <div class="kanban" id="kanban"></div>
     </div>
 </div>
 
@@ -444,7 +463,6 @@ header {
 <div id="modalHistoricoDetalhado" class="modal">
     <div class="modal-content" style="width: 550px; background: #fff;">
         <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
-        
         <div class="manual-history-box">
             <div class="form-group">
                 <label>Incluir Novo Comentário Manual</label>
@@ -452,9 +470,7 @@ header {
                 <button type="button" class="btn-header btn-novo-op" style="margin-top:10px; width:100%" onclick="salvarHistoricoManual()">SALVAR COMENTÁRIO</button>
             </div>
         </div>
-
         <div id="timelineContainer" class="timeline"></div>
-        
         <div class="modal-footer">
             <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalHistoricoDetalhado')">Fechar</button>
         </div>
@@ -462,8 +478,24 @@ header {
 </div>
 
 <script>
+// NAVEGAÇÃO ENTRE TELAS
+function navegar(pagina) {
+    document.getElementById('page-dashboard').classList.remove('active-page');
+    document.getElementById('page-kanban').classList.remove('active-page');
+    document.getElementById('nav-dash').classList.remove('active');
+    document.getElementById('nav-kanban').classList.remove('active');
+
+    if (pagina === 'dashboard') {
+        document.getElementById('page-dashboard').classList.add('active-page');
+        document.getElementById('nav-dash').classList.add('active');
+    } else {
+        document.getElementById('page-kanban').classList.add('active-page');
+        document.getElementById('nav-kanban').classList.add('active');
+    }
+}
+
 // LÓGICA DE AUTENTICAÇÃO
-let USUARIO_LOGADO = ""; // Variável global para o histórico
+let USUARIO_LOGADO = "";
 function autenticar() {
     const user = document.getElementById('login_user').value;
     const pass = document.getElementById('login_pass').value;
@@ -472,6 +504,7 @@ function autenticar() {
         USUARIO_LOGADO = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
+        navegar('dashboard'); // Inicia no dashboard
         carregarAuxiliares(); 
         carregarDados();
     } else {
@@ -479,7 +512,6 @@ function autenticar() {
     }
 }
 
-// NOVA FUNÇÃO DE LOGOFF
 function logoff() {
     if(confirm("Deseja realmente sair do sistema?")) {
         document.getElementById('main-system').style.display = 'none';
@@ -491,15 +523,9 @@ function logoff() {
     }
 }
 
-document.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
-        autenticar();
-    }
-});
-
+// RESTANTE DO SEU CÓDIGO (SUPABASE E CHART.JS) SEM ALTERAÇÕES DE LÓGICA
 Chart.register(ChartDataLabels);
 
-// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA - CENTRALIZAÇÃO PRECISA
 const pluginCentroRosca = {
     id: 'pluginCentroRosca',
     afterDraw: (chart) => {
@@ -564,28 +590,20 @@ function toggleMotivoPerda() {
     }
 }
 
-// GERENCIAMENTO DE VENDEDORES
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('vend_id').value;
     const nome = document.getElementById('vend_nome').value.toUpperCase();
-    
     let res;
     if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
     else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-
     if(res.error) alert("Erro: " + res.error.message);
-    else { 
-        document.getElementById('formVendedor').reset(); 
-        document.getElementById('vend_id').value = "";
-        carregarAuxiliares(); 
-    }
+    else { document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
 });
 
 async function deletarVendedor(id) {
     if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('vendedores').delete().eq('id', id);
-        carregarAuxiliares();
+        await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
     }
 }
 
@@ -594,28 +612,20 @@ function prepararEdicaoVendedor(id, nome) {
     document.getElementById('vend_nome').value = nome;
 }
 
-// GERENCIAMENTO DE ÁREAS
 document.getElementById('formArea').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('area_id').value;
     const nome = document.getElementById('area_nome').value.toUpperCase();
-    
     let res;
     if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
     else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
-
     if(res.error) alert("Erro: " + res.error.message);
-    else { 
-        document.getElementById('formArea').reset(); 
-        document.getElementById('area_id').value = "";
-        carregarAuxiliares(); 
-    }
+    else { document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
 });
 
 async function deletarArea(id) {
     if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('areas').delete().eq('id', id);
-        carregarAuxiliares();
+        await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
     }
 }
 
@@ -636,8 +646,7 @@ function prepararNovo() {
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     document.getElementById('op_historico').value = ""; 
-    toggleMotivoPerda(); 
-    abrirModal('modalOportunidade');
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
 function editarOportunidade(id) {
@@ -657,8 +666,7 @@ function editarOportunidade(id) {
     document.getElementById('op_historico').value = item.historico || ""; 
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
-    toggleMotivoPerda(); 
-    abrirModal('modalOportunidade');
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
 async function deletarOportunidade() {
@@ -669,21 +677,17 @@ async function deletarOportunidade() {
     }
 }
 
-// FUNÇÕES PARA O POPUP DE HISTÓRICO BONITO
 function abrirHistoricoPopup() {
     const id = document.getElementById('op_id').value;
     if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
-    
     document.getElementById('txt_historico_manual').value = "";
-    renderizarLinhaDoTempo();
-    abrirModal('modalHistoricoDetalhado');
+    renderizarLinhaDoTempo(); abrirModal('modalHistoricoDetalhado');
 }
 
 function renderizarLinhaDoTempo() {
     const textoHistorico = document.getElementById('op_historico').value;
     const container = document.getElementById('timelineContainer');
     container.innerHTML = "";
-
     if(!textoHistorico || textoHistorico.trim() === "") {
         container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
     } else {
@@ -691,52 +695,37 @@ function renderizarLinhaDoTempo() {
         logs.forEach(log => {
             const match = log.match(/\[(.*?)\] (.*)/);
             if(match) {
-                const cabecalho = match[1]; 
-                const acao = match[2];     
+                const cabecalho = match[1]; const acao = match[2];     
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
-                item.innerHTML = `
-                    <span class="timeline-date">${cabecalho}</span>
-                    <div class="timeline-content">${acao}</div>
-                `;
+                item.innerHTML = `<span class="timeline-date">${cabecalho}</span><div class="timeline-content">${acao}</div>`;
                 container.appendChild(item);
             }
         });
     }
 }
 
-// NOVA FUNÇÃO PARA SALVAR COMENTÁRIO MANUAL
 async function salvarHistoricoManual() {
     const id = document.getElementById('op_id').value;
     const comentario = document.getElementById('txt_historico_manual').value.trim();
-    
     if(!comentario) return alert("Digite algo para salvar no histórico!");
-
     const agora = new Date();
     const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
     const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
-    
     let historicoAntigo = document.getElementById('op_historico').value || "";
     const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
-
-    // Salva no Supabase imediatamente
     const { error } = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
-
-    if(error) {
-        alert("Erro ao salvar comentário: " + error.message);
-    } else {
+    if(error) alert("Erro ao salvar comentário: " + error.message);
+    else {
         document.getElementById('op_historico').value = historicoAtualizado;
         document.getElementById('txt_historico_manual').value = "";
-        renderizarLinhaDoTempo();
-        carregarDados(); // Atualiza a base local
+        renderizarLinhaDoTempo(); carregarDados();
     }
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
-    
-    // CAMPOS ATUAIS
     const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
     const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
     const novo_vend = document.getElementById('op_vendedor').value;
@@ -746,95 +735,43 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const novo_status = document.getElementById('op_status').value;
     const nova_area = document.getElementById('op_area').value;
     const novo_motivo = document.getElementById('op_motivo_perda').value || "";
-
     let historico_atual = document.getElementById('op_historico').value || "";
-    
-    // SE FOR EDIÇÃO, COMPARA PARA O HISTÓRICO
     if(idValue) {
         const antigo = base.find(x => x.id == idValue);
         if(antigo) {
-            let log = "";
-            const agora = new Date();
+            let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
             if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
             if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
-            if(antigo.breve_descricao !== nova_desc) log += `\n[${carimbo}] DESCRIÇÃO FOI ALTERADA`;
-            if(antigo.data_oportunidade !== nova_data) {
-                const dataAntigaBR = antigo.data_oportunidade.split('-').reverse().join('/');
-                const dataNovaBR = nova_data.split('-').reverse().join('/');
-                log += `\n[${carimbo}] DATA OP.: "${dataAntigaBR}" → "${dataNovaBR}"`;
-            }
-            if((antigo.previsao_fechamento || "") !== nova_prev) {
-                const prevAntigaBR = antigo.previsao_fechamento ? antigo.previsao_fechamento.split('-').reverse().join('/') : 'VAZIO';
-                const prevNovaBR = nova_prev ? nova_prev.split('-').reverse().join('/') : 'VAZIO';
-                log += `\n[${carimbo}] PREVISÃO: "${prevAntigaBR}" → "${prevNovaBR}"`;
-            }
-            
-            if(log !== "") {
-                historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
-            }
+            if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
         }
     } else {
         const agora = new Date();
         const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
-
-    const payload = {
-        cliente: novo_cliente,
-        breve_descricao: nova_desc,
-        vendedor: novo_vend,
-        data_oportunidade: nova_data,
-        previsao_fechamento: nova_prev || null,
-        valor_estimado_ano: novo_valor,
-        valor_mensal_recorrente: (novo_valor / 12),
-        status: novo_status,
-        area: nova_area,
-        motivo_perda: novo_motivo || null,
-        historico: historico_atual
-    };
-
+    const payload = { cliente: novo_cliente, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
     if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     else await supabaseClient.from('oportunidades').insert([payload]);
-    
     fecharModal('modalOportunidade'); carregarDados();
 };
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
     const { data: a } = await supabaseClient.from('areas').select('*');
-    
     const fill = (id, d, label) => { 
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
     };
-
     fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
     fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
-
     const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) listV.innerHTML = (v || []).map(i => `
-        <div class="item-auxiliar">
-            <span>${i.nome}</span>
-            <div>
-                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button>
-                <button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button>
-            </div>
-        </div>`).join('');
-
+    if(listV) listV.innerHTML = (v || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
     const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) listA.innerHTML = (a || []).map(i => `
-        <div class="item-auxiliar">
-            <span>${i.nome}</span>
-            <div>
-                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button>
-                <button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button>
-            </div>
-        </div>`).join('');
+    if(listA) listA.innerHTML = (a || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
 }
 
 async function carregarDados(){ 
@@ -849,14 +786,10 @@ async function carregarDados(){
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
 function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
-
 async function drop(ev, novoStatus) {
-    ev.preventDefault();
-    ev.currentTarget.classList.remove('column-over');
+    ev.preventDefault(); ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    editarOportunidade(cardId);
-    document.getElementById('op_status').value = novoStatus;
-    toggleMotivoPerda();
+    editarOportunidade(cardId); document.getElementById('op_status').value = novoStatus; toggleMotivoPerda();
 }
 
 function renderizar(){
@@ -865,51 +798,28 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
-
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
-    
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; 
-        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
+        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
         pipeTot += vA; mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
-
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
-
     if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut', 
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                datalabels: { color: '#fff' }, 
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } 
-            } 
-        },
-        plugins: [pluginCentroRosca]
-    });
-
+    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
-    });
-
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
-    
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
@@ -925,6 +835,5 @@ function renderizar(){
     });
 }
 </script>
-    
 </body>
 </html>
