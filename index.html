@@ -831,7 +831,7 @@ function renderizar(){
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
     
     let pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let plan2026 = 0, real2026 = 0, mbReal2026 = 0;
+    let totalPlan2026 = 0, totalReal2026 = 0, mbRealTotal = 0;
     let quarters = { plan: [0,0,0,0], real: [0,0,0,0] };
     let statusCont = {}, vendVal = {}, vendMB = {};
 
@@ -841,9 +841,10 @@ function renderizar(){
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         
-        plan2026 += parseFloat(r["2026_plan"]) || 0;
-        real2026 += parseFloat(r["2026_real"]) || 0;
-        mbReal2026 += parseFloat(r["mb_real_2026"]) || 0;
+        // CORREÇÃO: Usando os campos reais para meta e lucro
+        totalPlan2026 += parseFloat(r["2026_plan"]) || 0;
+        totalReal2026 += parseFloat(r["2026_real"]) || 0;
+        mbRealTotal += parseFloat(r["mb_real_2026"]) || 0;
 
         quarters.plan[0] += parseFloat(r.q1_plan) || 0;
         quarters.plan[1] += parseFloat(r.q2_plan) || 0;
@@ -863,8 +864,8 @@ function renderizar(){
 
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mbRealTotal').innerText = "R$ " + mbReal2026.toLocaleString('pt-BR');
-    document.getElementById('perfAnual').innerText = (plan2026 > 0 ? (real2026/plan2026*100) : 0).toFixed(1) + "%";
+    document.getElementById('mbRealTotal').innerText = "R$ " + mbRealTotal.toLocaleString('pt-BR');
+    document.getElementById('perfAnual').innerText = (totalPlan2026 > 0 ? (totalReal2026/totalPlan2026*100) : 0).toFixed(1) + "%";
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
@@ -873,7 +874,7 @@ function renderizar(){
         y: { display: false, grid: { display: false } } 
     };
 
-    // GRÁFICO 1: EVOLUÇÃO
+    // GRÁFICO 1: EVOLUÇÃO (PLANEJADO VS REALIZADO)
     if(charts.qtr) charts.qtr.destroy();
     charts.qtr = new Chart(document.getElementById('chartQuarters'), {
         type: 'bar',
