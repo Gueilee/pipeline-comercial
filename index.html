@@ -361,7 +361,7 @@ header {
                 <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
             </div>
         </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
+        <div id="ia_loading" class="ia-loading">🔍 Analisando presença digital e notícias...</div>
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
@@ -805,7 +805,22 @@ function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 async function drop(ev, novoStatus) {
     ev.preventDefault(); ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    editarOportunidade(cardId); document.getElementById('op_status').value = novoStatus; toggleMotivoPerda();
+    
+    // Atualiza o status no banco de dados e registra no histórico
+    const item = base.find(x => x.id == cardId);
+    if(item && item.status !== novoStatus) {
+        const agora = new Date();
+        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+        const novoLog = `[${carimbo}] STATUS (MOVIMENTAÇÃO KANBAN): "${item.status}" → "${novoStatus}"`;
+        const historicoAtualizado = novoLog + (item.historico ? "\n" + item.historico : "");
+        
+        await supabaseClient.from('oportunidades').update({ 
+            status: novoStatus, 
+            historico: historicoAtualizado 
+        }).eq('id', cardId);
+        
+        carregarDados();
+    }
 }
 
 function renderizar(){
@@ -853,7 +868,6 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    // CONFIGURAÇÃO GLOBAL PARA LIMPAR GRÁFICOS (SEM GRADES)
     const cleanScales = { 
         x: { display: false, grid: { display: false } }, 
         y: { display: false, grid: { display: false } } 
@@ -877,7 +891,7 @@ function renderizar(){
         }
     });
 
-    // GRÁFICO 2: LUCRO POR VENDEDOR (MANTENDO APENAS EIXO X COM NOMES)
+    // GRÁFICO 2: LUCRO POR VENDEDOR
     if(charts.mbv) charts.mbv.destroy();
     const smb = Object.entries(vendMB).sort((a,b)=>b[1]-a[1]);
     charts.mbv = new Chart(document.getElementById('chartMBVendedor'), {
@@ -895,16 +909,35 @@ function renderizar(){
 
     // GRÁFICO 3: STATUS
     if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
+    charts.st = new Chart(document.getElementById('chartStatus'), { 
+        type: 'doughnut', 
+        data: { 
+            labels: Object.keys(statusCont), 
+            datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]
+        }, 
+        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, 
+        plugins: [pluginCentroRosca] 
+    });
     
     // GRÁFICO 4: RANKING POTENCIAL
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, scales: cleanScales, plugins: { legend: { display: false }, datalabels: { color: '#444', anchor: 'end', align: 'right', offset: 5, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
+        type: 'bar', 
+        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22 }]}, 
+        options: { indexAxis: 'y', maintainAspectRatio: false, scales: cleanScales, plugins: { legend: { display: false }, datalabels: { color: '#444', anchor: 'end', align: 'right', offset: 5, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } 
+    });
 
     // KANBAN
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
+    const colunas = [
+        {n:"LEAD", cl:"col-lead", border:"#6c757d"},
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},
+        {n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},
+        {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
@@ -912,7 +945,7 @@ function renderizar(){
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
+            card.onclick = (e) => { editarOportunidade(i.id); };
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
