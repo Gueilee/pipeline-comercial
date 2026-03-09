@@ -394,6 +394,37 @@ document.addEventListener('keypress', function (e) {
 });
 
 Chart.register(ChartDataLabels);
+
+// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA
+const pluginCentroRosca = {
+    id: 'pluginCentroRosca',
+    beforeDraw: (chart) => {
+        if (chart.config.type === 'doughnut') {
+            const { ctx, width, height } = chart;
+            ctx.restore();
+            const fontSize = (height / 160).toFixed(2);
+            ctx.font = `bold ${fontSize}em sans-serif`;
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#414042";
+
+            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+            const text = total.toString();
+            const textX = Math.round((width - ctx.measureText(text).width) / 2);
+            const textY = height / 1.85; // Ajuste fino para alinhar com a legenda embaixo
+
+            ctx.fillText(text, textX, textY);
+            
+            // Subtexto "TOTAL"
+            ctx.font = `600 ${(height / 350).toFixed(2)}em sans-serif`;
+            const label = "OPORTUNIDADES";
+            const labelX = Math.round((width - ctx.measureText(label).width) / 2);
+            ctx.fillText(label, labelX, textY - 25);
+            
+            ctx.save();
+        }
+    }
+};
+
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 const { createClient } = supabase;
@@ -630,7 +661,14 @@ function renderizar(){
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', 
         data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { color: '#fff' }, 
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } 
+            } 
+        },
+        plugins: [pluginCentroRosca]
     });
 
     if(charts.vd) charts.vd.destroy();
@@ -663,5 +701,3 @@ function renderizar(){
 </body>
     
 </html>
-
-
