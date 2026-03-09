@@ -198,6 +198,13 @@ header {
 .btn-mini { padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; margin-left: 5px; }
 .btn-edit-mini { background: #e1f5fe; color: #0288d1; }
 .btn-del-mini { background: #ffebee; color: #c62828; }
+
+/* HISTÓRICO */
+.history-section { margin-top: 25px; border-top: 2px solid #eee; padding-top: 15px; }
+.history-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-bottom: 10px; }
+.history-list { font-size: 11px; max-height: 150px; overflow-y: auto; background: #fdfdfd; border-radius: 6px; padding: 10px; border: 1px solid #eee; }
+.history-item { padding: 5px 0; border-bottom: 1px solid #f0f0f0; line-height: 1.4; }
+.history-date { font-weight: bold; color: #888; margin-right: 5px; }
 </style>
 </head>
 
@@ -361,6 +368,12 @@ header {
                     <option value="BID">BID</option>
                 </select>
             </div>
+
+            <div id="sectionHistorico" class="history-section" style="display:none;">
+                <div class="history-title">🕒 Histórico de Movimentações</div>
+                <div id="listaHistorico" class="history-list"></div>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
                 <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
@@ -548,12 +561,13 @@ function prepararNovo() {
     document.getElementById('op_id').value = "";
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
+    document.getElementById('sectionHistorico').style.display = "none"; // Esconde histórico em novas ops
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     toggleMotivoPerda(); // Garante que comece oculto
     abrirModal('modalOportunidade');
 }
 
-function editarOportunidade(id) {
+async function editarOportunidade(id) {
     const item = base.find(x => x.id == id);
     if(!item) return;
     document.getElementById('op_id').value = item.id;
@@ -569,8 +583,30 @@ function editarOportunidade(id) {
     document.getElementById('op_motivo_perda').value = item.motivo_perda || ""; // Carrega o motivo
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
+    
+    // Carregar Histórico
+    await carregarHistorico(item.id);
+
     toggleMotivoPerda(); // Verifica se deve exibir o campo de motivo
     abrirModal('modalOportunidade');
+}
+
+async function carregarHistorico(opId) {
+    const { data: hist } = await supabaseClient.from('historico_oportunidades').select('*').eq('id_oportunidade', opId).order('data_alteracao', { ascending: false });
+    const section = document.getElementById('sectionHistorico');
+    const lista = document.getElementById('listaHistorico');
+    
+    if (hist && hist.length > 0) {
+        section.style.display = "block";
+        lista.innerHTML = hist.map(h => `
+            <div class="history-item">
+                <span class="history-date">${new Date(h.data_alteracao).toLocaleString('pt-BR')}</span>
+                Alterou <b>${h.campo_alterado}</b> de <i>"${h.valor_antigo || '-'}"</i> para <b>"${h.valor_novo || '-'}"</b>
+            </div>
+        `).join('');
+    } else {
+        section.style.display = "none";
+    }
 }
 
 async function deletarOportunidade() {
