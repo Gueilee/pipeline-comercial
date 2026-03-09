@@ -24,7 +24,7 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN AJUSTADOS */
+/* ESTILOS DA TELA DE LOGIN */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('fundo-login.jpg'); 
@@ -33,16 +33,16 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
     background-repeat: no-repeat;
     display: flex; 
     align-items: center; 
-    justify-content: flex-start; /* Ajustado para a esquerda */
+    justify-content: flex-start;
     z-index: 10000;
 }
 .login-box {
-    background: #ffffff; /* Fundo branco sólido */
+    background: #ffffff;
     padding: 40px; border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     width: 320px; text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    margin-left: 10%; /* Afastamento da borda esquerda */
+    margin-left: 10%;
 }
 .login-box img { width: 150px; margin-bottom: 20px; }
 .login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; font-weight: bold; }
@@ -58,10 +58,8 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 .btn-login:hover { background: #32215a; transform: translateY(-1px); }
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
-/* ESCONDER SISTEMA INICIALMENTE */
 #main-system { display: none; }
 
-/* CABEÇALHO MODERNO */
 header { 
     background: white; 
     padding: 10px 40px; 
@@ -85,7 +83,6 @@ header {
     border-radius: 12px;
 }
 
-/* ESTILO DOS NOVOS BOTÕES/MENU */
 .btn-header { 
     border: none; 
     padding: 10px 16px; 
@@ -180,7 +177,7 @@ header {
     background: #f9f9f9;
     border-radius: 6px;
     padding: 10px;
-    max-height: 150px;
+    max-height: 180px;
     overflow-y: auto;
     font-size: 11px;
     line-height: 1.6;
@@ -189,14 +186,9 @@ header {
 }
 .historico-item {
     border-bottom: 1px solid #eee;
-    padding: 4px 0;
+    padding: 6px 0;
 }
 .historico-item:last-child { border-bottom: none; }
-
-.ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
-.ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
-.ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
@@ -221,7 +213,6 @@ header {
 
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
 
-/* ESTILOS NOVOS PARA LISTAGEM AUXILIAR */
 .lista-auxiliar { margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
 .item-auxiliar { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #fafafa; font-size: 13px; }
 .btn-mini { padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; margin-left: 5px; }
@@ -293,7 +284,6 @@ header {
 <div id="modalIA" class="modal">
     <div class="modal-content" style="width: 650px;">
         <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
         <div class="form-group">
             <label>Empresa ou Site</label>
             <div style="display:flex; gap:10px;">
@@ -301,22 +291,8 @@ header {
                 <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
             </div>
         </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
-        <div id="ia_resultado" class="ia-result-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
-            </div>
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalIA')">Fechar</button>
-        </div>
+        <div id="ia_resultado" style="margin-top:15px; font-size:13px; color:#555;"></div>
+        <div class="modal-footer"><button type="button" class="btn-header" onclick="fecharModal('modalIA')">Fechar</button></div>
     </div>
 </div>
 
@@ -327,8 +303,8 @@ header {
             <input type="hidden" id="vend_id">
             <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
             <div class="modal-footer">
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value='';">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+                <button type="button" class="btn-header" onclick="fecharModal('modalVendedor')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar</button>
             </div>
         </form>
         <div class="lista-auxiliar" id="listaVendedoresGerenciamento"></div>
@@ -342,8 +318,8 @@ header {
             <input type="hidden" id="area_id">
             <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
             <div class="modal-footer">
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalArea'); document.getElementById('formArea').reset(); document.getElementById('area_id').value='';">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+                <button type="button" class="btn-header" onclick="fecharModal('modalArea')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar</button>
             </div>
         </form>
         <div class="lista-auxiliar" id="listaAreasGerenciamento"></div>
@@ -392,14 +368,13 @@ header {
             </div>
 
             <div class="historico-section" id="sectionHistorico" style="display:none;">
-                <h4>Histórico de Movimentações</h4>
-                <div class="historico-lista" id="op_historico_lista">
-                    </div>
+                <h4>Histórico de Alterações</h4>
+                <div class="historico-lista" id="op_historico_lista"></div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="button" class="btn-header" onclick="fecharModal('modalOportunidade')">Cancelar</button>
                 <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
             </div>
         </form>
@@ -407,68 +382,7 @@ header {
 </div>
 
 <script>
-// Variável Global para armazenar o usuário logado
 let usuarioLogado = "";
-
-// LÓGICA DE AUTENTICAÇÃO
-function autenticar() {
-    const user = document.getElementById('login_user').value;
-    const pass = document.getElementById('login_pass').value;
-
-    if(user === "admin" && pass === "vendemmia2024") {
-        usuarioLogado = user.toUpperCase();
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-system').style.display = 'block';
-        carregarAuxiliares(); 
-        carregarDados();
-    } else {
-        document.getElementById('login-error').style.display = 'block';
-    }
-}
-
-// NOVA FUNÇÃO DE LOGOFF
-function logoff() {
-    if(confirm("Deseja realmente sair do sistema?")) {
-        document.getElementById('main-system').style.display = 'none';
-        document.getElementById('login-overlay').style.display = 'flex';
-        document.getElementById('login_user').value = "";
-        document.getElementById('login_pass').value = "";
-        document.getElementById('login-error').style.display = 'none';
-        usuarioLogado = "";
-    }
-}
-
-document.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') {
-        autenticar();
-    }
-});
-
-Chart.register(ChartDataLabels);
-
-// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA - CENTRALIZAÇÃO PRECISA
-const pluginCentroRosca = {
-    id: 'pluginCentroRosca',
-    afterDraw: (chart) => {
-        if (chart.config.type === 'doughnut') {
-            const { ctx, chartArea: { top, bottom, left, right } } = chart;
-            ctx.save();
-            const centerX = (left + right) / 2;
-            const centerY = (top + bottom) / 2;
-            const chartHeight = bottom - top;
-            const fontSize = (chartHeight / 120).toFixed(2);
-            ctx.font = `bold ${fontSize}em sans-serif`;
-            ctx.textBaseline = "middle";
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#414042";
-            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-            const text = total.toString();
-            ctx.fillText(text, centerX, centerY);
-            ctx.restore();
-        }
-    }
-};
-
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 const { createClient } = supabase;
@@ -476,106 +390,104 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; let charts={};
 
-function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
-function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
-
-function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
-    const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    loader.style.display = 'block';
-    resultado.style.display = 'none';
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
+// --- AUTENTICAÇÃO ---
+function autenticar() {
+    const user = document.getElementById('login_user').value;
+    const pass = document.getElementById('login_pass').value;
+    if(user === "admin" && pass === "vendemmia2024") {
+        usuarioLogado = user.toUpperCase();
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-system').style.display = 'block';
+        carregarAuxiliares(); carregarDados();
+    } else { document.getElementById('login-error').style.display = 'block'; }
 }
 
-// FUNÇÃO PARA CONTROLAR VISIBILIDADE DO MOTIVO DE PERDA
-function toggleMotivoPerda() {
-    const status = document.getElementById('op_status').value;
-    const group = document.getElementById('group_motivo_perda');
-    if(status === "PERDIDO") {
-        group.style.display = 'flex';
+function logoff() {
+    if(confirm("Deseja realmente sair?")) location.reload();
+}
+
+// --- FUNÇÃO CORE: GERAÇÃO DE LOGS DE HISTÓRICO ---
+function gerarLogAlteracao(dadosAntigos, dadosNovos) {
+    const agora = new Date();
+    const dataStr = agora.toLocaleDateString('pt-BR');
+    const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+    let logs = [];
+
+    // Detecção de mudanças em campos chave
+    if (dadosAntigos.cliente !== dadosNovos.cliente) logs.push(`CLIENTE: "${dadosAntigos.cliente}" → "${dadosNovos.cliente}"`);
+    if (dadosAntigos.status !== dadosNovos.status) logs.push(`STATUS: ${dadosAntigos.status} → ${dadosNovos.status}`);
+    if (dadosAntigos.vendedor !== dadosNovos.vendedor) logs.push(`VENDEDOR: ${dadosAntigos.vendedor} → ${dadosNovos.vendedor}`);
+    if (dadosAntigos.area !== dadosNovos.area) logs.push(`ÁREA: ${dadosAntigos.area} → ${dadosNovos.area}`);
+    
+    if (Number(dadosAntigos.valor_estimado_ano) !== Number(dadosNovos.valor_estimado_ano)) {
+        const de = Number(dadosAntigos.valor_estimado_ano).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const para = Number(dadosNovos.valor_estimado_ano).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        logs.push(`VALOR: ${de} → ${para}`);
+    }
+
+    if(logs.length === 0) return "";
+    return `${dataStr} - ${horaStr} - [${usuarioLogado}]: ${logs.join(' | ')}`;
+}
+
+// --- SALVAMENTO E HISTÓRICO ---
+document.getElementById('formOportunidade').onsubmit = async (e) => {
+    e.preventDefault();
+    const idValue = document.getElementById('op_id').value;
+    
+    const payload = {
+        cliente: document.getElementById('op_cliente').value.toUpperCase(),
+        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
+        vendedor: document.getElementById('op_vendedor').value,
+        data_oportunidade: document.getElementById('op_data_oportunidade').value,
+        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
+        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
+        status: document.getElementById('op_status').value,
+        area: document.getElementById('op_area').value,
+        motivo_perda: document.getElementById('op_motivo_perda').value || null
+    };
+
+    if(idValue) {
+        const itemOriginal = base.find(x => x.id == idValue);
+        const novoLog = gerarLogAlteracao(itemOriginal, payload);
+        if(novoLog !== "") {
+            const histAntigo = itemOriginal.historico || "";
+            payload.historico = histAntigo + (histAntigo ? "; " : "") + novoLog;
+        } else { payload.historico = itemOriginal.historico; }
+        await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     } else {
-        group.style.display = 'none';
-        document.getElementById('op_motivo_perda').value = "";
+        const agora = new Date();
+        const d = agora.toLocaleDateString('pt-BR'), h = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+        payload.historico = `${d} - ${h} - [${usuarioLogado}]: CRIOU A OPORTUNIDADE`;
+        await supabaseClient.from('oportunidades').insert([payload]);
     }
+    fecharModal('modalOportunidade'); carregarDados();
+};
+
+// --- DRAG AND DROP COM HISTÓRICO ---
+async function drop(ev, novoStatus) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('column-over');
+    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
+    const item = base.find(x => x.id == cardId);
+    if(!item || item.status === novoStatus) return;
+
+    if(novoStatus === "PERDIDO") { editarOportunidade(cardId); document.getElementById('op_status').value = "PERDIDO"; toggleMotivoPerda(); return; }
+
+    const agora = new Date();
+    const d = agora.toLocaleDateString('pt-BR'), h = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+    const logMov = `${d} - ${h} - [${usuarioLogado}]: MOVEU STATUS DE ${item.status} PARA ${novoStatus}`;
+    const novoHist = (item.historico || "") + (item.historico ? "; " : "") + logMov;
+
+    await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist, motivo_perda: null }).eq('id', cardId);
+    carregarDados();
 }
 
-// GERENCIAMENTO DE VENDEDORES
-document.getElementById('formVendedor').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('vend_id').value;
-    const nome = document.getElementById('vend_nome').value.toUpperCase();
-    
-    let res;
-    if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-
-    if(res.error) alert("Erro: " + res.error.message);
-    else { 
-        document.getElementById('formVendedor').reset(); 
-        document.getElementById('vend_id').value = "";
-        carregarAuxiliares(); 
-    }
-});
-
-async function deletarVendedor(id) {
-    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('vendedores').delete().eq('id', id);
-        carregarAuxiliares();
-    }
-}
-
-function prepararEdicaoVendedor(id, nome) {
-    document.getElementById('vend_id').value = id;
-    document.getElementById('vend_nome').value = nome;
-}
-
-// GERENCIAMENTO DE ÁREAS
-document.getElementById('formArea').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('area_id').value;
-    const nome = document.getElementById('area_nome').value.toUpperCase();
-    
-    let res;
-    if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
-
-    if(res.error) alert("Erro: " + res.error.message);
-    else { 
-        document.getElementById('formArea').reset(); 
-        document.getElementById('area_id').value = "";
-        carregarAuxiliares(); 
-    }
-});
-
-async function deletarArea(id) {
-    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('areas').delete().eq('id', id);
-        carregarAuxiliares();
-    }
-}
-
-function prepararEdicaoArea(id, nome) {
-    document.getElementById('area_id').value = id;
-    document.getElementById('area_nome').value = nome;
-}
-
-function calcularMRR() { 
-    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
-    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
-}
+// --- AUXILIARES E INTERFACE ---
+function abrirModal(id){ document.getElementById(id).style.display = 'block'; }
+function fecharModal(id){ document.getElementById(id).style.display = 'none'; }
+function calcularMRR() { const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); }
+function toggleMotivoPerda() { document.getElementById('group_motivo_perda').style.display = document.getElementById('op_status').value === "PERDIDO" ? 'flex' : 'none'; }
 
 function prepararNovo() {
     document.getElementById('formOportunidade').reset();
@@ -584,8 +496,7 @@ function prepararNovo() {
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     document.getElementById('sectionHistorico').style.display = "none";
-    toggleMotivoPerda();
-    abrirModal('modalOportunidade');
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
 function editarOportunidade(id) {
@@ -605,132 +516,33 @@ function editarOportunidade(id) {
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
     
-    // Carregar Historico
+    // Renderiza Histórico
     document.getElementById('sectionHistorico').style.display = "block";
     const listaH = document.getElementById('op_historico_lista');
     if(item.historico) {
         const logs = item.historico.split(';').filter(x => x.trim() !== "");
         listaH.innerHTML = logs.map(log => `<div class="historico-item">${log}</div>`).reverse().join('');
-    } else {
-        listaH.innerHTML = "Sem registros anteriores.";
-    }
+    } else { listaH.innerHTML = "Sem registros."; }
 
-    toggleMotivoPerda();
-    abrirModal('modalOportunidade');
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
-async function deletarOportunidade() {
-    const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        await supabaseClient.from('oportunidades').delete().eq('id', id);
-        fecharModal('modalOportunidade'); carregarDados();
-    }
-}
-
-// FUNÇÃO PARA GERAR LOG DE ALTERAÇÃO
-function gerarLogAlteracao(dadosAntigos, dadosNovos) {
-    const agora = new Date();
-    const dataStr = agora.toLocaleDateString('pt-BR');
-    const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
-    let logs = [];
-
-    if (dadosAntigos.valor_estimado_ano != dadosNovos.valor_estimado_ano) {
-        logs.push(`ALTEROU O VALOR ANUAL DE R$ ${dadosAntigos.valor_estimado_ano} PARA R$ ${dadosNovos.valor_estimado_ano}`);
-    }
-    if (dadosAntigos.status != dadosNovos.status) {
-        logs.push(`ALTEROU O STATUS DE ${dadosAntigos.status} PARA ${dadosNovos.status}`);
-    }
-    if (dadosAntigos.vendedor != dadosNovos.vendedor) {
-        logs.push(`ALTEROU O VENDEDOR DE ${dadosAntigos.vendedor} PARA ${dadosNovos.vendedor}`);
-    }
-
-    if(logs.length === 0) return "";
-    
-    // Retorna string formatada: "DATA - HORA - USUÁRIO: NOME - MUDANÇA"
-    return logs.map(l => `${dataStr} - ${horaStr} - USUÁRIO: ${usuarioLogado} - ${l}`).join('; ');
-}
-
-document.getElementById('formOportunidade').onsubmit = async (e) => {
-    e.preventDefault();
-    const idValue = document.getElementById('op_id').value;
-    
-    const payload = {
-        cliente: document.getElementById('op_cliente').value.toUpperCase(),
-        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
-        vendedor: document.getElementById('op_vendedor').value,
-        data_oportunidade: document.getElementById('op_data_oportunidade').value,
-        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
-        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
-        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
-        status: document.getElementById('op_status').value,
-        area: document.getElementById('op_area').value,
-        motivo_perda: document.getElementById('op_motivo_perda').value || null
-    };
-
-    if(idValue) {
-        // EDIÇÃO: Verificar o que mudou
-        const itemOriginal = base.find(x => x.id == idValue);
-        const novoLog = gerarLogAlteracao(itemOriginal, payload);
-        
-        if(novoLog !== "") {
-            const historicoAtual = itemOriginal.historico || "";
-            payload.historico = historicoAtual + (historicoAtual !== "" ? "; " : "") + novoLog;
-        }
-
-        await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-    } else {
-        // NOVO: Registro inicial
-        const agora = new Date();
-        const dataStr = agora.toLocaleDateString('pt-BR');
-        const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
-        payload.historico = `${dataStr} - ${horaStr} - USUÁRIO: ${usuarioLogado} - CRIOU A OPORTUNIDADE`;
-        
-        await supabaseClient.from('oportunidades').insert([payload]);
-    }
-    
-    fecharModal('modalOportunidade'); 
-    carregarDados();
-};
+async function deletarOportunidade() { if(confirm("Excluir?")) { await supabaseClient.from('oportunidades').delete().eq('id', document.getElementById('op_id').value); fecharModal('modalOportunidade'); carregarDados(); } }
 
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
     const { data: a } = await supabaseClient.from('areas').select('*');
-    
     const fill = (id, d, label) => { 
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
     };
-
     fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
     fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
-
-    const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) listV.innerHTML = (v || []).map(i => `
-        <div class="item-auxiliar">
-            <span>${i.nome}</span>
-            <div>
-                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button>
-                <button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button>
-            </div>
-        </div>`).join('');
-
-    const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) listA.innerHTML = (a || []).map(i => `
-        <div class="item-auxiliar">
-            <span>${i.nome}</span>
-            <div>
-                <button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button>
-                <button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button>
-            </div>
-        </div>`).join('');
 }
 
 async function carregarDados(){ 
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
     base = data || []; 
-    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
-    const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
     renderizar(); 
 }
 
@@ -738,51 +550,17 @@ function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
 function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
-async function drop(ev, novoStatus) {
-    ev.preventDefault();
-    ev.currentTarget.classList.remove('column-over');
-    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    
-    const itemOriginal = base.find(x => x.id == cardId);
-    if(!itemOriginal) return;
-
-    // Se mover para PERDIDO via drag-and-drop, abre o modal para escolher o motivo
-    if(novoStatus === "PERDIDO") {
-        editarOportunidade(cardId);
-        document.getElementById('op_status').value = "PERDIDO";
-        toggleMotivoPerda();
-        return;
-    }
-
-    // Gerar log do movimento drag-and-drop
-    const agora = new Date();
-    const logMov = `${agora.toLocaleDateString('pt-BR')} - ${agora.getHours().toString().padStart(2, '0')}H${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${usuarioLogado} - MOVEU STATUS DE ${itemOriginal.status} PARA ${novoStatus}`;
-    const novoHistorico = (itemOriginal.historico || "") + (itemOriginal.historico ? "; " : "") + logMov;
-
-    const { error } = await supabaseClient.from('oportunidades').update({ 
-        status: novoStatus, 
-        motivo_perda: null,
-        historico: novoHistorico
-    }).eq('id', cardId);
-
-    if (error) alert("Erro ao mover: " + error.message);
-    else carregarDados();
-}
-
+// --- RENDERIZAÇÃO E DASHBOARD ---
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    const fV = document.getElementById('filtroVendedor').value, fA = document.getElementById('filtroArea').value, fS = document.getElementById('filtroStatus').value;
+    const filtrados = base.filter(r => (!fC || r.cliente.toLowerCase().includes(fC)) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
     
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; 
-        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
+        const vA = r.valor_estimado_ano || 0; pipeTot += vA; mrrTotal += (r.valor_mensal_recorrente || 0);
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
@@ -791,51 +569,49 @@ function renderizar(){
 
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR');
+    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100).toFixed(1) : 0) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? (recGan/nG).toLocaleString('pt-BR') : 0);
 
+    // Gráficos
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut', 
-        data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                datalabels: { color: '#fff' }, 
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } 
-            } 
-        },
-        plugins: [pluginCentroRosca]
+        type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), {
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]},
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } }
+        type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: '#422c76' }]},
+        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
+    // Kanban
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
-    
+    const colunas = [{n:"LEAD", cl:"col-lead", b:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", b:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", b:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", b:"#8e44ad"},{n:"GANHO", cl:"col-ganho", b:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", b:"#c0392b"}];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
-            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
+            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.b;
+            card.onclick = () => editarOportunidade(i.id);
+            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${i.valor_estimado_ano.toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
         kan.appendChild(col);
     });
 }
+
+function simularBuscaIA() {
+    const termo = document.getElementById('ia_termo').value;
+    if(!termo) return;
+    document.getElementById('ia_resultado').innerHTML = "<b>Análise para " + termo + "</b>: Empresa com forte presença no setor logístico, notícias recentes indicam expansão de frota.";
+}
+
+Chart.register(ChartDataLabels);
 </script>
-    
 </body>
-    
 </html>
