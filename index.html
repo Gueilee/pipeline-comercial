@@ -763,8 +763,16 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
             if(antigo.breve_descricao !== nova_desc) log += `\n[${carimbo}] DESCRIÇÃO FOI ALTERADA`;
-            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OP.: "${antigo.data_oportunidade}" → "${nova_data}"`;
-            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO: "${antigo.previsao_fechamento || 'VAZIO'}" → "${nova_prev || 'VAZIO'}"`;
+            if(antigo.data_oportunidade !== nova_data) {
+                const dataAntigaBR = antigo.data_oportunidade.split('-').reverse().join('/');
+                const dataNovaBR = nova_data.split('-').reverse().join('/');
+                log += `\n[${carimbo}] DATA OP.: "${dataAntigaBR}" → "${dataNovaBR}"`;
+            }
+            if((antigo.previsao_fechamento || "") !== nova_prev) {
+                const prevAntigaBR = antigo.previsao_fechamento ? antigo.previsao_fechamento.split('-').reverse().join('/') : 'VAZIO';
+                const prevNovaBR = nova_prev ? nova_prev.split('-').reverse().join('/') : 'VAZIO';
+                log += `\n[${carimbo}] PREVISÃO: "${prevAntigaBR}" → "${prevNovaBR}"`;
+            }
             
             if(log !== "") {
                 historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
