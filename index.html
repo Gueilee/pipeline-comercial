@@ -736,16 +736,34 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const nova_area = document.getElementById('op_area').value;
     const novo_motivo = document.getElementById('op_motivo_perda').value || "";
     let historico_atual = document.getElementById('op_historico').value || "";
+
+    // Funções auxiliares para formatar data br
+    const formatBr = (dataSql) => {
+        if(!dataSql) return "NÃO DEFINIDA";
+        const [y, m, d] = dataSql.split('-');
+        return `${d}/${m}/${y}`;
+    };
+
     if(idValue) {
         const antigo = base.find(x => x.id == idValue);
         if(antigo) {
             let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+            
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
             if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
             if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
+            
+            // VERIFICAÇÃO DAS DATAS
+            if(antigo.data_oportunidade !== nova_data) {
+                log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
+            }
+            if((antigo.previsao_fechamento || "") !== nova_prev) {
+                log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
+            }
+
             if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
         }
     } else {
