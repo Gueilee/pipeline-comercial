@@ -198,13 +198,6 @@ header {
 .btn-mini { padding: 4px 8px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; margin-left: 5px; }
 .btn-edit-mini { background: #e1f5fe; color: #0288d1; }
 .btn-del-mini { background: #ffebee; color: #c62828; }
-
-/* ESTILO DO HISTÓRICO */
-.historico-container { margin-top: 20px; background: #f9f9f9; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
-.historico-container label { font-size: 11px; font-weight: bold; color: var(--lilas); text-transform: uppercase; }
-.historico-lista { max-height: 150px; overflow-y: auto; font-size: 12px; margin-top: 10px; }
-.historico-item { padding: 5px 0; border-bottom: 1px solid #eee; color: #555; }
-.historico-item:last-child { border-bottom: none; }
 </style>
 </head>
 
@@ -368,12 +361,6 @@ header {
                     <option value="BID">BID</option>
                 </select>
             </div>
-
-            <div class="historico-container" id="container_historico" style="display:none;">
-                <label>Histórico de Mudanças</label>
-                <div class="historico-lista" id="op_historico_lista"></div>
-            </div>
-
             <div class="modal-footer">
                 <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
                 <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
@@ -449,7 +436,7 @@ const pluginCentroRosca = {
 };
 
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViFtvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -561,7 +548,6 @@ function prepararNovo() {
     document.getElementById('op_id').value = "";
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
-    document.getElementById('container_historico').style.display = "none"; // Esconde histórico
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
     toggleMotivoPerda(); // Garante que comece oculto
     abrirModal('modalOportunidade');
@@ -581,22 +567,6 @@ function editarOportunidade(id) {
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
     document.getElementById('op_status').value = item.status;
     document.getElementById('op_motivo_perda').value = item.motivo_perda || ""; // Carrega o motivo
-
-    // Lógica do Histórico
-    const histLista = document.getElementById('op_historico_lista');
-    histLista.innerHTML = "";
-    if(item.historico && item.historico.length > 0) {
-        document.getElementById('container_historico').style.display = "block";
-        item.historico.reverse().forEach(h => {
-            const div = document.createElement('div');
-            div.className = 'historico-item';
-            div.innerText = h;
-            histLista.appendChild(div);
-        });
-    } else {
-        document.getElementById('container_historico').style.display = "none";
-    }
-
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
     toggleMotivoPerda(); // Verifica se deve exibir o campo de motivo
@@ -614,22 +584,6 @@ async function deletarOportunidade() {
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
-    const novoStatus = document.getElementById('op_status').value;
-    
-    let historicoAtualizado = [];
-    
-    if(idValue) {
-        const itemAntigo = base.find(x => x.id == idValue);
-        historicoAtualizado = itemAntigo.historico || [];
-        if(itemAntigo.status !== novoStatus) {
-            const dataHora = new Date().toLocaleString('pt-BR');
-            historicoAtualizado.push(`${dataHora}: Status alterado de ${itemAntigo.status} para ${novoStatus}`);
-        }
-    } else {
-        const dataHora = new Date().toLocaleString('pt-BR');
-        historicoAtualizado = [`${dataHora}: Oportunidade criada como ${novoStatus}`];
-    }
-
     const payload = {
         cliente: document.getElementById('op_cliente').value.toUpperCase(),
         breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
@@ -638,15 +592,12 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
         valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
-        status: novoStatus,
+        status: document.getElementById('op_status').value,
         area: document.getElementById('op_area').value,
-        motivo_perda: document.getElementById('op_motivo_perda').value || null,
-        historico: historicoAtualizado // Salva o array de histórico
+        motivo_perda: document.getElementById('op_motivo_perda').value || null // Salva na coluna nova
     };
-
     if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     else await supabaseClient.from('oportunidades').insert([payload]);
-    
     fecharModal('modalOportunidade'); carregarDados();
 };
 
@@ -702,9 +653,6 @@ async function drop(ev, novoStatus) {
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
     
-    const item = base.find(x => x.id == cardId);
-    if(item.status === novoStatus) return;
-
     // Se mover para PERDIDO via drag-and-drop, abre o modal para escolher o motivo
     if(novoStatus === "PERDIDO") {
         editarOportunidade(cardId);
@@ -713,17 +661,7 @@ async function drop(ev, novoStatus) {
         return;
     }
 
-    // Atualiza histórico no drag and drop
-    const dataHora = new Date().toLocaleString('pt-BR');
-    let novoHist = item.historico || [];
-    novoHist.push(`${dataHora}: Status alterado via Kanban para ${novoStatus}`);
-
-    const { error } = await supabaseClient.from('oportunidades').update({ 
-        status: novoStatus, 
-        motivo_perda: null,
-        historico: novoHist 
-    }).eq('id', cardId);
-    
+    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus, motivo_perda: null }).eq('id', cardId);
     if (error) alert("Erro ao mover: " + error.message);
     else carregarDados();
 }
