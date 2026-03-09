@@ -199,16 +199,58 @@ header {
 .btn-edit-mini { background: #e1f5fe; color: #0288d1; }
 .btn-del-mini { background: #ffebee; color: #c62828; }
 
-/* AJUSTE PARA O HISTÓRICO - VISUALIZAÇÃO MELHORADA */
-#op_historico { 
-    background: #fdfdfd; 
-    font-size: 11px; 
-    color: #444; 
-    line-height: 1.6; 
-    border: 1px solid #eee;
-    font-family: 'Courier New', Courier, monospace;
-    white-space: pre-wrap;
+/* ESTILO DO BOTÃO DE HISTÓRICO E TIMELINE */
+.btn-history-view {
+    background: #f0f0f0;
+    color: var(--lilas);
+    border: 1px solid #ddd;
     padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+.btn-history-view:hover { background: #e8e8e8; border-color: var(--lilas); }
+
+.timeline {
+    position: relative;
+    padding: 20px 0;
+    list-style: none;
+}
+.timeline-item {
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 20px;
+    border-left: 2px solid #eee;
+}
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--lilas);
+}
+.timeline-date {
+    font-size: 11px;
+    font-weight: bold;
+    color: #888;
+    margin-bottom: 4px;
+    display: block;
+}
+.timeline-content {
+    font-size: 13px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    color: #444;
+    border: 1px solid #eee;
 }
 </style>
 </head>
@@ -376,7 +418,9 @@ header {
             
             <div class="form-group">
                 <label>Histórico de Alterações</label>
-                <textarea id="op_historico" rows="6" readonly placeholder="Nenhuma alteração registrada..."></textarea>
+                <input type="hidden" id="op_historico"> <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
+                    <span>📜</span> Ver Histórico de Alterações
+                </button>
             </div>
 
             <div class="modal-footer">
@@ -385,6 +429,17 @@ header {
                 <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="modalHistoricoDetalhado" class="modal">
+    <div class="modal-content" style="width: 550px; background: #fff;">
+        <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
+        <div id="timelineContainer" class="timeline">
+            </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalHistoricoDetalhado')">Fechar</button>
+        </div>
     </div>
 </div>
 
@@ -562,7 +617,7 @@ function prepararNovo() {
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    document.getElementById('op_historico').value = ""; // Limpa histórico
+    document.getElementById('op_historico').value = ""; 
     toggleMotivoPerda(); 
     abrirModal('modalOportunidade');
 }
@@ -581,7 +636,7 @@ function editarOportunidade(id) {
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
     document.getElementById('op_status').value = item.status;
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
-    document.getElementById('op_historico').value = item.historico || ""; // Carrega o histórico da coluna
+    document.getElementById('op_historico').value = item.historico || ""; 
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
     toggleMotivoPerda(); 
@@ -594,6 +649,37 @@ async function deletarOportunidade() {
         await supabaseClient.from('oportunidades').delete().eq('id', id);
         fecharModal('modalOportunidade'); carregarDados();
     }
+}
+
+// FUNÇÕES PARA O POPUP DE HISTÓRICO BONITO
+function abrirHistoricoPopup() {
+    const textoHistorico = document.getElementById('op_historico').value;
+    const container = document.getElementById('timelineContainer');
+    container.innerHTML = "";
+
+    if(!textoHistorico || textoHistorico.trim() === "") {
+        container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
+    } else {
+        // Separa as linhas do histórico (assumindo que cada registro começa com "[")
+        const logs = textoHistorico.split('\n').filter(l => l.trim() !== "");
+        
+        logs.forEach(log => {
+            const match = log.match(/\[(.*?)\] (.*)/);
+            if(match) {
+                const cabecalho = match[1]; // Data e Usuário
+                const acao = match[2];     // O que mudou
+                
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <span class="timeline-date">${cabecalho}</span>
+                    <div class="timeline-content">${acao}</div>
+                `;
+                container.appendChild(item);
+            }
+        });
+    }
+    abrirModal('modalHistoricoDetalhado');
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
@@ -619,7 +705,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         if(antigo) {
             let log = "";
             const agora = new Date();
-            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours()}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+            // FORMATO BRASILEIRO: DD/MM/AAAA HH:MM
+            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
 
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
             if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
@@ -637,7 +724,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     } else {
         // SE FOR NOVO
         const agora = new Date();
-        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours()}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
 
