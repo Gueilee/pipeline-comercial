@@ -252,6 +252,15 @@ header {
     color: #444;
     border: 1px solid #eee;
 }
+
+/* NOVO CAMPO DE HISTÓRICO MANUAL */
+.manual-history-box {
+    background: #f4f7f6;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+}
 </style>
 </head>
 
@@ -419,7 +428,7 @@ header {
             <div class="form-group">
                 <label>Histórico de Alterações</label>
                 <input type="hidden" id="op_historico"> <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
-                    <span>📜</span> Ver Histórico de Alterações
+                    <span>📜</span> Ver Histórico e Adicionar Comentário
                 </button>
             </div>
 
@@ -435,8 +444,17 @@ header {
 <div id="modalHistoricoDetalhado" class="modal">
     <div class="modal-content" style="width: 550px; background: #fff;">
         <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
-        <div id="timelineContainer" class="timeline">
+        
+        <div class="manual-history-box">
+            <div class="form-group">
+                <label>Incluir Novo Comentário Manual</label>
+                <textarea id="txt_historico_manual" rows="3" placeholder="Ex: Dia 09/03/2026 tenho uma reunião de alinhamento com o cliente..."></textarea>
+                <button type="button" class="btn-header btn-novo-op" style="margin-top:10px; width:100%" onclick="salvarHistoricoManual()">SALVAR COMENTÁRIO</button>
             </div>
+        </div>
+
+        <div id="timelineContainer" class="timeline"></div>
+        
         <div class="modal-footer">
             <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalHistoricoDetalhado')">Fechar</button>
         </div>
@@ -653,6 +671,15 @@ async function deletarOportunidade() {
 
 // FUNÇÕES PARA O POPUP DE HISTÓRICO BONITO
 function abrirHistoricoPopup() {
+    const id = document.getElementById('op_id').value;
+    if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
+    
+    document.getElementById('txt_historico_manual').value = "";
+    renderizarLinhaDoTempo();
+    abrirModal('modalHistoricoDetalhado');
+}
+
+function renderizarLinhaDoTempo() {
     const textoHistorico = document.getElementById('op_historico').value;
     const container = document.getElementById('timelineContainer');
     container.innerHTML = "";
@@ -660,15 +687,12 @@ function abrirHistoricoPopup() {
     if(!textoHistorico || textoHistorico.trim() === "") {
         container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
     } else {
-        // Separa as linhas do histórico (assumindo que cada registro começa com "[")
         const logs = textoHistorico.split('\n').filter(l => l.trim() !== "");
-        
         logs.forEach(log => {
             const match = log.match(/\[(.*?)\] (.*)/);
             if(match) {
-                const cabecalho = match[1]; // Data e Usuário
-                const acao = match[2];     // O que mudou
-                
+                const cabecalho = match[1]; 
+                const acao = match[2];     
                 const item = document.createElement('div');
                 item.className = 'timeline-item';
                 item.innerHTML = `
@@ -679,7 +703,33 @@ function abrirHistoricoPopup() {
             }
         });
     }
-    abrirModal('modalHistoricoDetalhado');
+}
+
+// NOVA FUNÇÃO PARA SALVAR COMENTÁRIO MANUAL
+async function salvarHistoricoManual() {
+    const id = document.getElementById('op_id').value;
+    const comentario = document.getElementById('txt_historico_manual').value.trim();
+    
+    if(!comentario) return alert("Digite algo para salvar no histórico!");
+
+    const agora = new Date();
+    const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+    const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
+    
+    let historicoAntigo = document.getElementById('op_historico').value || "";
+    const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
+
+    // Salva no Supabase imediatamente
+    const { error } = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
+
+    if(error) {
+        alert("Erro ao salvar comentário: " + error.message);
+    } else {
+        document.getElementById('op_historico').value = historicoAtualizado;
+        document.getElementById('txt_historico_manual').value = "";
+        renderizarLinhaDoTempo();
+        carregarDados(); // Atualiza a base local
+    }
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
@@ -705,7 +755,6 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         if(antigo) {
             let log = "";
             const agora = new Date();
-            // FORMATO BRASILEIRO: DD/MM/AAAA HH:MM
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
 
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
@@ -722,7 +771,6 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
             }
         }
     } else {
-        // SE FOR NOVO
         const agora = new Date();
         const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
@@ -739,7 +787,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         status: novo_status,
         area: nova_area,
         motivo_perda: novo_motivo || null,
-        historico: historico_atual // Salva na coluna historico
+        historico: historico_atual
     };
 
     if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
@@ -798,8 +846,6 @@ async function drop(ev, novoStatus) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    
-    // No Drag and Drop, abrimos o modal para garantir que o histórico seja gravado via formulário
     editarOportunidade(cardId);
     document.getElementById('op_status').value = novoStatus;
     toggleMotivoPerda();
