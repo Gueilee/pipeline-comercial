@@ -395,25 +395,32 @@ document.addEventListener('keypress', function (e) {
 
 Chart.register(ChartDataLabels);
 
-// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA - AJUSTADO
+// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA - CENTRALIZAÇÃO PRECISA
 const pluginCentroRosca = {
     id: 'pluginCentroRosca',
-    beforeDraw: (chart) => {
+    afterDraw: (chart) => {
         if (chart.config.type === 'doughnut') {
-            const { ctx, width, height } = chart;
-            ctx.restore();
-            const fontSize = (height / 160).toFixed(2);
+            const { ctx, chartArea: { top, bottom, left, right } } = chart;
+            ctx.save();
+
+            // Calcula o centro exato da área do gráfico (ignorando legendas)
+            const centerX = (left + right) / 2;
+            const centerY = (top + bottom) / 2;
+
+            // Configuração da fonte proporcional à altura da área do gráfico
+            const chartHeight = bottom - top;
+            const fontSize = (chartHeight / 120).toFixed(2);
             ctx.font = `bold ${fontSize}em sans-serif`;
             ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
             ctx.fillStyle = "#414042";
 
             const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
             const text = total.toString();
-            const textX = Math.round((width - ctx.measureText(text).width) / 2);
-            const textY = height / 2; // Centralizado verticalmente
 
-            ctx.fillText(text, textX, textY);
-            ctx.save();
+            // Desenha o texto nas coordenadas centrais calculadas
+            ctx.fillText(text, centerX, centerY);
+            ctx.restore();
         }
     }
 };
@@ -694,3 +701,4 @@ function renderizar(){
 </body>
     
 </html>
+
