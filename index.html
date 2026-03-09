@@ -154,7 +154,7 @@ header {
 .input-search, select { padding:10px; border-radius:6px; border:1px solid #ccc; font-size:13px; background: white; height: 40px; box-sizing: border-box; }
 .input-search { min-width: 300px; border: 2px solid var(--lilas); }
 
-/* KPI GRID ATUALIZADA PARA 6 COLUNAS */
+/* KPI GRID */
 .kpis{ display:grid; grid-template-columns:repeat(6,1fr); gap:15px; margin-bottom:30px; }
 .kpi{ background:white; padding:15px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--lilas); }
 .kpi h3{ margin:0; font-size:11px; color:var(--lilas); font-weight: 600; text-transform: uppercase; }
@@ -325,22 +325,22 @@ header {
 
         <div id="page-dashboard" class="active-page">
             <div class="kpis">
-                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-                <div class="kpi"><h3>Pipeline Estimado</h3><p id="pipelineTotal">R$ 0</p></div>
-                <div class="kpi" style="border-top-color: var(--ia-gold);"><h3>Perf. Anual (Real/Plan)</h3><p id="perfAnual">0%</p></div>
-                <div class="kpi" style="border-top-color: #27ae60;"><h3>Meta Bruta Real (Ano)</h3><p id="mbRealTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+                <div class="kpi"><h3>Total Fechado (Ganha)</h3><p id="receitaGanha">R$ 0</p></div>
+                <div class="kpi"><h3>Vendas em Aberto</h3><p id="pipelineTotal">R$ 0</p></div>
+                <div class="kpi" style="border-top-color: var(--ia-gold);"><h3>Atingimento da Meta</h3><p id="perfAnual">0%</p></div>
+                <div class="kpi" style="border-top-color: #27ae60;"><h3>Lucro Bruto Realizado</h3><p id="mbRealTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Sucesso de Vendas</h3><p id="conversao">0%</p></div>
+                <div class="kpi"><h3>Valor Médio Contrato</h3><p id="ticket">R$ 0</p></div>
             </div>
 
             <div class="charts-grid">
-                <div class="chart-card"><h4>Performance Planejado vs Realizado (Quarters)</h4><canvas id="chartQuarters"></canvas></div>
-                <div class="chart-card"><h4>Meta Bruta Realizada por Vendedor</h4><canvas id="chartMBVendedor"></canvas></div>
+                <div class="chart-card"><h4>Evolução das Vendas (Por Trimestre)</h4><canvas id="chartQuarters"></canvas></div>
+                <div class="chart-card"><h4>Lucro Bruto por Vendedor</h4><canvas id="chartMBVendedor"></canvas></div>
             </div>
 
             <div class="charts-grid">
-                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-                <div class="chart-card"><h4>Ranking Valor Estimado por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+                <div class="chart-card"><h4>Onde estão nossas Vendas?</h4><canvas id="chartStatus"></canvas></div>
+                <div class="chart-card"><h4>Ranking de Potencial por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
             </div>
         </div>
 
@@ -815,7 +815,6 @@ function renderizar(){
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
     
-    // VARIÁVEIS PARA OS NOVOS CÁLCULOS
     let pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let plan2026 = 0, real2026 = 0, mbReal2026 = 0;
     let quarters = { plan: [0,0,0,0], real: [0,0,0,0] };
@@ -827,12 +826,10 @@ function renderizar(){
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         
-        // SOMA DAS NOVAS COLUNAS
         plan2026 += parseFloat(r["2026_plan"]) || 0;
         real2026 += parseFloat(r["2026_real"]) || 0;
         mbReal2026 += parseFloat(r["mb_real_2026"]) || 0;
 
-        // DADOS PARA O GRÁFICO DE QUARTERS
         quarters.plan[0] += parseFloat(r.q1_plan) || 0;
         quarters.plan[1] += parseFloat(r.q2_plan) || 0;
         quarters.plan[2] += parseFloat(r.q3_plan) || 0;
@@ -849,7 +846,6 @@ function renderizar(){
         }
     });
 
-    // ATUALIZAÇÃO DOS KPIS
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
     document.getElementById('mbRealTotal').innerText = "R$ " + mbReal2026.toLocaleString('pt-BR');
@@ -857,38 +853,56 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
 
-    // GRÁFICO 1: PERFORMANCE POR QUARTER
+    // CONFIGURAÇÃO GLOBAL PARA LIMPAR GRÁFICOS (SEM GRADES)
+    const cleanScales = { 
+        x: { display: false, grid: { display: false } }, 
+        y: { display: false, grid: { display: false } } 
+    };
+
+    // GRÁFICO 1: EVOLUÇÃO
     if(charts.qtr) charts.qtr.destroy();
     charts.qtr = new Chart(document.getElementById('chartQuarters'), {
         type: 'bar',
         data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            labels: ['1º Trim', '2º Trim', '3º Trim', '4º Trim'],
             datasets: [
-                { label: 'Planejado', data: quarters.plan, backgroundColor: '#d1d1d1', borderRadius: 5 },
-                { label: 'Realizado', data: quarters.real, backgroundColor: 'var(--lilas)', borderRadius: 5 }
+                { label: 'O que Planejamos', data: quarters.plan, backgroundColor: '#d1d1d1', borderRadius: 5 },
+                { label: 'O que Vendemos', data: quarters.real, backgroundColor: 'var(--lilas)', borderRadius: 5 }
             ]
         },
-        options: { maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { position: 'bottom' } } }
+        options: { 
+            maintainAspectRatio: false, 
+            scales: cleanScales,
+            plugins: { datalabels: { display: false }, legend: { position: 'bottom' } } 
+        }
     });
 
-    // GRÁFICO 2: MB POR VENDEDOR
+    // GRÁFICO 2: LUCRO POR VENDEDOR (MANTENDO APENAS EIXO X COM NOMES)
     if(charts.mbv) charts.mbv.destroy();
     const smb = Object.entries(vendMB).sort((a,b)=>b[1]-a[1]);
     charts.mbv = new Chart(document.getElementById('chartMBVendedor'), {
         type: 'bar',
         data: { labels: smb.map(x=>x[0]), datasets: [{ data: smb.map(x=>x[1]), backgroundColor: '#27ae60', borderRadius: 8 }] },
-        options: { maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { display: false } } }
+        options: { 
+            maintainAspectRatio: false, 
+            scales: { 
+                x: { display: true, grid: { display: false }, border: { display: false } }, 
+                y: { display: false, grid: { display: false } } 
+            },
+            plugins: { datalabels: { display: false }, legend: { display: false } } 
+        }
     });
 
-    // GRÁFICOS ORIGINAIS (MANTIDOS)
+    // GRÁFICO 3: STATUS
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
     
+    // GRÁFICO 4: RANKING POTENCIAL
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, scales: { x: { display: false }, y: { grid: { display: false } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, scales: cleanScales, plugins: { legend: { display: false }, datalabels: { color: '#444', anchor: 'end', align: 'right', offset: 5, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
 
-    // KANBAN (MANTIDO)
+    // KANBAN
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
     colunas.forEach(s => {
