@@ -395,7 +395,7 @@ document.addEventListener('keypress', function (e) {
 
 Chart.register(ChartDataLabels);
 
-// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA
+// PLUGIN PARA DESENHAR O TOTAL NO CENTRO DA ROSCA - AJUSTADO
 const pluginCentroRosca = {
     id: 'pluginCentroRosca',
     beforeDraw: (chart) => {
@@ -410,16 +410,9 @@ const pluginCentroRosca = {
             const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
             const text = total.toString();
             const textX = Math.round((width - ctx.measureText(text).width) / 2);
-            const textY = height / 1.85; // Ajuste fino para alinhar com a legenda embaixo
+            const textY = height / 2; // Centralizado verticalmente
 
             ctx.fillText(text, textX, textY);
-            
-            // Subtexto "TOTAL"
-            ctx.font = `600 ${(height / 350).toFixed(2)}em sans-serif`;
-            const label = "OPORTUNIDADES";
-            const labelX = Math.round((width - ctx.measureText(label).width) / 2);
-            ctx.fillText(label, labelX, textY - 25);
-            
             ctx.save();
         }
     }
