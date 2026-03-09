@@ -164,6 +164,35 @@ header {
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
+/* ESTILOS DO HISTÓRICO */
+.historico-section {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+}
+.historico-section h4 { 
+    font-size: 12px; 
+    color: var(--lilas); 
+    margin-bottom: 10px; 
+    text-transform: uppercase;
+}
+.historico-lista {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #555;
+    border: 1px solid #eee;
+}
+.historico-item {
+    border-bottom: 1px solid #eee;
+    padding: 4px 0;
+}
+.historico-item:last-child { border-bottom: none; }
+
 .ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
 .ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
 .ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
@@ -361,6 +390,13 @@ header {
                     <option value="BID">BID</option>
                 </select>
             </div>
+
+            <div class="historico-section" id="sectionHistorico" style="display:none;">
+                <h4>Histórico de Movimentações</h4>
+                <div class="historico-lista" id="op_historico_lista">
+                    </div>
+            </div>
+
             <div class="modal-footer">
                 <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
                 <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
@@ -371,12 +407,16 @@ header {
 </div>
 
 <script>
+// Variável Global para armazenar o usuário logado
+let usuarioLogado = "";
+
 // LÓGICA DE AUTENTICAÇÃO
 function autenticar() {
     const user = document.getElementById('login_user').value;
     const pass = document.getElementById('login_pass').value;
 
     if(user === "admin" && pass === "vendemmia2024") {
+        usuarioLogado = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
         carregarAuxiliares(); 
@@ -394,6 +434,7 @@ function logoff() {
         document.getElementById('login_user').value = "";
         document.getElementById('login_pass').value = "";
         document.getElementById('login-error').style.display = 'none';
+        usuarioLogado = "";
     }
 }
 
@@ -412,23 +453,16 @@ const pluginCentroRosca = {
         if (chart.config.type === 'doughnut') {
             const { ctx, chartArea: { top, bottom, left, right } } = chart;
             ctx.save();
-
-            // Calcula o centro exato da área do gráfico (ignorando legendas)
             const centerX = (left + right) / 2;
             const centerY = (top + bottom) / 2;
-
-            // Configuração da fonte proporcional à altura da área do gráfico
             const chartHeight = bottom - top;
             const fontSize = (chartHeight / 120).toFixed(2);
             ctx.font = `bold ${fontSize}em sans-serif`;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = "#414042";
-
             const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
             const text = total.toString();
-
-            // Desenha o texto nas coordenadas centrais calculadas
             ctx.fillText(text, centerX, centerY);
             ctx.restore();
         }
@@ -549,7 +583,8 @@ function prepararNovo() {
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    toggleMotivoPerda(); // Garante que comece oculto
+    document.getElementById('sectionHistorico').style.display = "none";
+    toggleMotivoPerda();
     abrirModal('modalOportunidade');
 }
 
@@ -566,10 +601,21 @@ function editarOportunidade(id) {
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
     document.getElementById('op_status').value = item.status;
-    document.getElementById('op_motivo_perda').value = item.motivo_perda || ""; // Carrega o motivo
+    document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
-    toggleMotivoPerda(); // Verifica se deve exibir o campo de motivo
+    
+    // Carregar Historico
+    document.getElementById('sectionHistorico').style.display = "block";
+    const listaH = document.getElementById('op_historico_lista');
+    if(item.historico) {
+        const logs = item.historico.split(';').filter(x => x.trim() !== "");
+        listaH.innerHTML = logs.map(log => `<div class="historico-item">${log}</div>`).reverse().join('');
+    } else {
+        listaH.innerHTML = "Sem registros anteriores.";
+    }
+
+    toggleMotivoPerda();
     abrirModal('modalOportunidade');
 }
 
@@ -581,9 +627,33 @@ async function deletarOportunidade() {
     }
 }
 
+// FUNÇÃO PARA GERAR LOG DE ALTERAÇÃO
+function gerarLogAlteracao(dadosAntigos, dadosNovos) {
+    const agora = new Date();
+    const dataStr = agora.toLocaleDateString('pt-BR');
+    const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+    let logs = [];
+
+    if (dadosAntigos.valor_estimado_ano != dadosNovos.valor_estimado_ano) {
+        logs.push(`ALTEROU O VALOR ANUAL DE R$ ${dadosAntigos.valor_estimado_ano} PARA R$ ${dadosNovos.valor_estimado_ano}`);
+    }
+    if (dadosAntigos.status != dadosNovos.status) {
+        logs.push(`ALTEROU O STATUS DE ${dadosAntigos.status} PARA ${dadosNovos.status}`);
+    }
+    if (dadosAntigos.vendedor != dadosNovos.vendedor) {
+        logs.push(`ALTEROU O VENDEDOR DE ${dadosAntigos.vendedor} PARA ${dadosNovos.vendedor}`);
+    }
+
+    if(logs.length === 0) return "";
+    
+    // Retorna string formatada: "DATA - HORA - USUÁRIO: NOME - MUDANÇA"
+    return logs.map(l => `${dataStr} - ${horaStr} - USUÁRIO: ${usuarioLogado} - ${l}`).join('; ');
+}
+
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
+    
     const payload = {
         cliente: document.getElementById('op_cliente').value.toUpperCase(),
         breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
@@ -594,11 +664,32 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
         status: document.getElementById('op_status').value,
         area: document.getElementById('op_area').value,
-        motivo_perda: document.getElementById('op_motivo_perda').value || null // Salva na coluna nova
+        motivo_perda: document.getElementById('op_motivo_perda').value || null
     };
-    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-    else await supabaseClient.from('oportunidades').insert([payload]);
-    fecharModal('modalOportunidade'); carregarDados();
+
+    if(idValue) {
+        // EDIÇÃO: Verificar o que mudou
+        const itemOriginal = base.find(x => x.id == idValue);
+        const novoLog = gerarLogAlteracao(itemOriginal, payload);
+        
+        if(novoLog !== "") {
+            const historicoAtual = itemOriginal.historico || "";
+            payload.historico = historicoAtual + (historicoAtual !== "" ? "; " : "") + novoLog;
+        }
+
+        await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    } else {
+        // NOVO: Registro inicial
+        const agora = new Date();
+        const dataStr = agora.toLocaleDateString('pt-BR');
+        const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+        payload.historico = `${dataStr} - ${horaStr} - USUÁRIO: ${usuarioLogado} - CRIOU A OPORTUNIDADE`;
+        
+        await supabaseClient.from('oportunidades').insert([payload]);
+    }
+    
+    fecharModal('modalOportunidade'); 
+    carregarDados();
 };
 
 async function carregarAuxiliares(){
@@ -613,7 +704,6 @@ async function carregarAuxiliares(){
     fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
     fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
 
-    // Renderizar Listas de Gerenciamento
     const listV = document.getElementById('listaVendedoresGerenciamento');
     if(listV) listV.innerHTML = (v || []).map(i => `
         <div class="item-auxiliar">
@@ -653,6 +743,9 @@ async function drop(ev, novoStatus) {
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
     
+    const itemOriginal = base.find(x => x.id == cardId);
+    if(!itemOriginal) return;
+
     // Se mover para PERDIDO via drag-and-drop, abre o modal para escolher o motivo
     if(novoStatus === "PERDIDO") {
         editarOportunidade(cardId);
@@ -661,7 +754,17 @@ async function drop(ev, novoStatus) {
         return;
     }
 
-    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus, motivo_perda: null }).eq('id', cardId);
+    // Gerar log do movimento drag-and-drop
+    const agora = new Date();
+    const logMov = `${agora.toLocaleDateString('pt-BR')} - ${agora.getHours().toString().padStart(2, '0')}H${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${usuarioLogado} - MOVEU STATUS DE ${itemOriginal.status} PARA ${novoStatus}`;
+    const novoHistorico = (itemOriginal.historico || "") + (itemOriginal.historico ? "; " : "") + logMov;
+
+    const { error } = await supabaseClient.from('oportunidades').update({ 
+        status: novoStatus, 
+        motivo_perda: null,
+        historico: novoHistorico
+    }).eq('id', cardId);
+
     if (error) alert("Erro ao mover: " + error.message);
     else carregarDados();
 }
