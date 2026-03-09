@@ -342,13 +342,23 @@ header {
             </div>
             <div class="form-group">
                 <label>Status</label>
-                <select id="op_status" required>
+                <select id="op_status" required onchange="toggleMotivoPerda()">
                     <option value="LEAD">LEAD</option>
                     <option value="AINDA FRIO">AINDA FRIO</option>
                     <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
                     <option value="EM ASSINATURA">EM ASSINATURA</option>
                     <option value="GANHO">GANHO</option>
                     <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+            <div class="form-group" id="group_motivo_perda" style="display: none;">
+                <label>Motivo da Perda</label>
+                <select id="op_motivo_perda">
+                    <option value="">Selecione o motivo...</option>
+                    <option value="VALOR">VALOR</option>
+                    <option value="CONCORRÊNCIA">CONCORRÊNCIA</option>
+                    <option value="SEM ACORDO">SEM ACORDO</option>
+                    <option value="BID">BID</option>
                 </select>
             </div>
             <div class="modal-footer">
@@ -456,6 +466,18 @@ function simularBuscaIA() {
     }, 1500);
 }
 
+// FUNÇÃO PARA CONTROLAR VISIBILIDADE DO MOTIVO DE PERDA
+function toggleMotivoPerda() {
+    const status = document.getElementById('op_status').value;
+    const group = document.getElementById('group_motivo_perda');
+    if(status === "PERDIDO") {
+        group.style.display = 'flex';
+    } else {
+        group.style.display = 'none';
+        document.getElementById('op_motivo_perda').value = "";
+    }
+}
+
 // GERENCIAMENTO DE VENDEDORES
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -527,6 +549,7 @@ function prepararNovo() {
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
+    toggleMotivoPerda(); // Garante que comece oculto
     abrirModal('modalOportunidade');
 }
 
@@ -543,8 +566,10 @@ function editarOportunidade(id) {
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
     document.getElementById('op_status').value = item.status;
+    document.getElementById('op_motivo_perda').value = item.motivo_perda || ""; // Carrega o motivo
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
+    toggleMotivoPerda(); // Verifica se deve exibir o campo de motivo
     abrirModal('modalOportunidade');
 }
 
@@ -568,7 +593,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0,
         valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
         status: document.getElementById('op_status').value,
-        area: document.getElementById('op_area').value
+        area: document.getElementById('op_area').value,
+        motivo_perda: document.getElementById('op_motivo_perda').value || null // Salva na coluna nova
     };
     if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     else await supabaseClient.from('oportunidades').insert([payload]);
@@ -626,7 +652,16 @@ async function drop(ev, novoStatus) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
+    
+    // Se mover para PERDIDO via drag-and-drop, abre o modal para escolher o motivo
+    if(novoStatus === "PERDIDO") {
+        editarOportunidade(cardId);
+        document.getElementById('op_status').value = "PERDIDO";
+        toggleMotivoPerda();
+        return;
+    }
+
+    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus, motivo_perda: null }).eq('id', cardId);
     if (error) alert("Erro ao mover: " + error.message);
     else carregarDados();
 }
@@ -701,4 +736,3 @@ function renderizar(){
 </body>
     
 </html>
-
