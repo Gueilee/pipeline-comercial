@@ -24,7 +24,6 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('fundo-login.jpg'); 
@@ -177,7 +176,7 @@ header {
     background: #f9f9f9;
     border-radius: 6px;
     padding: 10px;
-    max-height: 180px;
+    max-height: 150px;
     overflow-y: auto;
     font-size: 11px;
     line-height: 1.6;
@@ -186,7 +185,7 @@ header {
 }
 .historico-item {
     border-bottom: 1px solid #eee;
-    padding: 6px 0;
+    padding: 4px 0;
 }
 .historico-item:last-child { border-bottom: none; }
 
@@ -368,7 +367,7 @@ header {
             </div>
 
             <div class="historico-section" id="sectionHistorico" style="display:none;">
-                <h4>Histórico de Alterações</h4>
+                <h4>Histórico de Movimentações</h4>
                 <div class="historico-lista" id="op_historico_lista"></div>
             </div>
 
@@ -390,7 +389,6 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; let charts={};
 
-// --- AUTENTICAÇÃO ---
 function autenticar() {
     const user = document.getElementById('login_user').value;
     const pass = document.getElementById('login_pass').value;
@@ -402,34 +400,45 @@ function autenticar() {
     } else { document.getElementById('login-error').style.display = 'block'; }
 }
 
-function logoff() {
-    if(confirm("Deseja realmente sair?")) location.reload();
-}
+function logoff() { if(confirm("Sair?")) location.reload(); }
 
-// --- FUNÇÃO CORE: GERAÇÃO DE LOGS DE HISTÓRICO ---
-function gerarLogAlteracao(dadosAntigos, dadosNovos) {
+// --- FUNÇÃO DE HISTÓRICO COMPLETA (TODOS OS CAMPOS) ---
+function gerarLogAlteracao(antigo, novo) {
     const agora = new Date();
-    const dataStr = agora.toLocaleDateString('pt-BR');
-    const horaStr = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
+    const ts = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
     let logs = [];
 
-    // Detecção de mudanças em campos chave
-    if (dadosAntigos.cliente !== dadosNovos.cliente) logs.push(`CLIENTE: "${dadosAntigos.cliente}" → "${dadosNovos.cliente}"`);
-    if (dadosAntigos.status !== dadosNovos.status) logs.push(`STATUS: ${dadosAntigos.status} → ${dadosNovos.status}`);
-    if (dadosAntigos.vendedor !== dadosNovos.vendedor) logs.push(`VENDEDOR: ${dadosAntigos.vendedor} → ${dadosNovos.vendedor}`);
-    if (dadosAntigos.area !== dadosNovos.area) logs.push(`ÁREA: ${dadosAntigos.area} → ${dadosNovos.area}`);
-    
-    if (Number(dadosAntigos.valor_estimado_ano) !== Number(dadosNovos.valor_estimado_ano)) {
-        const de = Number(dadosAntigos.valor_estimado_ano).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const para = Number(dadosNovos.valor_estimado_ano).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        logs.push(`VALOR: ${de} → ${para}`);
-    }
+    const campos = [
+        { id: 'cliente', label: 'CLIENTE' },
+        { id: 'breve_descricao', label: 'DESCRIÇÃO' },
+        { id: 'vendedor', label: 'VENDEDOR' },
+        { id: 'area', label: 'ÁREA' },
+        { id: 'data_oportunidade', label: 'DATA OP.' },
+        { id: 'previsao_fechamento', label: 'PREVISÃO' },
+        { id: 'valor_estimado_ano', label: 'VALOR ANUAL' },
+        { id: 'status', label: 'STATUS' },
+        { id: 'motivo_perda', label: 'MOTIVO PERDA' }
+    ];
 
-    if(logs.length === 0) return "";
-    return `${dataStr} - ${horaStr} - [${usuarioLogado}]: ${logs.join(' | ')}`;
+    campos.forEach(c => {
+        let valAntigo = antigo[c.id] || "";
+        let valNovo = novo[c.id] || "";
+        
+        // Normalização para comparação
+        if (c.id === 'valor_estimado_ano') {
+            valAntigo = parseFloat(valAntigo).toFixed(2);
+            valNovo = parseFloat(valNovo).toFixed(2);
+        }
+
+        if (String(valAntigo).trim() !== String(valNovo).trim()) {
+            logs.push(`${c.label}: "${valAntigo}" → "${valNovo}"`);
+        }
+    });
+
+    if (logs.length === 0) return "";
+    return `${ts} - [${usuarioLogado}]: ${logs.join(' | ')}`;
 }
 
-// --- SALVAMENTO E HISTÓRICO ---
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
@@ -457,14 +466,13 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     } else {
         const agora = new Date();
-        const d = agora.toLocaleDateString('pt-BR'), h = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
-        payload.historico = `${d} - ${h} - [${usuarioLogado}]: CRIOU A OPORTUNIDADE`;
+        const ts = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
+        payload.historico = `${ts} - [${usuarioLogado}]: CRIOU A OPORTUNIDADE`;
         await supabaseClient.from('oportunidades').insert([payload]);
     }
     fecharModal('modalOportunidade'); carregarDados();
 };
 
-// --- DRAG AND DROP COM HISTÓRICO ---
 async function drop(ev, novoStatus) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('column-over');
@@ -475,15 +483,14 @@ async function drop(ev, novoStatus) {
     if(novoStatus === "PERDIDO") { editarOportunidade(cardId); document.getElementById('op_status').value = "PERDIDO"; toggleMotivoPerda(); return; }
 
     const agora = new Date();
-    const d = agora.toLocaleDateString('pt-BR'), h = agora.getHours().toString().padStart(2, '0') + "H" + agora.getMinutes().toString().padStart(2, '0');
-    const logMov = `${d} - ${h} - [${usuarioLogado}]: MOVEU STATUS DE ${item.status} PARA ${novoStatus}`;
+    const ts = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
+    const logMov = `${ts} - [${usuarioLogado}]: STATUS: "${item.status}" → "${novoStatus}" (ARRASTADO)`;
     const novoHist = (item.historico || "") + (item.historico ? "; " : "") + logMov;
 
     await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist, motivo_perda: null }).eq('id', cardId);
     carregarDados();
 }
 
-// --- AUXILIARES E INTERFACE ---
 function abrirModal(id){ document.getElementById(id).style.display = 'block'; }
 function fecharModal(id){ document.getElementById(id).style.display = 'none'; }
 function calcularMRR() { const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); }
@@ -516,7 +523,6 @@ function editarOportunidade(id) {
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
     
-    // Renderiza Histórico
     document.getElementById('sectionHistorico').style.display = "block";
     const listaH = document.getElementById('op_historico_lista');
     if(item.historico) {
@@ -542,15 +548,13 @@ async function carregarAuxiliares(){
 
 async function carregarDados(){ 
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
-    base = data || []; 
-    renderizar(); 
+    base = data || []; renderizar(); 
 }
 
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
 function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
-// --- RENDERIZAÇÃO E DASHBOARD ---
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
     const fV = document.getElementById('filtroVendedor').value, fA = document.getElementById('filtroArea').value, fS = document.getElementById('filtroStatus').value;
@@ -573,7 +577,6 @@ function renderizar(){
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100).toFixed(1) : 0) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? (recGan/nG).toLocaleString('pt-BR') : 0);
 
-    // Gráficos
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), {
         type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]},
@@ -587,7 +590,6 @@ function renderizar(){
         options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
-    // Kanban
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [{n:"LEAD", cl:"col-lead", b:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", b:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", b:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", b:"#8e44ad"},{n:"GANHO", cl:"col-ganho", b:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", b:"#c0392b"}];
     colunas.forEach(s => {
@@ -604,14 +606,7 @@ function renderizar(){
         kan.appendChild(col);
     });
 }
-
-function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) return;
-    document.getElementById('ia_resultado').innerHTML = "<b>Análise para " + termo + "</b>: Empresa com forte presença no setor logístico, notícias recentes indicam expansão de frota.";
-}
-
-Chart.register(ChartDataLabels);
+function simularBuscaIA() { alert("Simulação IA executada."); }
 </script>
 </body>
 </html>
