@@ -596,11 +596,11 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
     const novo_vend = document.getElementById('op_vendedor').value;
     const nova_data = document.getElementById('op_data_oportunidade').value;
-    const nova_prev = document.getElementById('op_previsao_fechamento').value || null;
+    const nova_prev = document.getElementById('op_previsao_fechamento').value || "";
     const novo_valor = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0;
     const novo_status = document.getElementById('op_status').value;
     const nova_area = document.getElementById('op_area').value;
-    const novo_motivo = document.getElementById('op_motivo_perda').value || null;
+    const novo_motivo = document.getElementById('op_motivo_perda').value || "";
 
     let historico_atual = document.getElementById('op_historico').value || "";
     
@@ -618,9 +618,11 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
             if(antigo.vendedor !== novo_vend) log += `\n${carimbo} - ALTEROU VENDEDOR DE "${antigo.vendedor}" PARA "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n${carimbo} - ALTEROU ÁREA DE "${antigo.area}" PARA "${nova_area}"`;
             if(antigo.breve_descricao !== nova_desc) log += `\n${carimbo} - ALTEROU DESCRIÇÃO`;
+            if(antigo.data_oportunidade !== nova_data) log += `\n${carimbo} - ALTEROU DATA DA OP. DE "${antigo.data_oportunidade}" PARA "${nova_data}"`;
+            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n${carimbo} - ALTEROU PREVISÃO FECH. DE "${antigo.previsao_fechamento || 'VAZIO'}" PARA "${nova_prev || 'VAZIO'}"`;
             
             if(log !== "") {
-                historico_atual = log + (historico_atual ? "\n" + historico_atual : "");
+                historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
             }
         }
     } else {
@@ -634,12 +636,12 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         breve_descricao: nova_desc,
         vendedor: novo_vend,
         data_oportunidade: nova_data,
-        previsao_fechamento: nova_prev,
+        previsao_fechamento: nova_prev || null,
         valor_estimado_ano: novo_valor,
         valor_mensal_recorrente: (novo_valor / 12),
         status: novo_status,
         area: nova_area,
-        motivo_perda: novo_motivo,
+        motivo_perda: novo_motivo || null,
         historico: historico_atual // Salva na coluna historico
     };
 
