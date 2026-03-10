@@ -958,27 +958,39 @@ function renderizarMetas() {
                 }
             },
             scales: {
-                y: { display: false }, // Remove eixo vertical
+                y: { display: false },
                 x: { 
-                    grid: { display: false }, // Remove grades verticais
+                    grid: { display: false },
                     ticks: { font: { size: 11, weight: 'bold' } } 
                 }
             }
         }
     });
 
-    // GRÁFICO RODAPÉ: APENAS MARGEM BRUTA (MB)
+    // GRÁFICO RODAPÉ: MARGEM BRUTA (MB) VS REALIZADO
     if(charts.metaMBFooter) charts.metaMBFooter.destroy();
     charts.metaMBFooter = new Chart(document.getElementById('chartMetaMBFooter'), {
         type: 'bar',
         data: {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [{
-                label: 'Margem Bruta (MB)',
-                data: qMB,
-                backgroundColor: '#d4af37',
-                borderRadius: 2
-            }]
+            datasets: [
+                {
+                    label: 'Meta Bruta (MB)',
+                    data: qMB,
+                    backgroundColor: '#d4af37',
+                    borderRadius: 2,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5
+                },
+                {
+                    label: 'Realizado',
+                    data: qReal,
+                    backgroundColor: '#27ae60',
+                    borderRadius: 2,
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5
+                }
+            ]
         },
         options: {
             maintainAspectRatio: false,
@@ -988,9 +1000,9 @@ function renderizarMetas() {
                     display: true,
                     anchor: 'end',
                     align: 'top',
-                    color: '#b8962d',
+                    color: (ctx) => ctx.datasetIndex === 0 ? '#b8962d' : '#1e7e46',
                     font: { size: 9, weight: 'bold' },
-                    formatter: (v) => 'R$ ' + (v/1000).toFixed(0) + 'k'
+                    formatter: (v) => v > 0 ? 'R$ ' + (v/1000).toFixed(0) + 'k' : ''
                 }
             },
             scales: {
