@@ -923,11 +923,30 @@ function renderizarMetas() {
         data: {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
             datasets: [
-                { label: 'Planejado', data: qPlan, backgroundColor: '#422c76', borderRadius: 5 },
-                { label: 'Realizado', data: qReal, backgroundColor: '#27ae60', borderRadius: 5 }
+                { label: 'Planejado', data: qPlan, backgroundColor: '#422c76', borderRadius: 4, order: 2 },
+                { label: 'Realizado', data: qReal, backgroundColor: '#27ae60', borderRadius: 4, order: 1 },
+                { 
+                    label: 'MB (Margem Bruta)', 
+                    data: qMB, 
+                    backgroundColor: '#d4af37', 
+                    borderRadius: 2, 
+                    barPercentage: 0.5, // Barra mais fina no rodapé
+                    categoryPercentage: 0.5,
+                    order: 3
+                }
             ]
         },
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                datalabels: { display: false } // Oculta labels para não poluir o visual de rodapé
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+                x: { ticks: { font: { size: 11, weight: 'bold' } } }
+            }
+        }
     });
 
     if(charts.metaMB) charts.metaMB.destroy();
