@@ -922,7 +922,7 @@ async function renderizarMetas() {
     document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
 
     // NOVO GRÁFICO DE REUNIÕES (AJUSTADO PARA COLUNAS DA IMAGEM: metas_reunioes e reunioes_realizadas)
-    const { data: vData } = await supabaseClient.from('vendedores').select('nome, metas_reunioes, reunioes_realizadas');
+    const { data: vData } = await supabaseClient.from('vendedores').select('nome, meta_reuniao, reuniao_real');
     if(vData) {
         if(charts.reunioes) charts.reunioes.destroy();
         charts.reunioes = new Chart(document.getElementById('chartReunioesVendedor'), {
@@ -932,7 +932,7 @@ async function renderizarMetas() {
                 datasets: [
                     {
                         label: 'Meta de Reuniões',
-                        data: vData.map(v => v.metas_reunioes || 0),
+                        data: vData.map(v => v.meta_reuniao || 0),
                         backgroundColor: 'rgba(65, 64, 66, 0.2)',
                         borderColor: '#414042',
                         borderWidth: 1,
@@ -941,7 +941,7 @@ async function renderizarMetas() {
                     },
                     {
                         label: 'Realizadas',
-                        data: vData.map(v => v.reunioes_realizadas || 0),
+                        data: vData.map(v => v.reuniao_real || 0),
                         backgroundColor: '#422c76',
                         borderColor: '#422c76',
                         type: 'line',
@@ -1092,3 +1092,4 @@ async function renderizarMetas() {
 </script>
 </body>
 </html>
+
