@@ -365,8 +365,8 @@ header {
                     </div>
                 </div>
                 <div class="chart-card">
-                    <h4>Evolução de Reuniões Realizadas</h4>
-                    <canvas id="chartReunioes"></canvas>
+                    <h4>Alcance da Meta Bruta (MB)</h4>
+                    <canvas id="chartMetaBruta"></canvas>
                 </div>
                 <div class="card-meta-full">
                     <h4>Detalhamento Geral de Metas</h4>
@@ -392,7 +392,7 @@ header {
                 <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
             </div>
         </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
+        <div id="ia_loading" class="ia-loading">🔍 Analisando presença digital e notícias...</div>
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
@@ -484,7 +484,8 @@ header {
             
             <div class="form-group">
                 <label>Histórico de Alterações</label>
-                <input type="hidden" id="op_historico"> <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
+                <input type="hidden" id="op_historico"> 
+                <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
                     <span>📜</span> Ver Histórico e Adicionar Comentário
                 </button>
             </div>
@@ -516,7 +517,19 @@ header {
 </div>
 
 <script>
-// NAVEGAÇÃO ENTRE TELAS
+// CONFIGURAÇÕES SUPABASE
+const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let base=[]; 
+let charts={};
+let USUARIO_LOGADO = "";
+
+Chart.register(ChartDataLabels);
+
+// NAVEGAÇÃO
 function navegar(pagina) {
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
@@ -529,29 +542,29 @@ function navegar(pagina) {
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
         document.getElementById('nav-dash').classList.add('active');
+        renderizar();
     } else if (pagina === 'kanban') {
         document.getElementById('page-kanban').classList.add('active-page');
         document.getElementById('nav-kanban').classList.add('active');
+        renderizar();
     } else if (pagina === 'metas') {
         document.getElementById('page-metas').classList.add('active-page');
         document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); // Chama a função de metas ao entrar na tela
+        renderizarMetas();
     }
 }
 
-// LÓGICA DE AUTENTICAÇÃO
-let USUARIO_LOGADO = "";
+// LOGIN
 function autenticar() {
     const user = document.getElementById('login_user').value;
     const pass = document.getElementById('login_pass').value;
-
     if(user === "admin" && pass === "vendemmia2024") {
         USUARIO_LOGADO = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
-        navegar('dashboard'); // Inicia no dashboard
         carregarAuxiliares(); 
         carregarDados();
+        navegar('dashboard');
     } else {
         document.getElementById('login-error').style.display = 'block';
     }
@@ -559,124 +572,261 @@ function autenticar() {
 
 function logoff() {
     if(confirm("Deseja realmente sair do sistema?")) {
-        document.getElementById('main-system').style.display = 'none';
-        document.getElementById('login-overlay').style.display = 'flex';
-        document.getElementById('login_user').value = "";
-        document.getElementById('login_pass').value = "";
-        document.getElementById('login-error').style.display = 'none';
-        USUARIO_LOGADO = "";
+        location.reload();
     }
 }
 
-// RESTANTE DO SEU CÓDIGO (SUPABASE E CHART.JS) SEM ALTERAÇÕES DE LÓGICA
-Chart.register(ChartDataLabels);
+// CARREGAR DADOS DO SUPABASE
+async function carregarDados(){ 
+    const { data, error } = await supabaseClient.from('oportunidades').select('*'); 
+    if(error) { console.error(error); return; }
+    base = data || []; 
+    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
+    const dl = document.getElementById('listaClientes');
+    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    renderizar(); 
+}
 
-const pluginCentroRosca = {
-    id: 'pluginCentroRosca',
-    afterDraw: (chart) => {
-        if (chart.config.type === 'doughnut') {
-            const { ctx, chartArea: { top, bottom, left, right } } = chart;
-            ctx.save();
-            const centerX = (left + right) / 2;
-            const centerY = (top + bottom) / 2;
-            const chartHeight = bottom - top;
-            const fontSize = (chartHeight / 120).toFixed(2);
-            ctx.font = `bold ${fontSize}em sans-serif`;
-            ctx.textBaseline = "middle";
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#414042";
-            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-            const text = total.toString();
-            ctx.fillText(text, centerX, centerY);
-            ctx.restore();
+async function carregarAuxiliares(){
+    const { data: v } = await supabaseClient.from('vendedores').select('*');
+    const { data: a } = await supabaseClient.from('areas').select('*');
+    const fill = (id, d, label) => { 
+        const el = document.getElementById(id); 
+        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    };
+    fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
+    fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
+    
+    const listV = document.getElementById('listaVendedoresGerenciamento');
+    if(listV) listV.innerHTML = (v || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+    
+    const listA = document.getElementById('listaAreasGerenciamento');
+    if(listA) listA.innerHTML = (a || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+}
+
+// LÓGICA DE METAS (CORRIGIDA)
+function renderizarMetas() {
+    const fV = document.getElementById('filtroVendedor').value;
+    const filtrados = base.filter(r => (!fV || r.vendedor === fV));
+
+    let totPlan = 0, totReal = 0, totMB = 0;
+    let qPlan = [0,0,0,0], qReal = [0,0,0,0], qMB = [0,0,0,0];
+
+    filtrados.forEach(r => {
+        // Garante que valores nulos sejam 0
+        const p2026 = parseFloat(r["2026_plan"]) || 0;
+        const r2026 = parseFloat(r["2026_real"]) || 0;
+        const m2026 = parseFloat(r["mb_plan_2026"]) || 0;
+
+        totPlan += p2026;
+        totReal += r2026;
+        totMB += m2026;
+
+        // Soma por Trimestre
+        qPlan[0] += parseFloat(r["q1_plan"]) || 0;
+        qPlan[1] += parseFloat(r["q2_plan"]) || 0;
+        qPlan[2] += parseFloat(r["q3_plan"]) || 0;
+        qPlan[3] += parseFloat(r["q4_plan"]) || 0;
+
+        qReal[0] += parseFloat(r["q1_real"]) || 0;
+        qReal[1] += parseFloat(r["q2_real"]) || 0;
+        qReal[2] += parseFloat(r["q3_real"]) || 0;
+        qReal[3] += parseFloat(r["q4_real"]) || 0;
+
+        qMB[0] += parseFloat(r["mb_plan_q1"]) || 0;
+        qMB[1] += parseFloat(r["mb_plan_q2"]) || 0;
+        qMB[2] += parseFloat(r["mb_plan_q3"]) || 0;
+        qMB[3] += parseFloat(r["mb_plan_q4"]) || 0;
+    });
+
+    document.getElementById('txt_plan_total').innerText = "R$ " + totPlan.toLocaleString('pt-BR');
+    document.getElementById('txt_real_total').innerText = "R$ " + totReal.toLocaleString('pt-BR');
+    document.getElementById('txt_mb_total').innerText = "R$ " + totMB.toLocaleString('pt-BR');
+    document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
+
+    // Gráfico Trimestral
+    if(charts.metaQ) charts.metaQ.destroy();
+    charts.metaQ = new Chart(document.getElementById('chartMetaQuarter'), {
+        type: 'bar',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [
+                { label: 'Planejado', data: qPlan, backgroundColor: '#422c76', borderRadius: 4 },
+                { label: 'Realizado', data: qReal, backgroundColor: '#27ae60', borderRadius: 4 }
+            ]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { 
+                    anchor: 'end', align: 'top', font: { size: 9, weight: 'bold' },
+                    formatter: (v) => v > 0 ? 'R$ ' + Math.round(v/1000) + 'k' : ''
+                }
+            } 
         }
-    }
-};
+    });
 
-const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Gráfico Meta Bruta Footer
+    if(charts.metaMBFooter) charts.metaMBFooter.destroy();
+    charts.metaMBFooter = new Chart(document.getElementById('chartMetaMBFooter'), {
+        type: 'bar',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [
+                { label: 'MB', data: qMB, backgroundColor: '#d4af37' },
+                { label: 'Real', data: qReal, backgroundColor: '#27ae60' }
+            ]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+    });
 
-let base=[]; let charts={};
+    // Gráfico de Linha Alcance MB
+    if(charts.metaMB) charts.metaMB.destroy();
+    charts.metaMB = new Chart(document.getElementById('chartMetaBruta'), {
+        type: 'line',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [
+                { label: 'Meta Bruta (MB)', data: qMB, borderColor: '#d4af37', tension: 0.3, fill: false },
+                { label: 'Realizado', data: qReal, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', fill: true, tension: 0.3 }
+            ]
+        },
+        options: { maintainAspectRatio: false }
+    });
 
-function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
-function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
-
-function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
-    const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    loader.style.display = 'block';
-    resultado.style.display = 'none';
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
+    // Tabela de Detalhamento
+    let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
+        <thead style="background:#f8f9fa; border-bottom: 2px solid #eee;">
+            <tr>
+                <th style="padding:12px; text-align:left;">CLIENTE / VENDEDOR</th>
+                <th style="text-align:center;">PLAN 2026</th>
+                <th style="text-align:center;">REAL 2026</th>
+                <th style="text-align:center;">ATING. %</th>
+                <th style="text-align:center;">MB 2026</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    filtrados.filter(r => (parseFloat(r["2026_plan"]) > 0 || parseFloat(r["2026_real"]) > 0)).forEach(r => {
+        let p = parseFloat(r["2026_plan"]) || 0;
+        let re = parseFloat(r["2026_real"]) || 0;
+        let ating = p > 0 ? ((re/p)*100).toFixed(1) : 0;
+        htmlTab += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px;"><b>${r.cliente}</b><br><span style="color:#888; font-size:10px;">${r.vendedor}</span></td>
+            <td style="text-align:center;">R$ ${p.toLocaleString('pt-BR')}</td>
+            <td style="text-align:center;">R$ ${re.toLocaleString('pt-BR')}</td>
+            <td style="text-align:center;"><span style="padding:3px 8px; border-radius:12px; background:${ating >= 100 ? '#e8f5e9' : '#fdedec'}; color:${ating >= 100 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${ating}%</span></td>
+            <td style="text-align:center; color:#d4af37; font-weight:bold;">R$ ${parseFloat(r["mb_plan_2026"] || 0).toLocaleString('pt-BR')}</td>
+        </tr>`;
+    });
+    htmlTab += `</tbody></table>`;
+    document.getElementById('tabelaMetas').innerHTML = htmlTab;
 }
 
-function toggleMotivoPerda() {
-    const status = document.getElementById('op_status').value;
-    const group = document.getElementById('group_motivo_perda');
-    if(status === "PERDIDO") {
-        group.style.display = 'flex';
-    } else {
-        group.style.display = 'none';
-        document.getElementById('op_motivo_perda').value = "";
-    }
+// RENDERIZAÇÃO GERAL (DASHBOARD E KANBAN)
+function renderizar(){
+    const fC = document.getElementById('filtroCliente').value.toLowerCase();
+    const fV = document.getElementById('filtroVendedor').value;
+    const fA = document.getElementById('filtroArea').value;
+    const fS = document.getElementById('filtroStatus').value;
+    
+    const filtrados = base.filter(r => 
+        (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && 
+        (!fV || r.vendedor === fV) && 
+        (!fA || r.area === fA) && 
+        (!fS || r.status === fS)
+    );
+
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+
+    // KPIs Dashboard
+    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
+    let statusCont = {}, vendVal = {};
+    
+    filtrados.forEach(r => {
+        const vA = parseFloat(r.valor_estimado_ano) || 0;
+        const vM = parseFloat(r.valor_mensal_recorrente) || 0;
+        pipeTot += vA; 
+        mrrTotal += vM;
+        if(r.status === 'GANHO') { recGan += vA; nG++; }
+        if(r.status === 'PERDIDO') nP++;
+        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
+    });
+
+    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
+    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
+
+    // Gráfico Status
+    if(charts.st) charts.st.destroy();
+    charts.st = new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(statusCont),
+            datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Gráfico Vendedor
+    if(charts.vd) charts.vd.destroy();
+    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
+    charts.vd = new Chart(document.getElementById('chartVendedor'), {
+        type: 'bar',
+        data: {
+            labels: sv.map(x=>x[0]),
+            datasets: [{ data: sv.map(x=>x[1]), backgroundColor: '#422c76', borderRadius: 8 }]
+        },
+        options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+
+    // Kanban
+    const kan = document.getElementById('kanban'); 
+    kan.innerHTML = "";
+    const colunas = [
+        {n:"LEAD", cl:"col-lead", border:"#6c757d"},
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},
+        {n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},
+        {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
+
+    colunas.forEach(s => {
+        const col = document.createElement('div'); 
+        col.className = `column ${s.cl}`;
+        col.ondragover = (e) => e.preventDefault();
+        col.ondrop = (e) => drop(e, s.n);
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
+        const b = col.querySelector('.column-body');
+        
+        filtrados.filter(f => f.status === s.n).forEach(i => {
+            const card = document.createElement('div'); 
+            card.className = 'card'; 
+            card.id = `card-${i.id}`; 
+            card.draggable = true; 
+            card.ondragstart = (e) => e.dataTransfer.setData("text", e.target.id);
+            card.style.borderLeftColor = s.border;
+            card.onclick = () => editarOportunidade(i.id);
+            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
+            b.appendChild(card);
+        });
+        kan.appendChild(col);
+    });
 }
 
-document.getElementById('formVendedor').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('vend_id').value;
-    const nome = document.getElementById('vend_nome').value.toUpperCase();
-    let res;
-    if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
-});
+// FUNÇÕES DE APOIO E MODAIS
+function abrirModal(id){ document.getElementById(id).style.display = 'block'; }
+function fecharModal(id){ document.getElementById(id).style.display = 'none'; }
 
-async function deletarVendedor(id) {
-    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
-    }
-}
-
-function prepararEdicaoVendedor(id, nome) {
-    document.getElementById('vend_id').value = id;
-    document.getElementById('vend_nome').value = nome;
-}
-
-document.getElementById('formArea').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('area_id').value;
-    const nome = document.getElementById('area_nome').value.toUpperCase();
-    let res;
-    if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
-});
-
-async function deletarArea(id) {
-    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
-    }
-}
-
-function prepararEdicaoArea(id, nome) {
-    document.getElementById('area_id').value = id;
-    document.getElementById('area_nome').value = nome;
+async function drop(ev, novoStatus) {
+    ev.preventDefault();
+    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
+    const { error } = await supabaseClient.from('oportunidades').update({ status: novoStatus }).eq('id', cardId);
+    if(!error) carregarDados();
 }
 
 function calcularMRR() { 
@@ -690,8 +840,7 @@ function prepararNovo() {
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    document.getElementById('op_historico').value = ""; 
-    toggleMotivoPerda(); abrirModal('modalOportunidade');
+    abrirModal('modalOportunidade');
 }
 
 function editarOportunidade(id) {
@@ -711,387 +860,95 @@ function editarOportunidade(id) {
     document.getElementById('op_historico').value = item.historico || ""; 
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
-    toggleMotivoPerda(); abrirModal('modalOportunidade');
+    toggleMotivoPerda(); 
+    abrirModal('modalOportunidade');
 }
 
-async function deletarOportunidade() {
-    const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        await supabaseClient.from('oportunidades').delete().eq('id', id);
-        fecharModal('modalOportunidade'); carregarDados();
-    }
-}
-
-function abrirHistoricoPopup() {
-    const id = document.getElementById('op_id').value;
-    if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
-    document.getElementById('txt_historico_manual').value = "";
-    renderizarLinhaDoTempo(); abrirModal('modalHistoricoDetalhado');
-}
-
-function renderizarLinhaDoTempo() {
-    const textoHistorico = document.getElementById('op_historico').value;
-    const container = document.getElementById('timelineContainer');
-    container.innerHTML = "";
-    if(!textoHistorico || textoHistorico.trim() === "") {
-        container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
-    } else {
-        const logs = textoHistorico.split('\n').filter(l => l.trim() !== "");
-        logs.forEach(log => {
-            const match = log.match(/\[(.*?)\] (.*)/);
-            if(match) {
-                const cabecalho = match[1]; const acao = match[2];     
-                const item = document.createElement('div');
-                item.className = 'timeline-item';
-                item.innerHTML = `<span class="timeline-date">${cabecalho}</span><div class="timeline-content">${acao}</div>`;
-                container.appendChild(item);
-            }
-        });
-    }
-}
-
-async function salvarHistoricoManual() {
-    const id = document.getElementById('op_id').value;
-    const comentario = document.getElementById('txt_historico_manual').value.trim();
-    if(!comentario) return alert("Digite algo para salvar no histórico!");
-    const agora = new Date();
-    const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-    const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
-    let historicoAntigo = document.getElementById('op_historico').value || "";
-    const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
-    const { error } = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
-    if(error) alert("Erro ao salvar comentário: " + error.message);
-    else {
-        document.getElementById('op_historico').value = historicoAtualizado;
-        document.getElementById('txt_historico_manual').value = "";
-        renderizarLinhaDoTempo(); carregarDados();
-    }
+function toggleMotivoPerda() {
+    const s = document.getElementById('op_status').value;
+    document.getElementById('group_motivo_perda').style.display = (s === 'PERDIDO') ? 'block' : 'none';
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
-    const idValue = document.getElementById('op_id').value;
-    const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
-    const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
-    const novo_vend = document.getElementById('op_vendedor').value;
-    const nova_data = document.getElementById('op_data_oportunidade').value;
-    const nova_prev = document.getElementById('op_previsao_fechamento').value || "";
-    const novo_valor = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0;
-    const novo_status = document.getElementById('op_status').value;
-    const nova_area = document.getElementById('op_area').value;
-    const novo_motivo = document.getElementById('op_motivo_perda').value || "";
-    let historico_atual = document.getElementById('op_historico').value || "";
-
-    const formatBr = (dataSql) => {
-        if(!dataSql) return "NÃO DEFINIDA";
-        const [y, m, d] = dataSql.split('-');
-        return `${d}/${m}/${y}`;
+    const id = document.getElementById('op_id').value;
+    const payload = {
+        cliente: document.getElementById('op_cliente').value.toUpperCase(),
+        breve_descricao: document.getElementById('op_breve_descricao').value.toUpperCase(),
+        vendedor: document.getElementById('op_vendedor').value,
+        area: document.getElementById('op_area').value,
+        data_oportunidade: document.getElementById('op_data_oportunidade').value,
+        previsao_fechamento: document.getElementById('op_previsao_fechamento').value || null,
+        valor_estimado_ano: parseFloat(document.getElementById('op_valor_estimado_ano').value),
+        valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value),
+        status: document.getElementById('op_status').value,
+        motivo_perda: document.getElementById('op_motivo_perda').value || null
     };
 
-    if(idValue) {
-        const antigo = base.find(x => x.id == idValue);
-        if(antigo) {
-            let log = ""; const agora = new Date();
-            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-            if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
-            if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
-            if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
-            if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
-            if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
-            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
-            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
-            if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
-        }
-    } else {
-        const agora = new Date();
-        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-        historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
-    }
-    const payload = { cliente: novo_cliente, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
-    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+    if(id) await supabaseClient.from('oportunidades').update(payload).eq('id', id);
     else await supabaseClient.from('oportunidades').insert([payload]);
-    fecharModal('modalOportunidade'); carregarDados();
+    
+    fecharModal('modalOportunidade');
+    carregarDados();
 };
 
-async function carregarAuxiliares(){
-    const { data: v } = await supabaseClient.from('vendedores').select('*');
-    const { data: a } = await supabaseClient.from('areas').select('*');
-    const fill = (id, d, label) => { 
-        const el = document.getElementById(id); 
-        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
-    };
-    fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
-    fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
-    const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) listV.innerHTML = (v || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
-    const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) listA.innerHTML = (a || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+async function deletarOportunidade() {
+    const id = document.getElementById('op_id').value;
+    if(id && confirm("Excluir?")) {
+        await supabaseClient.from('oportunidades').delete().eq('id', id);
+        fecharModal('modalOportunidade');
+        carregarDados();
+    }
 }
 
-async function carregarDados(){ 
-    const { data } = await supabaseClient.from('oportunidades').select('*'); 
-    base = data || []; 
-    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
-    const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
-    renderizar(); 
+// HISTÓRICO
+function abrirHistoricoPopup() {
+    renderizarLinhaDoTempo();
+    abrirModal('modalHistoricoDetalhado');
 }
 
-function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
-function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
-function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
-async function drop(ev, novoStatus) {
-    ev.preventDefault(); ev.currentTarget.classList.remove('column-over');
-    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    editarOportunidade(cardId); document.getElementById('op_status').value = novoStatus; toggleMotivoPerda();
-}
-
-function renderizar(){
-    const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
-    
-    // Se a tela ativa for Metas, atualiza as metas também
-    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
-
-    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
-    filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'GANHO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
-        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
-    });
-    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
-    
-    if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
-    
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
-    
-    const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
-    colunas.forEach(s => {
-        const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
-        const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
-            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
-            b.appendChild(card);
-        });
-        kan.appendChild(col);
+function renderizarLinhaDoTempo() {
+    const texto = document.getElementById('op_historico').value;
+    const container = document.getElementById('timelineContainer');
+    container.innerHTML = "";
+    if(!texto) { container.innerHTML = "Sem histórico."; return; }
+    texto.split('\n').forEach(log => {
+        const item = document.createElement('div');
+        item.className = 'timeline-item';
+        item.innerHTML = `<div class="timeline-content">${log}</div>`;
+        container.appendChild(item);
     });
 }
 
-// LOGICA ESPECIFICA DA TELA DE METAS
-async function renderizarMetas() {
-    const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV));
-
-    let totPlan = 0, totReal = 0, totMB = 0;
-    let qPlan = [0,0,0,0], qReal = [0,0,0,0], qMB = [0,0,0,0];
-
-    filtrados.forEach(r => {
-        totPlan += parseFloat(r["2026_plan"]) || 0;
-        totReal += parseFloat(r["2026_real"]) || 0;
-        totMB += parseFloat(r["mb_plan_2026"]) || 0;
-        for(let i=1; i<=4; i++) {
-            qPlan[i-1] += parseFloat(r[`q${i}_plan`]) || 0;
-            qReal[i-1] += parseFloat(r[`q${i}_real`]) || 0;
-            qMB[i-1] += parseFloat(r[`mb_plan_q${i}`]) || 0;
-        }
-    });
-
-    document.getElementById('txt_plan_total').innerText = "R$ " + totPlan.toLocaleString('pt-BR');
-    document.getElementById('txt_real_total').innerText = "R$ " + totReal.toLocaleString('pt-BR');
-    document.getElementById('txt_mb_total').innerText = "R$ " + totMB.toLocaleString('pt-BR');
-    document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
-
-    // GRÁFICO PRINCIPAL: PLANEJADO VS REALIZADO
-    if(charts.metaQ) charts.metaQ.destroy();
-    charts.metaQ = new Chart(document.getElementById('chartMetaQuarter'), {
-        type: 'bar',
-        data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [
-                { 
-                    label: 'Planejado', 
-                    data: qPlan, 
-                    backgroundColor: '#422c76', 
-                    borderRadius: 4
-                },
-                { 
-                    label: 'Realizado', 
-                    data: qReal, 
-                    backgroundColor: '#27ae60', 
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { 
-                    position: 'top', 
-                    labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } 
-                },
-                datalabels: { 
-                    display: true, 
-                    anchor: 'end', 
-                    align: 'top', 
-                    font: { size: 9, weight: 'bold' },
-                    formatter: (v) => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR') : ''
-                }
-            },
-            scales: {
-                y: { display: false },
-                x: { 
-                    grid: { display: false },
-                    ticks: { font: { size: 11, weight: 'bold' } } 
-                }
-            }
-        }
-    });
-
-    // GRÁFICO RODAPÉ: MARGEM BRUTA (MB) VS REALIZADO
-    if(charts.metaMBFooter) charts.metaMBFooter.destroy();
-    charts.metaMBFooter = new Chart(document.getElementById('chartMetaMBFooter'), {
-        type: 'bar',
-        data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [
-                {
-                    label: 'Meta Bruta (MB)',
-                    data: qMB,
-                    backgroundColor: '#d4af37',
-                    borderRadius: 2,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                },
-                {
-                    label: 'Realizado',
-                    data: qReal,
-                    backgroundColor: '#27ae60',
-                    borderRadius: 2,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                datalabels: {
-                    display: true,
-                    anchor: 'end',
-                    align: 'top',
-                    color: (ctx) => ctx.datasetIndex === 0 ? '#b8962d' : '#1e7e46',
-                    font: { size: 9, weight: 'bold' },
-                    formatter: (v) => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR') : ''
-                }
-            },
-            scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-
-    // NOVO GRÁFICO: EVOLUÇÃO DE REUNIÕES (DADOS DA TABELA VENDEDORES)
-    const { data: dadosVendedores } = await supabaseClient.from('vendedores').select('nome, meta_reuniao, reuniao_real');
-    const labelsVend = (dadosVendedores || []).map(v => v.nome);
-    const dataMetaReuniao = (dadosVendedores || []).map(v => v.meta_reuniao || 0);
-    const dataRealReuniao = (dadosVendedores || []).map(v => v.reuniao_real || 0);
-
-    if(charts.reunioes) charts.reunioes.destroy();
-    charts.reunioes = new Chart(document.getElementById('chartReunioes'), {
-        type: 'bar',
-        data: {
-            labels: labelsVend,
-            datasets: [
-                {
-                    label: 'Realizadas',
-                    data: dataRealReuniao,
-                    backgroundColor: '#422c76',
-                    borderRadius: 5,
-                    barThickness: 15
-                },
-                {
-                    label: 'Meta Anual',
-                    data: dataMetaReuniao,
-                    backgroundColor: '#e0e0e0',
-                    borderRadius: 5,
-                    barThickness: 15
-                }
-            ]
-        },
-        options: {
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                datalabels: {
-                    anchor: 'end',
-                    align: 'right',
-                    color: '#444',
-                    font: { weight: 'bold', size: 10 },
-                    formatter: (value, context) => {
-                        if (context.datasetIndex === 0) {
-                            const meta = context.chart.data.datasets[1].data[context.dataIndex];
-                            const perc = meta > 0 ? Math.round((value / meta) * 100) : 0;
-                            return value + ' (' + perc + '%)';
-                        }
-                        return '';
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { display: false } },
-                y: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
-            }
-        }
-    });
-
-    let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
-        <thead style="background:#f8f9fa; border-bottom: 2px solid #eee;">
-            <tr>
-                <th style="padding:12px; text-align:left;">CLIENTE / VENDEDOR</th>
-                <th style="text-align:center;">PLAN 2026</th>
-                <th style="text-align:center;">REAL 2026</th>
-                <th style="text-align:center;">ATING. %</th>
-                <th style="text-align:center;">MB 2026</th>
-            </tr>
-        </thead>
-        <tbody>`;
-    
-    filtrados.filter(r => r["2026_plan"] > 0 || r["2026_real"] > 0).forEach(r => {
-        let ating = r["2026_plan"] > 0 ? ((r["2026_real"]/r["2026_plan"])*100).toFixed(1) : 0;
-        htmlTab += `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:10px;"><b>${r.cliente}</b><br><span style="color:#888; font-size:10px;">${r.vendedor}</span></td>
-            <td style="text-align:center;">R$ ${parseFloat(r["2026_plan"] || 0).toLocaleString('pt-BR')}</td>
-            <td style="text-align:center;">R$ ${parseFloat(r["2026_real"] || 0).toLocaleString('pt-BR')}</td>
-            <td style="text-align:center;"><span style="padding:3px 8px; border-radius:12px; background:${ating >= 100 ? '#e8f5e9' : '#fdedec'}; color:${ating >= 100 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${ating}%</span></td>
-            <td style="text-align:center; color:#d4af37; font-weight:bold;">R$ ${parseFloat(r["mb_plan_2026"] || 0).toLocaleString('pt-BR')}</td>
-        </tr>`;
-    });
-    htmlTab += `</tbody></table>`;
-    document.getElementById('tabelaMetas').innerHTML = htmlTab;
+async function salvarHistoricoManual() {
+    const id = document.getElementById('op_id').value;
+    const nota = document.getElementById('txt_historico_manual').value;
+    if(!id || !nota) return;
+    const hAntigo = document.getElementById('op_historico').value;
+    const hNovo = `[${new Date().toLocaleString()}] ${nota.toUpperCase()}\n${hAntigo}`;
+    await supabaseClient.from('oportunidades').update({ historico: hNovo }).eq('id', id);
+    document.getElementById('op_historico').value = hNovo;
+    document.getElementById('txt_historico_manual').value = "";
+    renderizarLinhaDoTempo();
 }
+
+function simularBuscaIA() {
+    const t = document.getElementById('ia_termo').value;
+    if(!t) return;
+    document.getElementById('ia_loading').style.display = 'block';
+    setTimeout(() => {
+        document.getElementById('ia_loading').style.display = 'none';
+        document.getElementById('ia_resultado').style.display = 'block';
+        document.getElementById('res_empresa').innerText = t.toUpperCase();
+        document.getElementById('res_descricao').innerText = "Empresa líder no setor consultado (Simulação).";
+    }, 1000);
+}
+
+// Inicialização
+window.onload = () => {
+    // Caso queira pular o login para testes, comente a linha abaixo e descomente carregarDados()
+    // carregarDados();
+};
 </script>
 </body>
 </html>
