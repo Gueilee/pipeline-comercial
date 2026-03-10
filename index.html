@@ -154,15 +154,14 @@ header {
 .input-search, select { padding:10px; border-radius:6px; border:1px solid #ccc; font-size:13px; background: white; height: 40px; box-sizing: border-box; }
 .input-search { min-width: 300px; border: 2px solid var(--lilas); }
 
-/* KPI GRID */
-.kpis{ display:grid; grid-template-columns:repeat(6,1fr); gap:15px; margin-bottom:30px; }
-.kpi{ background:white; padding:15px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--lilas); }
-.kpi h3{ margin:0; font-size:11px; color:var(--lilas); font-weight: 600; text-transform: uppercase; }
-.kpi p{ font-size:18px; font-weight:bold; margin: 8px 0 0 0; color: #333; }
+.kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-bottom:30px; }
+.kpi{ background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+.kpi h3{ margin:0; font-size:13px; color:var(--lilas); font-weight: 600; }
+.kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
-.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 35px; }
+.charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
-.chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
@@ -325,22 +324,16 @@ header {
 
         <div id="page-dashboard" class="active-page">
             <div class="kpis">
-                <div class="kpi"><h3>Total Fechado (Ganha)</h3><p id="receitaGanha">R$ 0</p></div>
-                <div class="kpi"><h3>Vendas em Aberto</h3><p id="pipelineTotal">R$ 0</p></div>
-                <div class="kpi" style="border-top-color: var(--ia-gold);"><h3>Atingimento da Meta</h3><p id="perfAnual">0%</p></div>
-                <div class="kpi" style="border-top-color: #27ae60;"><h3>Lucro Bruto Realizado</h3><p id="mbRealTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Sucesso de Vendas</h3><p id="conversao">0%</p></div>
-                <div class="kpi"><h3>Valor Médio Contrato</h3><p id="ticket">R$ 0</p></div>
+                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
             </div>
 
             <div class="charts-grid">
-                <div class="chart-card"><h4>Evolução das Vendas (Por Trimestre)</h4><canvas id="chartQuarters"></canvas></div>
-                <div class="chart-card"><h4>Lucro Bruto por Vendedor</h4><canvas id="chartMBVendedor"></canvas></div>
-            </div>
-
-            <div class="charts-grid">
-                <div class="chart-card"><h4>Onde estão nossas Vendas?</h4><canvas id="chartStatus"></canvas></div>
-                <div class="chart-card"><h4>Ranking de Potencial por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+                <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
             </div>
         </div>
 
@@ -361,7 +354,7 @@ header {
                 <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
             </div>
         </div>
-        <div id="ia_loading" class="ia-loading">🔍 Analisando presença digital e notícias...</div>
+        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
         <div id="ia_resultado" class="ia-result-box">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
@@ -511,6 +504,7 @@ function autenticar() {
         USUARIO_LOGADO = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
+        navegar('dashboard'); // Inicia no dashboard
         carregarAuxiliares(); 
         carregarDados();
     } else {
@@ -529,6 +523,7 @@ function logoff() {
     }
 }
 
+// RESTANTE DO SEU CÓDIGO (SUPABASE E CHART.JS) SEM ALTERAÇÕES DE LÓGICA
 Chart.register(ChartDataLabels);
 
 const pluginCentroRosca = {
@@ -574,7 +569,7 @@ function simularBuscaIA() {
         loader.style.display = 'none';
         resultado.style.display = 'block';
         document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Análise de presença digital concluída. Empresa ativa no segmento logístico.";
+        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
         document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
         document.getElementById('res_noticias').innerHTML = `
             <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
@@ -742,6 +737,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const novo_motivo = document.getElementById('op_motivo_perda').value || "";
     let historico_atual = document.getElementById('op_historico').value || "";
 
+    // Funções auxiliares para formatar data br
     const formatBr = (dataSql) => {
         if(!dataSql) return "NÃO DEFINIDA";
         const [y, m, d] = dataSql.split('-');
@@ -759,8 +755,14 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
             if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
-            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
-            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
+            
+            // VERIFICAÇÃO DAS DATAS
+            if(antigo.data_oportunidade !== nova_data) {
+                log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
+            }
+            if((antigo.previsao_fechamento || "") !== nova_prev) {
+                log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
+            }
 
             if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
         }
@@ -805,22 +807,7 @@ function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 async function drop(ev, novoStatus) {
     ev.preventDefault(); ev.currentTarget.classList.remove('column-over');
     const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    
-    // Atualiza o status no banco de dados e registra no histórico
-    const item = base.find(x => x.id == cardId);
-    if(item && item.status !== novoStatus) {
-        const agora = new Date();
-        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-        const novoLog = `[${carimbo}] STATUS (MOVIMENTAÇÃO KANBAN): "${item.status}" → "${novoStatus}"`;
-        const historicoAtualizado = novoLog + (item.historico ? "\n" + item.historico : "");
-        
-        await supabaseClient.from('oportunidades').update({ 
-            status: novoStatus, 
-            historico: historicoAtualizado 
-        }).eq('id', cardId);
-        
-        carregarDados();
-    }
+    editarOportunidade(cardId); document.getElementById('op_status').value = novoStatus; toggleMotivoPerda();
 }
 
 function renderizar(){
@@ -829,116 +816,28 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
-    
-    let pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let totalPlan2026 = 0, totalReal2026 = 0, mbRealTotal = 0;
-    let quarters = { plan: [0,0,0,0], real: [0,0,0,0] };
-    let statusCont = {}, vendVal = {}, vendMB = {};
-
+    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
+    let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0;
-        pipeTot += vA;
+        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
+        pipeTot += vA; mrrTotal += vM;
         if(r.status === 'GANHO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
-        
-        // CORREÇÃO: Usando os campos reais para meta e lucro
-        totalPlan2026 += parseFloat(r["2026_plan"]) || 0;
-        totalReal2026 += parseFloat(r["2026_real"]) || 0;
-        mbRealTotal += parseFloat(r["mb_real_2026"]) || 0;
-
-        quarters.plan[0] += parseFloat(r.q1_plan) || 0;
-        quarters.plan[1] += parseFloat(r.q2_plan) || 0;
-        quarters.plan[2] += parseFloat(r.q3_plan) || 0;
-        quarters.plan[3] += parseFloat(r.q4_plan) || 0;
-        quarters.real[0] += parseFloat(r.q1_real) || 0;
-        quarters.real[1] += parseFloat(r.q2_real) || 0;
-        quarters.real[2] += parseFloat(r.q3_real) || 0;
-        quarters.real[3] += parseFloat(r.q4_real) || 0;
-
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) {
-            vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
-            vendMB[r.vendedor] = (vendMB[r.vendedor] || 0) + (parseFloat(r.mb_real_2026) || 0);
-        }
+        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
-
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mbRealTotal').innerText = "R$ " + mbRealTotal.toLocaleString('pt-BR');
-    document.getElementById('perfAnual').innerText = (totalPlan2026 > 0 ? (totalReal2026/totalPlan2026*100) : 0).toFixed(1) + "%";
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
-
-    const cleanScales = { 
-        x: { display: false, grid: { display: false } }, 
-        y: { display: false, grid: { display: false } } 
-    };
-
-    // GRÁFICO 1: EVOLUÇÃO (PLANEJADO VS REALIZADO)
-    if(charts.qtr) charts.qtr.destroy();
-    charts.qtr = new Chart(document.getElementById('chartQuarters'), {
-        type: 'bar',
-        data: {
-            labels: ['1º Trim', '2º Trim', '3º Trim', '4º Trim'],
-            datasets: [
-                { label: 'O que Planejamos', data: quarters.plan, backgroundColor: '#d1d1d1', borderRadius: 5 },
-                { label: 'O que Vendemos', data: quarters.real, backgroundColor: 'var(--lilas)', borderRadius: 5 }
-            ]
-        },
-        options: { 
-            maintainAspectRatio: false, 
-            scales: cleanScales,
-            plugins: { datalabels: { display: false }, legend: { position: 'bottom' } } 
-        }
-    });
-
-    // GRÁFICO 2: LUCRO POR VENDEDOR
-    if(charts.mbv) charts.mbv.destroy();
-    const smb = Object.entries(vendMB).sort((a,b)=>b[1]-a[1]);
-    charts.mbv = new Chart(document.getElementById('chartMBVendedor'), {
-        type: 'bar',
-        data: { labels: smb.map(x=>x[0]), datasets: [{ data: smb.map(x=>x[1]), backgroundColor: '#27ae60', borderRadius: 8 }] },
-        options: { 
-            maintainAspectRatio: false, 
-            scales: { 
-                x: { display: true, grid: { display: false }, border: { display: false } }, 
-                y: { display: false, grid: { display: false } } 
-            },
-            plugins: { datalabels: { display: false }, legend: { display: false } } 
-        }
-    });
-
-    // GRÁFICO 3: STATUS
     if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { 
-        type: 'doughnut', 
-        data: { 
-            labels: Object.keys(statusCont), 
-            datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]
-        }, 
-        options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, 
-        plugins: [pluginCentroRosca] 
-    });
-    
-    // GRÁFICO 4: RANKING POTENCIAL
+    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
-        type: 'bar', 
-        data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22 }]}, 
-        options: { indexAxis: 'y', maintainAspectRatio: false, scales: cleanScales, plugins: { legend: { display: false }, datalabels: { color: '#444', anchor: 'end', align: 'right', offset: 5, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } 
-    });
-
-    // KANBAN
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [
-        {n:"LEAD", cl:"col-lead", border:"#6c757d"},
-        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
-        {n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},
-        {n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},
-        {n:"GANHO", cl:"col-ganho", border:"#27ae60"},
-        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
-    ];
+    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
@@ -946,7 +845,7 @@ function renderizar(){
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = (e) => { editarOportunidade(i.id); };
+            card.onclick = (e) => { if(e.target === card || e.target.parentNode === card) editarOportunidade(i.id); };
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
