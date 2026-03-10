@@ -169,7 +169,7 @@ header {
 .kpi p{ font-size:20px; font-weight:bold; margin: 10px 0 0 0; color: #333; }
 
 .charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
-.chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; box-sizing: border-box; min-height: 380px; }
+.chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
@@ -356,20 +356,18 @@ header {
             </div>
             
             <div class="grid-metas">
-                <div class="chart-card">
+                <div class="chart-card" style="height: auto; min-height: 480px;">
                     <h4>Performance Trimestral (Plan vs Real)</h4>
-                    <canvas id="chartMetaQuarter"></canvas>
+                    <div style="flex: 1; min-height: 250px;"><canvas id="chartMetaQuarter"></canvas></div>
+                    <div style="height: 120px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                        <h5 style="margin: 0 0 5px 0; font-size: 12px; color: #666;">Margem Bruta (MB) por Trimestre</h5>
+                        <canvas id="chartMetaMBFooter"></canvas>
+                    </div>
                 </div>
                 <div class="chart-card">
                     <h4>Alcance da Meta Bruta (MB)</h4>
                     <canvas id="chartMetaBruta"></canvas>
                 </div>
-
-                <div class="chart-card" style="grid-column: 1; height: 280px; margin-top: -10px;">
-                    <h4>Detalhamento Margem Bruta (MB)</h4>
-                    <canvas id="chartMetaBrutaBarras"></canvas>
-                </div>
-
                 <div class="card-meta-full">
                     <h4>Detalhamento Geral de Metas</h4>
                     <div id="tabelaMetas" style="overflow-x: auto; margin-top:15px;"></div>
@@ -537,7 +535,7 @@ function navegar(pagina) {
     } else if (pagina === 'metas') {
         document.getElementById('page-metas').classList.add('active-page');
         document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); 
+        renderizarMetas(); // Chama a função de metas ao entrar na tela
     }
 }
 
@@ -551,7 +549,7 @@ function autenticar() {
         USUARIO_LOGADO = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
-        navegar('dashboard'); 
+        navegar('dashboard'); // Inicia no dashboard
         carregarAuxiliares(); 
         carregarDados();
     } else {
@@ -570,6 +568,7 @@ function logoff() {
     }
 }
 
+// RESTANTE DO SEU CÓDIGO (SUPABASE E CHART.JS) SEM ALTERAÇÕES DE LÓGICA
 Chart.register(ChartDataLabels);
 
 const pluginCentroRosca = {
@@ -854,6 +853,7 @@ function renderizar(){
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
     
+    // Se a tela ativa for Metas, atualiza as metas também
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
@@ -896,7 +896,7 @@ function renderizar(){
     });
 }
 
-// LOGICA ESPECIFICA DA TELA DE METAS (ATUALIZADA)
+// LOGICA ESPECIFICA DA TELA DE METAS
 function renderizarMetas() {
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
     const fV = document.getElementById('filtroVendedor').value;
@@ -921,54 +921,76 @@ function renderizarMetas() {
     document.getElementById('txt_mb_total').innerText = "R$ " + totMB.toLocaleString('pt-BR');
     document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
 
-    // 1. PERFORMANCE TRIMESTRAL (INVERTIDO: PLAN E DEPOIS REAL)
+    // GRÁFICO PRINCIPAL: PLANEJADO VS REALIZADO
     if(charts.metaQ) charts.metaQ.destroy();
     charts.metaQ = new Chart(document.getElementById('chartMetaQuarter'), {
         type: 'bar',
         data: {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
             datasets: [
-                { label: 'Planejado', data: qPlan, backgroundColor: '#422c76', borderRadius: 4 },
-                { label: 'Realizado', data: qReal, backgroundColor: '#27ae60', borderRadius: 4 }
+                { 
+                    label: 'Planejado', 
+                    data: qPlan, 
+                    backgroundColor: '#422c76', 
+                    borderRadius: 4
+                },
+                { 
+                    label: 'Realizado', 
+                    data: qReal, 
+                    backgroundColor: '#27ae60', 
+                    borderRadius: 4
+                }
             ]
         },
         options: { 
             maintainAspectRatio: false, 
             plugins: { 
-                legend: { position: 'top' },
-                datalabels: {
-                    anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
-                    formatter: (v) => v > 0 ? "R$ " + (v/1000).toFixed(0) + "k" : ""
+                legend: { 
+                    position: 'top', 
+                    labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } 
+                },
+                datalabels: { 
+                    display: true, 
+                    anchor: 'end', 
+                    align: 'top', 
+                    font: { size: 9, weight: 'bold' },
+                    formatter: (v) => v > 0 ? 'R$ ' + (v/1000).toFixed(0) + 'k' : ''
                 }
             },
             scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
+                y: { display: false }, // Remove eixo vertical
+                x: { 
+                    grid: { display: false }, // Remove grades verticais
+                    ticks: { font: { size: 11, weight: 'bold' } } 
+                }
             }
         }
     });
 
-    // 2. NOVO GRÁFICO SÓ DE MARGEM BRUTA (COLUNAS)
-    if(charts.metaMBBarras) charts.metaMBBarras.destroy();
-    charts.metaMBBarras = new Chart(document.getElementById('chartMetaBrutaBarras'), {
+    // GRÁFICO RODAPÉ: APENAS MARGEM BRUTA (MB)
+    if(charts.metaMBFooter) charts.metaMBFooter.destroy();
+    charts.metaMBFooter = new Chart(document.getElementById('chartMetaMBFooter'), {
         type: 'bar',
         data: {
-            labels: ['MB Q1', 'MB Q2', 'MB Q3', 'MB Q4'],
-            datasets: [{ 
-                label: 'Margem Bruta (MB)', 
-                data: qMB, 
-                backgroundColor: '#d4af37', 
-                borderRadius: 4,
-                barThickness: 50
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [{
+                label: 'Margem Bruta (MB)',
+                data: qMB,
+                backgroundColor: '#d4af37',
+                borderRadius: 2
             }]
         },
-        options: { 
-            maintainAspectRatio: false, 
+        options: {
+            maintainAspectRatio: false,
             plugins: { 
-                legend: { position: 'top' },
+                legend: { display: false },
                 datalabels: {
-                    anchor: 'end', align: 'top', font: { weight: 'bold' },
-                    formatter: (v) => "R$ " + v.toLocaleString('pt-BR')
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    color: '#b8962d',
+                    font: { size: 9, weight: 'bold' },
+                    formatter: (v) => 'R$ ' + (v/1000).toFixed(0) + 'k'
                 }
             },
             scales: {
@@ -978,25 +1000,17 @@ function renderizarMetas() {
         }
     });
 
-    // 3. ALCANCE DA META BRUTA (LINHA)
     if(charts.metaMB) charts.metaMB.destroy();
     charts.metaMB = new Chart(document.getElementById('chartMetaBruta'), {
         type: 'line',
         data: {
             labels: ['Q1', 'Q2', 'Q3', 'Q4'],
             datasets: [
-                { label: 'Meta Bruta (MB)', data: qMB, borderColor: '#d4af37', backgroundColor: '#d4af37', fill: false, tension: 0.3, pointRadius: 5 },
+                { label: 'Meta Bruta (MB)', data: qMB, borderColor: '#d4af37', backgroundColor: '#d4af37', fill: false, tension: 0.3, pointStyle: 'circle', pointRadius: 6 },
                 { label: 'Realizado', data: qReal, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', fill: true, tension: 0.3 }
             ]
         },
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { legend: { position: 'top' } },
-            scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
-            }
-        }
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
     let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
