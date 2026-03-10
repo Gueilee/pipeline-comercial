@@ -365,8 +365,8 @@ header {
                     </div>
                 </div>
                 <div class="chart-card">
-                    <h4>Alcance da Meta Bruta (MB)</h4>
-                    <canvas id="chartMetaBruta"></canvas>
+                    <h4>Evolução de Reuniões Realizadas</h4>
+                    <canvas id="chartReunioes"></canvas>
                 </div>
                 <div class="card-meta-full">
                     <h4>Detalhamento Geral de Metas</h4>
@@ -897,7 +897,7 @@ function renderizar(){
 }
 
 // LOGICA ESPECIFICA DA TELA DE METAS
-function renderizarMetas() {
+async function renderizarMetas() {
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
     const fV = document.getElementById('filtroVendedor').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV));
@@ -1012,17 +1012,59 @@ function renderizarMetas() {
         }
     });
 
-    if(charts.metaMB) charts.metaMB.destroy();
-    charts.metaMB = new Chart(document.getElementById('chartMetaBruta'), {
-        type: 'line',
+    // NOVO GRÁFICO: EVOLUÇÃO DE REUNIÕES (DADOS DA TABELA VENDEDORES)
+    const { data: dadosVendedores } = await supabaseClient.from('vendedores').select('nome, meta_reuniao, reuniao_real');
+    const labelsVend = (dadosVendedores || []).map(v => v.nome);
+    const dataMetaReuniao = (dadosVendedores || []).map(v => v.meta_reuniao || 0);
+    const dataRealReuniao = (dadosVendedores || []).map(v => v.reuniao_real || 0);
+
+    if(charts.reunioes) charts.reunioes.destroy();
+    charts.reunioes = new Chart(document.getElementById('chartReunioes'), {
+        type: 'bar',
         data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            labels: labelsVend,
             datasets: [
-                { label: 'Meta Bruta (MB)', data: qMB, borderColor: '#d4af37', backgroundColor: '#d4af37', fill: false, tension: 0.3, pointStyle: 'circle', pointRadius: 6 },
-                { label: 'Realizado', data: qReal, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', fill: true, tension: 0.3 }
+                {
+                    label: 'Realizadas',
+                    data: dataRealReuniao,
+                    backgroundColor: '#422c76',
+                    borderRadius: 5,
+                    barThickness: 15
+                },
+                {
+                    label: 'Meta Anual',
+                    data: dataMetaReuniao,
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 5,
+                    barThickness: 15
+                }
             ]
         },
-        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                    color: '#444',
+                    font: { weight: 'bold', size: 10 },
+                    formatter: (value, context) => {
+                        if (context.datasetIndex === 0) {
+                            const meta = context.chart.data.datasets[1].data[context.dataIndex];
+                            const perc = meta > 0 ? Math.round((value / meta) * 100) : 0;
+                            return value + ' (' + perc + '%)';
+                        }
+                        return '';
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { display: false } },
+                y: { grid: { display: false }, ticks: { font: { size: 11, weight: 'bold' } } }
+            }
+        }
     });
 
     let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
