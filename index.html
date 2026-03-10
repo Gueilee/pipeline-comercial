@@ -59,8 +59,17 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
 /* CONTROLE DE EXIBIÇÃO DAS TELAS */
-#main-system, #page-dashboard, #page-kanban { display: none; }
+#main-system, #page-dashboard, #page-kanban, #page-metas { display: none; }
 .active-page { display: block !important; }
+
+/* ESTILOS DA TELA DE METAS */
+.grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.card-meta-full { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); grid-column: span 2; }
+.meta-status-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 25px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.meta-badge { text-align: center; border-right: 1px solid #eee; flex: 1; }
+.meta-badge:last-child { border-right: none; }
+.meta-badge span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
+.meta-badge b { font-size: 20px; color: var(--lilas); }
 
 /* CABEÇALHO */
 header { 
@@ -294,6 +303,7 @@ header {
             <div class="nav-group">
                 <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
                 <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
+                <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
             </div>
             
             <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
@@ -334,6 +344,30 @@ header {
             <div class="charts-grid">
                 <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
                 <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+            </div>
+        </div>
+
+        <div id="page-metas">
+            <div class="meta-status-container">
+                <div class="meta-badge"><span>Planejado 2026</span><b id="txt_plan_total">R$ 0</b></div>
+                <div class="meta-badge"><span>Realizado 2026</span><b id="txt_real_total">R$ 0</b></div>
+                <div class="meta-badge"><span>Meta Bruta (MB)</span><b id="txt_mb_total">R$ 0</b></div>
+                <div class="meta-badge"><span>% Atingimento</span><b id="txt_perc_ating">0%</b></div>
+            </div>
+            
+            <div class="grid-metas">
+                <div class="chart-card">
+                    <h4>Performance Trimestral (Real vs Plan)</h4>
+                    <canvas id="chartMetaQuarter"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h4>Alcance da Meta Bruta (MB)</h4>
+                    <canvas id="chartMetaBruta"></canvas>
+                </div>
+                <div class="card-meta-full">
+                    <h4>Detalhamento Geral de Metas</h4>
+                    <div id="tabelaMetas" style="overflow-x: auto; margin-top:15px;"></div>
+                </div>
             </div>
         </div>
 
@@ -482,15 +516,22 @@ header {
 function navegar(pagina) {
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
+    document.getElementById('page-metas').classList.remove('active-page');
+    
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
+    document.getElementById('nav-metas').classList.remove('active');
 
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
         document.getElementById('nav-dash').classList.add('active');
-    } else {
+    } else if (pagina === 'kanban') {
         document.getElementById('page-kanban').classList.add('active-page');
         document.getElementById('nav-kanban').classList.add('active');
+    } else if (pagina === 'metas') {
+        document.getElementById('page-metas').classList.add('active-page');
+        document.getElementById('nav-metas').classList.add('active');
+        renderizarMetas(); // Chama a função de metas ao entrar na tela
     }
 }
 
@@ -737,7 +778,6 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const novo_motivo = document.getElementById('op_motivo_perda').value || "";
     let historico_atual = document.getElementById('op_historico').value || "";
 
-    // Funções auxiliares para formatar data br
     const formatBr = (dataSql) => {
         if(!dataSql) return "NÃO DEFINIDA";
         const [y, m, d] = dataSql.split('-');
@@ -749,21 +789,13 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         if(antigo) {
             let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-            
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
             if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
             if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
             if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
-            
-            // VERIFICAÇÃO DAS DATAS
-            if(antigo.data_oportunidade !== nova_data) {
-                log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
-            }
-            if((antigo.previsao_fechamento || "") !== nova_prev) {
-                log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
-            }
-
+            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
+            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
             if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
         }
     } else {
@@ -816,6 +848,10 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    
+    // Se a tela ativa for Metas, atualiza as metas também
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
@@ -831,11 +867,14 @@ function renderizar(){
     document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
     document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    
     if(charts.st) charts.st.destroy();
     charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
+    
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
+    
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
     colunas.forEach(s => {
@@ -851,6 +890,83 @@ function renderizar(){
         });
         kan.appendChild(col);
     });
+}
+
+// LOGICA ESPECIFICA DA TELA DE METAS
+function renderizarMetas() {
+    const fC = document.getElementById('filtroCliente').value.toLowerCase();
+    const fV = document.getElementById('filtroVendedor').value;
+    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV));
+
+    let totPlan = 0, totReal = 0, totMB = 0;
+    let qPlan = [0,0,0,0], qReal = [0,0,0,0], qMB = [0,0,0,0];
+
+    filtrados.forEach(r => {
+        totPlan += parseFloat(r["2026_plan"]) || 0;
+        totReal += parseFloat(r["2026_real"]) || 0;
+        totMB += parseFloat(r["mb_plan_2026"]) || 0;
+        for(let i=1; i<=4; i++) {
+            qPlan[i-1] += parseFloat(r[`q${i}_plan`]) || 0;
+            qReal[i-1] += parseFloat(r[`q${i}_real`]) || 0;
+            qMB[i-1] += parseFloat(r[`mb_plan_q${i}`]) || 0;
+        }
+    });
+
+    document.getElementById('txt_plan_total').innerText = "R$ " + totPlan.toLocaleString('pt-BR');
+    document.getElementById('txt_real_total').innerText = "R$ " + totReal.toLocaleString('pt-BR');
+    document.getElementById('txt_mb_total').innerText = "R$ " + totMB.toLocaleString('pt-BR');
+    document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
+
+    if(charts.metaQ) charts.metaQ.destroy();
+    charts.metaQ = new Chart(document.getElementById('chartMetaQuarter'), {
+        type: 'bar',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [
+                { label: 'Planejado', data: qPlan, backgroundColor: '#422c76', borderRadius: 5 },
+                { label: 'Realizado', data: qReal, backgroundColor: '#27ae60', borderRadius: 5 }
+            ]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    if(charts.metaMB) charts.metaMB.destroy();
+    charts.metaMB = new Chart(document.getElementById('chartMetaBruta'), {
+        type: 'line',
+        data: {
+            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+            datasets: [
+                { label: 'Meta Bruta (MB)', data: qMB, borderColor: '#d4af37', backgroundColor: '#d4af37', fill: false, tension: 0.3, pointStyle: 'circle', pointRadius: 6 },
+                { label: 'Realizado', data: qReal, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', fill: true, tension: 0.3 }
+            ]
+        },
+        options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
+        <thead style="background:#f8f9fa; border-bottom: 2px solid #eee;">
+            <tr>
+                <th style="padding:12px; text-align:left;">CLIENTE / VENDEDOR</th>
+                <th style="text-align:center;">PLAN 2026</th>
+                <th style="text-align:center;">REAL 2026</th>
+                <th style="text-align:center;">ATING. %</th>
+                <th style="text-align:center;">MB 2026</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    filtrados.filter(r => r["2026_plan"] > 0 || r["2026_real"] > 0).forEach(r => {
+        let ating = r["2026_plan"] > 0 ? ((r["2026_real"]/r["2026_plan"])*100).toFixed(1) : 0;
+        htmlTab += `<tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px;"><b>${r.cliente}</b><br><span style="color:#888; font-size:10px;">${r.vendedor}</span></td>
+            <td style="text-align:center;">R$ ${parseFloat(r["2026_plan"] || 0).toLocaleString('pt-BR')}</td>
+            <td style="text-align:center;">R$ ${parseFloat(r["2026_real"] || 0).toLocaleString('pt-BR')}</td>
+            <td style="text-align:center;"><span style="padding:3px 8px; border-radius:12px; background:${ating >= 100 ? '#e8f5e9' : '#fdedec'}; color:${ating >= 100 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${ating}%</span></td>
+            <td style="text-align:center; color:#d4af37; font-weight:bold;">R$ ${parseFloat(r["mb_plan_2026"] || 0).toLocaleString('pt-BR')}</td>
+        </tr>`;
+    });
+    htmlTab += `</tbody></table>`;
+    document.getElementById('tabelaMetas').innerHTML = htmlTab;
 }
 </script>
 </body>
