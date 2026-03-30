@@ -168,7 +168,7 @@ header {
 
 /* TELA DE METAS */
 .metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.kpis-metas { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px; }
+.kpis-metas { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:30px; } /* Atualizado para 4 colunas */
 .charts-grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 35px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
@@ -363,6 +363,7 @@ header {
                 <div class="kpi"><h3>Atingimento Geral (Real vs Meta)</h3><p id="metaPercAtingimento">0%</p></div>
                 <div class="kpi"><h3>Faturamento Total Realizado YTD</h3><p id="metaRealizadoTotal">R$ 0</p></div>
                 <div class="kpi"><h3>Reuniões (Realizadas vs Meta YTD)</h3><p id="metaReunioesYTD">0 / 0</p></div>
+                <div class="kpi"><h3>Propostas (Enviadas vs Meta YTD)</h3><p id="metaPropostasYTD">0 / 0</p></div>
             </div>
 
             <div class="charts-grid-metas">
@@ -400,6 +401,7 @@ header {
             
             <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
                 <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
+                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas" required></div>
             </div>
 
             <div class="form-row">
@@ -575,11 +577,11 @@ header {
 <script>
 // DICIONÁRIO DE METAS ANUAIS FIXAS (BASEADO NO SEU ARQUIVO)
 const METAS_ANUAIS = {
-    "ANDREA HEUCHLING": { reuniao: 60, trading: 7500000, armazem: 7200000, transporte: 1750000, analytics: 0 },
-    "GUILHERME ALMEIDA": { reuniao: 60, trading: 25000000, armazem: 1800000, transporte: 1050000, analytics: 0 },
-    "MICHELE SILVA": { reuniao: 60, trading: 15000000, armazem: 1200000, transporte: 700000, analytics: 0 },
-    "RAFAEL SANTOS": { reuniao: 60, trading: 2500000, armazem: 1800000, transporte: 5000000, analytics: 0 },
-    "CARLA MORENO": { reuniao: 120, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
+    "ANDREA HEUCHLING": { reuniao: 60, propostas: 36, trading: 7500000, armazem: 7200000, transporte: 1750000, analytics: 0 },
+    "GUILHERME ALMEIDA": { reuniao: 60, propostas: 36, trading: 25000000, armazem: 1800000, transporte: 1050000, analytics: 0 },
+    "MICHELE SILVA": { reuniao: 60, propostas: 36, trading: 15000000, armazem: 1200000, transporte: 700000, analytics: 0 },
+    "RAFAEL SANTOS": { reuniao: 60, propostas: 36, trading: 2500000, armazem: 1800000, transporte: 5000000, analytics: 0 },
+    "CARLA MORENO": { reuniao: 120, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
 };
 
 // NAVEGAÇÃO ENTRE TELAS
@@ -895,6 +897,7 @@ document.getElementById('formMetasInput').addEventListener('submit', async (e) =
         mes_ano: document.getElementById('meta_input_mes').value,
         vendedor: document.getElementById('meta_input_vendedor').value,
         realizado_reuniao: parseInt(document.getElementById('meta_input_reuniao').value) || 0,
+        realizado_propostas: parseInt(document.getElementById('meta_input_propostas').value) || 0,
         realizado_trading: parseFloat(document.getElementById('meta_input_trading').value) || 0,
         realizado_armazem: parseFloat(document.getElementById('meta_input_armazem').value) || 0,
         realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
@@ -923,7 +926,7 @@ function renderizarMetas() {
     const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
 
     // 1. Calcular a Meta Anual Consolidada (Baseado no filtro)
-    let metaAnual = { reuniao: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
+    let metaAnual = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
     
     if(fV && METAS_ANUAIS[fV]) {
         metaAnual = METAS_ANUAIS[fV];
@@ -931,6 +934,7 @@ function renderizarMetas() {
         // Se não tiver filtro, soma de todos os vendedores listados na constante
         Object.values(METAS_ANUAIS).forEach(m => {
             metaAnual.reuniao += m.reuniao;
+            metaAnual.propostas += m.propostas;
             metaAnual.trading += m.trading;
             metaAnual.armazem += m.armazem;
             metaAnual.transporte += m.transporte;
@@ -942,7 +946,7 @@ function renderizarMetas() {
     const metaFaturamentoMensal = metaTotalFaturamento / 12;
 
     // 2. Calcular o Realizado Consolidado YTD
-    let realYTD = { reuniao: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+    let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
     let arrayRealMensal = new Array(12).fill(0); // Para o gráfico de linha/barra [Jan a Dez]
 
     dadosMeses.forEach(m => {
@@ -950,6 +954,7 @@ function renderizarMetas() {
         const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
         
         realYTD.reuniao += (m.realizado_reuniao || 0);
+        realYTD.propostas += (m.realizado_propostas || 0);
         realYTD.trading += (m.realizado_trading || 0);
         realYTD.armazem += (m.realizado_armazem || 0);
         realYTD.transporte += (m.realizado_transporte || 0);
@@ -968,6 +973,7 @@ function renderizarMetas() {
     
     document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
     document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
+    document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
 
     // 4. Gráfico: Evolução Mensal (Linha + Barra)
     if(charts.evolucao) charts.evolucao.destroy();
