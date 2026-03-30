@@ -801,11 +801,25 @@ async function carregarAuxiliares(){
     fill('op_vendedor', v || [], "Selecione..."); 
     fill('op_area', a || [], "Selecione..."); 
     
+    // Lista de Vendedores para Edição/Exclusão
     const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) listV.innerHTML = (v || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+    if(listV) {
+        if(v && v.length > 0) {
+            listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        } else {
+            listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
+        }
+    }
     
+    // Lista de Áreas para Edição/Exclusão
     const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) listA.innerHTML = (a || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+    if(listA) {
+        if(a && a.length > 0) {
+            listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        } else {
+            listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
+        }
+    }
 }
 
 async function carregarDados(){ 
