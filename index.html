@@ -59,7 +59,7 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
 /* CONTROLE DE EXIBIÇÃO DAS TELAS */
-#main-system, #page-dashboard, #page-kanban { display: none; }
+#main-system, #page-dashboard, #page-kanban, #page-metas { display: none; }
 .active-page { display: block !important; }
 
 /* CABEÇALHO */
@@ -139,6 +139,9 @@ header {
     color: white;
 }
 
+.btn-novo-meta { background-color: #27ae60; color: white; }
+.btn-novo-meta:hover { background-color: #1e8449; }
+
 .btn-logoff { 
     color: #c0392b; 
     border-radius: 8px;
@@ -162,6 +165,11 @@ header {
 .charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
+
+/* TELA DE METAS */
+.metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.kpis-metas { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px; }
+.charts-grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 35px; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
@@ -294,6 +302,7 @@ header {
             <div class="nav-group">
                 <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
                 <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
+                <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
             </div>
             
             <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
@@ -340,6 +349,74 @@ header {
         <div id="page-kanban">
             <div class="kanban" id="kanban"></div>
         </div>
+
+        <div id="page-metas">
+            <div class="metas-header">
+                <div>
+                    <h2 style="margin: 0; color: var(--lilas);">Acompanhamento de Metas</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Use o filtro superior de Vendedores para detalhar o desempenho individual.</p>
+                </div>
+                <button type="button" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
+            </div>
+
+            <div class="kpis-metas">
+                <div class="kpi"><h3>Atingimento Geral (Real vs Meta)</h3><p id="metaPercAtingimento">0%</p></div>
+                <div class="kpi"><h3>Faturamento Total Realizado YTD</h3><p id="metaRealizadoTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Reuniões (Realizadas vs Meta YTD)</h3><p id="metaReunioesYTD">0 / 0</p></div>
+            </div>
+
+            <div class="charts-grid-metas">
+                <div class="chart-card"><h4>Evolução Mensal (Receita Total)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
+                <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modalMetasInput" class="modal">
+    <div class="modal-content" style="width: 500px;">
+        <h3>📝 Lançamento de Resultados</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês.</p>
+        <form id="formMetasInput">
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Mês</label>
+                    <select id="meta_input_mes" required>
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="meta_input_vendedor" required></select></div>
+            </div>
+            
+            <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Realizado Trading (R$)</label><input type="number" step="0.01" id="meta_input_trading" required></div>
+                <div class="form-group" style="flex:1"><label>Realizado Armazém (R$)</label><input type="number" step="0.01" id="meta_input_armazem" required></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Realizado Transporte (R$)</label><input type="number" step="0.01" id="meta_input_transporte" required></div>
+                <div class="form-group" style="flex:1"><label>Realizado Analytics (R$)</label><input type="number" step="0.01" id="meta_input_analytics" required></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalMetasInput')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-meta">Salvar Mês</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -496,13 +573,24 @@ header {
 </div>
 
 <script>
+// DICIONÁRIO DE METAS ANUAIS FIXAS (BASEADO NO SEU ARQUIVO)
+const METAS_ANUAIS = {
+    "ANDREA HEUCHLING": { reuniao: 60, trading: 7500000, armazem: 7200000, transporte: 1750000, analytics: 0 },
+    "GUILHERME ALMEIDA": { reuniao: 60, trading: 25000000, armazem: 1800000, transporte: 1050000, analytics: 0 },
+    "MICHELE SILVA": { reuniao: 60, trading: 15000000, armazem: 1200000, transporte: 700000, analytics: 0 },
+    "RAFAEL SANTOS": { reuniao: 60, trading: 2500000, armazem: 1800000, transporte: 5000000, analytics: 0 },
+    "CARLA MORENO": { reuniao: 120, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
+};
+
 // NAVEGAÇÃO ENTRE TELAS
 function navegar(pagina) {
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
+    document.getElementById('page-metas').classList.remove('active-page');
     
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
+    document.getElementById('nav-metas').classList.remove('active');
 
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
@@ -510,6 +598,10 @@ function navegar(pagina) {
     } else if (pagina === 'kanban') {
         document.getElementById('page-kanban').classList.add('active-page');
         document.getElementById('nav-kanban').classList.add('active');
+    } else if (pagina === 'metas') {
+        document.getElementById('page-metas').classList.add('active-page');
+        document.getElementById('nav-metas').classList.add('active');
+        renderizarMetas(); // Garante que a tela de metas é desenhada ao abrir
     }
 }
 
@@ -571,7 +663,9 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let base=[]; let charts={};
+let base=[]; 
+let baseMetasMensais=[]; 
+let charts={};
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
@@ -608,6 +702,7 @@ function toggleMotivoPerda() {
     }
 }
 
+// ---- CADASTRO AUXILIARES ----
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('vend_id').value;
@@ -624,7 +719,6 @@ async function deletarVendedor(id) {
         await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
     }
 }
-
 function prepararEdicaoVendedor(id, nome) {
     document.getElementById('vend_id').value = id;
     document.getElementById('vend_nome').value = nome;
@@ -646,12 +740,12 @@ async function deletarArea(id) {
         await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
     }
 }
-
 function prepararEdicaoArea(id, nome) {
     document.getElementById('area_id').value = id;
     document.getElementById('area_nome').value = nome;
 }
 
+// ---- OPORTUNIDADES ----
 function calcularMRR() { 
     const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
     document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
@@ -789,49 +883,204 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     fecharModal('modalOportunidade'); carregarDados();
 };
 
+// ---- MÓDULO DE METAS ----
+function prepararNovaMeta() {
+    document.getElementById('formMetasInput').reset();
+    abrirModal('modalMetasInput');
+}
+
+document.getElementById('formMetasInput').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        mes_ano: document.getElementById('meta_input_mes').value,
+        vendedor: document.getElementById('meta_input_vendedor').value,
+        realizado_reuniao: parseInt(document.getElementById('meta_input_reuniao').value) || 0,
+        realizado_trading: parseFloat(document.getElementById('meta_input_trading').value) || 0,
+        realizado_armazem: parseFloat(document.getElementById('meta_input_armazem').value) || 0,
+        realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
+        realizado_analytics: parseFloat(document.getElementById('meta_input_analytics').value) || 0
+    };
+
+    // Primeiro checa se já existe um lançamento pra esse Vendedor nesse Mês
+    const existente = baseMetasMensais.find(m => m.vendedor === payload.vendedor && m.mes_ano === payload.mes_ano);
+    
+    let res;
+    if(existente) {
+        res = await supabaseClient.from('metas_mensais').update(payload).eq('id', existente.id);
+    } else {
+        res = await supabaseClient.from('metas_mensais').insert([payload]);
+    }
+    
+    if(res && res.error) alert("Erro: " + res.error.message);
+    else { 
+        fecharModal('modalMetasInput'); 
+        carregarDados(); // Recarrega para atualizar gráficos
+    }
+});
+
+function renderizarMetas() {
+    const fV = document.getElementById('filtroVendedor').value;
+    const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
+
+    // 1. Calcular a Meta Anual Consolidada (Baseado no filtro)
+    let metaAnual = { reuniao: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
+    
+    if(fV && METAS_ANUAIS[fV]) {
+        metaAnual = METAS_ANUAIS[fV];
+    } else if (!fV) {
+        // Se não tiver filtro, soma de todos os vendedores listados na constante
+        Object.values(METAS_ANUAIS).forEach(m => {
+            metaAnual.reuniao += m.reuniao;
+            metaAnual.trading += m.trading;
+            metaAnual.armazem += m.armazem;
+            metaAnual.transporte += m.transporte;
+            metaAnual.analytics += m.analytics;
+        });
+    }
+
+    const metaTotalFaturamento = metaAnual.trading + metaAnual.armazem + metaAnual.transporte + metaAnual.analytics;
+    const metaFaturamentoMensal = metaTotalFaturamento / 12;
+
+    // 2. Calcular o Realizado Consolidado YTD
+    let realYTD = { reuniao: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+    let arrayRealMensal = new Array(12).fill(0); // Para o gráfico de linha/barra [Jan a Dez]
+
+    dadosMeses.forEach(m => {
+        const mesIndex = parseInt(m.mes_ano) - 1; // Mês 1 vira index 0
+        const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
+        
+        realYTD.reuniao += (m.realizado_reuniao || 0);
+        realYTD.trading += (m.realizado_trading || 0);
+        realYTD.armazem += (m.realizado_armazem || 0);
+        realYTD.transporte += (m.realizado_transporte || 0);
+        realYTD.analytics += (m.realizado_analytics || 0);
+        realYTD.faturamento += faturamentoMes;
+
+        if(mesIndex >= 0 && mesIndex < 12) {
+            arrayRealMensal[mesIndex] += faturamentoMes;
+        }
+    });
+
+    // 3. Atualizar KPIs
+    const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
+    document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
+    document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
+    
+    document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
+
+    // 4. Gráfico: Evolução Mensal (Linha + Barra)
+    if(charts.evolucao) charts.evolucao.destroy();
+    charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            datasets: [
+                {
+                    label: 'Meta Mensal',
+                    data: new Array(12).fill(metaFaturamentoMensal),
+                    type: 'line',
+                    borderColor: '#422c76',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Linha tracejada
+                    pointRadius: 0,
+                    fill: false,
+                    datalabels: { display: false }
+                },
+                {
+                    label: 'Realizado',
+                    data: arrayRealMensal,
+                    backgroundColor: '#17a2b8',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
+                    formatter: v => v > 0 ? "R$ " + (v/1000).toFixed(0) + "k" : ""
+                }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+
+    // 5. Gráfico: Unidade de Negócio
+    if(charts.unidade) charts.unidade.destroy();
+    charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
+        type: 'bar',
+        data: {
+            labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
+            datasets: [
+                {
+                    label: 'Meta Anual',
+                    data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Realizado YTD',
+                    data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
+                    backgroundColor: '#8e44ad',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                    formatter: (v, ctx) => v > 0 && ctx.datasetIndex === 1 ? "R$ " + (v/1000).toFixed(0) + "k" : ""
+                }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+}
+
+// ---- LOADS INICIAIS ----
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
     const { data: a } = await supabaseClient.from('areas').select('*');
     
-    // Popula apenas os modais de criação/edição a partir das tabelas auxiliares
     const fill = (id, d, label) => { 
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
     };
     fill('op_vendedor', v || [], "Selecione..."); 
     fill('op_area', a || [], "Selecione..."); 
+    fill('meta_input_vendedor', v || [], "Vendedor..."); 
     
-    // Lista de Vendedores para Edição/Exclusão
     const listV = document.getElementById('listaVendedoresGerenciamento');
     if(listV) {
-        if(v && v.length > 0) {
-            listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
-        } else {
-            listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
-        }
+        if(v && v.length > 0) listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
     }
     
-    // Lista de Áreas para Edição/Exclusão
     const listA = document.getElementById('listaAreasGerenciamento');
     if(listA) {
-        if(a && a.length > 0) {
-            listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
-        } else {
-            listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
-        }
+        if(a && a.length > 0) listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
     }
 }
 
 async function carregarDados(){ 
-    const { data } = await supabaseClient.from('oportunidades').select('*'); 
-    base = data || []; 
+    const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
+    base = ops || []; 
     
-    // Lista de Clientes Únicos
+    // Carrega também as Metas Mensais
+    const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
+    baseMetasMensais = metas || [];
+
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
     
-    // Popula o Filtro de Vendedores dinamicamente da base atual
     const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
     const filtroVend = document.getElementById('filtroVendedor');
     if(filtroVend) {
@@ -840,7 +1089,6 @@ async function carregarDados(){
         filtroVend.value = valAtual;
     }
 
-    // Popula o Filtro de Áreas dinamicamente da base atual
     const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
     const filtroArea = document.getElementById('filtroArea');
     if(filtroArea) {
@@ -850,6 +1098,8 @@ async function carregarDados(){
     }
 
     renderizar(); 
+    // Atualiza metas se a aba estiver ativa
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 }
 
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
@@ -867,6 +1117,9 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+
+    // Reflete os filtros na tela de metas automaticamente se estiver aberta
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
@@ -890,7 +1143,6 @@ function renderizar(){
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     
-    // Adicionando Emojis de Medalha no Eixo Y
     const labelsVendedores = sv.map((x, i) => {
         if(i === 0) return '🥇 ' + x[0];
         if(i === 1) return '🥈 ' + x[0];
@@ -913,7 +1165,7 @@ function renderizar(){
         options: { 
             indexAxis: 'y', 
             maintainAspectRatio: false, 
-            layout: { padding: { right: 80 } }, // Aumentado para garantir espaço para o rótulo
+            layout: { padding: { right: 80 } },
             scales: { 
                 x: { display: false }, 
                 y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
@@ -921,9 +1173,9 @@ function renderizar(){
             plugins: { 
                 legend: { display: false }, 
                 datalabels: { 
-                    color: '#422c76', // Cor lilás atualizada
+                    color: '#422c76', 
                     anchor: 'end', 
-                    align: 'right', // Rótulo alinhado à direita (para fora da barra)
+                    align: 'right', 
                     offset: 5, 
                     font: { weight: 'bold', size: 11 }, 
                     formatter: v => "R$ " + v.toLocaleString('pt-BR') 
