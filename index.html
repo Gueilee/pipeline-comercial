@@ -1408,7 +1408,10 @@ function renderizar(){
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
-            card.onclick = () => editarOportunidade(i.id);
+            
+            // 🔥 SOLUÇÃO AQUI: Setando o atributo onclick no HTML garantindo a passagem do ID único.
+            card.setAttribute('onclick', `editarOportunidade('${i.id}')`);
+            
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
