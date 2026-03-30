@@ -59,7 +59,7 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
 /* CONTROLE DE EXIBIÇÃO DAS TELAS */
-#main-system, #page-dashboard, #page-kanban, #page-metas { display: none; }
+#main-system, #page-dashboard, #page-kanban, #page-metas, #page-financeiro { display: none; }
 .active-page { display: block !important; }
 
 /* CABEÇALHO */
@@ -170,6 +170,20 @@ header {
 .metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .kpis-metas { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:30px; }
 .charts-grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 35px; }
+
+/* DATAGRID FINANCEIRO */
+.datagrid-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+.datagrid-table th, .datagrid-table td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+.datagrid-table th { background: #f4f4f4; color: var(--lilas); font-weight: bold; position: sticky; top: 0;}
+.datagrid-table input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-weight: bold; color: var(--lilas); }
+.datagrid-table input:focus { border-color: #01E18E; box-shadow: 0 0 5px rgba(1, 225, 142, 0.5); outline: none; }
+
+/* RANKING FINANCEIRO */
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+.ranking-table th { border-bottom: 2px solid #eee; padding: 8px; text-align: left; color: #888; text-transform: uppercase; font-size: 11px; }
+.ranking-table td { padding: 10px 8px; border-bottom: 1px solid #eee; }
+.text-green { color: #27ae60; font-weight: bold; }
+.text-red { color: #c0392b; font-weight: bold; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
 .modal-content { 
@@ -303,6 +317,7 @@ header {
                 <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
                 <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
                 <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
+                <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
             </div>
             
             <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
@@ -315,7 +330,7 @@ header {
     </header>
 
     <div class="container">
-        <div class="filters">
+        <div class="filters" id="barraFiltros">
             <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
             <datalist id="listaClientes"></datalist>
             <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
@@ -370,6 +385,93 @@ header {
                 <div class="chart-card"><h4>Evolução Mensal (Receita Total)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
                 <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
             </div>
+        </div>
+
+        <div id="page-financeiro">
+            <div class="metas-header">
+                <div>
+                    <h2 style="margin: 0; color: var(--lilas);">Visão Financeira (Previsto x Realizado)</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Acompanhamento orçamentário consolidado de Clientes por BU e Categoria.</p>
+                </div>
+                <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
+            </div>
+
+            <div class="kpis-metas">
+                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapTotal">R$ 0</p></div>
+                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercTotal">0%</p></div>
+            </div>
+
+            <div class="charts-grid-metas">
+                <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
+                <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
+            </div>
+
+            <div class="charts-grid-metas">
+                <div class="chart-card" style="height: auto; min-height: 300px;">
+                    <h4>🏆 Top 5 Clientes (Acima do Plano)</h4>
+                    <table class="ranking-table" id="tbDestaques">
+                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-card" style="height: auto; min-height: 300px;">
+                    <h4>⚠️ Top 5 Ofensores (Abaixo do Plano)</h4>
+                    <table class="ranking-table" id="tbOfensores">
+                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="modalFinInput" class="modal">
+    <div class="modal-content" style="width: 850px;">
+        <h3>⚡ Lançamento Rápido Mensal</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o mês. Digite os valores e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
+        
+        <div class="form-group" style="width: 250px;">
+            <label>Mês de Referência</label>
+            <select id="fin_input_mes" onchange="carregarGridFin()">
+                <option value="">Selecione o mês...</option>
+                <option value="1">Janeiro</option>
+                <option value="2">Fevereiro</option>
+                <option value="3">Março</option>
+                <option value="4">Abril</option>
+                <option value="5">Maio</option>
+                <option value="6">Junho</option>
+                <option value="7">Julho</option>
+                <option value="8">Agosto</option>
+                <option value="9">Setembro</option>
+                <option value="10">Outubro</option>
+                <option value="11">Novembro</option>
+                <option value="12">Dezembro</option>
+            </select>
+        </div>
+        
+        <div style="max-height: 45vh; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;">
+            <table class="datagrid-table" id="gridFinTable">
+                <thead>
+                    <tr>
+                        <th style="width: 15%">BU</th>
+                        <th style="width: 45%">Cliente</th>
+                        <th style="width: 20%">Plano (R$)</th>
+                        <th style="width: 20%">Realizado (R$)</th>
+                    </tr>
+                </thead>
+                <tbody id="gridFinBody">
+                    <tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
+            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Mês Inteiro</button>
         </div>
     </div>
 </div>
@@ -589,10 +691,17 @@ function navegar(pagina) {
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
     document.getElementById('page-metas').classList.remove('active-page');
+    document.getElementById('page-financeiro').classList.remove('active-page');
     
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
+    document.getElementById('nav-financeiro').classList.remove('active');
+
+    const barraFiltros = document.getElementById('barraFiltros');
+    if (barraFiltros) {
+        barraFiltros.style.display = (pagina === 'dashboard' || pagina === 'kanban' || pagina === 'metas') ? 'flex' : 'none';
+    }
 
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
@@ -603,7 +712,11 @@ function navegar(pagina) {
     } else if (pagina === 'metas') {
         document.getElementById('page-metas').classList.add('active-page');
         document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); // Garante que a tela de metas é desenhada ao abrir
+        renderizarMetas(); 
+    } else if (pagina === 'financeiro') {
+        document.getElementById('page-financeiro').classList.add('active-page');
+        document.getElementById('nav-financeiro').classList.add('active');
+        renderizarFinanceiro();
     }
 }
 
@@ -652,8 +765,15 @@ const pluginCentroRosca = {
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
             ctx.fillStyle = "#414042";
-            const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-            const text = total.toString();
+            
+            let text = "";
+            if(chart.canvas.id === "chartFinBU") {
+                text = "BUs";
+            } else {
+                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                text = total.toString();
+            }
+            
             ctx.fillText(text, centerX, centerY);
             ctx.restore();
         }
@@ -667,6 +787,8 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; 
 let baseMetasMensais=[]; 
+let basePlanFinanceiro = []; 
+let baseResMensais = [];
 let charts={};
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
@@ -1022,14 +1144,14 @@ function renderizarMetas() {
                     label: 'Meta Mensal',
                     data: new Array(12).fill(metaFaturamentoMensal),
                     type: 'line',
-                    borderColor: '#422c76',
+                    borderColor: '#01E18E',
                     borderWidth: 2,
                     borderDash: [5, 5], 
                     pointRadius: 0,
                     fill: false,
                     datalabels: { 
                         display: true, 
-                        color: '#422c76', 
+                        color: '#01E18E', 
                         anchor: 'end', 
                         align: 'top', 
                         font: {size: 10, weight:'bold'},
@@ -1043,7 +1165,7 @@ function renderizarMetas() {
                 {
                     label: 'Realizado',
                     data: arrayRealMensal,
-                    backgroundColor: '#17a2b8',
+                    backgroundColor: '#422c76',
                     borderRadius: 4
                 }
             ]
@@ -1081,14 +1203,14 @@ function renderizarMetas() {
                 {
                     label: 'Meta Anual',
                     data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: '#422c76',
                     borderRadius: 4,
                     maxBarThickness: 60 // Afina as barras
                 },
                 {
                     label: 'Realizado YTD',
                     data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
-                    backgroundColor: '#8e44ad',
+                    backgroundColor: '#ff2f69',
                     borderRadius: 4,
                     maxBarThickness: 60 // Afina as barras
                 }
@@ -1154,6 +1276,9 @@ async function carregarDados(){
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
 
+    // NOVO: Carrega dados financeiros
+    await carregarDadosFinanceiros();
+
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
@@ -1177,6 +1302,14 @@ async function carregarDados(){
     renderizar(); 
     // Atualiza metas se a aba estiver ativa
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+    if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
+}
+
+async function carregarDadosFinanceiros() {
+    const { data: plan } = await supabaseClient.from('planejamento_financeiro').select('*');
+    const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
+    basePlanFinanceiro = plan || [];
+    baseResMensais = res || [];
 }
 
 function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
@@ -1283,6 +1416,202 @@ function renderizar(){
         });
         kan.appendChild(col);
     });
+}
+
+// ----------------------------------------------------
+// MÓDULO FINANCEIRO (PREVISTO X REALIZADO)
+// ----------------------------------------------------
+
+function renderizarFinanceiro() {
+    let planoTotalAnual = 0;
+    let realTotalYTD = 0;
+    
+    let arrayPlanoMensal = new Array(12).fill(0);
+    let arrayRealMensal = new Array(12).fill(0);
+    let faturamentoPorBU = { 'VCI': 0, 'GRV': 0, 'ARM': 0, 'OUTROS': 0 };
+    let clientesDesempenho = {}; 
+
+    baseResMensais.forEach(rm => {
+        const mesIdx = rm.mes_numero - 1;
+        const valPlan = parseFloat(rm.valor_planejado) || 0;
+        const valReal = parseFloat(rm.valor_realizado) || 0;
+        
+        planoTotalAnual += valPlan;
+        realTotalYTD += valReal;
+        
+        arrayPlanoMensal[mesIdx] += valPlan;
+        arrayRealMensal[mesIdx] += valReal;
+
+        const planRef = basePlanFinanceiro.find(p => p.id === rm.planejamento_id);
+        if(planRef) {
+            const bu = planRef.bu || 'OUTROS';
+            faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
+
+            const cliKey = planRef.cliente + " (" + bu + ")";
+            if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
+            clientesDesempenho[cliKey].plano += valPlan;
+            clientesDesempenho[cliKey].real += valReal;
+            clientesDesempenho[cliKey].desvio += (valReal - valPlan);
+        }
+    });
+
+    const gap = realTotalYTD - planoTotalAnual;
+    const percAting = planoTotalAnual > 0 ? ((realTotalYTD / planoTotalAnual) * 100).toFixed(1) : 0;
+    
+    document.getElementById('finPlanoTotal').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
+    document.getElementById('finRealTotal').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
+    
+    document.getElementById('finGapTotal').innerText = "R$ " + (gap/1000000).toFixed(2) + "M";
+    document.getElementById('finGapTotal').style.color = gap >= 0 ? '#27ae60' : '#c0392b';
+    
+    document.getElementById('finPercTotal').innerText = percAting + "%";
+    document.getElementById('finPercTotal').style.color = percAting >= 100 ? '#27ae60' : '#f39c12';
+
+    if(charts.finEvolucao) charts.finEvolucao.destroy();
+    charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            datasets: [
+                {
+                    label: 'Plano Orçamentário',
+                    data: arrayPlanoMensal,
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Realizado Faturado',
+                    data: arrayRealMensal,
+                    backgroundColor: '#ff2f69',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 20 } },
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                    formatter: v => {
+                        if (v === 0) return "";
+                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                        return (v/1000).toFixed(0) + "k";
+                    }
+                }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+
+    const buLabels = Object.keys(faturamentoPorBU).filter(k => faturamentoPorBU[k] > 0);
+    const buData = buLabels.map(k => faturamentoPorBU[k]);
+    
+    if(charts.finBu) charts.finBu.destroy();
+    charts.finBu = new Chart(document.getElementById('chartFinBU'), {
+        type: 'doughnut',
+        data: {
+            labels: buLabels,
+            datasets: [{ data: buData, backgroundColor: ['#422c76','#ff2f69','#01E18E','#17a2b8'] }]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { color: '#fff', font: {weight: 'bold'} }, 
+                legend: { position: 'bottom' } 
+            } 
+        },
+        plugins: [pluginCentroRosca]
+    });
+
+    const arrayClientes = Object.entries(clientesDesempenho).map(([nome, vals]) => ({nome, ...vals}));
+    const destaques = [...arrayClientes].filter(c => c.desvio > 0).sort((a,b) => b.desvio - a.desvio).slice(0, 5);
+    const ofensores = [...arrayClientes].filter(c => c.desvio < 0).sort((a,b) => a.desvio - b.desvio).slice(0, 5);
+
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+
+    const tbDest = document.querySelector('#tbDestaques tbody');
+    if(tbDest) tbDest.innerHTML = destaques.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-green">+${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum cliente acima do plano.</td></tr>";
+
+    const tbOfen = document.querySelector('#tbOfensores tbody');
+    if(tbOfen) tbOfen.innerHTML = ofensores.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-red">${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum ofensor encontrado.</td></tr>";
+}
+
+function abrirLancamentoFin() {
+    document.getElementById('fin_input_mes').value = "";
+    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
+    abrirModal('modalFinInput');
+}
+
+function carregarGridFin() {
+    const mes = document.getElementById('fin_input_mes').value;
+    const tbody = document.getElementById('gridFinBody');
+    if(!mes) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
+        return;
+    }
+
+    const regsMes = baseResMensais.filter(r => r.mes_numero == mes);
+    
+    const gridData = regsMes.map(rm => {
+        const plan = basePlanFinanceiro.find(p => p.id === rm.planejamento_id);
+        return {
+            id: rm.id,
+            cliente: plan ? plan.cliente : 'Desconhecido',
+            bu: plan ? plan.bu : '-',
+            plano: parseFloat(rm.valor_planejado) || 0,
+            real: parseFloat(rm.valor_realizado) || 0
+        };
+    });
+
+    gridData.sort((a, b) => a.bu.localeCompare(b.bu) || a.cliente.localeCompare(b.cliente));
+
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    tbody.innerHTML = gridData.map(d => `
+        <tr>
+            <td><span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${d.bu}</span></td>
+            <td><b>${d.cliente}</b></td>
+            <td style="color:#666;">${formatCurrency(d.plano)}</td>
+            <td><input type="number" step="0.01" class="fin-input-real" data-id="${d.id}" value="${d.real === 0 ? '' : d.real}" placeholder="0.00"></td>
+        </tr>
+    `).join('');
+}
+
+async function salvarGridFin() {
+    const mes = document.getElementById('fin_input_mes').value;
+    if(!mes) return alert("Selecione um mês primeiro.");
+
+    const btn = document.getElementById('btnSalvarFin');
+    btn.innerText = "Salvando..."; 
+    btn.disabled = true;
+
+    const inputs = document.querySelectorAll('.fin-input-real');
+    const promessas = [];
+
+    inputs.forEach(inp => {
+        const idRow = inp.dataset.id;
+        const valReal = parseFloat(inp.value) || 0;
+        
+        const rowAntiga = baseResMensais.find(r => r.id === idRow);
+        if(rowAntiga && parseFloat(rowAntiga.valor_realizado) !== valReal) {
+            promessas.push(
+                supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', idRow)
+            );
+        }
+    });
+
+    if(promessas.length > 0) {
+        await Promise.all(promessas);
+        await carregarDadosFinanceiros(); 
+    }
+
+    fecharModal('modalFinInput');
+    btn.innerText = "Salvar Mês Inteiro"; 
+    btn.disabled = false;
+    
+    renderizarFinanceiro(); 
 }
 </script>
 </body>
