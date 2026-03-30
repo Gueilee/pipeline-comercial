@@ -377,11 +377,11 @@ header {
 <div id="modalMetasInput" class="modal">
     <div class="modal-content" style="width: 500px;">
         <h3>📝 Lançamento de Resultados</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês.</p>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês. Dica: Se já existir um lançamento, ao selecionar Mês e Vendedor, ele será carregado para edição.</p>
         <form id="formMetasInput">
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Mês</label>
-                    <select id="meta_input_mes" required>
+                    <select id="meta_input_mes" required onchange="carregarMetaExistente()">
                         <option value="1">Janeiro</option>
                         <option value="2">Fevereiro</option>
                         <option value="3">Março</option>
@@ -396,7 +396,7 @@ header {
                         <option value="12">Dezembro</option>
                     </select>
                 </div>
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="meta_input_vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="meta_input_vendedor" required onchange="carregarMetaExistente()"></select></div>
             </div>
             
             <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
@@ -888,7 +888,35 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
     document.getElementById('formMetasInput').reset();
+    document.getElementById('meta_input_vendedor').value = ""; // Reseta o vendedor para forçar a escolha e carregar o histórico
     abrirModal('modalMetasInput');
+}
+
+// NOVA FUNÇÃO: CARREGA O LANÇAMENTO EXISTENTE PARA EDIÇÃO
+function carregarMetaExistente() {
+    const mes = document.getElementById('meta_input_mes').value;
+    const vend = document.getElementById('meta_input_vendedor').value;
+    
+    if(!mes || !vend) return; // Só busca se os dois estiverem selecionados
+
+    const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
+    
+    if(existente) {
+        document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
+        document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
+        document.getElementById('meta_input_trading').value = existente.realizado_trading || 0;
+        document.getElementById('meta_input_armazem').value = existente.realizado_armazem || 0;
+        document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
+        document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
+    } else {
+        // Se não existir, zera os campos para um novo lançamento
+        document.getElementById('meta_input_reuniao').value = "";
+        document.getElementById('meta_input_propostas').value = "";
+        document.getElementById('meta_input_trading').value = "";
+        document.getElementById('meta_input_armazem').value = "";
+        document.getElementById('meta_input_transporte').value = "";
+        document.getElementById('meta_input_analytics').value = "";
+    }
 }
 
 document.getElementById('formMetasInput').addEventListener('submit', async (e) => {
@@ -999,7 +1027,18 @@ function renderizarMetas() {
                     borderDash: [5, 5], 
                     pointRadius: 0,
                     fill: false,
-                    datalabels: { display: false }
+                    datalabels: { 
+                        display: true, 
+                        color: '#422c76', 
+                        anchor: 'end', 
+                        align: 'top', 
+                        font: {size: 10, weight:'bold'},
+                        formatter: v => {
+                            if (v === 0) return "";
+                            if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                            return (v/1000).toFixed(0) + "k";
+                        }
+                    }
                 },
                 {
                     label: 'Realizado',
@@ -1011,11 +1050,14 @@ function renderizarMetas() {
         },
         options: {
             maintainAspectRatio: false,
+            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo superior não cortar
             plugins: {
                 legend: { position: 'bottom' },
                 datalabels: {
                     color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
-                    formatter: v => {
+                    formatter: (v, ctx) => {
+                        // Não formata a linha de meta aqui, só a barra
+                        if (ctx.datasetIndex === 0) return ""; 
                         if (v === 0) return "";
                         if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
                         return (v/1000).toFixed(0) + "k";
@@ -1023,16 +1065,7 @@ function renderizarMetas() {
                 }
             },
             scales: { 
-                y: { 
-                    display: true,
-                    ticks: {
-                        callback: function(value) {
-                            if (value >= 1000000) return (value/1000000) + 'M';
-                            if (value >= 1000) return (value/1000) + 'k';
-                            return value;
-                        }
-                    }
-                }, 
+                y: { display: false }, // Remove Eixo vertical
                 x: { grid: { display: false } } 
             }
         }
@@ -1049,18 +1082,21 @@ function renderizarMetas() {
                     label: 'Meta Anual',
                     data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
                     backgroundColor: '#e0e0e0',
-                    borderRadius: 4
+                    borderRadius: 4,
+                    maxBarThickness: 60 // Afina as barras
                 },
                 {
                     label: 'Realizado YTD',
                     data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
                     backgroundColor: '#8e44ad',
-                    borderRadius: 4
+                    borderRadius: 4,
+                    maxBarThickness: 60 // Afina as barras
                 }
             ]
         },
         options: {
             maintainAspectRatio: false,
+            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo de trading não cortar no topo
             plugins: {
                 legend: { position: 'bottom' },
                 datalabels: {
@@ -1077,16 +1113,7 @@ function renderizarMetas() {
                 }
             },
             scales: { 
-                y: { 
-                    display: true, 
-                    ticks: {
-                        callback: function(value) {
-                            if (value >= 1000000) return (value/1000000) + 'M';
-                            if (value >= 1000) return (value/1000) + 'k';
-                            return value;
-                        }
-                    }
-                }, 
+                y: { display: false }, // Remove Eixo Vertical
                 x: { grid: { display: false } } 
             }
         }
