@@ -792,14 +792,18 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
     const { data: a } = await supabaseClient.from('areas').select('*');
+    
+    // Popula apenas os modais de criação/edição a partir das tabelas auxiliares
     const fill = (id, d, label) => { 
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
     };
-    fill('op_vendedor', v || [], "Selecione..."); fill('filtroVendedor', v || [], "Vendedor");
-    fill('op_area', a || [], "Selecione..."); fill('filtroArea', a || [], "Área");
+    fill('op_vendedor', v || [], "Selecione..."); 
+    fill('op_area', a || [], "Selecione..."); 
+    
     const listV = document.getElementById('listaVendedoresGerenciamento');
     if(listV) listV.innerHTML = (v || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+    
     const listA = document.getElementById('listaAreasGerenciamento');
     if(listA) listA.innerHTML = (a || []).map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
 }
@@ -807,9 +811,30 @@ async function carregarAuxiliares(){
 async function carregarDados(){ 
     const { data } = await supabaseClient.from('oportunidades').select('*'); 
     base = data || []; 
+    
+    // Lista de Clientes Únicos
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    
+    // Popula o Filtro de Vendedores dinamicamente da base atual
+    const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
+    const filtroVend = document.getElementById('filtroVendedor');
+    if(filtroVend) {
+        const valAtual = filtroVend.value;
+        filtroVend.innerHTML = '<option value="">Vendedor</option>' + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
+        filtroVend.value = valAtual;
+    }
+
+    // Popula o Filtro de Áreas dinamicamente da base atual
+    const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
+    const filtroArea = document.getElementById('filtroArea');
+    if(filtroArea) {
+        const valAtual = filtroArea.value;
+        filtroArea.innerHTML = '<option value="">Área</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
+        filtroArea.value = valAtual;
+    }
+
     renderizar(); 
 }
 
@@ -850,7 +875,48 @@ function renderizar(){
     
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
+    
+    // Adicionando Emojis de Medalha no Eixo Y
+    const labelsVendedores = sv.map((x, i) => {
+        if(i === 0) return '🥇 ' + x[0];
+        if(i === 1) return '🥈 ' + x[0];
+        if(i === 2) return '🥉 ' + x[0];
+        return x[0];
+    });
+
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
+        type: 'bar', 
+        data: { 
+            labels: labelsVendedores, 
+            datasets: [{ 
+                data: sv.map(x=>x[1]), 
+                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
+                borderRadius: 8, 
+                barThickness: 22, 
+                maxBarThickness: 30 
+            }]
+        }, 
+        options: { 
+            indexAxis: 'y', 
+            maintainAspectRatio: false, 
+            layout: { padding: { right: 80 } }, // Aumentado para garantir espaço para o rótulo
+            scales: { 
+                x: { display: false }, 
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
+            }, 
+            plugins: { 
+                legend: { display: false }, 
+                datalabels: { 
+                    color: '#422c76', // Cor lilás atualizada
+                    anchor: 'end', 
+                    align: 'right', // Rótulo alinhado à direita (para fora da barra)
+                    offset: 5, 
+                    font: { weight: 'bold', size: 11 }, 
+                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
+                } 
+            } 
+        } 
+    });
     
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [
