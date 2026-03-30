@@ -1409,8 +1409,12 @@ function renderizar(){
         filtrados.filter(f => f.status === s.n).forEach(i => {
             const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
             
-            // 🔥 SOLUÇÃO AQUI: Setando o atributo onclick no HTML garantindo a passagem do ID único.
-            card.setAttribute('onclick', `editarOportunidade('${i.id}')`);
+            // 🔥 SOLUÇÃO APLICADA: Voltando para a função idêntica à que funcionava no seu código antigo.
+            card.onclick = (e) => { 
+                if(e.target === card || e.target.parentNode === card) {
+                    editarOportunidade(i.id); 
+                }
+            };
             
             card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
