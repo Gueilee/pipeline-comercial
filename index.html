@@ -1426,7 +1426,7 @@ function renderizarFinanceiro() {
     
     let arrayPlanoMensal = new Array(12).fill(0);
     let arrayRealMensal = new Array(12).fill(0);
-    let faturamentoPorBU = { 'VCI': 0, 'GRV': 0, 'ARM': 0, 'OUTROS': 0 };
+    let faturamentoPorBU = {};
     let clientesDesempenho = {}; 
 
     baseResMensais.forEach(rm => {
@@ -1443,7 +1443,12 @@ function renderizarFinanceiro() {
             arrayRealMensal[mesIdx] += valReal;
         }
 
-        const bu = rm.bu || 'OUTROS';
+        // AGRUPAMENTO INTELIGENTE: Junta subdivisões na BU principal para o gráfico
+        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
+        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
+        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
+        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
+
         const cliName = rm.cliente || 'Sem Nome';
 
         faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
@@ -1505,21 +1510,48 @@ function renderizarFinanceiro() {
         }
     });
 
-    const buLabels = Object.keys(faturamentoPorBU).filter(k => faturamentoPorBU[k] > 0);
+    // -------------------------------------------------------------
+    // GRÁFICO DE ROSCA (SHARE POR BU) CORRIGIDO E DINÂMICO
+    // -------------------------------------------------------------
+    const buLabels = Object.keys(faturamentoPorBU);
     const buData = buLabels.map(k => faturamentoPorBU[k]);
+    
+    // Verifica se todos os valores realizados ainda estão zerados
+    const isAllZero = buData.every(v => v === 0);
     
     if(charts.finBu) charts.finBu.destroy();
     charts.finBu = new Chart(document.getElementById('chartFinBU'), {
         type: 'doughnut',
         data: {
-            labels: buLabels,
-            datasets: [{ data: buData, backgroundColor: ['#422c76','#ff2f69','#01E18E','#17a2b8'] }]
+            labels: isAllZero ? ['Sem Faturamento'] : buLabels,
+            datasets: [{ 
+                data: isAllZero ? [1] : buData, 
+                backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
+            }]
         },
         options: { 
             maintainAspectRatio: false, 
             plugins: { 
-                datalabels: { color: '#fff', font: {weight: 'bold'} }, 
-                legend: { position: 'bottom' } 
+                datalabels: { 
+                    display: !isAllZero,
+                    color: '#fff', 
+                    font: {weight: 'bold', size: 12},
+                    formatter: (val, ctx) => {
+                        let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        if(total === 0 || val === 0) return '';
+                        // Transforma em Porcentagem
+                        return Math.round((val / total) * 100) + '%';
+                    }
+                }, 
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (isAllZero) return ' R$ 0,00';
+                            return ' R$ ' + context.raw.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                        }
+                    }
+                }
             } 
         },
         plugins: [pluginCentroRosca]
