@@ -13,11 +13,11 @@
 --grafite:#414042;
 --lilas:#422c76;
 --offwhite:#faf9f5;
---bg-lead: #6c757d;
 --bg-frio: #17a2b8;
---bg-proposta: #f39c12;
---bg-assinatura: #8e44ad;
---bg-ganho: #27ae60;
+--bg-fup: #f39c12;
+--bg-maior50: #8e44ad;
+--bg-fechamento: #007bff;
+--bg-fechado: #27ae60;
 --bg-perdido: #c0392b;
 --ia-gold: #d4af37;
 }
@@ -59,17 +59,8 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
 
 /* CONTROLE DE EXIBIÇÃO DAS TELAS */
-#main-system, #page-dashboard, #page-kanban, #page-metas { display: none; }
+#main-system, #page-dashboard, #page-kanban { display: none; }
 .active-page { display: block !important; }
-
-/* ESTILOS DA TELA DE METAS */
-.grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-.card-meta-full { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); grid-column: span 2; }
-.meta-status-container { display: flex; justify-content: space-around; align-items: center; margin-bottom: 25px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-.meta-badge { text-align: center; border-right: 1px solid #eee; flex: 1; }
-.meta-badge:last-child { border-right: none; }
-.meta-badge span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.5px; }
-.meta-badge b { font-size: 20px; color: var(--lilas); }
 
 /* CABEÇALHO */
 header { 
@@ -178,7 +169,7 @@ header {
     margin: 2vh auto; 
     padding: 30px; 
     border-radius: 12px; 
-    width: 500px; 
+    width: 650px; 
     box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
     position: relative; 
     max-height: 92vh; 
@@ -193,18 +184,18 @@ header {
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+.form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee; }
 
 .kanban{ display:grid; grid-template-columns:repeat(6,1fr); gap:12px; align-items: start; }
 .column{ padding:0; border-radius:10px; min-height:600px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.1); transition: background 0.3s; }
 .column h4 { margin: 0; padding: 12px; text-align: center; font-size: 12px; color: white; text-transform: uppercase; font-weight: bold; }
 
-.col-lead { background-color: #f2f2f2; } .col-lead h4 { background-color: var(--bg-lead); }
 .col-frio { background-color: #e1f5f7; } .col-frio h4 { background-color: var(--bg-frio); }
-.col-proposta { background-color: #fef5e7; } .col-proposta h4 { background-color: var(--bg-proposta); }
-.col-assinatura { background-color: #f4ecf7; } .col-assinatura h4 { background-color: var(--bg-assinatura); }
-.col-ganho { background-color: #e8f5e9; } .col-ganho h4 { background-color: var(--bg-ganho); }
+.col-fup { background-color: #fef5e7; } .col-fup h4 { background-color: var(--bg-fup); }
+.col-maior50 { background-color: #f4ecf7; } .col-maior50 h4 { background-color: var(--bg-maior50); }
+.col-fechamento { background-color: #e1f5fe; } .col-fechamento h4 { background-color: var(--bg-fechamento); }
+.col-fechado { background-color: #e8f5e9; } .col-fechado h4 { background-color: var(--bg-fechado); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
 .card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
@@ -303,7 +294,6 @@ header {
             <div class="nav-group">
                 <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
                 <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
-                <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
             </div>
             
             <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
@@ -323,11 +313,11 @@ header {
             <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
             <select id="filtroStatus" onchange="renderizar()">
                 <option value="">Status</option>
-                <option value="LEAD">LEAD</option>
                 <option value="AINDA FRIO">AINDA FRIO</option>
-                <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                <option value="EM ASSINATURA">EM ASSINATURA</option>
-                <option value="GANHO">GANHO</option>
+                <option value="FUP">FUP</option>
+                <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
+                <option value="EM FECHAMENTO">EM FECHAMENTO</option>
+                <option value="FECHADO">FECHADO</option>
                 <option value="PERDIDO">PERDIDO</option>
             </select>
         </div>
@@ -347,34 +337,6 @@ header {
             </div>
         </div>
 
-        <div id="page-metas">
-            <div class="meta-status-container">
-                <div class="meta-badge"><span>Planejado 2026</span><b id="txt_plan_total">R$ 0</b></div>
-                <div class="meta-badge"><span>Realizado 2026</span><b id="txt_real_total">R$ 0</b></div>
-                <div class="meta-badge"><span>Meta Bruta (MB)</span><b id="txt_mb_total">R$ 0</b></div>
-                <div class="meta-badge"><span>% Atingimento</span><b id="txt_perc_ating">0%</b></div>
-            </div>
-            
-            <div class="grid-metas">
-                <div class="chart-card" style="height: auto; min-height: 480px;">
-                    <h4>Performance Trimestral (Plan vs Real)</h4>
-                    <div style="flex: 1; min-height: 250px;"><canvas id="chartMetaQuarter"></canvas></div>
-                    <div style="height: 120px; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-                        <h5 style="margin: 0 0 5px 0; font-size: 12px; color: #666;">Margem Bruta (MB) por Trimestre</h5>
-                        <canvas id="chartMetaMBFooter"></canvas>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <h4>Evolução de Reuniões por Vendedor</h4>
-                    <canvas id="chartReunioesVendedor"></canvas>
-                </div>
-                <div class="card-meta-full">
-                    <h4>Detalhamento Geral de Metas</h4>
-                    <div id="tabelaMetas" style="overflow-x: auto; margin-top:15px;"></div>
-                </div>
-            </div>
-        </div>
-
         <div id="page-kanban">
             <div class="kanban" id="kanban"></div>
         </div>
@@ -382,7 +344,7 @@ header {
 </div>
 
 <div id="modalIA" class="modal">
-    <div class="modal-content" style="width: 650px;">
+    <div class="modal-content">
         <h3>✨ Inteligência de Prospecção</h3>
         <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
         <div class="form-group">
@@ -412,7 +374,7 @@ header {
 </div>
 
 <div id="modalVendedor" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 500px;">
         <h3>Vendedores</h3>
         <form id="formVendedor">
             <input type="hidden" id="vend_id">
@@ -427,7 +389,7 @@ header {
 </div>
 
 <div id="modalArea" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="width: 500px;">
         <h3>Áreas</h3>
         <form id="formArea">
             <input type="hidden" id="area_id">
@@ -442,35 +404,53 @@ header {
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content" style="width: 600px;">
+    <div class="modal-content">
         <h3 id="modalTitulo">Nova Oportunidade</h3>
         <form id="formOportunidade">
             <input type="hidden" id="op_id">
-            <div class="form-group"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+            
+            <div class="form-row">
+                <div class="form-group" style="flex:2"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+                <div class="form-group" style="flex:1">
+                    <label>Tipo</label>
+                    <input type="text" id="op_tipo" placeholder="Ex: UP-SELLING" list="listaTipos">
+                    <datalist id="listaTipos">
+                        <option value="NOVO NEGÓCIO">
+                        <option value="UP-SELLING">
+                        <option value="CROSS-SELLING">
+                    </datalist>
+                </div>
+            </div>
+            
             <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
                 <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
             </div>
+            
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
                 <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
             </div>
+            
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
                 <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
             </div>
+            
             <div class="form-group">
                 <label>Status</label>
                 <select id="op_status" required onchange="toggleMotivoPerda()">
-                    <option value="LEAD">LEAD</option>
                     <option value="AINDA FRIO">AINDA FRIO</option>
-                    <option value="PROPOSTA ENVIADA - ACEITA">PROPOSTA ENVIADA - ACEITA</option>
-                    <option value="EM ASSINATURA">EM ASSINATURA</option>
-                    <option value="GANHO">GANHO</option>
+                    <option value="FUP">FUP</option>
+                    <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
+                    <option value="EM FECHAMENTO">EM FECHAMENTO</option>
+                    <option value="FECHADO">FECHADO</option>
                     <option value="PERDIDO">PERDIDO</option>
                 </select>
             </div>
+            
             <div class="form-group" id="group_motivo_perda" style="display: none;">
                 <label>Motivo da Perda</label>
                 <select id="op_motivo_perda">
@@ -520,11 +500,9 @@ header {
 function navegar(pagina) {
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
-    document.getElementById('page-metas').classList.remove('active-page');
     
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
-    document.getElementById('nav-metas').classList.remove('active');
 
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
@@ -532,10 +510,6 @@ function navegar(pagina) {
     } else if (pagina === 'kanban') {
         document.getElementById('page-kanban').classList.add('active-page');
         document.getElementById('nav-kanban').classList.add('active');
-    } else if (pagina === 'metas') {
-        document.getElementById('page-metas').classList.add('active-page');
-        document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); // Chama a função de metas ao entrar na tela
     }
 }
 
@@ -549,7 +523,7 @@ function autenticar() {
         USUARIO_LOGADO = user.toUpperCase();
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('main-system').style.display = 'block';
-        navegar('dashboard'); // Inicia no dashboard
+        navegar('dashboard');
         carregarAuxiliares(); 
         carregarDados();
     } else {
@@ -568,7 +542,6 @@ function logoff() {
     }
 }
 
-// RESTANTE DO SEU CÓDIGO (SUPABASE E CHART.JS) SEM ALTERAÇÕES DE LÓGICA
 Chart.register(ChartDataLabels);
 
 const pluginCentroRosca = {
@@ -699,6 +672,7 @@ function editarOportunidade(id) {
     if(!item) return;
     document.getElementById('op_id').value = item.id;
     document.getElementById('op_cliente').value = item.cliente;
+    document.getElementById('op_tipo').value = item.tipo || "";
     document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
     document.getElementById('op_vendedor').value = item.vendedor;
     document.getElementById('op_area').value = item.area;
@@ -772,6 +746,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
     const idValue = document.getElementById('op_id').value;
     const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
+    const novo_tipo = document.getElementById('op_tipo').value.toUpperCase();
     const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
     const novo_vend = document.getElementById('op_vendedor').value;
     const nova_data = document.getElementById('op_data_oportunidade').value;
@@ -794,6 +769,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
             let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
             if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
+            if((antigo.tipo || "") !== novo_tipo) log += `\n[${carimbo}] TIPO: "${antigo.tipo || ""}" → "${novo_tipo}"`;
             if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
             if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
             if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
@@ -807,7 +783,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
-    const payload = { cliente: novo_cliente, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
+    const payload = { cliente: novo_cliente, tipo: novo_tipo, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
     if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
     else await supabaseClient.from('oportunidades').insert([payload]);
     fecharModal('modalOportunidade'); carregarDados();
@@ -852,16 +828,13 @@ function renderizar(){
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
-    
-    // Se a tela ativa for Metas, atualiza as metas também
-    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
         pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'GANHO') { recGan += vA; nG++; }
+        if(r.status === 'FECHADO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
         statusCont[r.status] = (statusCont[r.status] || 0) + 1;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
@@ -873,14 +846,21 @@ function renderizar(){
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
     
     if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#6c757d','#17a2b8','#f39c12','#8e44ad','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
+    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
     
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
     charts.vd = new Chart(document.getElementById('chartVendedor'), { type: 'bar', data: { labels: sv.map(x=>x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 50 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#fff', anchor: 'end', align: 'start', offset: 5, font: { weight: 'bold' }, formatter: v => "R$ " + v.toLocaleString('pt-BR') } } } });
     
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"LEAD", cl:"col-lead", border:"#6c757d"},{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"PROPOSTA ENVIADA - ACEITA", cl:"col-proposta", border:"#f39c12"},{n:"EM ASSINATURA", cl:"col-assinatura", border:"#8e44ad"},{n:"GANHO", cl:"col-ganho", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
+    const colunas = [
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"FUP", cl:"col-fup", border:"#f39c12"},
+        {n:"MAIOR QUE 50%", cl:"col-maior50", border:"#8e44ad"},
+        {n:"EM FECHAMENTO", cl:"col-fechamento", border:"#007bff"},
+        {n:"FECHADO", cl:"col-fechado", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
@@ -895,235 +875,6 @@ function renderizar(){
         kan.appendChild(col);
     });
 }
-
-// LOGICA ESPECIFICA DA TELA DE METAS
-async function renderizarMetas() {
-    const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV));
-
-    let totPlan = 0, totReal = 0, totMB = 0;
-    let qPlan = [0,0,0,0], qReal = [0,0,0,0], qMB = [0,0,0,0];
-
-    filtrados.forEach(r => {
-        totPlan += parseFloat(r["2026_plan"]) || 0;
-        totReal += parseFloat(r["2026_real"]) || 0;
-        totMB += parseFloat(r["mb_plan_2026"]) || 0;
-        for(let i=1; i<=4; i++) {
-            qPlan[i-1] += parseFloat(r[`q${i}_plan`]) || 0;
-            qReal[i-1] += parseFloat(r[`q${i}_real`]) || 0;
-            qMB[i-1] += parseFloat(r[`mb_plan_q${i}`]) || 0;
-        }
-    });
-
-    document.getElementById('txt_plan_total').innerText = "R$ " + totPlan.toLocaleString('pt-BR');
-    document.getElementById('txt_real_total').innerText = "R$ " + totReal.toLocaleString('pt-BR');
-    document.getElementById('txt_mb_total').innerText = "R$ " + totMB.toLocaleString('pt-BR');
-    document.getElementById('txt_perc_ating').innerText = totPlan > 0 ? ((totReal/totPlan)*100).toFixed(1) + "%" : "0%";
-
-// NOVO GRÁFICO DE REUNIÕES (ESTILIZADO E MODERNO)
-const { data: vData } = await supabaseClient.from('vendedores').select('nome, meta_reuniao, reuniao_real');
-
-if(vData) {
-    if(charts.reunioes) charts.reunioes.destroy();
-    
-    charts.reunioes = new Chart(document.getElementById('chartReunioesVendedor'), {
-        type: 'bar',
-        data: {
-            labels: vData.map(v => v.nome),
-            datasets: [
-                {
-                    label: 'Realizadas',
-                    data: vData.map(v => v.reuniao_real || 0),
-                    type: 'line',
-                    borderColor: '#422c76',
-                    backgroundColor: '#422c76',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: false,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#d4af37',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    order: 1,
-                    datalabels: {
-                        display: true,
-                        align: 'top',
-                        anchor: 'end',
-                        offset: 4,
-                        color: '#422c76',
-                        font: { weight: 'bold', size: 12 }
-                    }
-                },
-                {
-                    label: 'Meta de Reuniões',
-                    data: vData.map(v => v.meta_reuniao || 0),
-                    backgroundColor: 'rgba(211, 211, 211, 0.4)', // Cinza mais suave e moderno
-                    borderRadius: 8,
-                    borderSkipped: false,
-                    barPercentage: 0.6, // Deixa a coluna mais fina
-                    categoryPercentage: 0.7,
-                    order: 2,
-                    datalabels: { display: false } // Esconde labels da meta para não poluir
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false, // Permite que ele preencha a altura do container pai
-            layout: {
-                padding: { top: 30, bottom: 10, left: 10, right: 10 }
-            },
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: { size: 12 }
-                    }
-                },
-                tooltip: { enabled: true },
-                datalabels: {
-                    formatter: Math.round
-                }
-            },
-            scales: {
-                y: {
-                    display: false, // Remove o eixo vertical completamente
-                    beginAtZero: true,
-                    grid: { display: false } // Remove linhas de grade do Y
-                },
-                x: {
-                    grid: { display: false }, // Remove linhas de grade do X
-                    ticks: {
-                        color: '#666',
-                        font: { size: 11 }
-                    },
-                    border: { display: false } // Remove a linha da base do eixo
-                }
-            }
-        }
-    });
-}
-    // GRÁFICO PRINCIPAL: PLANEJADO VS REALIZADO
-    if(charts.metaQ) charts.metaQ.destroy();
-    charts.metaQ = new Chart(document.getElementById('chartMetaQuarter'), {
-        type: 'bar',
-        data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [
-                { 
-                    label: 'Planejado', 
-                    data: qPlan, 
-                    backgroundColor: '#422c76', 
-                    borderRadius: 4
-                },
-                { 
-                    label: 'Realizado', 
-                    data: qReal, 
-                    backgroundColor: '#27ae60', 
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { 
-                    position: 'top', 
-                    labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } 
-                },
-                datalabels: { 
-                    display: true, 
-                    anchor: 'end', 
-                    align: 'top', 
-                    font: { size: 9, weight: 'bold' },
-                    formatter: (v) => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR') : ''
-                }
-            },
-            scales: {
-                y: { display: false },
-                x: { 
-                    grid: { display: false },
-                    ticks: { font: { size: 11, weight: 'bold' } } 
-                }
-            }
-        }
-    });
-
-    // GRÁFICO RODAPÉ: MARGEM BRUTA (MB) VS REALIZADO
-    if(charts.metaMBFooter) charts.metaMBFooter.destroy();
-    charts.metaMBFooter = new Chart(document.getElementById('chartMetaMBFooter'), {
-        type: 'bar',
-        data: {
-            labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-            datasets: [
-                {
-                    label: 'Meta Bruta (MB)',
-                    data: qMB,
-                    backgroundColor: '#d4af37',
-                    borderRadius: 2,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                },
-                {
-                    label: 'Realizado',
-                    data: qReal,
-                    backgroundColor: '#27ae60',
-                    borderRadius: 2,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { display: false },
-                datalabels: {
-                    display: true,
-                    anchor: 'end',
-                    align: 'top',
-                    color: (ctx) => ctx.datasetIndex === 0 ? '#b8962d' : '#1e7e46',
-                    font: { size: 9, weight: 'bold' },
-                    formatter: (v) => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR') : ''
-                }
-            },
-            scales: {
-                y: { display: false },
-                x: { grid: { display: false } }
-            }
-        }
-    });
-
-    let htmlTab = `<table style="width:100%; border-collapse: collapse; font-size:12px; min-width:600px;">
-        <thead style="background:#f8f9fa; border-bottom: 2px solid #eee;">
-            <tr>
-                <th style="padding:12px; text-align:left;">CLIENTE / VENDEDOR</th>
-                <th style="text-align:center;">PLAN 2026</th>
-                <th style="text-align:center;">REAL 2026</th>
-                <th style="text-align:center;">ATING. %</th>
-                <th style="text-align:center;">MB 2026</th>
-            </tr>
-        </thead>
-        <tbody>`;
-    
-    filtrados.filter(r => r["2026_plan"] > 0 || r["2026_real"] > 0).forEach(r => {
-        let ating = r["2026_plan"] > 0 ? ((r["2026_real"]/r["2026_plan"])*100).toFixed(1) : 0;
-        htmlTab += `<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:10px;"><b>${r.cliente}</b><br><span style="color:#888; font-size:10px;">${r.vendedor}</span></td>
-            <td style="text-align:center;">R$ ${parseFloat(r["2026_plan"] || 0).toLocaleString('pt-BR')}</td>
-            <td style="text-align:center;">R$ ${parseFloat(r["2026_real"] || 0).toLocaleString('pt-BR')}</td>
-            <td style="text-align:center;"><span style="padding:3px 8px; border-radius:12px; background:${ating >= 100 ? '#e8f5e9' : '#fdedec'}; color:${ating >= 100 ? '#27ae60' : '#c0392b'}; font-weight:bold;">${ating}%</span></td>
-            <td style="text-align:center; color:#d4af37; font-weight:bold;">R$ ${parseFloat(r["mb_plan_2026"] || 0).toLocaleString('pt-BR')}</td>
-        </tr>`;
-    });
-    htmlTab += `</tbody></table>`;
-    document.getElementById('tabelaMetas').innerHTML = htmlTab;
-}
 </script>
 </body>
 </html>
-
-
