@@ -787,7 +787,6 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let base=[]; 
 let baseMetasMensais=[]; 
-let basePlanFinanceiro = []; 
 let baseResMensais = [];
 let charts={};
 
@@ -1276,7 +1275,7 @@ async function carregarDados(){
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
 
-    // NOVO: Carrega dados financeiros
+    // NOVO: Carrega dados financeiros unificados
     await carregarDadosFinanceiros();
 
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
@@ -1306,9 +1305,8 @@ async function carregarDados(){
 }
 
 async function carregarDadosFinanceiros() {
-    const { data: plan } = await supabaseClient.from('planejamento_financeiro').select('*');
+    // Nova lógica puxando apenas da tabela resultados_mensais
     const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
-    basePlanFinanceiro = plan || [];
     baseResMensais = res || [];
 }
 
@@ -1439,20 +1437,22 @@ function renderizarFinanceiro() {
         planoTotalAnual += valPlan;
         realTotalYTD += valReal;
         
-        arrayPlanoMensal[mesIdx] += valPlan;
-        arrayRealMensal[mesIdx] += valReal;
-
-        const planRef = basePlanFinanceiro.find(p => p.id === rm.planejamento_id);
-        if(planRef) {
-            const bu = planRef.bu || 'OUTROS';
-            faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
-
-            const cliKey = planRef.cliente + " (" + bu + ")";
-            if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
-            clientesDesempenho[cliKey].plano += valPlan;
-            clientesDesempenho[cliKey].real += valReal;
-            clientesDesempenho[cliKey].desvio += (valReal - valPlan);
+        // Verifica se o índice de mês é válido (0 a 11)
+        if (mesIdx >= 0 && mesIdx <= 11) {
+            arrayPlanoMensal[mesIdx] += valPlan;
+            arrayRealMensal[mesIdx] += valReal;
         }
+
+        const bu = rm.bu || 'OUTROS';
+        const cliName = rm.cliente || 'Sem Nome';
+
+        faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
+
+        const cliKey = cliName + " (" + bu + ")";
+        if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
+        clientesDesempenho[cliKey].plano += valPlan;
+        clientesDesempenho[cliKey].real += valReal;
+        clientesDesempenho[cliKey].desvio += (valReal - valPlan);
     });
 
     const gap = realTotalYTD - planoTotalAnual;
@@ -1555,11 +1555,10 @@ function carregarGridFin() {
     const regsMes = baseResMensais.filter(r => r.mes_numero == mes);
     
     const gridData = regsMes.map(rm => {
-        const plan = basePlanFinanceiro.find(p => p.id === rm.planejamento_id);
         return {
             id: rm.id,
-            cliente: plan ? plan.cliente : 'Desconhecido',
-            bu: plan ? plan.bu : '-',
+            cliente: rm.cliente || 'Desconhecido',
+            bu: rm.bu || '-',
             plano: parseFloat(rm.valor_planejado) || 0,
             real: parseFloat(rm.valor_realizado) || 0
         };
@@ -1594,7 +1593,7 @@ async function salvarGridFin() {
         const idRow = inp.dataset.id;
         const valReal = parseFloat(inp.value) || 0;
         
-        const rowAntiga = baseResMensais.find(r => r.id === idRow);
+        const rowAntiga = baseResMensais.find(r => r.id == idRow);
         if(rowAntiga && parseFloat(rowAntiga.valor_realizado) !== valReal) {
             promessas.push(
                 supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', idRow)
