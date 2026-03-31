@@ -24,7 +24,7 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN */
+/* ESTILOS DA TELA DE LOGIN - AJUSTADO PARA O LADO DIREITO */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('fundo-login.jpg'); 
@@ -33,7 +33,7 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
     background-repeat: no-repeat;
     display: flex; 
     align-items: center; 
-    justify-content: flex-start;
+    justify-content: flex-end; /* Alterado para alinhar ao final (direita) */
     z-index: 10000;
 }
 .login-box {
@@ -42,7 +42,7 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
     box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     width: 320px; text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    margin-left: 10%;
+    margin-right: 10%; /* Alterado de margin-left para margin-right */
 }
 .login-box img { width: 150px; margin-bottom: 20px; }
 .login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; font-weight: bold; }
@@ -1273,7 +1273,7 @@ async function carregarDados(){
     const filtroArea = document.getElementById('filtroArea');
     if(filtroArea) {
         const valAtual = filtroArea.value;
-        filtroArea.innerHTML = '<option value="">Área</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
+        filtroArea.innerHTML = '<option value="">Area</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
         filtroArea.value = valAtual;
     }
 
