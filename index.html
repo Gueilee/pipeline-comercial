@@ -24,16 +24,22 @@
 
 body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
 
-/* ESTILOS DA TELA DE LOGIN - AJUSTADO PARA O LADO DIREITO */
+/* ESTILOS DA TELA DE LOGIN - AJUSTADO PARA PRIORIZAR O LOGO */
 #login-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
     background-image: url('fundo-login.jpg'); 
+    /* background-size: cover continua sendo o melhor para não distorcer, 
+       mas vamos mudar a posição para garantir o logo */
     background-size: cover;
-    background-position: center;
+    background-position: left top; /* FIX: Faz a imagem começar pelo logo (topo e esquerda) */
     background-repeat: no-repeat;
     display: flex; 
     align-items: center; 
-    justify-content: flex-end; /* Alterado para alinhar ao final (direita) */
+    justify-content: flex-end; 
     z-index: 10000;
 }
 .login-box {
