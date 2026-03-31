@@ -220,7 +220,7 @@ header {
 .col-fechado { background-color: #e8f5e9; } .col-fechado h4 { background-color: var(--bg-fechado); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
-.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: pointer; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
 .card:active { cursor: grabbing; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .form-row { display: flex; gap: 15px; }
@@ -696,7 +696,7 @@ function navegar(pagina) {
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.remove('active');
+    document.getElementById('nav-financeiro').classList.add('active');
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
@@ -1009,15 +1009,19 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
     document.getElementById('formMetasInput').reset();
-    document.getElementById('meta_input_vendedor').value = ""; 
+    document.getElementById('meta_input_vendedor').value = ""; // Reseta o vendedor para forçar a escolha e carregar o histórico
     abrirModal('modalMetasInput');
 }
 
+// NOVA FUNÇÃO: CARREGA O LANÇAMENTO EXISTENTE PARA EDIÇÃO
 function carregarMetaExistente() {
     const mes = document.getElementById('meta_input_mes').value;
     const vend = document.getElementById('meta_input_vendedor').value;
-    if(!mes || !vend) return; 
+    
+    if(!mes || !vend) return; // Só busca se os dois estiverem selecionados
+
     const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
+    
     if(existente) {
         document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
         document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
@@ -1026,6 +1030,7 @@ function carregarMetaExistente() {
         document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
         document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
     } else {
+        // Se não existir, zera os campos para um novo lançamento
         document.getElementById('meta_input_reuniao').value = "";
         document.getElementById('meta_input_propostas').value = "";
         document.getElementById('meta_input_trading').value = "";
@@ -1047,75 +1052,192 @@ document.getElementById('formMetasInput').addEventListener('submit', async (e) =
         realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
         realizado_analytics: parseFloat(document.getElementById('meta_input_analytics').value) || 0
     };
+
     const existente = baseMetasMensais.find(m => m.vendedor === payload.vendedor && m.mes_ano === payload.mes_ano);
+    
     let res;
-    if(existente) res = await supabaseClient.from('metas_mensais').update(payload).eq('id', existente.id);
-    else res = await supabaseClient.from('metas_mensais').insert([payload]);
+    if(existente) {
+        res = await supabaseClient.from('metas_mensais').update(payload).eq('id', existente.id);
+    } else {
+        res = await supabaseClient.from('metas_mensais').insert([payload]);
+    }
+    
     if(res && res.error) alert("Erro: " + res.error.message);
-    else { fecharModal('modalMetasInput'); carregarDados(); }
+    else { 
+        fecharModal('modalMetasInput'); 
+        carregarDados(); 
+    }
 });
 
 function renderizarMetas() {
     const fV = document.getElementById('filtroVendedor').value;
     const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
+
+    // 1. Calcular a Meta Mensal Consolidada (Baseado no filtro ou soma total)
     let metaMensal = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
-    if(fV && METAS_MENSAIS[fV]) metaMensal = METAS_MENSAIS[fV];
-    else if (!fV) {
+    
+    if(fV && METAS_MENSAIS[fV]) {
+        metaMensal = METAS_MENSAIS[fV];
+    } else if (!fV) {
         Object.values(METAS_MENSAIS).forEach(m => {
-            metaMensal.reuniao += m.reuniao; metaMensal.propostas += m.propostas;
-            metaMensal.trading += m.trading; metaMensal.armazem += m.armazem;
-            metaMensal.transporte += m.transporte; metaMensal.analytics += m.analytics;
+            metaMensal.reuniao += m.reuniao;
+            metaMensal.propostas += m.propostas;
+            metaMensal.trading += m.trading;
+            metaMensal.armazem += m.armazem;
+            metaMensal.transporte += m.transporte;
+            metaMensal.analytics += m.analytics;
         });
     }
+
+    // A meta YTD (Anual) exibida nos gráficos é a mensal * 12
     const metaAnual = {
-        reuniao: metaMensal.reuniao * 12, propostas: metaMensal.propostas * 12,
-        trading: metaMensal.trading * 12, armazem: metaMensal.armazem * 12,
-        transporte: metaMensal.transporte * 12, analytics: metaMensal.analytics * 12
+        reuniao: metaMensal.reuniao * 12,
+        propostas: metaMensal.propostas * 12,
+        trading: metaMensal.trading * 12,
+        armazem: metaMensal.armazem * 12,
+        transporte: metaMensal.transporte * 12,
+        analytics: metaMensal.analytics * 12
     };
+
     const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
     const metaTotalFaturamento = metaFaturamentoMensal * 12;
+
+    // 2. Calcular o Realizado Consolidado YTD
     let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
     let arrayRealMensal = new Array(12).fill(0); 
+
     dadosMeses.forEach(m => {
         const mesIndex = parseInt(m.mes_ano) - 1; 
         const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
-        realYTD.reuniao += (m.realizado_reuniao || 0); realYTD.propostas += (m.realizado_propostas || 0);
-        realYTD.trading += (m.realizado_trading || 0); realYTD.armazem += (m.realizado_armazem || 0);
-        realYTD.transporte += (m.realizado_transporte || 0); realYTD.analytics += (m.realizado_analytics || 0);
+        
+        realYTD.reuniao += (m.realizado_reuniao || 0);
+        realYTD.propostas += (m.realizado_propostas || 0);
+        realYTD.trading += (m.realizado_trading || 0);
+        realYTD.armazem += (m.realizado_armazem || 0);
+        realYTD.transporte += (m.realizado_transporte || 0);
+        realYTD.analytics += (m.realizado_analytics || 0);
         realYTD.faturamento += faturamentoMes;
-        if(mesIndex >= 0 && mesIndex < 12) arrayRealMensal[mesIndex] += faturamentoMes;
+
+        if(mesIndex >= 0 && mesIndex < 12) {
+            arrayRealMensal[mesIndex] += faturamentoMes;
+        }
     });
+
+    // 3. Atualizar KPIs
     const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
     document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
     document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
+    
     document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
     document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
     document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
 
+    // 4. Gráfico: Evolução Mensal (Linha + Barra)
     if(charts.evolucao) charts.evolucao.destroy();
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type: 'bar',
         data: {
             labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
             datasets: [
-                { label: 'Meta Mensal', data: new Array(12).fill(metaFaturamentoMensal), type: 'line', borderColor: '#01E18E', borderWidth: 2, borderDash: [5, 5], pointRadius: 0, fill: false, datalabels: { display: true, color: '#01E18E', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'}, formatter: v => v >= 1000000 ? (v/1000000).toFixed(1) + "M" : (v/1000).toFixed(0) + "k" }},
-                { label: 'Realizado', data: arrayRealMensal, backgroundColor: '#422c76', borderRadius: 4 }
+                {
+                    label: 'Meta Mensal',
+                    data: new Array(12).fill(metaFaturamentoMensal),
+                    type: 'line',
+                    borderColor: '#01E18E',
+                    borderWidth: 2,
+                    borderDash: [5, 5], 
+                    pointRadius: 0,
+                    fill: false,
+                    datalabels: { 
+                        display: true, 
+                        color: '#01E18E', 
+                        anchor: 'end', 
+                        align: 'top', 
+                        font: {size: 10, weight:'bold'},
+                        formatter: v => {
+                            if (v === 0) return "";
+                            if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                            return (v/1000).toFixed(0) + "k";
+                        }
+                    }
+                },
+                {
+                    label: 'Realizado',
+                    data: arrayRealMensal,
+                    backgroundColor: '#422c76',
+                    borderRadius: 4
+                }
             ]
         },
-        options: { maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'}, formatter: (v, ctx) => ctx.datasetIndex === 0 || v === 0 ? "" : v >= 1000000 ? (v/1000000).toFixed(1) + "M" : (v/1000).toFixed(0) + "k" }}, scales: { y: { display: false }, x: { grid: { display: false } }}}
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo superior não cortar
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
+                    formatter: (v, ctx) => {
+                        // Não formata a linha de meta aqui, só a barra
+                        if (ctx.datasetIndex === 0) return ""; 
+                        if (v === 0) return "";
+                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                        return (v/1000).toFixed(0) + "k";
+                    }
+                }
+            },
+            scales: { 
+                y: { display: false }, // Remove Eixo vertical
+                x: { grid: { display: false } } 
+            }
+        }
     });
 
+    // 5. Gráfico: Unidade de Negócio
     if(charts.unidade) charts.unidade.destroy();
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type: 'bar',
         data: {
             labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
             datasets: [
-                { label: 'Meta Anual', data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics], backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60 },
-                { label: 'Realizado YTD', data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics], backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60 }
+                {
+                    label: 'Meta Anual',
+                    data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
+                    backgroundColor: '#422c76',
+                    borderRadius: 4,
+                    maxBarThickness: 60 // Afina as barras
+                },
+                {
+                    label: 'Realizado YTD',
+                    data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
+                    backgroundColor: '#ff2f69',
+                    borderRadius: 4,
+                    maxBarThickness: 60 // Afina as barras
+                }
             ]
         },
-        options: { maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'}, formatter: v => v === 0 ? "" : v >= 1000000 ? "R$ " + (v/1000000).toFixed(1) + "M" : "R$ " + (v/1000).toFixed(0) + "k" }}, scales: { y: { display: false }, x: { grid: { display: false } }}}
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo de trading não cortar no topo
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#444', 
+                    anchor: 'end', 
+                    align: 'top', 
+                    font: {size: 10, weight:'bold'},
+                    formatter: (v) => {
+                        if (v === 0) return "";
+                        if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
+                        if (v >= 1000) return "R$ " + (v/1000).toFixed(0) + "k";
+                        return "R$ " + v;
+                    }
+                }
+            },
+            scales: { 
+                y: { display: false }, // Remove Eixo Vertical
+                x: { grid: { display: false } } 
+            }
+        }
     });
 }
 
@@ -1123,6 +1245,7 @@ function renderizarMetas() {
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
     const { data: a } = await supabaseClient.from('areas').select('*');
+    
     const fill = (id, d, label) => { 
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
@@ -1130,38 +1253,59 @@ async function carregarAuxiliares(){
     fill('op_vendedor', v || [], "Selecione..."); 
     fill('op_area', a || [], "Selecione..."); 
     fill('meta_input_vendedor', v || [], "Vendedor..."); 
+    
     const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) listV.innerHTML = v && v.length > 0 ? v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('') : "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado.</p>";
+    if(listV) {
+        if(v && v.length > 0) listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
+    }
+    
     const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) listA.innerHTML = a && a.length > 0 ? a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('') : "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada.</p>";
+    if(listA) {
+        if(a && a.length > 0) listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
+    }
 }
 
 async function carregarDados(){ 
     const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
     base = ops || []; 
+    
+    // Carrega também as Metas Mensais
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
+
+    // NOVO: Carrega dados financeiros unificados
     await carregarDadosFinanceiros();
+
+    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = [...new Set(base.map(item => item.cliente).filter(c => c))].sort().map(c => `<option value="${c}">`).join('');
+    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    
+    const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
     const filtroVend = document.getElementById('filtroVendedor');
     if(filtroVend) {
         const valAtual = filtroVend.value;
-        filtroVend.innerHTML = '<option value="">Vendedor</option>' + [...new Set(base.map(item => item.vendedor).filter(c => c))].sort().map(v => `<option value="${v}">${v}</option>`).join('');
+        filtroVend.innerHTML = '<option value="">Vendedor</option>' + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
         filtroVend.value = valAtual;
     }
+
+    const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
     const filtroArea = document.getElementById('filtroArea');
     if(filtroArea) {
         const valAtual = filtroArea.value;
-        filtroArea.innerHTML = '<option value="">Área</option>' + [...new Set(base.map(item => item.area).filter(c => c))].sort().map(a => `<option value="${a}">${a}</option>`).join('');
+        filtroArea.innerHTML = '<option value="">Área</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
         filtroArea.value = valAtual;
     }
+
     renderizar(); 
+    // Atualiza metas se a aba estiver ativa
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
     if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
 }
 
 async function carregarDadosFinanceiros() {
+    // Nova lógica puxando apenas da tabela resultados_mensais
     const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
     baseResMensais = res || [];
 }
@@ -1182,7 +1326,9 @@ function renderizar(){
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
+    // Reflete os filtros na tela de metas automaticamente se estiver aberta
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
     let statusCont = {}, vendVal = {};
     filtrados.forEach(r => {
@@ -1204,21 +1350,66 @@ function renderizar(){
     
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
+    
+    const labelsVendedores = sv.map((x, i) => {
+        if(i === 0) return '🥇 ' + x[0];
+        if(i === 1) return '🥈 ' + x[0];
+        if(i === 2) return '🥉 ' + x[0];
+        return x[0];
+    });
+
     charts.vd = new Chart(document.getElementById('chartVendedor'), { 
-        type: 'bar', data: { labels: sv.map((x, i) => i < 3 ? ['🥇 ','🥈 ','🥉 '][i] + x[0] : x[0]), datasets: [{ data: sv.map(x=>x[1]), backgroundColor: 'rgba(66, 44, 118, 0.85)', borderRadius: 8, barThickness: 22, maxBarThickness: 30 }]}, 
-        options: { indexAxis: 'y', maintainAspectRatio: false, layout: { padding: { right: 80 } }, scales: { x: { display: false }, y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }, plugins: { legend: { display: false }, datalabels: { color: '#422c76', anchor: 'end', align: 'right', offset: 5, font: { weight: 'bold', size: 11 }, formatter: v => "R$ " + v.toLocaleString('pt-BR') }}}}
+        type: 'bar', 
+        data: { 
+            labels: labelsVendedores, 
+            datasets: [{ 
+                data: sv.map(x=>x[1]), 
+                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
+                borderRadius: 8, 
+                barThickness: 22, 
+                maxBarThickness: 30 
+            }]
+        }, 
+        options: { 
+            indexAxis: 'y', 
+            maintainAspectRatio: false, 
+            layout: { padding: { right: 80 } },
+            scales: { 
+                x: { display: false }, 
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
+            }, 
+            plugins: { 
+                legend: { display: false }, 
+                datalabels: { 
+                    color: '#422c76', 
+                    anchor: 'end', 
+                    align: 'right', 
+                    offset: 5, 
+                    font: { weight: 'bold', size: 11 }, 
+                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
+                } 
+            } 
+        } 
     });
     
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [{n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},{n:"FUP", cl:"col-fup", border:"#f39c12"},{n:"MAIOR QUE 50%", cl:"col-maior50", border:"#8e44ad"},{n:"EM FECHAMENTO", cl:"col-fechamento", border:"#007bff"},{n:"FECHADO", cl:"col-fechado", border:"#27ae60"},{n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}];
+    const colunas = [
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"FUP", cl:"col-fup", border:"#f39c12"},
+        {n:"MAIOR QUE 50%", cl:"col-maior50", border:"#8e44ad"},
+        {n:"EM FECHAMENTO", cl:"col-fechamento", border:"#007bff"},
+        {n:"FECHADO", cl:"col-fechado", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
-            // ✅ CORREÇÃO DEFINITIVA: Cria uma constante LOCAL para o ID evitar o erro "PREXX"
+            // CRIANDO UMA CONSTANTE COM O ID CORRETO DENTRO DESTE ESCOPO
             const idOportunidade = itemDaVez.id;
+
             const card = document.createElement('div'); 
             card.className = 'card'; 
             card.id = `card-${idOportunidade}`; 
@@ -1227,8 +1418,10 @@ function renderizar(){
             card.style.borderLeftColor = s.border;
             card.style.cursor = 'pointer';
             
-            // ✅ Vinculando o evento de clique corretamente ao ID exclusivo deste item
-            card.onclick = function() { editarOportunidade(idOportunidade); };
+            // 🔥 SOLUÇÃO DEFINITIVA: addEventListener com captura direta da variável do loop
+            card.addEventListener('click', function(e) {
+                editarOportunidade(idOportunidade);
+            });
             
             card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
@@ -1237,112 +1430,233 @@ function renderizar(){
     });
 }
 
+// ----------------------------------------------------
+// MÓDULO FINANCEIRO (PREVISTO X REALIZADO)
+// ----------------------------------------------------
+
 function renderizarFinanceiro() {
-    let planoTotalAnual = 0, realTotalYTD = 0;
-    let arrayPlanoMensal = new Array(12).fill(0), arrayRealMensal = new Array(12).fill(0);
-    let faturamentoPorBU = {}, clientesDesempenho = {}; 
+    let planoTotalAnual = 0;
+    let realTotalYTD = 0;
+    
+    let arrayPlanoMensal = new Array(12).fill(0);
+    let arrayRealMensal = new Array(12).fill(0);
+    let faturamentoPorBU = {};
+    let clientesDesempenho = {}; 
+
     baseResMensais.forEach(rm => {
         const mesIdx = rm.mes_numero - 1;
-        const valPlan = parseFloat(rm.valor_planejado) || 0, valReal = parseFloat(rm.valor_realizado) || 0;
-        planoTotalAnual += valPlan; realTotalYTD += valReal;
-        if (mesIdx >= 0 && mesIdx <= 11) { arrayPlanoMensal[mesIdx] += valPlan; arrayRealMensal[mesIdx] += valReal; }
+        const valPlan = parseFloat(rm.valor_planejado) || 0;
+        const valReal = parseFloat(rm.valor_realizado) || 0;
+        
+        planoTotalAnual += valPlan;
+        realTotalYTD += valReal;
+        
+        // Verifica se o índice de mês é válido (0 a 11)
+        if (mesIdx >= 0 && mesIdx <= 11) {
+            arrayPlanoMensal[mesIdx] += valPlan;
+            arrayRealMensal[mesIdx] += valReal;
+        }
+
+        // AGRUPAMENTO INTELIGENTE: Junta subdivisões na BU principal para o gráfico
         let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
         if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
         else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
         else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
-        const cliName = rm.cliente || 'Sem Nome'; faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
+
+        const cliName = rm.cliente || 'Sem Nome';
+
+        faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
+
         const cliKey = cliName + " (" + bu + ")";
         if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
-        clientesDesempenho[cliKey].plano += valPlan; clientesDesempenho[cliKey].real += valReal; clientesDesempenho[cliKey].desvio += (valReal - valPlan);
+        clientesDesempenho[cliKey].plano += valPlan;
+        clientesDesempenho[cliKey].real += valReal;
+        clientesDesempenho[cliKey].desvio += (valReal - valPlan);
     });
+
     const gap = realTotalYTD - planoTotalAnual;
     const percAting = planoTotalAnual > 0 ? ((realTotalYTD / planoTotalAnual) * 100).toFixed(1) : 0;
+    
     document.getElementById('finPlanoTotal').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
     document.getElementById('finRealTotal').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
+    
     document.getElementById('finGapTotal').innerText = "R$ " + (gap/1000000).toFixed(2) + "M";
     document.getElementById('finGapTotal').style.color = gap >= 0 ? '#27ae60' : '#c0392b';
+    
     document.getElementById('finPercTotal').innerText = percAting + "%";
     document.getElementById('finPercTotal').style.color = percAting >= 100 ? '#27ae60' : '#f39c12';
 
     if(charts.finEvolucao) charts.finEvolucao.destroy();
     charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
-        type: 'bar', data: { labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'], datasets: [{ label: 'Plano', data: arrayPlanoMensal, backgroundColor: '#e0e0e0', borderRadius: 4 },{ label: 'Real', data: arrayRealMensal, backgroundColor: '#ff2f69', borderRadius: 4 }]},
-        options: { maintainAspectRatio: false, layout: { padding: { top: 20 } }, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'}, formatter: v => v === 0 ? "" : v >= 1000000 ? (v/1000000).toFixed(1) + "M" : (v/1000).toFixed(0) + "k" }}, scales: { y: { display: false }, x: { grid: { display: false } }}}
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            datasets: [
+                {
+                    label: 'Plano Orçamentário',
+                    data: arrayPlanoMensal,
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Realizado Faturado',
+                    data: arrayRealMensal,
+                    backgroundColor: '#ff2f69',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 20 } },
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                    formatter: v => {
+                        if (v === 0) return "";
+                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                        return (v/1000).toFixed(0) + "k";
+                    }
+                }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
     });
 
+    // -------------------------------------------------------------
+    // GRÁFICO DE ROSCA (SHARE POR BU) CORRIGIDO E DINÂMICO
+    // -------------------------------------------------------------
     const buLabels = Object.keys(faturamentoPorBU);
     const buData = buLabels.map(k => faturamentoPorBU[k]);
+    
+    // Verifica se todos os valores realizados ainda estão zerados
     const isAllZero = buData.every(v => v === 0);
+    
     if(charts.finBu) charts.finBu.destroy();
     charts.finBu = new Chart(document.getElementById('chartFinBU'), {
-        type: 'doughnut', data: { labels: isAllZero ? ['Sem Faturamento'] : buLabels, datasets: [{ data: isAllZero ? [1] : buData, backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad'] }]},
-        options: { maintainAspectRatio: false, plugins: { datalabels: { display: !isAllZero, color: '#fff', font: {weight: 'bold', size: 12}, formatter: (val, ctx) => Math.round((val / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) * 100) + '%' }, legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => isAllZero ? ' R$ 0,00' : ' R$ ' + c.raw.toLocaleString('pt-BR', {minimumFractionDigits:2}) }}}}, plugins: [pluginCentroRosca]
+        type: 'doughnut',
+        data: {
+            labels: isAllZero ? ['Sem Faturamento'] : buLabels,
+            datasets: [{ 
+                data: isAllZero ? [1] : buData, 
+                backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
+            }]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { 
+                    display: !isAllZero,
+                    color: '#fff', 
+                    font: {weight: 'bold', size: 12},
+                    formatter: (val, ctx) => {
+                        let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        if(total === 0 || val === 0) return '';
+                        // Transforma em Porcentagem
+                        return Math.round((val / total) * 100) + '%';
+                    }
+                }, 
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (isAllZero) return ' R$ 0,00';
+                            return ' R$ ' + context.raw.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                        }
+                    }
+                }
+            } 
+        },
+        plugins: [pluginCentroRosca]
     });
 
     const arrayClientes = Object.entries(clientesDesempenho).map(([nome, vals]) => ({nome, ...vals}));
+    const destaques = [...arrayClientes].filter(c => c.desvio > 0).sort((a,b) => b.desvio - a.desvio).slice(0, 5);
+    const ofensores = [...arrayClientes].filter(c => c.desvio < 0).sort((a,b) => a.desvio - b.desvio).slice(0, 5);
+
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+
     const tbDest = document.querySelector('#tbDestaques tbody');
-    if(tbDest) tbDest.innerHTML = arrayClientes.filter(c => c.desvio > 0).sort((a,b) => b.desvio - a.desvio).slice(0, 5).map(c => `<tr><td>${c.nome}</td><td>R$ ${c.plano.toLocaleString('pt-BR')}</td><td>R$ ${c.real.toLocaleString('pt-BR')}</td><td class="text-green">+R$ ${c.desvio.toLocaleString('pt-BR')}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum cliente acima.</td></tr>";
+    if(tbDest) tbDest.innerHTML = destaques.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-green">+${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum cliente acima do plano.</td></tr>";
+
     const tbOfen = document.querySelector('#tbOfensores tbody');
-    if(tbOfen) tbOfen.innerHTML = arrayClientes.filter(c => c.desvio < 0).sort((a,b) => a.desvio - b.desvio).slice(0, 5).map(c => `<tr><td>${c.nome}</td><td>R$ ${c.plano.toLocaleString('pt-BR')}</td><td>R$ ${c.real.toLocaleString('pt-BR')}</td><td class="text-red">R$ ${c.desvio.toLocaleString('pt-BR')}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum ofensor.</td></tr>";
+    if(tbOfen) tbOfen.innerHTML = ofensores.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-red">${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum ofensor encontrado.</td></tr>";
 }
 
 function abrirLancamentoFin() {
     document.getElementById('fin_input_mes').value = "";
-    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione o mês...</td></tr>`;
+    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
     abrirModal('modalFinInput');
 }
 
 function carregarGridFin() {
     const mes = document.getElementById('fin_input_mes').value;
     const tbody = document.getElementById('gridFinBody');
-    if(!mes) return;
-    const gridData = baseResMensais.filter(r => r.mes_numero == mes).sort((a, b) => a.bu.localeCompare(b.bu) || a.cliente.localeCompare(b.cliente));
-    tbody.innerHTML = gridData.map(d => `<tr><td><span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${d.bu}</span></td><td><b>${d.cliente}</b></td><td style="color:#666;">R$ ${parseFloat(d.valor_planejado).toLocaleString('pt-BR')}</td><td><input type="number" step="0.01" class="fin-input-real" data-id="${d.id}" value="${d.valor_realizado == 0 ? '' : d.valor_realizado}"></td></tr>`).join('');
+    if(!mes) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
+        return;
+    }
+
+    const regsMes = baseResMensais.filter(r => r.mes_numero == mes);
+    
+    const gridData = regsMes.map(rm => {
+        return {
+            id: rm.id,
+            cliente: rm.cliente || 'Desconhecido',
+            bu: rm.bu || '-',
+            plano: parseFloat(rm.valor_planejado) || 0,
+            real: parseFloat(rm.valor_realizado) || 0
+        };
+    });
+
+    gridData.sort((a, b) => a.bu.localeCompare(b.bu) || a.cliente.localeCompare(b.cliente));
+
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+    tbody.innerHTML = gridData.map(d => `
+        <tr>
+            <td><span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${d.bu}</span></td>
+            <td><b>${d.cliente}</b></td>
+            <td style="color:#666;">${formatCurrency(d.plano)}</td>
+            <td><input type="number" step="0.01" class="fin-input-real" data-id="${d.id}" value="${d.real === 0 ? '' : d.real}" placeholder="0.00"></td>
+        </tr>
+    `).join('');
 }
 
 async function salvarGridFin() {
     const mes = document.getElementById('fin_input_mes').value;
-    if(!mes) return;
-    const btn = document.getElementById('btnSalvarFin'); btn.innerText = "Salvando..."; btn.disabled = true;
+    if(!mes) return alert("Selecione um mês primeiro.");
+
+    const btn = document.getElementById('btnSalvarFin');
+    btn.innerText = "Salvando..."; 
+    btn.disabled = true;
+
+    const inputs = document.querySelectorAll('.fin-input-real');
     const promessas = [];
-    document.querySelectorAll('.fin-input-real').forEach(inp => {
+
+    inputs.forEach(inp => {
+        const idRow = inp.dataset.id;
         const valReal = parseFloat(inp.value) || 0;
-        if(parseFloat(baseResMensais.find(r => r.id == inp.dataset.id).valor_realizado) !== valReal) promessas.push(supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', inp.dataset.id));
+        
+        const rowAntiga = baseResMensais.find(r => r.id == idRow);
+        if(rowAntiga && parseFloat(rowAntiga.valor_realizado) !== valReal) {
+            promessas.push(
+                supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', idRow)
+            );
+        }
     });
-    if(promessas.length > 0) { await Promise.all(promessas); await carregarDadosFinanceiros(); }
-    fecharModal('modalFinInput'); btn.innerText = "Salvar Mês Inteiro"; btn.disabled = false; renderizarFinanceiro(); 
-}
 
-// 🔥 AJUSTE NA NAVEGAÇÃO: Corrigido para limpar o destaque do Financeiro
-function navegar(pagina) {
-    document.getElementById('page-dashboard').classList.remove('active-page');
-    document.getElementById('page-kanban').classList.remove('active-page');
-    document.getElementById('page-metas').classList.remove('active-page');
-    document.getElementById('page-financeiro').classList.remove('active-page');
-    
-    document.getElementById('nav-dash').classList.remove('active');
-    document.getElementById('nav-kanban').classList.remove('active');
-    document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.remove('active'); // Limpa o destaque antes de aplicar
-
-    const barraFiltros = document.getElementById('barraFiltros');
-    if (barraFiltros) barraFiltros.style.display = (pagina !== 'financeiro') ? 'flex' : 'none';
-
-    if (pagina === 'dashboard') {
-        document.getElementById('page-dashboard').classList.add('active-page');
-        document.getElementById('nav-dash').classList.add('active');
-    } else if (pagina === 'kanban') {
-        document.getElementById('page-kanban').classList.add('active-page');
-        document.getElementById('nav-kanban').classList.add('active');
-    } else if (pagina === 'metas') {
-        document.getElementById('page-metas').classList.add('active-page');
-        document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); 
-    } else if (pagina === 'financeiro') {
-        document.getElementById('page-financeiro').classList.add('active-page');
-        document.getElementById('nav-financeiro').classList.add('active');
-        renderizarFinanceiro();
+    if(promessas.length > 0) {
+        await Promise.all(promessas);
+        await carregarDadosFinanceiros(); 
     }
+
+    fecharModal('modalFinInput');
+    btn.innerText = "Salvar Mês Inteiro"; 
+    btn.disabled = false;
+    
+    renderizarFinanceiro(); 
 }
 </script>
 </body>
