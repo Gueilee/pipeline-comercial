@@ -696,7 +696,7 @@ function navegar(pagina) {
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.remove('active');
+    document.getElementById('nav-financeiro').classList.add('active');
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
@@ -1406,18 +1406,24 @@ function renderizar(){
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(i => {
-            const card = document.createElement('div'); card.className = 'card'; card.id = `card-${i.id}`; card.draggable = true; card.ondragstart = drag; card.style.borderLeftColor = s.border;
+        filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
+            // CRIANDO UMA CONSTANTE COM O ID CORRETO DENTRO DESTE ESCOPO
+            const idOportunidade = itemDaVez.id;
+
+            const card = document.createElement('div'); 
+            card.className = 'card'; 
+            card.id = `card-${idOportunidade}`; 
+            card.draggable = true; 
+            card.ondragstart = drag; 
+            card.style.borderLeftColor = s.border;
+            card.style.cursor = 'pointer';
             
-            // 🔥 CORREÇÃO DEFINITIVA DO CLIQUE: 
-            // Usando function() e this.id, garantimos que o sistema pegue o ID exato do card HTML que foi clicado,
-            // eliminando qualquer bug de escopo (closure) do navegador que faça abrir sempre o mesmo cliente.
-            card.onclick = function() { 
-                const cardId = this.id.replace('card-', '');
-                editarOportunidade(cardId); 
-            };
+            // 🔥 SOLUÇÃO DEFINITIVA: addEventListener com captura direta da variável do loop
+            card.addEventListener('click', function(e) {
+                editarOportunidade(idOportunidade);
+            });
             
-            card.innerHTML = `<b>${i.cliente}</b><br><small>${i.vendedor}</small><br>R$ ${parseFloat(i.valor_estimado_ano).toLocaleString('pt-BR')}`;
+            card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
         });
         kan.appendChild(col);
