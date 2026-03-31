@@ -696,7 +696,7 @@ function navegar(pagina) {
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.remove('active'); // <-- CORREÇÃO: Limpando a classe aqui!
+    document.getElementById('nav-financeiro').classList.remove('active');
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
@@ -884,9 +884,14 @@ function prepararNovo() {
     toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
+// CORREÇÃO: Forçando a comparação estrita como STRING para evitar o bug de 'undefined == undefined' ou tipagem mista
 function editarOportunidade(id) {
-    const item = base.find(x => x.id == id);
-    if(!item) return;
+    const item = base.find(x => String(x.id) === String(id));
+    if(!item) {
+        alert("Erro: Oportunidade não encontrada no sistema com o ID informado.");
+        return;
+    }
+    
     document.getElementById('op_id').value = item.id;
     document.getElementById('op_cliente').value = item.cliente;
     document.getElementById('op_tipo').value = item.tipo || "";
@@ -1411,14 +1416,18 @@ function renderizar(){
             const card = document.createElement('div'); 
             card.className = 'card'; 
             card.id = `card-${itemDaVez.id}`; 
+            
+            // CORREÇÃO: GRAVANDO O ID FISICAMENTE NO HTML DO CARD
+            card.dataset.id = itemDaVez.id; 
+
             card.draggable = true; 
             card.ondragstart = drag; 
             card.style.borderLeftColor = s.border;
             card.style.cursor = 'pointer';
             
-            // CORREÇÃO: Usando onclick simples garantindo a isolação do ID
+            // CORREÇÃO: LENDO O ID DIRETO DA MEMÓRIA DO CARD CLICADO (this.dataset)
             card.onclick = function() {
-                editarOportunidade(itemDaVez.id);
+                editarOportunidade(this.dataset.id);
             };
             
             card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
