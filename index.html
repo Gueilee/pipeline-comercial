@@ -696,7 +696,7 @@ function navegar(pagina) {
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.add('active');
+    document.getElementById('nav-financeiro').classList.remove('active'); // <-- CORREÇÃO: Limpando a classe aqui!
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
@@ -1407,21 +1407,19 @@ function renderizar(){
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
-            // CRIANDO UMA CONSTANTE COM O ID CORRETO DENTRO DESTE ESCOPO
-            const idOportunidade = itemDaVez.id;
-
+            
             const card = document.createElement('div'); 
             card.className = 'card'; 
-            card.id = `card-${idOportunidade}`; 
+            card.id = `card-${itemDaVez.id}`; 
             card.draggable = true; 
             card.ondragstart = drag; 
             card.style.borderLeftColor = s.border;
             card.style.cursor = 'pointer';
             
-            // 🔥 SOLUÇÃO DEFINITIVA: addEventListener com captura direta da variável do loop
-            card.addEventListener('click', function(e) {
-                editarOportunidade(idOportunidade);
-            });
+            // CORREÇÃO: Usando onclick simples garantindo a isolação do ID
+            card.onclick = function() {
+                editarOportunidade(itemDaVez.id);
+            };
             
             card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
