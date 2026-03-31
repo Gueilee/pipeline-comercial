@@ -677,7 +677,7 @@ header {
 </div>
 
 <script>
-// DICIONÁRIO DE METAS MENSAIS (Valores exatos por mês)
+// DICIONÁRIO DE METAS MENSAIS
 const METAS_MENSAIS = {
     "ANDREA HEUCHLING": { reuniao: 5, propostas: 3, trading: 625000.00, armazem: 600000.00, transporte: 145833.33, analytics: 0 },
     "GUILHERME ALMEIDA": { reuniao: 5, propostas: 3, trading: 2083333.33, armazem: 150000.00, transporte: 87500.00, analytics: 0 },
@@ -884,25 +884,29 @@ function prepararNovo() {
     toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
-// CORREÇÃO: Forçando a comparação estrita como STRING para evitar o bug de 'undefined == undefined' ou tipagem mista
-function editarOportunidade(id) {
-    const item = base.find(x => String(x.id) === String(id));
+// CORREÇÃO: Função BLINDADA para aceitar IDs em minúsculo ou maiúsculo
+function editarOportunidade(idParam) {
+    // Procura por x.id (padrão) ou x.ID (se o usuário renomeou errado no supabase)
+    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idParam));
+    
     if(!item) {
-        alert("Erro: Oportunidade não encontrada no sistema com o ID informado.");
+        alert("Erro crasso: Oportunidade não encontrada na memória. ID pesquisado: " + idParam);
         return;
     }
     
-    document.getElementById('op_id').value = item.id;
-    document.getElementById('op_cliente').value = item.cliente;
+    const idReal = item.id !== undefined ? item.id : item.ID;
+    
+    document.getElementById('op_id').value = idReal;
+    document.getElementById('op_cliente').value = item.cliente || "";
     document.getElementById('op_tipo').value = item.tipo || "";
     document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
-    document.getElementById('op_vendedor').value = item.vendedor;
-    document.getElementById('op_area').value = item.area;
-    document.getElementById('op_data_oportunidade').value = item.data_oportunidade;
+    document.getElementById('op_vendedor').value = item.vendedor || "";
+    document.getElementById('op_area').value = item.area || "";
+    document.getElementById('op_data_oportunidade').value = item.data_oportunidade || "";
     document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
-    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano;
-    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente;
-    document.getElementById('op_status').value = item.status;
+    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano || 0;
+    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente || 0;
+    document.getElementById('op_status').value = item.status || "";
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
     document.getElementById('op_historico').value = item.historico || ""; 
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
@@ -913,7 +917,10 @@ function editarOportunidade(id) {
 async function deletarOportunidade() {
     const id = document.getElementById('op_id').value;
     if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        await supabaseClient.from('oportunidades').delete().eq('id', id);
+        let res = await supabaseClient.from('oportunidades').delete().eq('id', id);
+        // Fallback caso a coluna seja maiuscula no supabase
+        if(res.error) await supabaseClient.from('oportunidades').delete().eq('ID', id); 
+        
         fecharModal('modalOportunidade'); carregarDados();
     }
 }
@@ -955,8 +962,11 @@ async function salvarHistoricoManual() {
     const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
     let historicoAntigo = document.getElementById('op_historico').value || "";
     const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
-    const { error } = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
-    if(error) alert("Erro ao salvar comentário: " + error.message);
+    
+    let res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
+    if(res.error) res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('ID', id);
+    
+    if(res.error) alert("Erro ao salvar comentário: " + res.error.message);
     else {
         document.getElementById('op_historico').value = historicoAtualizado;
         document.getElementById('txt_historico_manual').value = "";
@@ -986,7 +996,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     };
 
     if(idValue) {
-        const antigo = base.find(x => x.id == idValue);
+        const antigo = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idValue));
         if(antigo) {
             let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
@@ -1005,25 +1015,31 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
+    
     const payload = { cliente: novo_cliente, tipo: novo_tipo, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
-    if(idValue) await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-    else await supabaseClient.from('oportunidades').insert([payload]);
+    
+    if(idValue) {
+        let res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+        if(res.error) await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
+    } else {
+        await supabaseClient.from('oportunidades').insert([payload]);
+    }
+    
     fecharModal('modalOportunidade'); carregarDados();
 };
 
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
     document.getElementById('formMetasInput').reset();
-    document.getElementById('meta_input_vendedor').value = ""; // Reseta o vendedor para forçar a escolha e carregar o histórico
+    document.getElementById('meta_input_vendedor').value = ""; 
     abrirModal('modalMetasInput');
 }
 
-// NOVA FUNÇÃO: CARREGA O LANÇAMENTO EXISTENTE PARA EDIÇÃO
 function carregarMetaExistente() {
     const mes = document.getElementById('meta_input_mes').value;
     const vend = document.getElementById('meta_input_vendedor').value;
     
-    if(!mes || !vend) return; // Só busca se os dois estiverem selecionados
+    if(!mes || !vend) return; 
 
     const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
     
@@ -1035,7 +1051,6 @@ function carregarMetaExistente() {
         document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
         document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
     } else {
-        // Se não existir, zera os campos para um novo lançamento
         document.getElementById('meta_input_reuniao').value = "";
         document.getElementById('meta_input_propostas').value = "";
         document.getElementById('meta_input_trading').value = "";
@@ -1078,7 +1093,6 @@ function renderizarMetas() {
     const fV = document.getElementById('filtroVendedor').value;
     const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
 
-    // 1. Calcular a Meta Mensal Consolidada (Baseado no filtro ou soma total)
     let metaMensal = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
     
     if(fV && METAS_MENSAIS[fV]) {
@@ -1094,7 +1108,6 @@ function renderizarMetas() {
         });
     }
 
-    // A meta YTD (Anual) exibida nos gráficos é a mensal * 12
     const metaAnual = {
         reuniao: metaMensal.reuniao * 12,
         propostas: metaMensal.propostas * 12,
@@ -1107,7 +1120,6 @@ function renderizarMetas() {
     const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
     const metaTotalFaturamento = metaFaturamentoMensal * 12;
 
-    // 2. Calcular o Realizado Consolidado YTD
     let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
     let arrayRealMensal = new Array(12).fill(0); 
 
@@ -1128,7 +1140,6 @@ function renderizarMetas() {
         }
     });
 
-    // 3. Atualizar KPIs
     const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
     document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
     document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
@@ -1137,7 +1148,6 @@ function renderizarMetas() {
     document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
     document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
 
-    // 4. Gráfico: Evolução Mensal (Linha + Barra)
     if(charts.evolucao) charts.evolucao.destroy();
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type: 'bar',
@@ -1154,11 +1164,7 @@ function renderizarMetas() {
                     pointRadius: 0,
                     fill: false,
                     datalabels: { 
-                        display: true, 
-                        color: '#01E18E', 
-                        anchor: 'end', 
-                        align: 'top', 
-                        font: {size: 10, weight:'bold'},
+                        display: true, color: '#01E18E', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
                         formatter: v => {
                             if (v === 0) return "";
                             if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
@@ -1167,37 +1173,24 @@ function renderizarMetas() {
                     }
                 },
                 {
-                    label: 'Realizado',
-                    data: arrayRealMensal,
-                    backgroundColor: '#422c76',
-                    borderRadius: 4
+                    label: 'Realizado', data: arrayRealMensal, backgroundColor: '#422c76', borderRadius: 4
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false,
-            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo superior não cortar
-            plugins: {
-                legend: { position: 'bottom' },
-                datalabels: {
+            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
                     color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
                     formatter: (v, ctx) => {
-                        // Não formata a linha de meta aqui, só a barra
                         if (ctx.datasetIndex === 0) return ""; 
                         if (v === 0) return "";
                         if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
                         return (v/1000).toFixed(0) + "k";
                     }
                 }
-            },
-            scales: { 
-                y: { display: false }, // Remove Eixo vertical
-                x: { grid: { display: false } } 
-            }
+            }, scales: { y: { display: false }, x: { grid: { display: false } } }
         }
     });
 
-    // 5. Gráfico: Unidade de Negócio
     if(charts.unidade) charts.unidade.destroy();
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type: 'bar',
@@ -1205,31 +1198,18 @@ function renderizarMetas() {
             labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
             datasets: [
                 {
-                    label: 'Meta Anual',
-                    data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
-                    backgroundColor: '#422c76',
-                    borderRadius: 4,
-                    maxBarThickness: 60 // Afina as barras
+                    label: 'Meta Anual', data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
+                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60
                 },
                 {
-                    label: 'Realizado YTD',
-                    data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
-                    backgroundColor: '#ff2f69',
-                    borderRadius: 4,
-                    maxBarThickness: 60 // Afina as barras
+                    label: 'Realizado YTD', data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
+                    backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false,
-            layout: { padding: { top: 30 } }, // Dá espaço para o rótulo de trading não cortar no topo
-            plugins: {
-                legend: { position: 'bottom' },
-                datalabels: {
-                    color: '#444', 
-                    anchor: 'end', 
-                    align: 'top', 
-                    font: {size: 10, weight:'bold'},
+            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
                     formatter: (v) => {
                         if (v === 0) return "";
                         if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
@@ -1237,11 +1217,7 @@ function renderizarMetas() {
                         return "R$ " + v;
                     }
                 }
-            },
-            scales: { 
-                y: { display: false }, // Remove Eixo Vertical
-                x: { grid: { display: false } } 
-            }
+            }, scales: { y: { display: false }, x: { grid: { display: false } } }
         }
     });
 }
@@ -1276,11 +1252,9 @@ async function carregarDados(){
     const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
     base = ops || []; 
     
-    // Carrega também as Metas Mensais
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
 
-    // NOVO: Carrega dados financeiros unificados
     await carregarDadosFinanceiros();
 
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
@@ -1304,24 +1278,54 @@ async function carregarDados(){
     }
 
     renderizar(); 
-    // Atualiza metas se a aba estiver ativa
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
     if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
 }
 
 async function carregarDadosFinanceiros() {
-    // Nova lógica puxando apenas da tabela resultados_mensais
     const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
     baseResMensais = res || [];
 }
 
-function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+// ---- KANBAN DRAG & DROP BLINDADO (NOVO) ----
 function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
+
 async function drop(ev, novoStatus) {
-    ev.preventDefault(); ev.currentTarget.classList.remove('column-over');
-    const cardId = ev.dataTransfer.getData("text").replace("card-", "");
-    editarOportunidade(cardId); document.getElementById('op_status').value = novoStatus; toggleMotivoPerda();
+    ev.preventDefault(); 
+    ev.currentTarget.classList.remove('column-over');
+    
+    const cardIdAttr = ev.dataTransfer.getData("text/plain");
+    if(!cardIdAttr) return; // Se arrastou algo vazio, ignora
+    
+    // Extrai apenas o número do ID
+    const cardId = cardIdAttr.replace("card-", "");
+    
+    // Procura na memória local pelo id exato
+    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(cardId));
+    if(!item || item.status === novoStatus) return; // Se não achar ou for o mesmo status, ignora
+
+    // 1. Atualiza visualmente IMEDIATAMENTE na tela (Efeito liso)
+    item.status = novoStatus;
+    renderizar(); 
+
+    // 2. Se for PERDIDO, precisa justificar o motivo, então abre a tela
+    if(novoStatus === "PERDIDO") {
+        editarOportunidade(cardId);
+        return;
+    }
+
+    // 3. Salva no Supabase em Background (Invisível)
+    const idParaBanco = item.id !== undefined ? item.id : item.ID;
+    
+    // Gera log de histórico
+    const agora = new Date();
+    const carimbo = `[${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}] STATUS MOVIDO VIA KANBAN PARA: ${novoStatus}`;
+    const novoHist = carimbo + (item.historico ? "\n" + item.historico : "");
+    item.historico = novoHist;
+
+    let res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', idParaBanco);
+    if(res.error) await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
 }
 
 function renderizar(){
@@ -1331,7 +1335,6 @@ function renderizar(){
     const fS = document.getElementById('filtroStatus').value;
     const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
-    // Reflete os filtros na tela de metas automaticamente se estiver aberta
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
@@ -1413,19 +1416,23 @@ function renderizar(){
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
             
+            // PROTEÇÃO MÁXIMA PARA PEGAR O ID CORRETO NO NAVEGADOR
+            const idReal = itemDaVez.id !== undefined ? itemDaVez.id : itemDaVez.ID;
+
             const card = document.createElement('div'); 
             card.className = 'card'; 
-            card.id = `card-${itemDaVez.id}`; 
-            
-            // CORREÇÃO: GRAVANDO O ID FISICAMENTE NO HTML DO CARD
-            card.dataset.id = itemDaVez.id; 
+            card.id = `card-${idReal}`; 
+            card.dataset.id = idReal; 
 
             card.draggable = true; 
-            card.ondragstart = drag; 
             card.style.borderLeftColor = s.border;
             card.style.cursor = 'pointer';
+
+            // BLINDAGEM DO DRAG AND DROP: O card se "apresenta" com a ID correta e limpa pro navegador
+            card.ondragstart = function(ev) {
+                ev.dataTransfer.setData("text/plain", this.id);
+            };
             
-            // CORREÇÃO: LENDO O ID DIRETO DA MEMÓRIA DO CARD CLICADO (this.dataset)
             card.onclick = function() {
                 editarOportunidade(this.dataset.id);
             };
@@ -1464,7 +1471,6 @@ function renderizarFinanceiro() {
             arrayRealMensal[mesIdx] += valReal;
         }
 
-        // AGRUPAMENTO INTELIGENTE: Junta subdivisões na BU principal para o gráfico
         let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
         if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
         else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
@@ -1531,13 +1537,8 @@ function renderizarFinanceiro() {
         }
     });
 
-    // -------------------------------------------------------------
-    // GRÁFICO DE ROSCA (SHARE POR BU) CORRIGIDO E DINÂMICO
-    // -------------------------------------------------------------
     const buLabels = Object.keys(faturamentoPorBU);
     const buData = buLabels.map(k => faturamentoPorBU[k]);
-    
-    // Verifica se todos os valores realizados ainda estão zerados
     const isAllZero = buData.every(v => v === 0);
     
     if(charts.finBu) charts.finBu.destroy();
@@ -1560,7 +1561,6 @@ function renderizarFinanceiro() {
                     formatter: (val, ctx) => {
                         let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                         if(total === 0 || val === 0) return '';
-                        // Transforma em Porcentagem
                         return Math.round((val / total) * 100) + '%';
                     }
                 }, 
