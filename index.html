@@ -399,7 +399,20 @@ header {
                     <h2 style="margin: 0; color: var(--lilas);">Visão Financeira (Previsto x Realizado)</h2>
                     <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Acompanhamento orçamentário consolidado de Clientes por BU e Categoria.</p>
                 </div>
-                <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="filtroFinCliente" class="input-search" placeholder="🔍 Buscar cliente..." oninput="renderizarFinanceiro()" list="listaClientesFin" style="min-width: 180px;">
+                    <datalist id="listaClientesFin"></datalist>
+                    
+                    <select id="filtroFinBU" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
+                        <option value="">Todas as BUs</option>
+                        <option value="ARMAZÉM (ARM)">ARMAZÉM (ARM)</option>
+                        <option value="TRADING (VCI)">TRADING (VCI)</option>
+                        <option value="TRANSPORTE (GRV)">TRANSPORTE (GRV)</option>
+                        <option value="OUTROS">OUTROS</option>
+                    </select>
+                    
+                    <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
+                </div>
             </div>
 
             <div class="kpis-metas">
@@ -1276,6 +1289,11 @@ async function carregarDados(){
 async function carregarDadosFinanceiros() {
     const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
     baseResMensais = res || [];
+
+    // Popular lista de clientes do Financeiro para o Auto-complete
+    const clientesFin = [...new Set(baseResMensais.map(r => r.cliente).filter(c => c))].sort();
+    const dlFin = document.getElementById('listaClientesFin');
+    if(dlFin) dlFin.innerHTML = clientesFin.map(c => `<option value="${c}">`).join('');
 }
 
 // ---- KANBAN DRAG & DROP BLINDADO (NOVO) ----
@@ -1448,7 +1466,22 @@ function renderizarFinanceiro() {
     let faturamentoPorBU = {};
     let clientesDesempenho = {}; 
 
+    // PEGANDO OS VALORES DOS NOVOS FILTROS
+    const fFinCli = document.getElementById('filtroFinCliente').value.toLowerCase();
+    const fFinBU = document.getElementById('filtroFinBU').value;
+
     baseResMensais.forEach(rm => {
+        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
+        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
+        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
+        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
+
+        const cliName = rm.cliente || 'Sem Nome';
+
+        // APLICANDO OS FILTROS
+        if (fFinCli && !cliName.toLowerCase().includes(fFinCli)) return;
+        if (fFinBU && bu !== fFinBU) return;
+
         const mesIdx = rm.mes_numero - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
         const valReal = parseFloat(rm.valor_realizado) || 0;
@@ -1461,13 +1494,6 @@ function renderizarFinanceiro() {
             arrayPlanoMensal[mesIdx] += valPlan;
             arrayRealMensal[mesIdx] += valReal;
         }
-
-        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
-        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
-        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
-        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
-
-        const cliName = rm.cliente || 'Sem Nome';
 
         faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
 
