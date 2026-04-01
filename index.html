@@ -437,25 +437,13 @@ header {
 
 <div id="modalFinInput" class="modal">
     <div class="modal-content" style="width: 850px;">
-        <h3>⚡ Lançamento Rápido Mensal</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o mês. Digite os valores e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
+        <h3>⚡ Lançamento Rápido por Cliente</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o Cliente / BU. Edite os valores dos 12 meses e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
         
-        <div class="form-group" style="width: 250px;">
-            <label>Mês de Referência</label>
-            <select id="fin_input_mes" onchange="carregarGridFin()">
-                <option value="">Selecione o mês...</option>
-                <option value="1">Janeiro</option>
-                <option value="2">Fevereiro</option>
-                <option value="3">Março</option>
-                <option value="4">Abril</option>
-                <option value="5">Maio</option>
-                <option value="6">Junho</option>
-                <option value="7">Julho</option>
-                <option value="8">Agosto</option>
-                <option value="9">Setembro</option>
-                <option value="10">Outubro</option>
-                <option value="11">Novembro</option>
-                <option value="12">Dezembro</option>
+        <div class="form-group" style="width: 100%;">
+            <label>CLIENTE / UNIDADE DE NEGÓCIO</label>
+            <select id="fin_input_cliente" onchange="carregarGridFin()">
+                <option value="">Selecione o Cliente / BU...</option>
             </select>
         </div>
         
@@ -463,21 +451,20 @@ header {
             <table class="datagrid-table" id="gridFinTable">
                 <thead>
                     <tr>
-                        <th style="width: 15%">BU</th>
-                        <th style="width: 45%">Cliente</th>
-                        <th style="width: 20%">Plano (R$)</th>
-                        <th style="width: 20%">Realizado (R$)</th>
+                        <th style="width: 20%">Mês</th>
+                        <th style="width: 40%">Plano (R$)</th>
+                        <th style="width: 40%">Realizado (R$)</th>
                     </tr>
                 </thead>
                 <tbody id="gridFinBody">
-                    <tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>
+                    <tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="modal-footer">
             <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
-            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Mês Inteiro</button>
+            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Lançamentos</button>
         </div>
     </div>
 </div>
@@ -892,7 +879,6 @@ function prepararNovo() {
 
 // CORREÇÃO: Função BLINDADA para aceitar IDs em minúsculo ou maiúsculo
 function editarOportunidade(idParam) {
-    // Procura por x.id (padrão) ou x.ID (se o usuário renomeou errado no supabase)
     const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idParam));
     
     if(!item) {
@@ -924,7 +910,6 @@ async function deletarOportunidade() {
     const id = document.getElementById('op_id').value;
     if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
         let res = await supabaseClient.from('oportunidades').delete().eq('id', id);
-        // Fallback caso a coluna seja maiuscula no supabase
         if(res.error) await supabaseClient.from('oportunidades').delete().eq('ID', id); 
         
         fecharModal('modalOportunidade'); carregarDados();
@@ -1598,54 +1583,88 @@ function renderizarFinanceiro() {
 }
 
 function abrirLancamentoFin() {
-    document.getElementById('fin_input_mes').value = "";
-    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
+    const selectCliente = document.getElementById('fin_input_cliente');
+    const combinacoes = [];
+    const setMap = new Set();
+    
+    // Busca todas as combinações únicas de Cliente + BU que existem na base de resultados
+    baseResMensais.forEach(r => {
+        const cli = r.cliente || 'Desconhecido';
+        const bu = r.bu || '-';
+        const key = cli + '@@@' + bu;
+        const label = cli + ' | ' + bu;
+        if(!setMap.has(key)) {
+            setMap.add(key);
+            combinacoes.push({key, label});
+        }
+    });
+    
+    combinacoes.sort((a,b) => a.label.localeCompare(b.label));
+    
+    selectCliente.innerHTML = '<option value="">Selecione o Cliente / BU...</option>' + 
+                              combinacoes.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
+                              
+    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
     abrirModal('modalFinInput');
 }
 
+const nomesMesesGrid = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
 function carregarGridFin() {
-    const mes = document.getElementById('fin_input_mes').value;
+    const clienteSelecionado = document.getElementById('fin_input_cliente').value;
     const tbody = document.getElementById('gridFinBody');
-    if(!mes) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
+    if(!clienteSelecionado) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
         return;
     }
 
-    const regsMes = baseResMensais.filter(r => r.mes_numero == mes);
+    const [clienteNome, buNome] = clienteSelecionado.split('@@@');
     
-    const gridData = regsMes.map(rm => {
-        return {
-            id: rm.id,
-            cliente: rm.cliente || 'Desconhecido',
-            bu: rm.bu || '-',
-            plano: parseFloat(rm.valor_planejado) || 0,
-            real: parseFloat(rm.valor_realizado) || 0
-        };
-    });
-
-    gridData.sort((a, b) => a.bu.localeCompare(b.bu) || a.cliente.localeCompare(b.cliente));
-
+    // Filtra apenas os registros daquele cliente e daquela BU específica
+    const regsCliente = baseResMensais.filter(r => (r.cliente || 'Desconhecido') === clienteNome && (r.bu || '-') === buNome);
+    
     const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
 
-    tbody.innerHTML = gridData.map(d => `
-        <tr>
-            <td><span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${d.bu}</span></td>
-            <td><b>${d.cliente}</b></td>
-            <td style="color:#666;">${formatCurrency(d.plano)}</td>
-            <td><input type="number" step="0.01" class="fin-input-real" data-id="${d.id}" value="${d.real === 0 ? '' : d.real}" placeholder="0.00"></td>
-        </tr>
-    `).join('');
+    let linhasHTML = "";
+    for(let i=1; i<=12; i++) {
+        // Tenta achar o registro correspondente ao mês i
+        const regMes = regsCliente.find(r => r.mes_numero == i);
+        
+        if(regMes) {
+            const valPlano = parseFloat(regMes.valor_planejado) || 0;
+            const valReal = parseFloat(regMes.valor_realizado) || 0;
+            linhasHTML += `
+                <tr>
+                    <td><b>${nomesMesesGrid[i-1]}</b></td>
+                    <td style="color:#666;">${formatCurrency(valPlano)}</td>
+                    <td><input type="number" step="0.01" class="fin-input-real" data-id="${regMes.id}" value="${valReal === 0 ? '' : valReal}" placeholder="0.00"></td>
+                </tr>
+            `;
+        } else {
+            // Caso, por alguma razão de banco, não exista o lançamento do mês
+            linhasHTML += `
+                <tr>
+                    <td><b style="color:#888;">${nomesMesesGrid[i-1]}</b></td>
+                    <td style="color:#ccc;">R$ 0,00</td>
+                    <td><input type="number" disabled placeholder="Sem registro" style="background:#f9f9f9; border:1px solid #eee;"></td>
+                </tr>
+            `;
+        }
+    }
+    
+    tbody.innerHTML = linhasHTML;
 }
 
 async function salvarGridFin() {
-    const mes = document.getElementById('fin_input_mes').value;
-    if(!mes) return alert("Selecione um mês primeiro.");
+    const clienteSelecionado = document.getElementById('fin_input_cliente').value;
+    if(!clienteSelecionado) return alert("Selecione um cliente primeiro.");
 
     const btn = document.getElementById('btnSalvarFin');
     btn.innerText = "Salvando..."; 
     btn.disabled = true;
 
-    const inputs = document.querySelectorAll('.fin-input-real');
+    // Pega todos os inputs ativos
+    const inputs = document.querySelectorAll('.fin-input-real:not([disabled])');
     const promessas = [];
 
     inputs.forEach(inp => {
@@ -1666,7 +1685,7 @@ async function salvarGridFin() {
     }
 
     fecharModal('modalFinInput');
-    btn.innerText = "Salvar Mês Inteiro"; 
+    btn.innerText = "Salvar Lançamentos"; 
     btn.disabled = false;
     
     renderizarFinanceiro(); 
