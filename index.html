@@ -26,40 +26,40 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 
 /* ESTILOS DA TELA DE LOGIN - AJUSTADO PARA PRIORIZAR O LOGO */
 #login-overlay {
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%;
-    background-image: url('fundo-login.jpg'); 
-    /* background-size: cover continua sendo o melhor para não distorcer, 
-       mas vamos mudar a posição para garantir o logo */
-    background-size: cover;
-    background-position: left top; /* FIX: Faz a imagem começar pelo logo (topo e esquerda) */
-    background-repeat: no-repeat;
-    display: flex; 
-    align-items: center; 
-    justify-content: flex-end; 
-    z-index: 10000;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background-image: url('fundo-login.jpg'); 
+    /* background-size: cover continua sendo o melhor para não distorcer, 
+       mas vamos mudar a posição para garantir o logo */
+    background-size: cover;
+    background-position: left top; /* FIX: Faz a imagem começar pelo logo (topo e esquerda) */
+    background-repeat: no-repeat;
+    display: flex; 
+    align-items: center; 
+    justify-content: flex-end; 
+    z-index: 10000;
 }
 .login-box {
-    background: #ffffff;
-    padding: 40px; border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-    width: 320px; text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    margin-right: 10%; /* Alterado de margin-left para margin-right */
+    background: #ffffff;
+    padding: 40px; border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    width: 320px; text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-right: 10%; /* Alterado de margin-left para margin-right */
 }
 .login-box img { width: 150px; margin-bottom: 20px; }
 .login-box h2 { color: var(--lilas); margin-bottom: 20px; font-size: 18px; font-weight: bold; }
 .login-box input {
-    width: 100%; padding: 12px; margin-bottom: 15px;
-    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
+    width: 100%; padding: 12px; margin-bottom: 15px;
+    border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;
 }
 .btn-login {
-    width: 100%; padding: 12px; background: var(--lilas);
-    color: white; border: none; border-radius: 6px;
-    font-weight: bold; cursor: pointer; transition: 0.3s;
+    width: 100%; padding: 12px; background: var(--lilas);
+    color: white; border: none; border-radius: 6px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
 }
 .btn-login:hover { background: #32215a; transform: translateY(-1px); }
 #login-error { color: #c0392b; font-size: 12px; margin-bottom: 10px; display: none; font-weight: bold; }
@@ -69,93 +69,93 @@ body{ margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; bac
 .active-page { display: block !important; }
 
 /* CABEÇALHO */
-header { 
-    background: white; 
-    padding: 10px 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+header { 
+    background: white; 
+    padding: 10px 40px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 .logo { height: 45px; width: auto; transition: transform 0.3s; }
 .logo:hover { transform: scale(1.05); }
 
-.header-right { 
-    display: flex; 
-    gap: 8px; 
-    align-items: center; 
-    background: #f8f9fa;
-    padding: 6px;
-    border-radius: 12px;
+.header-right { 
+    display: flex; 
+    gap: 8px; 
+    align-items: center; 
+    background: #f8f9fa;
+    padding: 6px;
+    border-radius: 12px;
 }
 
 .nav-group {
-    display: flex;
-    gap: 5px;
-    margin-right: 15px;
-    border-right: 1px solid #ddd;
-    padding-right: 15px;
+    display: flex;
+    gap: 5px;
+    margin-right: 15px;
+    border-right: 1px solid #ddd;
+    padding-right: 15px;
 }
 
-.btn-header { 
-    border: none; 
-    padding: 10px 16px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: 600; 
-    font-size: 13px; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--grafite);
-    background: transparent;
+.btn-header { 
+    border: none; 
+    padding: 10px 16px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    font-size: 13px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--grafite);
+    background: transparent;
 }
 
 .btn-header:hover {
-    background: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
 }
 
 .btn-header.active {
-    background-color: var(--lilas);
-    color: white;
+    background-color: var(--lilas);
+    color: white;
 }
 
-.btn-ia { 
-    background: linear-gradient(135deg, var(--ia-gold), #f3d060); 
-    color: white; 
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
+.btn-ia { 
+    background: linear-gradient(135deg, var(--ia-gold), #f3d060); 
+    color: white; 
+    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
 }
-.btn-ia:hover { 
-    background: linear-gradient(135deg, #b8962d, var(--ia-gold));
-    color: white;
+.btn-ia:hover { 
+    background: linear-gradient(135deg, #b8962d, var(--ia-gold));
+    color: white;
 }
 
-.btn-novo-op { 
-    background-color: var(--lilas); 
-    color: white; 
+.btn-novo-op { 
+    background-color: var(--lilas); 
+    color: white; 
 }
-.btn-novo-op:hover { 
-    background-color: #32215a; 
-    color: white;
+.btn-novo-op:hover { 
+    background-color: #32215a; 
+    color: white;
 }
 
 .btn-novo-meta { background-color: #27ae60; color: white; }
 .btn-novo-meta:hover { background-color: #1e8449; }
 
-.btn-logoff { 
-    color: #c0392b; 
-    border-radius: 8px;
-    padding: 10px;
+.btn-logoff { 
+    color: #c0392b; 
+    border-radius: 8px;
+    padding: 10px;
 }
-.btn-logoff:hover { 
-    background-color: #fff1f0; 
-    box-shadow: 0 4px 8px rgba(192, 57, 43, 0.1);
+.btn-logoff:hover { 
+    background-color: #fff1f0; 
+    box-shadow: 0 4px 8px rgba(192, 57, 43, 0.1);
 }
 
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
@@ -192,16 +192,16 @@ header {
 .text-red { color: #c0392b; font-weight: bold; }
 
 .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); overflow-y: hidden; }
-.modal-content { 
-    background: white; 
-    margin: 2vh auto; 
-    padding: 30px; 
-    border-radius: 12px; 
-    width: 650px; 
-    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
-    position: relative; 
-    max-height: 92vh; 
-    overflow-y: auto; 
+.modal-content { 
+    background: white; 
+    margin: 2vh auto; 
+    padding: 30px; 
+    border-radius: 12px; 
+    width: 650px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2); 
+    position: relative; 
+    max-height: 92vh; 
+    overflow-y: auto; 
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
@@ -240,64 +240,64 @@ header {
 .btn-del-mini { background: #ffebee; color: #c62828; }
 
 .btn-history-view {
-    background: #f0f0f0;
-    color: var(--lilas);
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: 0.3s;
+    background: #f0f0f0;
+    color: var(--lilas);
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: 0.3s;
 }
 .btn-history-view:hover { background: #e8e8e8; border-color: var(--lilas); }
 
 .timeline {
-    position: relative;
-    padding: 20px 0;
-    list-style: none;
+    position: relative;
+    padding: 20px 0;
+    list-style: none;
 }
 .timeline-item {
-    position: relative;
-    padding-left: 30px;
-    margin-bottom: 20px;
-    border-left: 2px solid #eee;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 20px;
+    border-left: 2px solid #eee;
 }
 .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -7px;
-    top: 0;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--lilas);
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--lilas);
 }
 .timeline-date {
-    font-size: 11px;
-    font-weight: bold;
-    color: #888;
-    margin-bottom: 4px;
-    display: block;
+    font-size: 11px;
+    font-weight: bold;
+    color: #888;
+    margin-bottom: 4px;
+    display: block;
 }
 .timeline-content {
-    font-size: 13px;
-    background: #f9f9f9;
-    padding: 10px;
-    border-radius: 6px;
-    color: #444;
-    border: 1px solid #eee;
+    font-size: 13px;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    color: #444;
+    border: 1px solid #eee;
 }
 
 .manual-history-box {
-    background: #f4f7f6;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #e0e0e0;
+    background: #f4f7f6;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
 }
 </style>
 </head>
@@ -305,485 +305,472 @@ header {
 <body>
 
 <div id="login-overlay">
-    <div class="login-box">
-        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Acesso ao Pipeline</h2>
-        <div id="login-error">Usuário ou senha incorretos!</div>
-        <input type="text" id="login_user" placeholder="Usuário">
-        <input type="password" id="login_pass" placeholder="Senha">
-        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
-    </div>
+    <div class="login-box">
+        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>Acesso ao Pipeline</h2>
+        <div id="login-error">Usuário ou senha incorretos!</div>
+        <input type="text" id="login_user" placeholder="Usuário">
+        <input type="password" id="login_pass" placeholder="Senha">
+        <button class="btn-login" onclick="autenticar()">ENTRAR</button>
+    </div>
 </div>
 
 <div id="main-system">
-    <header>
-        <img src="Pipeline.png" class="logo">
-        <div class="header-right">
-            <div class="nav-group">
-                <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
-                <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
-                <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
-                <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
-            </div>
-            
-            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
-            <button type="button" class="btn-header" onclick="abrirModal('modalVendedor')"><span>👥</span> Vendedores</button>
-            <button type="button" class="btn-header" onclick="abrirModal('modalArea')"><span>🏢</span> Áreas</button>
-            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()"><span>➕</span> Nova Oportunidade</button>
-            <div style="width: 1px; height: 25px; background: #ddd; margin: 0 5px;"></div>
-            <button type="button" class="btn-header btn-logoff" onclick="logoff()" title="Sair do Sistema"><span>🚪</span> SAIR</button>
-        </div>
-    </header>
+    <header>
+        <img src="Pipeline.png" class="logo">
+        <div class="header-right">
+            <div class="nav-group">
+                <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
+                <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
+                <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
+                <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
+            </div>
+            
+            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
+            <button type="button" class="btn-header" onclick="abrirModal('modalVendedor')"><span>👥</span> Vendedores</button>
+            <button type="button" class="btn-header" onclick="abrirModal('modalArea')"><span>🏢</span> Áreas</button>
+            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()"><span>➕</span> Nova Oportunidade</button>
+            <div style="width: 1px; height: 25px; background: #ddd; margin: 0 5px;"></div>
+            <button type="button" class="btn-header btn-logoff" onclick="logoff()" title="Sair do Sistema"><span>🚪</span> SAIR</button>
+        </div>
+    </header>
 
-    <div class="container">
-        <div class="filters" id="barraFiltros">
-            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
-            <datalist id="listaClientes"></datalist>
-            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
-            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
-            <select id="filtroStatus" onchange="renderizar()">
-                <option value="">Status</option>
-                <option value="AINDA FRIO">AINDA FRIO</option>
-                <option value="FUP">FUP</option>
-                <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
-                <option value="EM FECHAMENTO">EM FECHAMENTO</option>
-                <option value="FECHADO">FECHADO</option>
-                <option value="PERDIDO">PERDIDO</option>
-            </select>
-        </div>
+    <div class="container">
+        <div class="filters" id="barraFiltros">
+            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+            <datalist id="listaClientes"></datalist>
+            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
+            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+            <select id="filtroStatus" onchange="renderizar()">
+                <option value="">Status</option>
+                <option value="AINDA FRIO">AINDA FRIO</option>
+                <option value="FUP">FUP</option>
+                <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
+                <option value="EM FECHAMENTO">EM FECHAMENTO</option>
+                <option value="FECHADO">FECHADO</option>
+                <option value="PERDIDO">PERDIDO</option>
+            </select>
+        </div>
 
-        <div id="page-dashboard" class="active-page">
-            <div class="kpis">
-                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
-                <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
-                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
-            </div>
+        <div id="page-dashboard" class="active-page">
+            <div class="kpis">
+                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+            </div>
 
-            <div class="charts-grid">
-                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-                <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
-            </div>
-        </div>
+            <div class="charts-grid">
+                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
+                <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+            </div>
+        </div>
 
-        <div id="page-kanban">
-            <div class="kanban" id="kanban"></div>
-        </div>
+        <div id="page-kanban">
+            <div class="kanban" id="kanban"></div>
+        </div>
 
-        <div id="page-metas">
-            <div class="metas-header">
-                <div>
-                    <h2 style="margin: 0; color: var(--lilas);">Acompanhamento de Metas</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Use o filtro superior de Vendedores para detalhar o desempenho individual.</p>
-                </div>
-                <button type="button" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
-            </div>
+        <div id="page-metas">
+            <div class="metas-header">
+                <div>
+                    <h2 style="margin: 0; color: var(--lilas);">Acompanhamento de Metas</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Use o filtro superior de Vendedores para detalhar o desempenho individual.</p>
+                </div>
+                <button type="button" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
+            </div>
 
-            <div class="kpis-metas">
-                <div class="kpi"><h3>Atingimento Geral (Real vs Meta)</h3><p id="metaPercAtingimento">0%</p></div>
-                <div class="kpi"><h3>Faturamento Total Realizado YTD</h3><p id="metaRealizadoTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Reuniões (Realizadas vs Meta YTD)</h3><p id="metaReunioesYTD">0 / 0</p></div>
-                <div class="kpi"><h3>Propostas (Enviadas vs Meta YTD)</h3><p id="metaPropostasYTD">0 / 0</p></div>
-            </div>
+            <div class="kpis-metas">
+                <div class="kpi"><h3>Atingimento Geral (Real vs Meta)</h3><p id="metaPercAtingimento">0%</p></div>
+                <div class="kpi"><h3>Faturamento Total Realizado YTD</h3><p id="metaRealizadoTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Reuniões (Realizadas vs Meta YTD)</h3><p id="metaReunioesYTD">0 / 0</p></div>
+                <div class="kpi"><h3>Propostas (Enviadas vs Meta YTD)</h3><p id="metaPropostasYTD">0 / 0</p></div>
+            </div>
 
-            <div class="charts-grid-metas">
-                <div class="chart-card"><h4>Evolução Mensal (Receita Total)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
-                <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
-            </div>
-        </div>
+            <div class="charts-grid-metas">
+                <div class="chart-card"><h4>Evolução Mensal (Receita Total)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
+                <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
+            </div>
+        </div>
 
-        <div id="page-financeiro">
-            <div class="metas-header">
-                <div>
-                    <h2 style="margin: 0; color: var(--lilas);">Visão Financeira (Previsto x Realizado)</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Acompanhamento orçamentário consolidado de Clientes por BU e Categoria.</p>
-                </div>
-                <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
-            </div>
+        <div id="page-financeiro">
+            <div class="metas-header">
+                <div>
+                    <h2 style="margin: 0; color: var(--lilas);">Visão Financeira (Previsto x Realizado)</h2>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Acompanhamento orçamentário consolidado de Clientes por BU e Categoria.</p>
+                </div>
+                <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
+            </div>
 
-            <div class="kpis-metas">
-                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapTotal">R$ 0</p></div>
-                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercTotal">0%</p></div>
-            </div>
+            <div class="kpis-metas">
+                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealTotal">R$ 0</p></div>
+                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapTotal">R$ 0</p></div>
+                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercTotal">0%</p></div>
+            </div>
 
-            <div class="charts-grid-metas">
-                <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
-                <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
-            </div>
+            <div class="charts-grid-metas">
+                <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
+                <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
+            </div>
 
-            <div class="charts-grid-metas">
-                <div class="chart-card" style="height: auto; min-height: 300px;">
-                    <h4>🏆 Top 5 Clientes (Acima do Plano)</h4>
-                    <table class="ranking-table" id="tbDestaques">
-                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="chart-card" style="height: auto; min-height: 300px;">
-                    <h4>⚠️ Top 5 Ofensores (Abaixo do Plano)</h4>
-                    <table class="ranking-table" id="tbOfensores">
-                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+            <div class="charts-grid-metas">
+                <div class="chart-card" style="height: auto; min-height: 300px;">
+                    <h4>🏆 Top 5 Clientes (Acima do Plano)</h4>
+                    <table class="ranking-table" id="tbDestaques">
+                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-card" style="height: auto; min-height: 300px;">
+                    <h4>⚠️ Top 5 Ofensores (Abaixo do Plano)</h4>
+                    <table class="ranking-table" id="tbOfensores">
+                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    </div>
+    </div>
 </div>
 
 <div id="modalFinInput" class="modal">
-    <div class="modal-content" style="width: 850px;">
-        <h3>⚡ Lançamento Rápido Mensal</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o mês. Digite os valores e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
-        
-        <div class="form-group" style="width: 250px;">
-            <label>Mês de Referência</label>
-            <select id="fin_input_mes" onchange="carregarGridFin()">
-                <option value="">Selecione o mês...</option>
-                <option value="1">Janeiro</option>
-                <option value="2">Fevereiro</option>
-                <option value="3">Março</option>
-                <option value="4">Abril</option>
-                <option value="5">Maio</option>
-                <option value="6">Junho</option>
-                <option value="7">Julho</option>
-                <option value="8">Agosto</option>
-                <option value="9">Setembro</option>
-                <option value="10">Outubro</option>
-                <option value="11">Novembro</option>
-                <option value="12">Dezembro</option>
-            </select>
-        </div>
-        
-        <div style="max-height: 45vh; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;">
-            <table class="datagrid-table" id="gridFinTable">
-                <thead>
-                    <tr>
-                        <th style="width: 15%">BU</th>
-                        <th style="width: 45%">Cliente</th>
-                        <th style="width: 20%">Plano (R$)</th>
-                        <th style="width: 20%">Realizado (R$)</th>
-                    </tr>
-                </thead>
-                <tbody id="gridFinBody">
-                    <tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>
-                </tbody>
-            </table>
-        </div>
+    <div class="modal-content" style="width: 850px;">
+        <h3>⚡ Lançamento Rápido por Cliente</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o Cliente / BU. Edite os valores dos 12 meses e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
+        
+        <div class="form-group" style="width: 100%;">
+            <label>Cliente / Unidade de Negócio</label>
+            <select id="fin_input_cliente_bu" onchange="carregarGridFin()">
+                <option value="">Selecione...</option>
+            </select>
+        </div>
+        
+        <div style="max-height: 45vh; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;">
+            <table class="datagrid-table" id="gridFinTable">
+                <thead>
+                    <tr>
+                        <th style="width: 30%">Mês</th>
+                        <th style="width: 35%">Plano (R$)</th>
+                        <th style="width: 35%">Realizado (R$)</th>
+                    </tr>
+                </thead>
+                <tbody id="gridFinBody">
+                    <tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-        <div class="modal-footer">
-            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
-            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Mês Inteiro</button>
-        </div>
-    </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
+            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Ano Inteiro</button>
+        </div>
+    </div>
 </div>
 
 <div id="modalMetasInput" class="modal">
-    <div class="modal-content" style="width: 500px;">
-        <h3>📝 Lançamento de Resultados</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês. Dica: Se já existir um lançamento, ao selecionar Mês e Vendedor, ele será carregado para edição.</p>
-        <form id="formMetasInput">
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Mês</label>
-                    <select id="meta_input_mes" required onchange="carregarMetaExistente()">
-                        <option value="1">Janeiro</option>
-                        <option value="2">Fevereiro</option>
-                        <option value="3">Março</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Maio</option>
-                        <option value="6">Junho</option>
-                        <option value="7">Julho</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Setembro</option>
-                        <option value="10">Outubro</option>
-                        <option value="11">Novembro</option>
-                        <option value="12">Dezembro</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="meta_input_vendedor" required onchange="carregarMetaExistente()"></select></div>
-            </div>
-            
-            <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
-                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
-                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas" required></div>
-            </div>
+    <div class="modal-content" style="width: 500px;">
+        <h3>📝 Lançamento de Resultados</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês. Dica: Se já existir um lançamento, ao selecionar Mês e Vendedor, ele será carregado para edição.</p>
+        <form id="formMetasInput">
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Mês</label>
+                    <select id="meta_input_mes" required onchange="carregarMetaExistente()">
+                        <option value="1">Janeiro</option>
+                        <option value="2">Fevereiro</option>
+                        <option value="3">Março</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Maio</option>
+                        <option value="6">Junho</option>
+                        <option value="7">Julho</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="meta_input_vendedor" required onchange="carregarMetaExistente()"></select></div>
+            </div>
+            
+            <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
+                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
+                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas" required></div>
+            </div>
 
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Realizado Trading (R$)</label><input type="number" step="0.01" id="meta_input_trading" required></div>
-                <div class="form-group" style="flex:1"><label>Realizado Armazém (R$)</label><input type="number" step="0.01" id="meta_input_armazem" required></div>
-            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Realizado Trading (R$)</label><input type="number" step="0.01" id="meta_input_trading" required></div>
+                <div class="form-group" style="flex:1"><label>Realizado Armazém (R$)</label><input type="number" step="0.01" id="meta_input_armazem" required></div>
+            </div>
 
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Realizado Transporte (R$)</label><input type="number" step="0.01" id="meta_input_transporte" required></div>
-                <div class="form-group" style="flex:1"><label>Realizado Analytics (R$)</label><input type="number" step="0.01" id="meta_input_analytics" required></div>
-            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Realizado Transporte (R$)</label><input type="number" step="0.01" id="meta_input_transporte" required></div>
+                <div class="form-group" style="flex:1"><label>Realizado Analytics (R$)</label><input type="number" step="0.01" id="meta_input_analytics" required></div>
+            </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalMetasInput')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-meta">Salvar Mês</button>
-            </div>
-        </form>
-    </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalMetasInput')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-meta">Salvar Mês</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div id="modalIA" class="modal">
-    <div class="modal-content">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
-        <div class="form-group">
-            <label>Empresa ou Site</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
-            </div>
-        </div>
-        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
-        <div id="ia_resultado" class="ia-result-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
-            </div>
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalIA')">Fechar</button>
-        </div>
-    </div>
+    <div class="modal-content">
+        <h3>✨ Inteligência de Prospecção</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
+        <div class="form-group">
+            <label>Empresa ou Site</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
+                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
+            </div>
+        </div>
+        <div id="ia_loading" class="ia_loading">🔍 Analisando presença digital e notícias...</div>
+        <div id="ia_resultado" class="ia-result-box">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
+                <span class="ia-badge">Insights IA</span>
+            </div>
+            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
+            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
+            <div class="ia-section-title">SEGMENTO E PORTE</div>
+            <p id="res_segmento" style="font-size: 13px;"></p>
+            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
+            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalIA')">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <div id="modalVendedor" class="modal">
-    <div class="modal-content" style="width: 500px;">
-        <h3>Vendedores</h3>
-        <form id="formVendedor">
-            <input type="hidden" id="vend_id">
-            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value='';">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
-            </div>
-        </form>
-        <div class="lista-auxiliar" id="listaVendedoresGerenciamento"></div>
-    </div>
+    <div class="modal-content" style="width: 500px;">
+        <h3>Vendedores</h3>
+        <form id="formVendedor">
+            <input type="hidden" id="vend_id">
+            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value='';">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
+            </div>
+        </form>
+        <div class="lista-auxiliar" id="listaVendedoresGerenciamento"></div>
+    </div>
 </div>
 
 <div id="modalArea" class="modal">
-    <div class="modal-content" style="width: 500px;">
-        <h3>Áreas</h3>
-        <form id="formArea">
-            <input type="hidden" id="area_id">
-            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
-            <div class="modal-footer">
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalArea'); document.getElementById('formArea').reset(); document.getElementById('area_id').value='';">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
-            </div>
-        </form>
-        <div class="lista-auxiliar" id="listaAreasGerenciamento"></div>
-    </div>
+    <div class="modal-content" style="width: 500px;">
+        <h3>Áreas</h3>
+        <form id="formArea">
+            <input type="hidden" id="area_id">
+            <div class="form-group"><label>Nome da Área</label><input type="text" id="area_nome" required></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalArea'); document.getElementById('formArea').reset(); document.getElementById('area_id').value='';">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Área</button>
+            </div>
+        </form>
+        <div class="lista-auxiliar" id="listaAreasGerenciamento"></div>
+    </div>
 </div>
 
 <div id="modalOportunidade" class="modal">
-    <div class="modal-content">
-        <h3 id="modalTitulo">Nova Oportunidade</h3>
-        <form id="formOportunidade">
-            <input type="hidden" id="op_id">
-            
-            <div class="form-row">
-                <div class="form-group" style="flex:2"><label>Cliente</label><input type="text" id="op_cliente" required></div>
-                <div class="form-group" style="flex:1">
-                    <label>Tipo</label>
-                    <input type="text" id="op_tipo" placeholder="Ex: UP-SELLING" list="listaTipos">
-                    <datalist id="listaTipos">
-                        <option value="NOVO NEGÓCIO">
-                        <option value="UP-SELLING">
-                        <option value="CROSS-SELLING">
-                    </datalist>
-                </div>
-            </div>
-            
-            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
-            
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
-                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
-                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Status</label>
-                <select id="op_status" required onchange="toggleMotivoPerda()">
-                    <option value="AINDA FRIO">AINDA FRIO</option>
-                    <option value="FUP">FUP</option>
-                    <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
-                    <option value="EM FECHAMENTO">EM FECHAMENTO</option>
-                    <option value="FECHADO">FECHADO</option>
-                    <option value="PERDIDO">PERDIDO</option>
-                </select>
-            </div>
-            
-            <div class="form-group" id="group_motivo_perda" style="display: none;">
-                <label>Motivo da Perda</label>
-                <select id="op_motivo_perda">
-                    <option value="">Selecione o motivo...</option>
-                    <option value="VALOR">VALOR</option>
-                    <option value="CONCORRÊNCIA">CONCORRÊNCIA</option>
-                    <option value="SEM ACORDO">SEM ACORDO</option>
-                    <option value="BID">BID</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Histórico de Alterações</label>
-                <input type="hidden" id="op_historico"> <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
-                    <span>📜</span> Ver Histórico e Adicionar Comentário
-                </button>
-            </div>
+    <div class="modal-content">
+        <h3 id="modalTitulo">Nova Oportunidade</h3>
+        <form id="formOportunidade">
+            <input type="hidden" id="op_id">
+            
+            <div class="form-row">
+                <div class="form-group" style="flex:2"><label>Cliente</label><input type="text" id="op_cliente" required></div>
+                <div class="form-group" style="flex:1">
+                    <label>Tipo</label>
+                    <input type="text" id="op_tipo" placeholder="Ex: UP-SELLING" list="listaTipos">
+                    <datalist id="listaTipos">
+                        <option value="NOVO NEGÓCIO">
+                        <option value="UP-SELLING">
+                        <option value="CROSS-SELLING">
+                    </datalist>
+                </div>
+            </div>
+            
+            <div class="form-group"><label>Breve Descrição</label><textarea id="op_breve_descricao" rows="2"></textarea></div>
+            
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
+                <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
+                <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
+                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Status</label>
+                <select id="op_status" required onchange="toggleMotivoPerda()">
+                    <option value="AINDA FRIO">AINDA FRIO</option>
+                    <option value="FUP">FUP</option>
+                    <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
+                    <option value="EM FECHAMENTO">EM FECHAMENTO</option>
+                    <option value="FECHADO">FECHADO</option>
+                    <option value="PERDIDO">PERDIDO</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="group_motivo_perda" style="display: none;">
+                <label>Motivo da Perda</label>
+                <select id="op_motivo_perda">
+                    <option value="">Selecione o motivo...</option>
+                    <option value="VALOR">VALOR</option>
+                    <option value="CONCORRÊNCIA">CONCORRÊNCIA</option>
+                    <option value="SEM ACORDO">SEM ACORDO</option>
+                    <option value="BID">BID</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Histórico de Alterações</label>
+                <input type="hidden" id="op_historico"> <button type="button" class="btn-history-view" onclick="abrirHistoricoPopup()">
+                    <span>📜</span> Ver Histórico e Adicionar Comentário
+                </button>
+            </div>
 
-            <div class="modal-footer">
-                <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
-                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
-                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
-            </div>
-        </form>
-    </div>
+            <div class="modal-footer">
+                <button type="button" id="btnExcluir" class="btn-header" style="background:#fdedec; color:#c0392b" onclick="deletarOportunidade()">Excluir</button>
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalOportunidade')">Cancelar</button>
+                <button type="submit" class="btn-header btn-novo-op">Salvar Oportunidade</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <div id="modalHistoricoDetalhado" class="modal">
-    <div class="modal-content" style="width: 550px; background: #fff;">
-        <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
-        <div class="manual-history-box">
-            <div class="form-group">
-                <label>Incluir Novo Comentário Manual</label>
-                <textarea id="txt_historico_manual" rows="3" placeholder="Ex: Dia 09/03/2026 tenho uma reunião de alinhamento com o cliente..."></textarea>
-                <button type="button" class="btn-header btn-novo-op" style="margin-top:10px; width:100%" onclick="salvarHistoricoManual()">SALVAR COMENTÁRIO</button>
-            </div>
-        </div>
-        <div id="timelineContainer" class="timeline"></div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalHistoricoDetalhado')">Fechar</button>
-        </div>
-    </div>
+    <div class="modal-content" style="width: 550px; background: #fff;">
+        <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
+        <div class="manual-history-box">
+            <div class="form-group">
+                <label>Incluir Novo Comentário Manual</label>
+                <textarea id="txt_historico_manual" rows="3" placeholder="Ex: Dia 09/03/2026 tenho uma reunião de alinhamento com o cliente..."></textarea>
+                <button type="button" class="btn-header btn-novo-op" style="margin-top:10px; width:100%" onclick="salvarHistoricoManual()">SALVAR COMENTÁRIO</button>
+            </div>
+        </div>
+        <div id="timelineContainer" class="timeline"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalHistoricoDetalhado')">Fechar</button>
+        </div>
+    </div>
 </div>
 
 <script>
 // DICIONÁRIO DE METAS MENSAIS
 const METAS_MENSAIS = {
-    "ANDREA HEUCHLING": { reuniao: 5, propostas: 3, trading: 625000.00, armazem: 600000.00, transporte: 145833.33, analytics: 0 },
-    "GUILHERME ALMEIDA": { reuniao: 5, propostas: 3, trading: 2083333.33, armazem: 150000.00, transporte: 87500.00, analytics: 0 },
-    "MICHELE SILVA": { reuniao: 5, propostas: 3, trading: 1250000.00, armazem: 100000.00, transporte: 58333.33, analytics: 0 },
-    "RAFAEL SANTOS": { reuniao: 5, propostas: 3, trading: 208333.33, armazem: 150000.00, transporte: 416666.67, analytics: 0 },
-    "CARLA MORENO": { reuniao: 10, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
+    "ANDREA HEUCHLING": { reuniao: 5, propostas: 3, trading: 625000.00, armazem: 600000.00, transporte: 145833.33, analytics: 0 },
+    "GUILHERME ALMEIDA": { reuniao: 5, propostas: 3, trading: 2083333.33, armazem: 150000.00, transporte: 87500.00, analytics: 0 },
+    "MICHELE SILVA": { reuniao: 5, propostas: 3, trading: 1250000.00, armazem: 100000.00, transporte: 58333.33, analytics: 0 },
+    "RAFAEL SANTOS": { reuniao: 5, propostas: 3, trading: 208333.33, armazem: 150000.00, transporte: 416666.67, analytics: 0 },
+    "CARLA MORENO": { reuniao: 10, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
 };
 
 // NAVEGAÇÃO ENTRE TELAS
 function navegar(pagina) {
-    document.getElementById('page-dashboard').classList.remove('active-page');
-    document.getElementById('page-kanban').classList.remove('active-page');
-    document.getElementById('page-metas').classList.remove('active-page');
-    document.getElementById('page-financeiro').classList.remove('active-page');
-    
-    document.getElementById('nav-dash').classList.remove('active');
-    document.getElementById('nav-kanban').classList.remove('active');
-    document.getElementById('nav-metas').classList.remove('active');
-    document.getElementById('nav-financeiro').classList.remove('active');
+    document.getElementById('page-dashboard').classList.remove('active-page');
+    document.getElementById('page-kanban').classList.remove('active-page');
+    document.getElementById('page-metas').classList.remove('active-page');
+    document.getElementById('page-financeiro').classList.remove('active-page');
+    
+    document.getElementById('nav-dash').classList.remove('active');
+    document.getElementById('nav-kanban').classList.remove('active');
+    document.getElementById('nav-metas').classList.remove('active');
+    document.getElementById('nav-financeiro').classList.remove('active');
 
-    const barraFiltros = document.getElementById('barraFiltros');
-    if (barraFiltros) {
-        barraFiltros.style.display = (pagina === 'dashboard' || pagina === 'kanban' || pagina === 'metas') ? 'flex' : 'none';
-    }
+    const barraFiltros = document.getElementById('barraFiltros');
+    if (barraFiltros) {
+        barraFiltros.style.display = (pagina === 'dashboard' || pagina === 'kanban' || pagina === 'metas') ? 'flex' : 'none';
+    }
 
-    if (pagina === 'dashboard') {
-        document.getElementById('page-dashboard').classList.add('active-page');
-        document.getElementById('nav-dash').classList.add('active');
-    } else if (pagina === 'kanban') {
-        document.getElementById('page-kanban').classList.add('active-page');
-        document.getElementById('nav-kanban').classList.add('active');
-    } else if (pagina === 'metas') {
-        document.getElementById('page-metas').classList.add('active-page');
-        document.getElementById('nav-metas').classList.add('active');
-        renderizarMetas(); 
-    } else if (pagina === 'financeiro') {
-        document.getElementById('page-financeiro').classList.add('active-page');
-        document.getElementById('nav-financeiro').classList.add('active');
-        renderizarFinanceiro();
-    }
+    if (pagina === 'dashboard') {
+        document.getElementById('page-dashboard').classList.add('active-page');
+        document.getElementById('nav-dash').classList.add('active');
+    } else if (pagina === 'kanban') {
+        document.getElementById('page-kanban').classList.add('active-page');
+        document.getElementById('nav-kanban').classList.add('active');
+    } else if (pagina === 'metas') {
+        document.getElementById('page-metas').classList.add('active-page');
+        document.getElementById('nav-metas').classList.add('active');
+        renderizarMetas(); 
+    } else if (pagina === 'financeiro') {
+        document.getElementById('page-financeiro').classList.add('active-page');
+        document.getElementById('nav-financeiro').classList.add('active');
+        renderizarFinanceiro();
+    }
 }
 
 // LÓGICA DE AUTENTICAÇÃO
 let USUARIO_LOGADO = "";
 function autenticar() {
-    const user = document.getElementById('login_user').value;
-    const pass = document.getElementById('login_pass').value;
+    const user = document.getElementById('login_user').value;
+    const pass = document.getElementById('login_pass').value;
 
-    if(user === "admin" && pass === "vendemmia2024") {
-        USUARIO_LOGADO = user.toUpperCase();
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('main-system').style.display = 'block';
-        navegar('dashboard');
-        carregarAuxiliares(); 
-        carregarDados();
-    } else {
-        document.getElementById('login-error').style.display = 'block';
-    }
+    if(user === "admin" && pass === "vendemmia2024") {
+        USUARIO_LOGADO = user.toUpperCase();
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('main-system').style.display = 'block';
+        navegar('dashboard');
+        carregarAuxiliares(); 
+        carregarDados();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+    }
 }
 
 function logoff() {
-    if(confirm("Deseja realmente sair do sistema?")) {
-        document.getElementById('main-system').style.display = 'none';
-        document.getElementById('login-overlay').style.display = 'flex';
-        document.getElementById('login_user').value = "";
-        document.getElementById('login_pass').value = "";
-        document.getElementById('login-error').style.display = 'none';
-        USUARIO_LOGADO = "";
-    }
+    if(confirm("Deseja realmente sair do sistema?")) {
+        document.getElementById('main-system').style.display = 'none';
+        document.getElementById('login-overlay').style.display = 'flex';
+        document.getElementById('login_user').value = "";
+        document.getElementById('login_pass').value = "";
+        document.getElementById('login-error').style.display = 'none';
+        USUARIO_LOGADO = "";
+    }
 }
 
 Chart.register(ChartDataLabels);
 
 const pluginCentroRosca = {
-    id: 'pluginCentroRosca',
-    afterDraw: (chart) => {
-        if (chart.config.type === 'doughnut') {
-            const { ctx, chartArea: { top, bottom, left, right } } = chart;
-            ctx.save();
-            const centerX = (left + right) / 2;
-            const centerY = (top + bottom) / 2;
-            const chartHeight = bottom - top;
-            const fontSize = (chartHeight / 120).toFixed(2);
-            ctx.font = `bold ${fontSize}em sans-serif`;
-            ctx.textBaseline = "middle";
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#414042";
-            
-            let text = "";
-            if(chart.canvas.id === "chartFinBU") {
-                text = "BUs";
-            } else {
-                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                text = total.toString();
-            }
-            
-            ctx.fillText(text, centerX, centerY);
-            ctx.restore();
-        }
-    }
+    id: 'pluginCentroRosca',
+    afterDraw: (chart) => {
+        if (chart.config.type === 'doughnut') {
+            const { ctx, chartArea: { top, bottom, left, right } } = chart;
+            ctx.save();
+            const centerX = (left + right) / 2;
+            const centerY = (top + bottom) / 2;
+            const chartHeight = bottom - top;
+            const fontSize = (chartHeight / 120).toFixed(2);
+            ctx.font = `bold ${fontSize}em sans-serif`;
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#414042";
+            
+            let text = "";
+            if(chart.canvas.id === "chartFinBU") {
+                text = "BUs";
+            } else {
+                const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                text = total.toString();
+            }
+            
+            ctx.fillText(text, centerX, centerY);
+            ctx.restore();
+        }
+    }
 };
 
 const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
@@ -791,8 +778,8 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let base=[]; 
-let baseMetasMensais=[]; 
+let base=[]; 
+let baseMetasMensais=[]; 
 let baseResMensais = [];
 let charts={};
 
@@ -800,497 +787,497 @@ function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.di
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
 function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
-    const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    loader.style.display = 'block';
-    resultado.style.display = 'none';
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
+    const termo = document.getElementById('ia_termo').value;
+    if(!termo) return alert("Digite o nome ou site!");
+    const loader = document.getElementById('ia_loading');
+    const resultado = document.getElementById('ia_resultado');
+    loader.style.display = 'block';
+    resultado.style.display = 'none';
+    setTimeout(() => {
+        loader.style.display = 'none';
+        resultado.style.display = 'block';
+        document.getElementById('res_empresa').innerText = termo.toUpperCase();
+        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
+        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
+        document.getElementById('res_noticias').innerHTML = `
+            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
+            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
+            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
+        `;
+    }, 1500);
 }
 
 function toggleMotivoPerda() {
-    const status = document.getElementById('op_status').value;
-    const group = document.getElementById('group_motivo_perda');
-    if(status === "PERDIDO") {
-        group.style.display = 'flex';
-    } else {
-        group.style.display = 'none';
-        document.getElementById('op_motivo_perda').value = "";
-    }
+    const status = document.getElementById('op_status').value;
+    const group = document.getElementById('group_motivo_perda');
+    if(status === "PERDIDO") {
+        group.style.display = 'flex';
+    } else {
+        group.style.display = 'none';
+        document.getElementById('op_motivo_perda').value = "";
+    }
 }
 
 // ---- CADASTRO AUXILIARES ----
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('vend_id').value;
-    const nome = document.getElementById('vend_nome').value.toUpperCase();
-    let res;
-    if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
+    e.preventDefault();
+    const id = document.getElementById('vend_id').value;
+    const nome = document.getElementById('vend_nome').value.toUpperCase();
+    let res;
+    if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
+    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
+    if(res.error) alert("Erro: " + res.error.message);
+    else { document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
 });
 
 async function deletarVendedor(id) {
-    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
-    }
+    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
+        await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
+    }
 }
 function prepararEdicaoVendedor(id, nome) {
-    document.getElementById('vend_id').value = id;
-    document.getElementById('vend_nome').value = nome;
+    document.getElementById('vend_id').value = id;
+    document.getElementById('vend_nome').value = nome;
 }
 
 document.getElementById('formArea').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('area_id').value;
-    const nome = document.getElementById('area_nome').value.toUpperCase();
-    let res;
-    if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
+    e.preventDefault();
+    const id = document.getElementById('area_id').value;
+    const nome = document.getElementById('area_nome').value.toUpperCase();
+    let res;
+    if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
+    else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
+    if(res.error) alert("Erro: " + res.error.message);
+    else { document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
 });
 
 async function deletarArea(id) {
-    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
-    }
+    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
+        await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
+    }
 }
 function prepararEdicaoArea(id, nome) {
-    document.getElementById('area_id').value = id;
-    document.getElementById('area_nome').value = nome;
+    document.getElementById('area_id').value = id;
+    document.getElementById('area_nome').value = nome;
 }
 
 // ---- OPORTUNIDADES ----
-function calcularMRR() { 
-    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
-    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
+function calcularMRR() { 
+    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
+    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
 }
 
 function prepararNovo() {
-    document.getElementById('formOportunidade').reset();
-    document.getElementById('op_id').value = "";
-    document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
-    document.getElementById('btnExcluir').style.display = "none";
-    document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    document.getElementById('op_historico').value = ""; 
-    toggleMotivoPerda(); abrirModal('modalOportunidade');
+    document.getElementById('formOportunidade').reset();
+    document.getElementById('op_id').value = "";
+    document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
+    document.getElementById('btnExcluir').style.display = "none";
+    document.getElementById('op_data_oportunidade').valueAsDate = new Date();
+    document.getElementById('op_historico').value = ""; 
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
 // CORREÇÃO: Função BLINDADA para aceitar IDs em minúsculo ou maiúsculo
 function editarOportunidade(idParam) {
-    // Procura por x.id (padrão) ou x.ID (se o usuário renomeou errado no supabase)
-    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idParam));
-    
-    if(!item) {
-        alert("Erro crasso: Oportunidade não encontrada na memória. ID pesquisado: " + idParam);
-        return;
-    }
-    
-    const idReal = item.id !== undefined ? item.id : item.ID;
-    
-    document.getElementById('op_id').value = idReal;
-    document.getElementById('op_cliente').value = item.cliente || "";
-    document.getElementById('op_tipo').value = item.tipo || "";
-    document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
-    document.getElementById('op_vendedor').value = item.vendedor || "";
-    document.getElementById('op_area').value = item.area || "";
-    document.getElementById('op_data_oportunidade').value = item.data_oportunidade || "";
-    document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
-    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano || 0;
-    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente || 0;
-    document.getElementById('op_status').value = item.status || "";
-    document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
-    document.getElementById('op_historico').value = item.historico || ""; 
-    document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
-    document.getElementById('btnExcluir').style.display = "block";
-    toggleMotivoPerda(); abrirModal('modalOportunidade');
+    // Procura por x.id (padrão) ou x.ID (se o usuário renomeou errado no supabase)
+    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idParam));
+    
+    if(!item) {
+        alert("Erro crasso: Oportunidade não encontrada na memória. ID pesquisado: " + idParam);
+        return;
+    }
+    
+    const idReal = item.id !== undefined ? item.id : item.ID;
+    
+    document.getElementById('op_id').value = idReal;
+    document.getElementById('op_cliente').value = item.cliente || "";
+    document.getElementById('op_tipo').value = item.tipo || "";
+    document.getElementById('op_breve_descricao').value = item.breve_descricao || "";
+    document.getElementById('op_vendedor').value = item.vendedor || "";
+    document.getElementById('op_area').value = item.area || "";
+    document.getElementById('op_data_oportunidade').value = item.data_oportunidade || "";
+    document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
+    document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano || 0;
+    document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente || 0;
+    document.getElementById('op_status').value = item.status || "";
+    document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
+    document.getElementById('op_historico').value = item.historico || ""; 
+    document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
+    document.getElementById('btnExcluir').style.display = "block";
+    toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
 async function deletarOportunidade() {
-    const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        let res = await supabaseClient.from('oportunidades').delete().eq('id', id);
-        // Fallback caso a coluna seja maiuscula no supabase
-        if(res.error) await supabaseClient.from('oportunidades').delete().eq('ID', id); 
-        
-        fecharModal('modalOportunidade'); carregarDados();
-    }
+    const id = document.getElementById('op_id').value;
+    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
+        let res = await supabaseClient.from('oportunidades').delete().eq('id', id);
+        // Fallback caso a coluna seja maiuscula no supabase
+        if(res.error) await supabaseClient.from('oportunidades').delete().eq('ID', id); 
+        
+        fecharModal('modalOportunidade'); carregarDados();
+    }
 }
 
 function abrirHistoricoPopup() {
-    const id = document.getElementById('op_id').value;
-    if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
-    document.getElementById('txt_historico_manual').value = "";
-    renderizarLinhaDoTempo(); abrirModal('modalHistoricoDetalhado');
+    const id = document.getElementById('op_id').value;
+    if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
+    document.getElementById('txt_historico_manual').value = "";
+    renderizarLinhaDoTempo(); abrirModal('modalHistoricoDetalhado');
 }
 
 function renderizarLinhaDoTempo() {
-    const textoHistorico = document.getElementById('op_historico').value;
-    const container = document.getElementById('timelineContainer');
-    container.innerHTML = "";
-    if(!textoHistorico || textoHistorico.trim() === "") {
-        container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
-    } else {
-        const logs = textoHistorico.split('\n').filter(l => l.trim() !== "");
-        logs.forEach(log => {
-            const match = log.match(/\[(.*?)\] (.*)/);
-            if(match) {
-                const cabecalho = match[1]; const acao = match[2];     
-                const item = document.createElement('div');
-                item.className = 'timeline-item';
-                item.innerHTML = `<span class="timeline-date">${cabecalho}</span><div class="timeline-content">${acao}</div>`;
-                container.appendChild(item);
-            }
-        });
-    }
+    const textoHistorico = document.getElementById('op_historico').value;
+    const container = document.getElementById('timelineContainer');
+    container.innerHTML = "";
+    if(!textoHistorico || textoHistorico.trim() === "") {
+        container.innerHTML = "<p style='text-align:center; color:#888; padding:20px;'>Nenhuma alteração registrada ainda.</p>";
+    } else {
+        const logs = textoHistorico.split('\n').filter(l => l.trim() !== "");
+        logs.forEach(log => {
+            const match = log.match(/\[(.*?)\] (.*)/);
+            if(match) {
+                const cabecalho = match[1]; const acao = match[2];     
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `<span class="timeline-date">${cabecalho}</span><div class="timeline-content">${acao}</div>`;
+                container.appendChild(item);
+            }
+        });
+    }
 }
 
 async function salvarHistoricoManual() {
-    const id = document.getElementById('op_id').value;
-    const comentario = document.getElementById('txt_historico_manual').value.trim();
-    if(!comentario) return alert("Digite algo para salvar no histórico!");
-    const agora = new Date();
-    const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-    const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
-    let historicoAntigo = document.getElementById('op_historico').value || "";
-    const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
-    
-    let res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
-    if(res.error) res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('ID', id);
-    
-    if(res.error) alert("Erro ao salvar comentário: " + res.error.message);
-    else {
-        document.getElementById('op_historico').value = historicoAtualizado;
-        document.getElementById('txt_historico_manual').value = "";
-        renderizarLinhaDoTempo(); carregarDados();
-    }
+    const id = document.getElementById('op_id').value;
+    const comentario = document.getElementById('txt_historico_manual').value.trim();
+    if(!comentario) return alert("Digite algo para salvar no histórico!");
+    const agora = new Date();
+    const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+    const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
+    let historicoAntigo = document.getElementById('op_historico').value || "";
+    const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
+    
+    let res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
+    if(res.error) res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('ID', id);
+    
+    if(res.error) alert("Erro ao salvar comentário: " + res.error.message);
+    else {
+        document.getElementById('op_historico').value = historicoAtualizado;
+        document.getElementById('txt_historico_manual').value = "";
+        renderizarLinhaDoTempo(); carregarDados();
+    }
 }
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
-    e.preventDefault();
-    const idValue = document.getElementById('op_id').value;
-    const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
-    const novo_tipo = document.getElementById('op_tipo').value.toUpperCase();
-    const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
-    const novo_vend = document.getElementById('op_vendedor').value;
-    const nova_data = document.getElementById('op_data_oportunidade').value;
-    const nova_prev = document.getElementById('op_previsao_fechamento').value || "";
-    const novo_valor = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0;
-    const novo_status = document.getElementById('op_status').value;
-    const nova_area = document.getElementById('op_area').value;
-    const novo_motivo = document.getElementById('op_motivo_perda').value || "";
-    let historico_atual = document.getElementById('op_historico').value || "";
+    e.preventDefault();
+    const idValue = document.getElementById('op_id').value;
+    const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
+    const novo_tipo = document.getElementById('op_tipo').value.toUpperCase();
+    const nova_desc = document.getElementById('op_breve_descricao').value.toUpperCase();
+    const novo_vend = document.getElementById('op_vendedor').value;
+    const nova_data = document.getElementById('op_data_oportunidade').value;
+    const nova_prev = document.getElementById('op_previsao_fechamento').value || "";
+    const novo_valor = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0;
+    const novo_status = document.getElementById('op_status').value;
+    const nova_area = document.getElementById('op_area').value;
+    const novo_motivo = document.getElementById('op_motivo_perda').value || "";
+    let historico_atual = document.getElementById('op_historico').value || "";
 
-    const formatBr = (dataSql) => {
-        if(!dataSql) return "NÃO DEFINIDA";
-        const [y, m, d] = dataSql.split('-');
-        return `${d}/${m}/${y}`;
-    };
+    const formatBr = (dataSql) => {
+        if(!dataSql) return "NÃO DEFINIDA";
+        const [y, m, d] = dataSql.split('-');
+        return `${d}/${m}/${y}`;
+    };
 
-    if(idValue) {
-        const antigo = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idValue));
-        if(antigo) {
-            let log = ""; const agora = new Date();
-            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-            if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
-            if((antigo.tipo || "") !== novo_tipo) log += `\n[${carimbo}] TIPO: "${antigo.tipo || ""}" → "${novo_tipo}"`;
-            if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
-            if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
-            if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
-            if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
-            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
-            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
-            if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
-        }
-    } else {
-        const agora = new Date();
-        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
-        historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
-    }
-    
-    const payload = { cliente: novo_cliente, tipo: novo_tipo, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
-    
-    if(idValue) {
-        let res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-        if(res.error) await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
-    } else {
-        await supabaseClient.from('oportunidades').insert([payload]);
-    }
-    
-    fecharModal('modalOportunidade'); carregarDados();
+    if(idValue) {
+        const antigo = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idValue));
+        if(antigo) {
+            let log = ""; const agora = new Date();
+            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+            if(antigo.cliente !== novo_cliente) log += `\n[${carimbo}] CLIENTE: "${antigo.cliente}" → "${novo_cliente}"`;
+            if((antigo.tipo || "") !== novo_tipo) log += `\n[${carimbo}] TIPO: "${antigo.tipo || ""}" → "${novo_tipo}"`;
+            if(antigo.status !== novo_status) log += `\n[${carimbo}] STATUS: "${antigo.status}" → "${novo_status}"`;
+            if(parseFloat(antigo.valor_estimado_ano) !== novo_valor) log += `\n[${carimbo}] VALOR ANUAL: "R$ ${antigo.valor_estimado_ano}" → "R$ ${novo_valor}"`;
+            if(antigo.vendedor !== novo_vend) log += `\n[${carimbo}] VENDEDOR: "${antigo.vendedor}" → "${novo_vend}"`;
+            if(antigo.area !== nova_area) log += `\n[${carimbo}] ÁREA: "${antigo.area}" → "${nova_area}"`;
+            if(antigo.data_oportunidade !== nova_data) log += `\n[${carimbo}] DATA OPORTUNIDADE: "${formatBr(antigo.data_oportunidade)}" → "${formatBr(nova_data)}"`;
+            if((antigo.previsao_fechamento || "") !== nova_prev) log += `\n[${carimbo}] PREVISÃO FECHAMENTO: "${formatBr(antigo.previsao_fechamento)}" → "${formatBr(nova_prev)}"`;
+            if(log !== "") historico_atual = log.trim() + (historico_atual ? "\n" + historico_atual : "");
+        }
+    } else {
+        const agora = new Date();
+        const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+        historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
+    }
+    
+    const payload = { cliente: novo_cliente, tipo: novo_tipo, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
+    
+    if(idValue) {
+        let res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
+        if(res.error) await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
+    } else {
+        await supabaseClient.from('oportunidades').insert([payload]);
+    }
+    
+    fecharModal('modalOportunidade'); carregarDados();
 };
 
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
-    document.getElementById('formMetasInput').reset();
-    document.getElementById('meta_input_vendedor').value = ""; 
-    abrirModal('modalMetasInput');
+    document.getElementById('formMetasInput').reset();
+    document.getElementById('meta_input_vendedor').value = ""; 
+    abrirModal('modalMetasInput');
 }
 
 function carregarMetaExistente() {
-    const mes = document.getElementById('meta_input_mes').value;
-    const vend = document.getElementById('meta_input_vendedor').value;
-    
-    if(!mes || !vend) return; 
+    const mes = document.getElementById('meta_input_mes').value;
+    const vend = document.getElementById('meta_input_vendedor').value;
+    
+    if(!mes || !vend) return; 
 
-    const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
-    
-    if(existente) {
-        document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
-        document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
-        document.getElementById('meta_input_trading').value = existente.realizado_trading || 0;
-        document.getElementById('meta_input_armazem').value = existente.realizado_armazem || 0;
-        document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
-        document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
-    } else {
-        document.getElementById('meta_input_reuniao').value = "";
-        document.getElementById('meta_input_propostas').value = "";
-        document.getElementById('meta_input_trading').value = "";
-        document.getElementById('meta_input_armazem').value = "";
-        document.getElementById('meta_input_transporte').value = "";
-        document.getElementById('meta_input_analytics').value = "";
-    }
+    const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
+    
+    if(existente) {
+        document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
+        document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
+        document.getElementById('meta_input_trading').value = existente.realizado_trading || 0;
+        document.getElementById('meta_input_armazem').value = existente.realizado_armazem || 0;
+        document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
+        document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
+    } else {
+        document.getElementById('meta_input_reuniao').value = "";
+        document.getElementById('meta_input_propostas').value = "";
+        document.getElementById('meta_input_trading').value = "";
+        document.getElementById('meta_input_armazem').value = "";
+        document.getElementById('meta_input_transporte').value = "";
+        document.getElementById('meta_input_analytics').value = "";
+    }
 }
 
 document.getElementById('formMetasInput').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const payload = {
-        mes_ano: document.getElementById('meta_input_mes').value,
-        vendedor: document.getElementById('meta_input_vendedor').value,
-        realizado_reuniao: parseInt(document.getElementById('meta_input_reuniao').value) || 0,
-        realizado_propostas: parseInt(document.getElementById('meta_input_propostas').value) || 0,
-        realizado_trading: parseFloat(document.getElementById('meta_input_trading').value) || 0,
-        realizado_armazem: parseFloat(document.getElementById('meta_input_armazem').value) || 0,
-        realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
-        realizado_analytics: parseFloat(document.getElementById('meta_input_analytics').value) || 0
-    };
+    e.preventDefault();
+    const payload = {
+        mes_ano: document.getElementById('meta_input_mes').value,
+        vendedor: document.getElementById('meta_input_vendedor').value,
+        realizado_reuniao: parseInt(document.getElementById('meta_input_reuniao').value) || 0,
+        realizado_propostas: parseInt(document.getElementById('meta_input_propostas').value) || 0,
+        realizado_trading: parseFloat(document.getElementById('meta_input_trading').value) || 0,
+        realizado_armazem: parseFloat(document.getElementById('meta_input_armazem').value) || 0,
+        realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
+        realizado_analytics: parseFloat(document.getElementById('meta_input_analytics').value) || 0
+    };
 
-    const existente = baseMetasMensais.find(m => m.vendedor === payload.vendedor && m.mes_ano === payload.mes_ano);
-    
-    let res;
-    if(existente) {
-        res = await supabaseClient.from('metas_mensais').update(payload).eq('id', existente.id);
-    } else {
-        res = await supabaseClient.from('metas_mensais').insert([payload]);
-    }
-    
-    if(res && res.error) alert("Erro: " + res.error.message);
-    else { 
-        fecharModal('modalMetasInput'); 
-        carregarDados(); 
-    }
+    const existente = baseMetasMensais.find(m => m.vendedor === payload.vendedor && m.mes_ano === payload.mes_ano);
+    
+    let res;
+    if(existente) {
+        res = await supabaseClient.from('metas_mensais').update(payload).eq('id', existente.id);
+    } else {
+        res = await supabaseClient.from('metas_mensais').insert([payload]);
+    }
+    
+    if(res && res.error) alert("Erro: " + res.error.message);
+    else { 
+        fecharModal('modalMetasInput'); 
+        carregarDados(); 
+    }
 });
 
 function renderizarMetas() {
-    const fV = document.getElementById('filtroVendedor').value;
-    const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
+    const fV = document.getElementById('filtroVendedor').value;
+    const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
 
-    let metaMensal = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
-    
-    if(fV && METAS_MENSAIS[fV]) {
-        metaMensal = METAS_MENSAIS[fV];
-    } else if (!fV) {
-        Object.values(METAS_MENSAIS).forEach(m => {
-            metaMensal.reuniao += m.reuniao;
-            metaMensal.propostas += m.propostas;
-            metaMensal.trading += m.trading;
-            metaMensal.armazem += m.armazem;
-            metaMensal.transporte += m.transporte;
-            metaMensal.analytics += m.analytics;
-        });
-    }
+    let metaMensal = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
+    
+    if(fV && METAS_MENSAIS[fV]) {
+        metaMensal = METAS_MENSAIS[fV];
+    } else if (!fV) {
+        Object.values(METAS_MENSAIS).forEach(m => {
+            metaMensal.reuniao += m.reuniao;
+            metaMensal.propostas += m.propostas;
+            metaMensal.trading += m.trading;
+            metaMensal.armazem += m.armazem;
+            metaMensal.transporte += m.transporte;
+            metaMensal.analytics += m.analytics;
+        });
+    }
 
-    const metaAnual = {
-        reuniao: metaMensal.reuniao * 12,
-        propostas: metaMensal.propostas * 12,
-        trading: metaMensal.trading * 12,
-        armazem: metaMensal.armazem * 12,
-        transporte: metaMensal.transporte * 12,
-        analytics: metaMensal.analytics * 12
-    };
+    const metaAnual = {
+        reuniao: metaMensal.reuniao * 12,
+        propostas: metaMensal.propostas * 12,
+        trading: metaMensal.trading * 12,
+        armazem: metaMensal.armazem * 12,
+        transporte: metaMensal.transporte * 12,
+        analytics: metaMensal.analytics * 12
+    };
 
-    const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
-    const metaTotalFaturamento = metaFaturamentoMensal * 12;
+    const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
+    const metaTotalFaturamento = metaFaturamentoMensal * 12;
 
-    let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
-    let arrayRealMensal = new Array(12).fill(0); 
+    let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+    let arrayRealMensal = new Array(12).fill(0); 
 
-    dadosMeses.forEach(m => {
-        const mesIndex = parseInt(m.mes_ano) - 1; 
-        const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
-        
-        realYTD.reuniao += (m.realizado_reuniao || 0);
-        realYTD.propostas += (m.realizado_propostas || 0);
-        realYTD.trading += (m.realizado_trading || 0);
-        realYTD.armazem += (m.realizado_armazem || 0);
-        realYTD.transporte += (m.realizado_transporte || 0);
-        realYTD.analytics += (m.realizado_analytics || 0);
-        realYTD.faturamento += faturamentoMes;
+    dadosMeses.forEach(m => {
+        const mesIndex = parseInt(m.mes_ano) - 1; 
+        const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
+        
+        realYTD.reuniao += (m.realizado_reuniao || 0);
+        realYTD.propostas += (m.realizado_propostas || 0);
+        realYTD.trading += (m.realizado_trading || 0);
+        realYTD.armazem += (m.realizado_armazem || 0);
+        realYTD.transporte += (m.realizado_transporte || 0);
+        realYTD.analytics += (m.realizado_analytics || 0);
+        realYTD.faturamento += faturamentoMes;
 
-        if(mesIndex >= 0 && mesIndex < 12) {
-            arrayRealMensal[mesIndex] += faturamentoMes;
-        }
-    });
+        if(mesIndex >= 0 && mesIndex < 12) {
+            arrayRealMensal[mesIndex] += faturamentoMes;
+        }
+    });
 
-    const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
-    document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
-    document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
-    
-    document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-    document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
-    document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
+    const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
+    document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
+    document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
+    
+    document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
+    document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
 
-    if(charts.evolucao) charts.evolucao.destroy();
-    charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
-            datasets: [
-                {
-                    label: 'Meta Mensal',
-                    data: new Array(12).fill(metaFaturamentoMensal),
-                    type: 'line',
-                    borderColor: '#01E18E',
-                    borderWidth: 2,
-                    borderDash: [5, 5], 
-                    pointRadius: 0,
-                    fill: false,
-                    datalabels: { 
-                        display: true, color: '#01E18E', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
-                        formatter: v => {
-                            if (v === 0) return "";
-                            if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
-                            return (v/1000).toFixed(0) + "k";
-                        }
-                    }
-                },
-                {
-                    label: 'Realizado', data: arrayRealMensal, backgroundColor: '#422c76', borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
-                    color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
-                    formatter: (v, ctx) => {
-                        if (ctx.datasetIndex === 0) return ""; 
-                        if (v === 0) return "";
-                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
-                        return (v/1000).toFixed(0) + "k";
-                    }
-                }
-            }, scales: { y: { display: false }, x: { grid: { display: false } } }
-        }
-    });
+    if(charts.evolucao) charts.evolucao.destroy();
+    charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            datasets: [
+                {
+                    label: 'Meta Mensal',
+                    data: new Array(12).fill(metaFaturamentoMensal),
+                    type: 'line',
+                    borderColor: '#01E18E',
+                    borderWidth: 2,
+                    borderDash: [5, 5], 
+                    pointRadius: 0,
+                    fill: false,
+                    datalabels: { 
+                        display: true, color: '#01E18E', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                        formatter: v => {
+                            if (v === 0) return "";
+                            if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                            return (v/1000).toFixed(0) + "k";
+                        }
+                    }
+                },
+                {
+                    label: 'Realizado', data: arrayRealMensal, backgroundColor: '#422c76', borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
+                    color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
+                    formatter: (v, ctx) => {
+                        if (ctx.datasetIndex === 0) return ""; 
+                        if (v === 0) return "";
+                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                        return (v/1000).toFixed(0) + "k";
+                    }
+                }
+            }, scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
 
-    if(charts.unidade) charts.unidade.destroy();
-    charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
-        type: 'bar',
-        data: {
-            labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
-            datasets: [
-                {
-                    label: 'Meta Anual', data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
-                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60
-                },
-                {
-                    label: 'Realizado YTD', data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
-                    backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
-                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
-                    formatter: (v) => {
-                        if (v === 0) return "";
-                        if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
-                        if (v >= 1000) return "R$ " + (v/1000).toFixed(0) + "k";
-                        return "R$ " + v;
-                    }
-                }
-            }, scales: { y: { display: false }, x: { grid: { display: false } } }
-        }
-    });
+    if(charts.unidade) charts.unidade.destroy();
+    charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
+        type: 'bar',
+        data: {
+            labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
+            datasets: [
+                {
+                    label: 'Meta Anual', data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
+                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60
+                },
+                {
+                    label: 'Realizado YTD', data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
+                    backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                    formatter: (v) => {
+                        if (v === 0) return "";
+                        if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
+                        if (v >= 1000) return "R$ " + (v/1000).toFixed(0) + "k";
+                        return "R$ " + v;
+                    }
+                }
+            }, scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
 }
 
 // ---- LOADS INICIAIS ----
 async function carregarAuxiliares(){
-    const { data: v } = await supabaseClient.from('vendedores').select('*');
-    const { data: a } = await supabaseClient.from('areas').select('*');
-    
-    const fill = (id, d, label) => { 
-        const el = document.getElementById(id); 
-        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
-    };
-    fill('op_vendedor', v || [], "Selecione..."); 
-    fill('op_area', a || [], "Selecione..."); 
-    fill('meta_input_vendedor', v || [], "Vendedor..."); 
-    
-    const listV = document.getElementById('listaVendedoresGerenciamento');
-    if(listV) {
-        if(v && v.length > 0) listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
-        else listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
-    }
-    
-    const listA = document.getElementById('listaAreasGerenciamento');
-    if(listA) {
-        if(a && a.length > 0) listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
-        else listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
-    }
+    const { data: v } = await supabaseClient.from('vendedores').select('*');
+    const { data: a } = await supabaseClient.from('areas').select('*');
+    
+    const fill = (id, d, label) => { 
+        const el = document.getElementById(id); 
+        if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
+    };
+    fill('op_vendedor', v || [], "Selecione..."); 
+    fill('op_area', a || [], "Selecione..."); 
+    fill('meta_input_vendedor', v || [], "Vendedor..."); 
+    
+    const listV = document.getElementById('listaVendedoresGerenciamento');
+    if(listV) {
+        if(v && v.length > 0) listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listV.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhum vendedor cadastrado ainda.</p>";
+    }
+    
+    const listA = document.getElementById('listaAreasGerenciamento');
+    if(listA) {
+        if(a && a.length > 0) listA.innerHTML = a.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoArea('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarArea('${i.id}')">EXCLUIR</button></div></div>`).join('');
+        else listA.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin-top:10px;'>Nenhuma área cadastrada ainda.</p>";
+    }
 }
 
-async function carregarDados(){ 
-    const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
-    base = ops || []; 
-    
-    const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
-    baseMetasMensais = metas || [];
+async function carregarDados(){ 
+    const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
+    base = ops || []; 
+    
+    const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
+    baseMetasMensais = metas || [];
 
-    await carregarDadosFinanceiros();
+    await carregarDadosFinanceiros();
 
-    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
-    const dl = document.getElementById('listaClientes');
-    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
-    
-    const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
-    const filtroVend = document.getElementById('filtroVendedor');
-    if(filtroVend) {
-        const valAtual = filtroVend.value;
-        filtroVend.innerHTML = '<option value="">Vendedor</option>' + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
-        filtroVend.value = valAtual;
-    }
+    const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
+    const dl = document.getElementById('listaClientes');
+    if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
+    
+    const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
+    const filtroVend = document.getElementById('filtroVendedor');
+    if(filtroVend) {
+        const valAtual = filtroVend.value;
+        filtroVend.innerHTML = '<option value="">Vendedor</option>' + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
+        filtroVend.value = valAtual;
+    }
 
-    const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
-    const filtroArea = document.getElementById('filtroArea');
-    if(filtroArea) {
-        const valAtual = filtroArea.value;
-        filtroArea.innerHTML = '<option value="">Area</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
-        filtroArea.value = valAtual;
-    }
+    const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
+    const filtroArea = document.getElementById('filtroArea');
+    if(filtroArea) {
+        const valAtual = filtroArea.value;
+        filtroArea.innerHTML = '<option value="">Area</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
+        filtroArea.value = valAtual;
+    }
 
-    renderizar(); 
-    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
-    if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
+    renderizar(); 
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+    if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
 }
 
 async function carregarDadosFinanceiros() {
-    const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
-    baseResMensais = res || [];
+    const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
+    baseResMensais = res || [];
 }
 
 // ---- KANBAN DRAG & DROP BLINDADO (NOVO) ----
@@ -1298,156 +1285,156 @@ function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('co
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
 async function drop(ev, novoStatus) {
-    ev.preventDefault(); 
-    ev.currentTarget.classList.remove('column-over');
-    
-    const cardIdAttr = ev.dataTransfer.getData("text/plain");
-    if(!cardIdAttr) return; // Se arrastou algo vazio, ignora
-    
-    // Extrai apenas o número do ID
-    const cardId = cardIdAttr.replace("card-", "");
-    
-    // Procura na memória local pelo id exato
-    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(cardId));
-    if(!item || item.status === novoStatus) return; // Se não achar ou for o mesmo status, ignora
+    ev.preventDefault(); 
+    ev.currentTarget.classList.remove('column-over');
+    
+    const cardIdAttr = ev.dataTransfer.getData("text/plain");
+    if(!cardIdAttr) return; // Se arrastou algo vazio, ignora
+    
+    // Extrai apenas o número do ID
+    const cardId = cardIdAttr.replace("card-", "");
+    
+    // Procura na memória local pelo id exato
+    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(cardId));
+    if(!item || item.status === novoStatus) return; // Se não achar ou for o mesmo status, ignora
 
-    // 1. Atualiza visualmente IMEDIATAMENTE na tela (Efeito liso)
-    item.status = novoStatus;
-    renderizar(); 
+    // 1. Atualiza visualmente IMEDIATAMENTE na tela (Efeito liso)
+    item.status = novoStatus;
+    renderizar(); 
 
-    // 2. Se for PERDIDO, precisa justificar o motivo, então abre a tela
-    if(novoStatus === "PERDIDO") {
-        editarOportunidade(cardId);
-        return;
-    }
+    // 2. Se for PERDIDO, precisa justificar o motivo, então abre a tela
+    if(novoStatus === "PERDIDO") {
+        editarOportunidade(cardId);
+        return;
+    }
 
-    // 3. Salva no Supabase em Background (Invisível)
-    const idParaBanco = item.id !== undefined ? item.id : item.ID;
-    
-    // Gera log de histórico
-    const agora = new Date();
-    const carimbo = `[${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}] STATUS MOVIDO VIA KANBAN PARA: ${novoStatus}`;
-    const novoHist = carimbo + (item.historico ? "\n" + item.historico : "");
-    item.historico = novoHist;
+    // 3. Salva no Supabase em Background (Invisível)
+    const idParaBanco = item.id !== undefined ? item.id : item.ID;
+    
+    // Gera log de histórico
+    const agora = new Date();
+    const carimbo = `[${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}] STATUS MOVIDO VIA KANBAN PARA: ${novoStatus}`;
+    const novoHist = carimbo + (item.historico ? "\n" + item.historico : "");
+    item.historico = novoHist;
 
-    let res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', idParaBanco);
-    if(res.error) await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
+    let res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', idParaBanco);
+    if(res.error) await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
 }
 
 function renderizar(){
-    const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    const fC = document.getElementById('filtroCliente').value.toLowerCase();
+    const fV = document.getElementById('filtroVendedor').value;
+    const fA = document.getElementById('filtroArea').value;
+    const fS = document.getElementById('filtroStatus').value;
+    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
 
-    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
+    if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
-    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
-    filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'FECHADO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
-        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
-    });
-    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
-    
-    if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
-    
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    
-    const labelsVendedores = sv.map((x, i) => {
-        if(i === 0) return '🥇 ' + x[0];
-        if(i === 1) return '🥈 ' + x[0];
-        if(i === 2) return '🥉 ' + x[0];
-        return x[0];
-    });
+    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
+    let statusCont = {}, vendVal = {};
+    filtrados.forEach(r => {
+        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
+        pipeTot += vA; mrrTotal += vM;
+        if(r.status === 'FECHADO') { recGan += vA; nG++; }
+        if(r.status === 'PERDIDO') nP++;
+        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
+    });
+    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
+    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
+    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
+    
+    if(charts.st) charts.st.destroy();
+    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
+    
+    if(charts.vd) charts.vd.destroy();
+    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
+    
+    const labelsVendedores = sv.map((x, i) => {
+        if(i === 0) return '🥇 ' + x[0];
+        if(i === 1) return '🥈 ' + x[0];
+        if(i === 2) return '🥉 ' + x[0];
+        return x[0];
+    });
 
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
-        type: 'bar', 
-        data: { 
-            labels: labelsVendedores, 
-            datasets: [{ 
-                data: sv.map(x=>x[1]), 
-                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
-                borderRadius: 8, 
-                barThickness: 22, 
-                maxBarThickness: 30 
-            }]
-        }, 
-        options: { 
-            indexAxis: 'y', 
-            maintainAspectRatio: false, 
-            layout: { padding: { right: 80 } },
-            scales: { 
-                x: { display: false }, 
-                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
-            }, 
-            plugins: { 
-                legend: { display: false }, 
-                datalabels: { 
-                    color: '#422c76', 
-                    anchor: 'end', 
-                    align: 'right', 
-                    offset: 5, 
-                    font: { weight: 'bold', size: 11 }, 
-                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
-                } 
-            } 
-        } 
-    });
-    
-    const kan = document.getElementById('kanban'); kan.innerHTML = "";
-    const colunas = [
-        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
-        {n:"FUP", cl:"col-fup", border:"#f39c12"},
-        {n:"MAIOR QUE 50%", cl:"col-maior50", border:"#8e44ad"},
-        {n:"EM FECHAMENTO", cl:"col-fechamento", border:"#007bff"},
-        {n:"FECHADO", cl:"col-fechado", border:"#27ae60"},
-        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
-    ];
-    colunas.forEach(s => {
-        const col = document.createElement('div'); col.className = `column ${s.cl}`;
-        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
-        const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
-            
-            // PROTEÇÃO MÁXIMA PARA PEGAR O ID CORRETO NO NAVEGADOR
-            const idReal = itemDaVez.id !== undefined ? itemDaVez.id : itemDaVez.ID;
+    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
+        type: 'bar', 
+        data: { 
+            labels: labelsVendedores, 
+            datasets: [{ 
+                data: sv.map(x=>x[1]), 
+                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
+                borderRadius: 8, 
+                barThickness: 22, 
+                maxBarThickness: 30 
+            }]
+        }, 
+        options: { 
+            indexAxis: 'y', 
+            maintainAspectRatio: false, 
+            layout: { padding: { right: 80 } },
+            scales: { 
+                x: { display: false }, 
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
+            }, 
+            plugins: { 
+                legend: { display: false }, 
+                datalabels: { 
+                    color: '#422c76', 
+                    anchor: 'end', 
+                    align: 'right', 
+                    offset: 5, 
+                    font: { weight: 'bold', size: 11 }, 
+                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
+                } 
+            } 
+        } 
+    });
+    
+    const kan = document.getElementById('kanban'); kan.innerHTML = "";
+    const colunas = [
+        {n:"AINDA FRIO", cl:"col-frio", border:"#17a2b8"},
+        {n:"FUP", cl:"col-fup", border:"#f39c12"},
+        {n:"MAIOR QUE 50%", cl:"col-maior50", border:"#8e44ad"},
+        {n:"EM FECHAMENTO", cl:"col-fechamento", border:"#007bff"},
+        {n:"FECHADO", cl:"col-fechado", border:"#27ae60"},
+        {n:"PERDIDO", cl:"col-perdido", border:"#c0392b"}
+    ];
+    colunas.forEach(s => {
+        const col = document.createElement('div'); col.className = `column ${s.cl}`;
+        col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
+        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
+        const b = col.querySelector('.column-body');
+        filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
+            
+            // PROTEÇÃO MÁXIMA PARA PEGAR O ID CORRETO NO NAVEGADOR
+            const idReal = itemDaVez.id !== undefined ? itemDaVez.id : itemDaVez.ID;
 
-            const card = document.createElement('div'); 
-            card.className = 'card'; 
-            card.id = `card-${idReal}`; 
-            card.dataset.id = idReal; 
+            const card = document.createElement('div'); 
+            card.className = 'card'; 
+            card.id = `card-${idReal}`; 
+            card.dataset.id = idReal; 
 
-            card.draggable = true; 
-            card.style.borderLeftColor = s.border;
-            card.style.cursor = 'pointer';
+            card.draggable = true; 
+            card.style.borderLeftColor = s.border;
+            card.style.cursor = 'pointer';
 
-            // BLINDAGEM DO DRAG AND DROP: O card se "apresenta" com a ID correta e limpa pro navegador
-            card.ondragstart = function(ev) {
-                ev.dataTransfer.setData("text/plain", this.id);
-            };
-            
-            card.onclick = function() {
-                editarOportunidade(this.dataset.id);
-            };
-            
-            card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
-            b.appendChild(card);
-        });
-        kan.appendChild(col);
-    });
+            // BLINDAGEM DO DRAG AND DROP: O card se "apresenta" com a ID correta e limpa pro navegador
+            card.ondragstart = function(ev) {
+                ev.dataTransfer.setData("text/plain", this.id);
+            };
+            
+            card.onclick = function() {
+                editarOportunidade(this.dataset.id);
+            };
+            
+            card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
+            b.appendChild(card);
+        });
+        kan.appendChild(col);
+    });
 }
 
 // ----------------------------------------------------
@@ -1455,221 +1442,215 @@ function renderizar(){
 // ----------------------------------------------------
 
 function renderizarFinanceiro() {
-    let planoTotalAnual = 0;
-    let realTotalYTD = 0;
-    
-    let arrayPlanoMensal = new Array(12).fill(0);
-    let arrayRealMensal = new Array(12).fill(0);
-    let faturamentoPorBU = {};
-    let clientesDesempenho = {}; 
+    let planoTotalAnual = 0;
+    let realTotalYTD = 0;
+    
+    let arrayPlanoMensal = new Array(12).fill(0);
+    let arrayRealMensal = new Array(12).fill(0);
+    let faturamentoPorBU = {};
+    let clientesDesempenho = {}; 
 
-    baseResMensais.forEach(rm => {
-        const mesIdx = rm.mes_numero - 1;
-        const valPlan = parseFloat(rm.valor_planejado) || 0;
-        const valReal = parseFloat(rm.valor_realizado) || 0;
-        
-        planoTotalAnual += valPlan;
-        realTotalYTD += valReal;
-        
-        // Verifica se o índice de mês é válido (0 a 11)
-        if (mesIdx >= 0 && mesIdx <= 11) {
-            arrayPlanoMensal[mesIdx] += valPlan;
-            arrayRealMensal[mesIdx] += valReal;
-        }
+    baseResMensais.forEach(rm => {
+        const mesIdx = rm.mes_numero - 1;
+        const valPlan = parseFloat(rm.valor_planejado) || 0;
+        const valReal = parseFloat(rm.valor_realizado) || 0;
+        
+        planoTotalAnual += valPlan;
+        realTotalYTD += valReal;
+        
+        // Verifica se o índice de mês é válido (0 a 11)
+        if (mesIdx >= 0 && mesIdx <= 11) {
+            arrayPlanoMensal[mesIdx] += valPlan;
+            arrayRealMensal[mesIdx] += valReal;
+        }
 
-        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
-        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
-        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
-        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
+        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
+        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
+        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
+        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
 
-        const cliName = rm.cliente || 'Sem Nome';
+        const cliName = rm.cliente || 'Sem Nome';
 
-        faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
+        faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
 
-        const cliKey = cliName + " (" + bu + ")";
-        if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
-        clientesDesempenho[cliKey].plano += valPlan;
-        clientesDesempenho[cliKey].real += valReal;
-        clientesDesempenho[cliKey].desvio += (valReal - valPlan);
-    });
+        const cliKey = cliName + " (" + bu + ")";
+        if(!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { plano: 0, real: 0, desvio: 0 };
+        clientesDesempenho[cliKey].plano += valPlan;
+        clientesDesempenho[cliKey].real += valReal;
+        clientesDesempenho[cliKey].desvio += (valReal - valPlan);
+    });
 
-    const gap = realTotalYTD - planoTotalAnual;
-    const percAting = planoTotalAnual > 0 ? ((realTotalYTD / planoTotalAnual) * 100).toFixed(1) : 0;
-    
-    document.getElementById('finPlanoTotal').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
-    document.getElementById('finRealTotal').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
-    
-    document.getElementById('finGapTotal').innerText = "R$ " + (gap/1000000).toFixed(2) + "M";
-    document.getElementById('finGapTotal').style.color = gap >= 0 ? '#27ae60' : '#c0392b';
-    
-    document.getElementById('finPercTotal').innerText = percAting + "%";
-    document.getElementById('finPercTotal').style.color = percAting >= 100 ? '#27ae60' : '#f39c12';
+    const gap = realTotalYTD - planoTotalAnual;
+    const percAting = planoTotalAnual > 0 ? ((realTotalYTD / planoTotalAnual) * 100).toFixed(1) : 0;
+    
+    document.getElementById('finPlanoTotal').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
+    document.getElementById('finRealTotal').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
+    
+    document.getElementById('finGapTotal').innerText = "R$ " + (gap/1000000).toFixed(2) + "M";
+    document.getElementById('finGapTotal').style.color = gap >= 0 ? '#27ae60' : '#c0392b';
+    
+    document.getElementById('finPercTotal').innerText = percAting + "%";
+    document.getElementById('finPercTotal').style.color = percAting >= 100 ? '#27ae60' : '#f39c12';
 
-    if(charts.finEvolucao) charts.finEvolucao.destroy();
-    charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
-        type: 'bar',
-        data: {
-            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
-            datasets: [
-                {
-                    label: 'Plano Orçamentário',
-                    data: arrayPlanoMensal,
-                    backgroundColor: '#e0e0e0',
-                    borderRadius: 4
-                },
-                {
-                    label: 'Realizado Faturado',
-                    data: arrayRealMensal,
-                    backgroundColor: '#ff2f69',
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false,
-            layout: { padding: { top: 20 } },
-            plugins: {
-                legend: { position: 'bottom' },
-                datalabels: {
-                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
-                    formatter: v => {
-                        if (v === 0) return "";
-                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
-                        return (v/1000).toFixed(0) + "k";
-                    }
-                }
-            },
-            scales: { y: { display: false }, x: { grid: { display: false } } }
-        }
-    });
+    if(charts.finEvolucao) charts.finEvolucao.destroy();
+    charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            datasets: [
+                {
+                    label: 'Plano Orçamentário',
+                    data: arrayPlanoMensal,
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Realizado Faturado',
+                    data: arrayRealMensal,
+                    backgroundColor: '#ff2f69',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 20 } },
+            plugins: {
+                legend: { position: 'bottom' },
+                datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
+                    formatter: v => {
+                        if (v === 0) return "";
+                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
+                        return (v/1000).toFixed(0) + "k";
+                    }
+                }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
 
-    const buLabels = Object.keys(faturamentoPorBU);
-    const buData = buLabels.map(k => faturamentoPorBU[k]);
-    const isAllZero = buData.every(v => v === 0);
-    
-    if(charts.finBu) charts.finBu.destroy();
-    charts.finBu = new Chart(document.getElementById('chartFinBU'), {
-        type: 'doughnut',
-        data: {
-            labels: isAllZero ? ['Sem Faturamento'] : buLabels,
-            datasets: [{ 
-                data: isAllZero ? [1] : buData, 
-                backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
-            }]
-        },
-        options: { 
-            maintainAspectRatio: false, 
-            plugins: { 
-                datalabels: { 
-                    display: !isAllZero,
-                    color: '#fff', 
-                    font: {weight: 'bold', size: 12},
-                    formatter: (val, ctx) => {
-                        let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        if(total === 0 || val === 0) return '';
-                        return Math.round((val / total) * 100) + '%';
-                    }
-                }, 
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            if (isAllZero) return ' R$ 0,00';
-                            return ' R$ ' + context.raw.toLocaleString('pt-BR', {minimumFractionDigits:2});
-                        }
-                    }
-                }
-            } 
-        },
-        plugins: [pluginCentroRosca]
-    });
+    const buLabels = Object.keys(faturamentoPorBU);
+    const buData = buLabels.map(k => faturamentoPorBU[k]);
+    const isAllZero = buData.every(v => v === 0);
+    
+    if(charts.finBu) charts.finBu.destroy();
+    charts.finBu = new Chart(document.getElementById('chartFinBU'), {
+        type: 'doughnut',
+        data: {
+            labels: isAllZero ? ['Sem Faturamento'] : buLabels,
+            datasets: [{ 
+                data: isAllZero ? [1] : buData, 
+                backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
+            }]
+        },
+        options: { 
+            maintainAspectRatio: false, 
+            plugins: { 
+                datalabels: { 
+                    display: !isAllZero,
+                    color: '#fff', 
+                    font: {weight: 'bold', size: 12},
+                    formatter: (val, ctx) => {
+                        let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        if(total === 0 || val === 0) return '';
+                        return Math.round((val / total) * 100) + '%';
+                    }
+                }, 
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (isAllZero) return ' R$ 0,00';
+                            return ' R$ ' + context.raw.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                        }
+                    }
+                }
+            } 
+        },
+        plugins: [pluginCentroRosca]
+    });
 
-    const arrayClientes = Object.entries(clientesDesempenho).map(([nome, vals]) => ({nome, ...vals}));
-    const destaques = [...arrayClientes].filter(c => c.desvio > 0).sort((a,b) => b.desvio - a.desvio).slice(0, 5);
-    const ofensores = [...arrayClientes].filter(c => c.desvio < 0).sort((a,b) => a.desvio - b.desvio).slice(0, 5);
+    const arrayClientes = Object.entries(clientesDesempenho).map(([nome, vals]) => ({nome, ...vals}));
+    const destaques = [...arrayClientes].filter(c => c.desvio > 0).sort((a,b) => b.desvio - a.desvio).slice(0, 5);
+    const ofensores = [...arrayClientes].filter(c => c.desvio < 0).sort((a,b) => a.desvio - b.desvio).slice(0, 5);
 
-    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
 
-    const tbDest = document.querySelector('#tbDestaques tbody');
-    if(tbDest) tbDest.innerHTML = destaques.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-green">+${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum cliente acima do plano.</td></tr>";
+    const tbDest = document.querySelector('#tbDestaques tbody');
+    if(tbDest) tbDest.innerHTML = destaques.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-green">+${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum cliente acima do plano.</td></tr>";
 
-    const tbOfen = document.querySelector('#tbOfensores tbody');
-    if(tbOfen) tbOfen.innerHTML = ofensores.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-red">${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum ofensor encontrado.</td></tr>";
+    const tbOfen = document.querySelector('#tbOfensores tbody');
+    if(tbOfen) tbOfen.innerHTML = ofensores.map(c => `<tr><td>${c.nome}</td><td>${formatCurrency(c.plano)}</td><td>${formatCurrency(c.real)}</td><td class="text-red">${formatCurrency(c.desvio)}</td></tr>`).join('') || "<tr><td colspan='4' style='text-align:center;'>Nenhum ofensor encontrado.</td></tr>";
 }
 
 function abrirLancamentoFin() {
-    document.getElementById('fin_input_mes').value = "";
-    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
-    abrirModal('modalFinInput');
+    const select = document.getElementById('fin_input_cliente_bu');
+    const combinacoes = [...new Set(baseResMensais.map(r => `${r.cliente || 'Desconhecido'} | ${r.bu || '-'}`))].sort();
+    select.innerHTML = '<option value="">Selecione o Cliente / BU...</option>' + 
+                      combinacoes.map(c => `<option value="${c}">${c}</option>`).join('');
+    
+    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
+    abrirModal('modalFinInput');
 }
 
 function carregarGridFin() {
-    const mes = document.getElementById('fin_input_mes').value;
-    const tbody = document.getElementById('gridFinBody');
-    if(!mes) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um mês acima para carregar a planilha...</td></tr>`;
-        return;
-    }
+    const selecao = document.getElementById('fin_input_cliente_bu').value;
+    const tbody = document.getElementById('gridFinBody');
+    if(!selecao) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
+        return;
+    }
 
-    const regsMes = baseResMensais.filter(r => r.mes_numero == mes);
-    
-    const gridData = regsMes.map(rm => {
-        return {
-            id: rm.id,
-            cliente: rm.cliente || 'Desconhecido',
-            bu: rm.bu || '-',
-            plano: parseFloat(rm.valor_planejado) || 0,
-            real: parseFloat(rm.valor_realizado) || 0
-        };
-    });
+    const [cliente, bu] = selecao.split(' | ');
+    const regsMes = baseResMensais.filter(r => (r.cliente || 'Desconhecido') === cliente && (r.bu || '-') === bu);
+    regsMes.sort((a,b) => parseInt(a.mes_numero) - parseInt(b.mes_numero));
 
-    gridData.sort((a, b) => a.bu.localeCompare(b.bu) || a.cliente.localeCompare(b.cliente));
+    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-    const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-
-    tbody.innerHTML = gridData.map(d => `
-        <tr>
-            <td><span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 11px;">${d.bu}</span></td>
-            <td><b>${d.cliente}</b></td>
-            <td style="color:#666;">${formatCurrency(d.plano)}</td>
-            <td><input type="number" step="0.01" class="fin-input-real" data-id="${d.id}" value="${d.real === 0 ? '' : d.real}" placeholder="0.00"></td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = regsMes.map(r => `
+        <tr>
+            <td><b>${nomesMeses[parseInt(r.mes_numero) - 1] || 'Mês ' + r.mes_numero}</b></td>
+            <td style="color:#666;">${formatCurrency(parseFloat(r.valor_planejado) || 0)}</td>
+            <td><input type="number" step="0.01" class="fin-input-real" data-id="${r.id}" value="${parseFloat(r.valor_realizado) === 0 ? '' : (parseFloat(r.valor_realizado) || '')}" placeholder="0.00"></td>
+        </tr>
+    `).join('');
 }
 
 async function salvarGridFin() {
-    const mes = document.getElementById('fin_input_mes').value;
-    if(!mes) return alert("Selecione um mês primeiro.");
+    const selecao = document.getElementById('fin_input_cliente_bu').value;
+    if(!selecao) return alert("Selecione um cliente primeiro.");
 
-    const btn = document.getElementById('btnSalvarFin');
-    btn.innerText = "Salvando..."; 
-    btn.disabled = true;
+    const btn = document.getElementById('btnSalvarFin');
+    btn.innerText = "Salvando..."; 
+    btn.disabled = true;
 
-    const inputs = document.querySelectorAll('.fin-input-real');
-    const promessas = [];
+    const inputs = document.querySelectorAll('.fin-input-real');
+    const promessas = [];
 
-    inputs.forEach(inp => {
-        const idRow = inp.dataset.id;
-        const valReal = parseFloat(inp.value) || 0;
-        
-        const rowAntiga = baseResMensais.find(r => r.id == idRow);
-        if(rowAntiga && parseFloat(rowAntiga.valor_realizado) !== valReal) {
-            promessas.push(
-                supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', idRow)
-            );
-        }
-    });
+    inputs.forEach(inp => {
+        const idRow = inp.dataset.id;
+        const valReal = parseFloat(inp.value) || 0;
+        
+        const rowAntiga = baseResMensais.find(r => r.id == idRow);
+        if(rowAntiga && parseFloat(rowAntiga.valor_realizado) !== valReal) {
+            promessas.push(
+                supabaseClient.from('resultados_mensais').update({ valor_realizado: valReal }).eq('id', idRow)
+            );
+        }
+    });
 
-    if(promessas.length > 0) {
-        await Promise.all(promessas);
-        await carregarDadosFinanceiros(); 
-    }
+    if(promessas.length > 0) {
+        await Promise.all(promessas);
+        await carregarDadosFinanceiros(); 
+    }
 
-    fecharModal('modalFinInput');
-    btn.innerText = "Salvar Mês Inteiro"; 
-    btn.disabled = false;
-    
-    renderizarFinanceiro(); 
+    fecharModal('modalFinInput');
+    btn.innerText = "Salvar Ano Inteiro"; 
+    btn.disabled = false;
+    
+    renderizarFinanceiro(); 
 }
 </script>
 </body>
