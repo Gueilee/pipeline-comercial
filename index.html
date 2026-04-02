@@ -294,6 +294,15 @@ header {
             <a href="#" onclick="trocarTelaLogin('box-login')">← Voltar para o Login</a>
         </div>
     </div>
+
+    <div class="login-box" id="box-nova-senha" style="display: none;">
+        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
+        <h2>Criar Nova Senha</h2>
+        <div id="nova-senha-msg" class="msg-box"></div>
+        <input type="password" id="nova_senha_1" placeholder="Nova senha (mín. 6 caracteres)">
+        <input type="password" id="nova_senha_2" placeholder="Confirme a nova senha">
+        <button class="btn-login" onclick="salvarNovaSenha()" id="btn-salvar-senha" style="background: #27ae60;">SALVAR E ENTRAR</button>
+    </div>
 </div>
 
 <div id="main-system">
@@ -728,11 +737,13 @@ function trocarTelaLogin(idTela) {
     document.getElementById('box-login').style.display = 'none';
     document.getElementById('box-cadastro').style.display = 'none';
     document.getElementById('box-recuperar').style.display = 'none';
+    document.getElementById('box-nova-senha').style.display = 'none'; 
     document.getElementById(idTela).style.display = 'block';
     
     document.getElementById('login-msg').style.display = 'none';
     document.getElementById('cad-msg').innerHTML = '';
     document.getElementById('rec-msg').innerHTML = '';
+    document.getElementById('nova-senha-msg').innerHTML = ''; 
 }
 
 async function autenticarSupabase() {
@@ -1854,6 +1865,51 @@ async function salvarGridFin() {
     btn.disabled = false;
     
     renderizarFinanceiro(); 
+}
+
+// ANTENA: Detecta se o usuário veio pelo link do e-mail de recuperação
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+        trocarTelaLogin('box-nova-senha');
+    }
+});
+
+// Função para enviar a nova senha para o banco de dados
+async function salvarNovaSenha() {
+    const senha1 = document.getElementById('nova_senha_1').value;
+    const senha2 = document.getElementById('nova_senha_2').value;
+    const msgDiv = document.getElementById('nova-senha-msg');
+    const btn = document.getElementById('btn-salvar-senha');
+
+    if(senha1.length < 6) {
+        msgDiv.innerHTML = "<span class='msg-error'>A senha deve ter no mínimo 6 caracteres.</span>";
+        return;
+    }
+    if(senha1 !== senha2) {
+        msgDiv.innerHTML = "<span class='msg-error'>As senhas não coincidem. Digite igual nos dois campos.</span>";
+        return;
+    }
+
+    btn.innerText = "Salvando...";
+    // O Supabase já sabe quem é o usuário por causa do link do e-mail, então é só mandar atualizar
+    const { data, error } = await supabaseClient.auth.updateUser({ password: senha1 });
+    btn.innerText = "SALVAR E ENTRAR";
+
+    if (error) {
+        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${error.message}</span>`;
+    } else {
+        msgDiv.innerHTML = "<span class='msg-success'>Senha atualizada com sucesso! Iniciando sistema...</span>";
+        
+        // Pega o e-mail do usuário para exibir no sistema e faz o login automático
+        if(data && data.user) {
+            USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+        }
+        
+        // Aguarda 2 segundos para o usuário ler a mensagem de sucesso e entra no sistema
+        setTimeout(() => {
+            iniciarSistema();
+        }, 2000);
+    }
 }
 </script>
 </body>
