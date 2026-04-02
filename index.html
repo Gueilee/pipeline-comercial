@@ -1611,8 +1611,8 @@ function renderizarFinanceiro() {
         options: { 
             maintainAspectRatio: false, 
             cutout: '75%',
-            // AJUSTE: Margem de 40px em todos os lados. Isso diminui a rosca e cria espaço para os rótulos não cortarem.
-            layout: { padding: { top: 40, bottom: 40, left: 40, right: 40 } },
+            // Reduzi um pouco o top aqui para compensar a margem que vamos dar na legenda
+            layout: { padding: { top: 20, bottom: 40, left: 40, right: 40 } },
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
@@ -1629,6 +1629,8 @@ function renderizarFinanceiro() {
                 }, 
                 legend: { 
                     position: 'top',
+                    // AJUSTE AQUI: Cria um "espaço de respiro" de 35px entre a legenda e a rosca
+                    padding: { bottom: 35 },
                     labels: { padding: 15, boxWidth: 12, font: { size: 11 } }
                 },
                 tooltip: {
