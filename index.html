@@ -405,10 +405,20 @@ header {
                     
                     <select id="filtroFinBU" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
                         <option value="">Todas as BUs</option>
-                        <option value="ARMAZÉM (ARM)">ARMAZÉM (ARM)</option>
+                        <option value="ARMAZEM (ARM)">ARMAZEM (ARM)</option>
                         <option value="TRADING (VCI)">TRADING (VCI)</option>
-                        <option value="TRANSPORTE (GRV)">TRANSPORTE (GRV)</option>
-                        <option value="OUTROS">OUTROS</option>
+                        <option value="TRANSPORTE (TRP)">TRANSPORTE (TRP)</option>
+                    </select>
+
+                    <select id="filtroFinCategoria" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
+                        <option value="">Todas as Categorias</option>
+                        <option value="GRV - NOVOS NEGOCIOS">GRV - Novos Negocios</option>
+                        <option value="ITV - NOVOS NEGOCIOS">ITV - Novos Negocios</option>
+                        <option value="NVG - NOVOS NEGOCIOS">NVG - Novos Negocios</option>
+                        <option value="TRP - CTE PROPRIO - NOVOS">TRP - CTE PROPRIO - NOVOS</option>
+                        <option value="TRP - FRETE TERCEIRO - NOVOS">TRP - FRETE TERCEIRO - NOVOS</option>
+                        <option value="VCI - NEGOCIOS < 12M">VCI - Negocios &lt; 12M</option>
+                        <option value="VCI - NOVOS NEGOCIOS">VCI - Novos Negocios</option>
                     </select>
                     
                     <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
@@ -1472,23 +1482,24 @@ function renderizarFinanceiro() {
     let faturamentoPorBU = {};
     let clientesDesempenho = {}; 
 
-    // PEGANDO OS VALORES DOS NOVOS FILTROS
+    // PEGANDO OS VALORES DOS NOVOS FILTROS E NORMALIZANDO
     const fFinCli = document.getElementById('filtroFinCliente').value.toLowerCase();
-    const fFinBU = document.getElementById('filtroFinBU').value;
+    const fFinBU = document.getElementById('filtroFinBU').value.toUpperCase();
+    const fFinCategoria = document.getElementById('filtroFinCategoria').value.toUpperCase();
 
     const currentMonthIndex = new Date().getMonth(); // 0 para Janeiro, 3 para Abril, etc.
 
     baseResMensais.forEach(rm => {
-        let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
-        if (bu.includes('ARM') || bu.includes('ITV') || bu.includes('NVG') || bu.includes('SJP')) bu = 'ARMAZÉM (ARM)';
-        else if (bu.includes('VCI') || bu.includes('TRADING')) bu = 'TRADING (VCI)';
-        else if (bu.includes('GRV') || bu.includes('TRANSPORTE')) bu = 'TRANSPORTE (GRV)';
+        // Normalizando as colunas do banco de dados removendo espaços duplos
+        let bu = rm.bu ? rm.bu.toUpperCase().replace(/\s+/g, ' ').trim() : 'OUTROS';
+        let categoria = rm.categoria ? rm.categoria.toUpperCase().replace(/\s+/g, ' ').trim() : '';
 
         const cliName = rm.cliente || 'Sem Nome';
 
-        // APLICANDO OS FILTROS
+        // APLICANDO OS FILTROS RIGOROSAMENTE COM BASE NOS NOVOS VALORES
         if (fFinCli && !cliName.toLowerCase().includes(fFinCli)) return;
         if (fFinBU && bu !== fFinBU) return;
+        if (fFinCategoria && categoria !== fFinCategoria) return;
 
         const mesIdx = rm.mes_numero - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
@@ -1641,7 +1652,7 @@ function abrirLancamentoFin() {
     // Busca todas as combinações únicas de Cliente + BU que existem na base de resultados
     baseResMensais.forEach(r => {
         const cli = r.cliente || 'Desconhecido';
-        const bu = r.bu || '-';
+        const bu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
         const key = cli + '@@@' + bu;
         const label = cli + ' | ' + bu;
         if(!setMap.has(key)) {
@@ -1671,8 +1682,12 @@ function carregarGridFin() {
 
     const [clienteNome, buNome] = clienteSelecionado.split('@@@');
     
-    // Filtra apenas os registros daquele cliente e daquela BU específica
-    const regsCliente = baseResMensais.filter(r => (r.cliente || 'Desconhecido') === clienteNome && (r.bu || '-') === buNome);
+    // Filtra apenas os registros daquele cliente e daquela BU específica normalizada
+    const regsCliente = baseResMensais.filter(r => {
+        const rCli = r.cliente || 'Desconhecido';
+        const rBu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
+        return rCli === clienteNome && rBu === buNome;
+    });
     
     const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
 
