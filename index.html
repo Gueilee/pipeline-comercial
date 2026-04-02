@@ -1610,30 +1610,27 @@ function renderizarFinanceiro() {
         },
         options: { 
             maintainAspectRatio: false, 
-            cutout: '75%',
-            // Padding igual em todos os lados mantém a rosca perfeitamente centralizada e do tamanho ideal
-            layout: { padding: 30 },
+            cutout: '60%', // Diminui o buraco da rosca (antes era 75%), deixando as fatias mais grossas
+            layout: { padding: 20 }, // Margem limpa e igual de todos os lados para centralizar perfeitamente
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
-                    color: '#422c76', 
-                    anchor: 'end',
-                    align: 'end',
-                    offset: 5,
-                    font: {weight: 'bold', size: 12},
+                    color: '#ffffff', // Rótulo na cor branca
+                    anchor: 'center', // Puxa o rótulo para o centro da fatia
+                    align: 'center', // Centraliza o rótulo para não vazar
+                    font: { weight: 'bold', size: 12 },
                     formatter: (val, ctx) => {
                         let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                         if(total === 0 || val === 0) return '';
-                        return Math.round((val / total) * 100) + '%';
+                        
+                        let percentual = Math.round((val / total) * 100);
+                        // Opcional: Se uma fatia for menor que 3%, oculta o rótulo para não espremer o texto
+                        return percentual >= 3 ? percentual + '%' : '';
                     }
                 }, 
                 legend: { 
                     position: 'top',
-                    labels: { padding: 10, boxWidth: 12, font: { size: 11 } },
-                    // ESTA É A MÁGICA: Força a legenda a ter um espaço vazio de 40px abaixo dela, afastando da rosca.
-                    afterFit: function(legend) {
-                        legend.height += 40;
-                    }
+                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } }
                 },
                 tooltip: {
                     callbacks: {
