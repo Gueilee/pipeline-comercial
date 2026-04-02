@@ -786,7 +786,18 @@ async function cadastrarSupabase() {
     btn.innerText = "CADASTRAR";
     
     if (error) {
-        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${error.message}</span>`;
+        let msgErro = error.message;
+
+        // Traduzindo os erros mais comuns do Supabase para PT-BR
+        if (msgErro.includes("Password should contain")) {
+            msgErro = "A senha deve ter letras (maiúsculas e minúsculas) e números.";
+        } else if (msgErro.includes("User already registered")) {
+            msgErro = "Este e-mail já possui cadastro no sistema.";
+        } else if (msgErro.includes("weak_password") || msgErro.includes("weak password")) {
+            msgErro = "Essa senha é muito fraca. Tente misturar letras e números.";
+        }
+
+        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${msgErro}</span>`;
     } else {
         msgDiv.innerHTML = "<span class='msg-success'>Conta criada com sucesso! Você já pode fazer o login.</span>";
         document.getElementById('cad_email').value = "";
