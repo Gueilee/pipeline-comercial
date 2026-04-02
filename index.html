@@ -780,9 +780,7 @@ const pluginCentroRosca = {
             const centerX = (left + right) / 2;
             const centerY = (top + bottom) / 2;
             const chartHeight = bottom - top;
-            
-            // Diminui o tamanho da fonte interna (antes dividia por 120, agora por 160)
-            const fontSize = (chartHeight / 160).toFixed(2);
+            const fontSize = (chartHeight / 120).toFixed(2);
             ctx.font = `bold ${fontSize}em sans-serif`;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
@@ -1198,7 +1196,7 @@ function renderizarMetas() {
             ]
         },
         options: {
-            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
+            maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 0 } }, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: {
                     color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
                     formatter: (v, ctx) => {
                         if (ctx.datasetIndex === 0) return ""; 
@@ -1228,7 +1226,7 @@ function renderizarMetas() {
             ]
         },
         options: {
-            maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: { position: 'bottom' }, datalabels: {
+            maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 0 } }, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: {
                     color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
                     formatter: (v) => {
                         if (v === 0) return "";
@@ -1578,7 +1576,7 @@ function renderizarFinanceiro() {
             maintainAspectRatio: false,
             layout: { padding: { top: 20 } },
             plugins: {
-                legend: { position: 'top' },
+                legend: { position: 'bottom' },
                 datalabels: {
                     color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
                     formatter: v => {
@@ -1596,7 +1594,6 @@ function renderizarFinanceiro() {
     const buData = buLabels.map(k => faturamentoPorBU[k]);
     const isAllZero = buData.every(v => v === 0);
     
-    // --- ATUALIZAÇÃO DO GRÁFICO SHARE POR BU ---
     if(charts.finBu) charts.finBu.destroy();
     charts.finBu = new Chart(document.getElementById('chartFinBU'), {
         type: 'doughnut',
@@ -1606,18 +1603,18 @@ function renderizarFinanceiro() {
                 data: isAllZero ? [1] : buData, 
                 backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
             }]
+        },
         options: { 
             maintainAspectRatio: false, 
-            cutout: '75%', 
-            // Reduzimos o topo para acomodar a legenda e deixamos respiro nas laterais/fundo para os rótulos de dados
-            layout: { padding: { top: 0, bottom: 20, left: 30, right: 30 } }, 
+            cutout: '75%',
+            layout: { padding: { top: 0, bottom: 20, left: 30, right: 30 } },
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
                     color: '#422c76', 
-                    anchor: 'end', 
-                    align: 'end', 
-                    offset: 5, 
+                    anchor: 'end',
+                    align: 'end',
+                    offset: 5,
                     font: {weight: 'bold', size: 12},
                     formatter: (val, ctx) => {
                         let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -1626,8 +1623,8 @@ function renderizarFinanceiro() {
                     }
                 }, 
                 legend: { 
-                    position: 'top', // AJUSTE: Legenda movida para a parte superior
-                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } } // Padronizado com os outros gráficos
+                    position: 'top',
+                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } }
                 },
                 tooltip: {
                     callbacks: {
