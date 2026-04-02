@@ -817,17 +817,30 @@ async function recuperarSupabase() {
     }
 
     btn.innerText = "Enviando...";
-    const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email);
+    
+    // O redirectTo avisa ao Supabase para devolver o usuário para a tela exata em que ele está agora
+    const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href 
+    });
+    
     btn.innerText = "ENVIAR LINK";
     
     if (error) {
-        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${error.message}</span>`;
+        let msgErro = error.message;
+        
+        // Traduzindo os erros do Supabase para PT-BR
+        if (msgErro.includes("rate limit")) {
+            msgErro = "Por segurança, aguarde 60 segundos antes de tentar novamente.";
+        } else if (msgErro.includes("User not found")) {
+            msgErro = "Este e-mail não foi encontrado no sistema.";
+        }
+
+        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${msgErro}</span>`;
     } else {
-        msgDiv.innerHTML = "<span class='msg-success'>Se o e-mail existir, um link de recuperação foi enviado!</span>";
+        msgDiv.innerHTML = "<span class='msg-success'>Link enviado! Verifique sua caixa de entrada (e o Spam).</span>";
         document.getElementById('rec_email').value = "";
     }
 }
-
 async function logoff() {
     if(confirm("Deseja realmente sair do sistema?")) {
         await supabaseClient.auth.signOut();
