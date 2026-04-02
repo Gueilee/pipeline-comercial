@@ -1578,7 +1578,7 @@ function renderizarFinanceiro() {
             maintainAspectRatio: false,
             layout: { padding: { top: 20 } },
             plugins: {
-                legend: { position: 'bottom' },
+                legend: { position: 'top' },
                 datalabels: {
                     color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
                     formatter: v => {
@@ -1606,11 +1606,11 @@ function renderizarFinanceiro() {
                 data: isAllZero ? [1] : buData, 
                 backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
             }]
-        },options: { 
+        options: { 
             maintainAspectRatio: false, 
             cutout: '75%', 
-            // AJUSTE 1: Aumentamos o fundo (bottom) para 45, empurrando a rosca para cima
-            layout: { padding: { top: 10, bottom: 45, left: 30, right: 30 } }, 
+            // Reduzimos o topo para acomodar a legenda e deixamos respiro nas laterais/fundo para os rótulos de dados
+            layout: { padding: { top: 0, bottom: 20, left: 30, right: 30 } }, 
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
@@ -1626,9 +1626,8 @@ function renderizarFinanceiro() {
                     }
                 }, 
                 legend: { 
-                    position: 'bottom',
-                    // AJUSTE 2: Adiciona respiro nos itens da legenda, empurrando-os para baixo
-                    labels: { padding: 15 } 
+                    position: 'top', // AJUSTE: Legenda movida para a parte superior
+                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } } // Padronizado com os outros gráficos
                 },
                 tooltip: {
                     callbacks: {
