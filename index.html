@@ -416,10 +416,14 @@ header {
             </div>
 
             <div class="kpis-metas">
-                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapTotal">R$ 0</p></div>
-                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercTotal">0%</p></div>
+                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoAnual">R$ 0</p></div>
+                <div class="kpi"><h3>Realizado Anual</h3><p id="finRealAnual">R$ 0</p></div>
+                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapAnual">R$ 0</p></div>
+                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercAnual">0%</p></div>
+                <div class="kpi"><h3>Plano YTD</h3><p id="finPlanoYTD">R$ 0</p></div>
+                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealYTD">R$ 0</p></div>
+                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapYTD">R$ 0</p></div>
+                <div class="kpi"><h3>% Atingimento (YTD)</h3><p id="finPercYTD">0%</p></div>
             </div>
 
             <div class="charts-grid-metas">
@@ -1459,6 +1463,8 @@ function renderizar(){
 
 function renderizarFinanceiro() {
     let planoTotalAnual = 0;
+    let realTotalAnual = 0;
+    let planoTotalYTD = 0;
     let realTotalYTD = 0;
     
     let arrayPlanoMensal = new Array(12).fill(0);
@@ -1469,6 +1475,8 @@ function renderizarFinanceiro() {
     // PEGANDO OS VALORES DOS NOVOS FILTROS
     const fFinCli = document.getElementById('filtroFinCliente').value.toLowerCase();
     const fFinBU = document.getElementById('filtroFinBU').value;
+
+    const currentMonthIndex = new Date().getMonth(); // 0 para Janeiro, 3 para Abril, etc.
 
     baseResMensais.forEach(rm => {
         let bu = rm.bu ? rm.bu.toUpperCase().trim() : 'OUTROS';
@@ -1487,7 +1495,12 @@ function renderizarFinanceiro() {
         const valReal = parseFloat(rm.valor_realizado) || 0;
         
         planoTotalAnual += valPlan;
-        realTotalYTD += valReal;
+        realTotalAnual += valReal;
+
+        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) {
+            planoTotalYTD += valPlan;
+            realTotalYTD += valReal;
+        }
         
         // Verifica se o índice de mês é válido (0 a 11)
         if (mesIdx >= 0 && mesIdx <= 11) {
@@ -1504,17 +1517,29 @@ function renderizarFinanceiro() {
         clientesDesempenho[cliKey].desvio += (valReal - valPlan);
     });
 
-    const gap = realTotalYTD - planoTotalAnual;
-    const percAting = planoTotalAnual > 0 ? ((realTotalYTD / planoTotalAnual) * 100).toFixed(1) : 0;
+    const gapAnual = realTotalAnual - planoTotalAnual;
+    const percAtingAnual = planoTotalAnual > 0 ? ((realTotalAnual / planoTotalAnual) * 100).toFixed(1) : 0;
+
+    const gapYTD = realTotalYTD - planoTotalYTD;
+    const percAtingYTD = planoTotalYTD > 0 ? ((realTotalYTD / planoTotalYTD) * 100).toFixed(1) : 0;
     
-    document.getElementById('finPlanoTotal').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
-    document.getElementById('finRealTotal').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
+    document.getElementById('finPlanoAnual').innerText = "R$ " + (planoTotalAnual/1000000).toFixed(2) + "M";
+    document.getElementById('finRealAnual').innerText = "R$ " + (realTotalAnual/1000000).toFixed(2) + "M";
     
-    document.getElementById('finGapTotal').innerText = "R$ " + (gap/1000000).toFixed(2) + "M";
-    document.getElementById('finGapTotal').style.color = gap >= 0 ? '#27ae60' : '#c0392b';
+    document.getElementById('finGapAnual').innerText = "R$ " + (gapAnual/1000000).toFixed(2) + "M";
+    document.getElementById('finGapAnual').style.color = gapAnual >= 0 ? '#27ae60' : '#c0392b';
     
-    document.getElementById('finPercTotal').innerText = percAting + "%";
-    document.getElementById('finPercTotal').style.color = percAting >= 100 ? '#27ae60' : '#f39c12';
+    document.getElementById('finPercAnual').innerText = percAtingAnual + "%";
+    document.getElementById('finPercAnual').style.color = percAtingAnual >= 100 ? '#27ae60' : '#f39c12';
+
+    document.getElementById('finPlanoYTD').innerText = "R$ " + (planoTotalYTD/1000000).toFixed(2) + "M";
+    document.getElementById('finRealYTD').innerText = "R$ " + (realTotalYTD/1000000).toFixed(2) + "M";
+    
+    document.getElementById('finGapYTD').innerText = "R$ " + (gapYTD/1000000).toFixed(2) + "M";
+    document.getElementById('finGapYTD').style.color = gapYTD >= 0 ? '#27ae60' : '#c0392b';
+    
+    document.getElementById('finPercYTD').innerText = percAtingYTD + "%";
+    document.getElementById('finPercYTD').style.color = percAtingYTD >= 100 ? '#27ae60' : '#f39c12';
 
     if(charts.finEvolucao) charts.finEvolucao.destroy();
     charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
