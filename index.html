@@ -780,7 +780,9 @@ const pluginCentroRosca = {
             const centerX = (left + right) / 2;
             const centerY = (top + bottom) / 2;
             const chartHeight = bottom - top;
-            const fontSize = (chartHeight / 120).toFixed(2);
+            
+            // Diminui o tamanho da fonte interna (antes dividia por 120, agora por 160)
+            const fontSize = (chartHeight / 160).toFixed(2);
             ctx.font = `bold ${fontSize}em sans-serif`;
             ctx.textBaseline = "middle";
             ctx.textAlign = "center";
@@ -1594,6 +1596,7 @@ function renderizarFinanceiro() {
     const buData = buLabels.map(k => faturamentoPorBU[k]);
     const isAllZero = buData.every(v => v === 0);
     
+    // --- ATUALIZAÇÃO DO GRÁFICO SHARE POR BU ---
     if(charts.finBu) charts.finBu.destroy();
     charts.finBu = new Chart(document.getElementById('chartFinBU'), {
         type: 'doughnut',
@@ -1606,10 +1609,15 @@ function renderizarFinanceiro() {
         },
         options: { 
             maintainAspectRatio: false, 
+            cutout: '75%', // Deixa a rosca bem mais fina
+            layout: { padding: 30 }, // Dá espaço externo para o rótulo de dados não cortar
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
-                    color: '#fff', 
+                    color: '#422c76', // Cor solicitada para o rótulo
+                    anchor: 'end', // Joga o rótulo para o lado de fora
+                    align: 'end', // Alinha para a parte externa
+                    offset: 5, // Distância pequena para descolar da borda da rosca
                     font: {weight: 'bold', size: 12},
                     formatter: (val, ctx) => {
                         let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
