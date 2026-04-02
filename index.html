@@ -1611,9 +1611,8 @@ function renderizarFinanceiro() {
         options: { 
             maintainAspectRatio: false, 
             cutout: '75%',
-            // AQUI ESTÁ A MÁGICA: O "top: 70" empurra toda a rosca para baixo com força, 
-            // criando um buraco enorme entre ela e a legenda para o rótulo caber com folga.
-            layout: { padding: { top: 70, bottom: 20, left: 30, right: 30 } },
+            // Padding igual em todos os lados mantém a rosca perfeitamente centralizada e do tamanho ideal
+            layout: { padding: 30 },
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
@@ -1630,7 +1629,11 @@ function renderizarFinanceiro() {
                 }, 
                 legend: { 
                     position: 'top',
-                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } }
+                    labels: { padding: 10, boxWidth: 12, font: { size: 11 } },
+                    // ESTA É A MÁGICA: Força a legenda a ter um espaço vazio de 40px abaixo dela, afastando da rosca.
+                    afterFit: function(legend) {
+                        legend.height += 40;
+                    }
                 },
                 tooltip: {
                     callbacks: {
