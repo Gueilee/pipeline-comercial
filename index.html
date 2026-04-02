@@ -1606,18 +1606,18 @@ function renderizarFinanceiro() {
                 data: isAllZero ? [1] : buData, 
                 backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
             }]
-        },
-        options: { 
+        },options: { 
             maintainAspectRatio: false, 
-            cutout: '75%', // Deixa a rosca bem mais fina
-            layout: { padding: 30 }, // Dá espaço externo para o rótulo de dados não cortar
+            cutout: '75%', 
+            // AJUSTE 1: Aumentamos o fundo (bottom) para 45, empurrando a rosca para cima
+            layout: { padding: { top: 10, bottom: 45, left: 30, right: 30 } }, 
             plugins: { 
                 datalabels: { 
                     display: !isAllZero,
-                    color: '#422c76', // Cor solicitada para o rótulo
-                    anchor: 'end', // Joga o rótulo para o lado de fora
-                    align: 'end', // Alinha para a parte externa
-                    offset: 5, // Distância pequena para descolar da borda da rosca
+                    color: '#422c76', 
+                    anchor: 'end', 
+                    align: 'end', 
+                    offset: 5, 
                     font: {weight: 'bold', size: 12},
                     formatter: (val, ctx) => {
                         let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -1625,7 +1625,11 @@ function renderizarFinanceiro() {
                         return Math.round((val / total) * 100) + '%';
                     }
                 }, 
-                legend: { position: 'bottom' },
+                legend: { 
+                    position: 'bottom',
+                    // AJUSTE 2: Adiciona respiro nos itens da legenda, empurrando-os para baixo
+                    labels: { padding: 15 } 
+                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
