@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 :root{
@@ -460,13 +461,24 @@ header {
 
 <div id="modalFinInput" class="modal">
     <div class="modal-content" style="width: 850px;">
-        <h3>⚡ Lançamento Rápido por Cliente</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Selecione o Cliente / BU. Edite os valores dos 12 meses e use a tecla <b>TAB</b> para descer rapidamente pelas linhas.</p>
+        <h3>⚡ Lançamento Rápido e Lote</h3>
+        <p style="font-size: 13px; color: #666; margin-top: -10px;">Suba seus valores em lote via Excel ou edite linha a linha abaixo.</p>
         
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px dashed #ccc; align-items: center; justify-content: space-between;">
+            <div>
+                <h4 style="margin: 0 0 5px 0; color: var(--lilas); font-size: 14px;">Lançamento em Lote (Excel)</h4>
+                <p style="margin: 0; font-size: 11px; color: #666;">Baixe o modelo com todos os clientes do banco, preencha a coluna de realizados e faça o upload para salvar de uma vez.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-header" style="background:#e1f5fe; color:#0288d1; border: 1px solid #0288d1;" onclick="baixarModeloExcel()">📥 Baixar Modelo</button>
+                <input type="file" id="uploadExcel" accept=".xlsx, .xls, .csv" style="display: none;" onchange="subirPlanilhaExcel(event)">
+                <button type="button" id="btnUploadExcel" class="btn-header btn-novo-meta" onclick="document.getElementById('uploadExcel').click()">📤 Subir Planilha</button>
+            </div>
+        </div>
         <div class="form-group" style="width: 100%;">
             <label>CLIENTE / UNIDADE DE NEGÓCIO</label>
             <select id="fin_input_cliente" onchange="carregarGridFin()">
-                <option value="">Selecione o Cliente / BU...</option>
+                <option value="">Selecione o Cliente / BU para editar na tela...</option>
             </select>
         </div>
         
@@ -487,7 +499,7 @@ header {
 
         <div class="modal-footer">
             <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
-            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Lançamentos</button>
+            <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Lançamentos na Tela</button>
         </div>
     </div>
 </div>
@@ -1468,7 +1480,7 @@ function renderizar(){
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}, vendVal = {};
+    let statusCont = {}; let vendVal = {};
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
         pipeTot += vA; mrrTotal += vM;
@@ -1780,7 +1792,7 @@ function abrirLancamentoFin() {
     
     combinacoes.sort((a,b) => a.label.localeCompare(b.label));
     
-    selectCliente.innerHTML = '<option value="">Selecione o Cliente / BU...</option>' + 
+    selectCliente.innerHTML = '<option value="">Selecione o Cliente / BU para editar na tela...</option>' + 
                               combinacoes.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
                               
     document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
@@ -1868,11 +1880,118 @@ async function salvarGridFin() {
     }
 
     fecharModal('modalFinInput');
-    btn.innerText = "Salvar Lançamentos"; 
+    btn.innerText = "Salvar Lançamentos na Tela"; 
     btn.disabled = false;
     
     renderizarFinanceiro(); 
 }
+
+// ----------------------------------------------------------------------
+// FUNÇÕES NOVAS DE EXCEL EM LOTE
+// ----------------------------------------------------------------------
+
+function baixarModeloExcel() {
+    if (!window.XLSX) return alert("Aguarde a biblioteca de planilhas carregar.");
+    
+    const dados = [];
+    const combinacoes = new Set();
+    
+    // Mapeia todos os clientes e BUs únicas do banco
+    baseResMensais.forEach(r => {
+        const cli = r.cliente || 'Desconhecido';
+        const bu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
+        combinacoes.add(cli + '@@@' + bu);
+    });
+
+    // Para cada combinação única, cria as 12 linhas dos meses
+    Array.from(combinacoes).sort().forEach(comb => {
+        for(let m = 1; m <= 12; m++) {
+            dados.push({
+                "CLIENTE_E_BU_DO_SISTEMA": comb, // Não alterar na planilha para bater com o banco
+                "MES": m,
+                "VALOR_REALIZADO": "" // Coluna para o usuário preencher
+            });
+        }
+    });
+
+    // Cria a planilha e faz o download
+    const ws = XLSX.utils.json_to_sheet(dados);
+    
+    // Alarga as colunas para ficar visualmente bonito
+    ws['!cols'] = [{ wch: 45 }, { wch: 10 }, { wch: 20 }];
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Modelo_Lancamento");
+    XLSX.writeFile(wb, "Modelo_Lancamento_Financeiro.xlsx");
+}
+
+async function subirPlanilhaExcel(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+
+    if (!window.XLSX) return alert("Aguarde a biblioteca de planilhas carregar.");
+
+    const btn = document.getElementById('btnUploadExcel');
+    const originalText = btn.innerText;
+    btn.innerText = "Processando...";
+    btn.disabled = true;
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const firstSheet = workbook.SheetNames[0];
+            const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+
+            const promessas = [];
+            
+            sheetData.forEach(row => {
+                const clienteBU = row["CLIENTE_E_BU_DO_SISTEMA"];
+                const mes = parseInt(row["MES"]);
+                let valRealizado = parseFloat(row["VALOR_REALIZADO"]);
+
+                // Pula linhas que o usuário não preencheu ou modificou a estrutura
+                if(!clienteBU || isNaN(mes) || isNaN(valRealizado)) return; 
+
+                const [clienteNome, buNome] = clienteBU.split('@@@');
+
+                // Encontra a linha exata no banco de dados baseada no arquivo
+                const reg = baseResMensais.find(r => {
+                    const rCli = r.cliente || 'Desconhecido';
+                    const rBu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
+                    return rCli === clienteNome && rBu === buNome && r.mes_numero == mes;
+                });
+
+                // Se encontrou e o valor é diferente, joga pra fila de atualização
+                if(reg && parseFloat(reg.valor_realizado) !== valRealizado) {
+                    promessas.push(
+                        supabaseClient.from('resultados_mensais').update({ valor_realizado: valRealizado }).eq('id', reg.id)
+                    );
+                }
+            });
+
+            if(promessas.length > 0) {
+                btn.innerText = "Salvando no Banco...";
+                await Promise.all(promessas);
+                await carregarDadosFinanceiros();
+                renderizarFinanceiro();
+                carregarGridFin(); // Atualiza a grid se houver algum cliente selecionado por baixo
+                alert(`Sucesso! ${promessas.length} valores foram atualizados na base de dados.`);
+            } else {
+                alert("Nenhum valor novo preenchido ou os valores já eram iguais aos do banco.");
+            }
+        } catch (error) {
+            alert("Erro ao processar a planilha: " + error.message);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+            event.target.value = ""; // Limpa o input do file
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
 
 // ANTENA: Detecta se o usuário veio pelo link do e-mail de recuperação
 supabaseClient.auth.onAuthStateChange((event, session) => {
