@@ -331,6 +331,12 @@ header {
             <datalist id="listaClientes"></datalist>
             <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
             <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
+            <select id="filtroTipo" onchange="renderizar()">
+                <option value="">Tipo (Todos)</option>
+                <option value="UP-SELLING">UP-SELLING</option>
+                <option value="CROSS-SELLING">CROSS-SELLING</option>
+                <option value="NOVOS CLIENTES">NOVOS CLIENTES</option>
+            </select>
             <select id="filtroStatus" onchange="renderizar()">
                 <option value="">Status</option>
                 <option value="AINDA FRIO">AINDA FRIO</option>
@@ -1456,7 +1462,8 @@ function renderizar(){
     const fV = document.getElementById('filtroVendedor').value;
     const fA = document.getElementById('filtroArea').value;
     const fS = document.getElementById('filtroStatus').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS));
+    const fT = document.getElementById('filtroTipo').value;
+    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS) && (!fT || ((!r.tipo || r.tipo.trim() === "") ? "NOVOS CLIENTES" : r.tipo.toUpperCase()) === fT || (fT === "NOVOS CLIENTES" && r.tipo && r.tipo.toUpperCase() === "NOVO NEGÓCIO")));
 
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
@@ -1914,4 +1921,3 @@ async function salvarNovaSenha() {
 </script>
 </body>
 </html>
-
