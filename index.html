@@ -1108,6 +1108,10 @@ async function salvarHistoricoManual() {
 
 document.getElementById('formOportunidade').onsubmit = async (e) => {
     e.preventDefault();
+    const btnSalvar = document.querySelector('#formOportunidade button[type="submit"]');
+    btnSalvar.innerText = "Salvando...";
+    btnSalvar.disabled = true;
+
     const idValue = document.getElementById('op_id').value;
     const novo_cliente = document.getElementById('op_cliente').value.toUpperCase();
     const novo_tipo = document.getElementById('op_tipo').value.toUpperCase();
@@ -1147,19 +1151,46 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
-    
-    const payload = { cliente: novo_cliente, tipo: novo_tipo, breve_descricao: nova_desc, vendedor: novo_vend, data_oportunidade: nova_data, previsao_fechamento: nova_prev || null, valor_estimado_ano: novo_valor, valor_mensal_recorrente: (novo_valor / 12), status: novo_status, area: nova_area, motivo_perda: novo_motivo || null, historico: historico_atual };
-    
+
+    const payload = { 
+        cliente: novo_cliente, 
+        tipo: novo_tipo, 
+        breve_descricao: nova_desc, 
+        vendedor: novo_vend, 
+        data_oportunidade: nova_data, 
+        previsao_fechamento: nova_prev || null, 
+        valor_estimado_ano: novo_valor, 
+        valor_mensal_recorrente: (novo_valor / 12), 
+        status: novo_status, 
+        area: nova_area, 
+        motivo_perda: novo_motivo || null, 
+        historico: historico_atual 
+    };
+
+    let erroNoBanco = null;
+
     if(idValue) {
         let res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-        if(res.error) await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
+        if(res.error) res = await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
+        erroNoBanco = res.error;
     } else {
-        await supabaseClient.from('oportunidades').insert([payload]);
+        let res = await supabaseClient.from('oportunidades').insert([payload]);
+        erroNoBanco = res.error;
     }
-    
-    fecharModal('modalOportunidade'); carregarDados();
-};
 
+    btnSalvar.innerText = "Salvar Oportunidade";
+    btnSalvar.disabled = false;
+
+    // Se houver erro, a tela avisa o usuário e não fecha o modal
+    if (erroNoBanco) {
+        alert("O Supabase recusou a gravação!\nMotivo: " + erroNoBanco.message);
+        console.error("Detalhe do erro no Supabase:", erroNoBanco);
+        return; 
+    }
+
+    fecharModal('modalOportunidade'); 
+    carregarDados();
+};
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
     document.getElementById('formMetasInput').reset();
@@ -1437,16 +1468,17 @@ async function drop(ev, novoStatus) {
     ev.currentTarget.classList.remove('column-over');
     
     const cardIdAttr = ev.dataTransfer.getData("text/plain");
-    if(!cardIdAttr) return; // Se arrastou algo vazio, ignora
+    if(!cardIdAttr) return;
     
-    // Extrai apenas o número do ID
     const cardId = cardIdAttr.replace("card-", "");
     
-    // Procura na memória local pelo id exato
     const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(cardId));
-    if(!item || item.status === novoStatus) return; // Se não achar ou for o mesmo status, ignora
+    if(!item || item.status === novoStatus) return; 
 
-    // 1. Atualiza visualmente IMEDIATAMENTE na tela (Efeito liso)
+    // Guarda o status antigo para reverter caso o banco dê erro
+    const statusAntigo = item.status;
+
+    // 1. Atualiza visualmente IMEDIATAMENTE na tela
     item.status = novoStatus;
     renderizar(); 
 
@@ -1456,19 +1488,28 @@ async function drop(ev, novoStatus) {
         return;
     }
 
-    // 3. Salva no Supabase em Background (Invisível)
+    // 3. Salva no Supabase
     const idParaBanco = item.id !== undefined ? item.id : item.ID;
     
-    // Gera log de histórico
     const agora = new Date();
     const carimbo = `[${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}] STATUS MOVIDO VIA KANBAN PARA: ${novoStatus}`;
     const novoHist = carimbo + (item.historico ? "\n" + item.historico : "");
-    item.historico = novoHist;
 
     let res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', idParaBanco);
-    if(res.error) await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
-}
+    if(res.error) res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
 
+    // Validação de erro invisível
+    if(res.error) {
+        alert("Erro ao mover no banco de dados!\nMotivo: " + res.error.message);
+        console.error("ERRO KANBAN:", res.error);
+        
+        // Reverte a alteração visual no kanban para evitar ilusão de ótica
+        item.status = statusAntigo;
+        renderizar();
+    } else {
+        item.historico = novoHist; // Confirma o histórico localmente se deu certo
+    }
+}
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
     const fV = document.getElementById('filtroVendedor').value;
