@@ -268,22 +268,9 @@ header {
         <input type="email" id="login_user" placeholder="E-mail corporativo">
         <input type="password" id="login_pass" placeholder="Senha">
         <button class="btn-login" onclick="autenticarSupabase()" id="btn-entrar">ENTRAR</button>
-        <div class="login-links">
-            <a href="#" onclick="trocarTelaLogin('box-cadastro')">Primeiro Acesso?</a>
-            <a href="#" onclick="trocarTelaLogin('box-recuperar')">Esqueci a senha</a>
-        </div>
-    </div>
-
-    <div class="login-box" id="box-cadastro" style="display: none;">
-        <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Criar Conta</h2>
-        <div id="cad-msg" class="msg-box"></div>
-        <input type="email" id="cad_email" placeholder="E-mail corporativo">
-        <input type="password" id="cad_pass" placeholder="Crie uma senha (mín. 6 letras)">
-        <button class="btn-login" onclick="cadastrarSupabase()" id="btn-cadastrar" style="background: #27ae60;">CADASTRAR</button>
-        <div class="login-links" style="justify-content: center; margin-top: 20px;">
-            <a href="#" onclick="trocarTelaLogin('box-login')">← Voltar para o Login</a>
-        </div>
+        <div class="login-links" style="justify-content: center;">
+    <a href="#" onclick="trocarTelaLogin('box-recuperar')">Esqueci a senha</a>
+</div>
     </div>
 
     <div class="login-box" id="box-recuperar" style="display: none;">
