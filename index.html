@@ -2035,7 +2035,6 @@ async function subirPlanilhaExcel(event) {
     reader.readAsArrayBuffer(file);
 }
 
-
 // ANTENA: Detecta se o usuário veio pelo link do e-mail de recuperação
 supabaseClient.auth.onAuthStateChange((event, session) => {
     if (event === 'PASSWORD_RECOVERY') {
@@ -2043,6 +2042,14 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
     }
 });
 
+// BLINDAGEM EXTRA: Se a antena falhar, forçamos a leitura pela URL (URL Hash)
+window.onload = () => {
+    if (window.location.hash && window.location.hash.includes("type=recovery")) {
+        trocarTelaLogin('box-nova-senha');
+    }
+};
+
+// Função para enviar a nova senha para o banco de dados...
 // Função para enviar a nova senha para o banco de dados
 async function salvarNovaSenha() {
     const senha1 = document.getElementById('nova_senha_1').value;
