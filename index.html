@@ -2049,7 +2049,6 @@ window.onload = () => {
     }
 };
 
-// Função para enviar a nova senha para o banco de dados...
 // Função para enviar a nova senha para o banco de dados
 async function salvarNovaSenha() {
     const senha1 = document.getElementById('nova_senha_1').value;
@@ -2067,21 +2066,31 @@ async function salvarNovaSenha() {
     }
 
     btn.innerText = "Salvando...";
-    // O Supabase já sabe quem é o usuário por causa do link do e-mail, então é só mandar atualizar
     const { data, error } = await supabaseClient.auth.updateUser({ password: senha1 });
     btn.innerText = "SALVAR E ENTRAR";
 
     if (error) {
-        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${error.message}</span>`;
+        let msgErro = error.message;
+        
+        // Blindagem contra o erro de sessão/link expirado
+        if (msgErro.includes("Auth session missing")) {
+            msgErro = "Este link de recuperação expirou ou já foi utilizado. Por favor, volte ao login e solicite um novo link.";
+            msgDiv.innerHTML = `
+                <span class='msg-error'>${msgErro}</span>
+                <br><br>
+                <button type="button" class="btn-header" style="background:#f0f0f0; width:100%; justify-content:center;" onclick="trocarTelaLogin('box-login')">← Voltar para o Login</button>
+            `;
+            return;
+        }
+
+        msgDiv.innerHTML = `<span class='msg-error'>Erro: ${msgErro}</span>`;
     } else {
         msgDiv.innerHTML = "<span class='msg-success'>Senha atualizada com sucesso! Iniciando sistema...</span>";
         
-        // Pega o e-mail do usuário para exibir no sistema e faz o login automático
         if(data && data.user) {
             USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
         }
         
-        // Aguarda 2 segundos para o usuário ler a mensagem de sucesso e entra no sistema
         setTimeout(() => {
             iniciarSistema();
         }, 2000);
