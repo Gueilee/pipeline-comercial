@@ -740,18 +740,23 @@ function navegar(pagina) {
 let USUARIO_LOGADO = "";
 
 // CONTROLE DE TELAS DE LOGIN
+// CONTROLE DE TELAS DE LOGIN
 function trocarTelaLogin(idTela) {
     document.getElementById('box-login').style.display = 'none';
-    document.getElementById('box-cadastro').style.display = 'none';
     document.getElementById('box-recuperar').style.display = 'none';
     document.getElementById('box-nova-senha').style.display = 'none'; 
+    
     document.getElementById(idTela).style.display = 'block';
     
     document.getElementById('login-msg').style.display = 'none';
-    document.getElementById('cad-msg').innerHTML = '';
     document.getElementById('rec-msg').innerHTML = '';
     document.getElementById('nova-senha-msg').innerHTML = ''; 
 }
+
+async function autenticarSupabase() {
+    const email = document.getElementById('login_user').value;
+    const pass = document.getElementById('login_pass').value;
+// ... (o resto do autenticarSupabase continua igualzinho para baixo)
 
 async function autenticarSupabase() {
     const email = document.getElementById('login_user').value;
