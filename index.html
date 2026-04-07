@@ -2031,7 +2031,7 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // BLINDAGEM EXTRA: Se a antena falhar, forçamos a leitura pela URL (URL Hash)
 window.onload = () => {
-    if (window.location.hash && window.location.hash.includes("type=recovery")) {
+    if (window.location.hash && (window.location.hash.includes("type=recovery") || window.location.hash.includes("type=invite"))) {
         trocarTelaLogin('box-nova-senha');
     }
 };
