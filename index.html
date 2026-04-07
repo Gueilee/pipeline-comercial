@@ -850,9 +850,10 @@ async function recuperarSupabase() {
     btn.innerText = "Enviando...";
     
     // O redirectTo avisa ao Supabase para devolver o usuário para a tela exata em que ele está agora
-    const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href 
-    });
+    // Procure este bloco e substitua pelo link do seu GitHub
+const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://gueilee.github.io/pipeline-comercial/" 
+});
     
     btn.innerText = "ENVIAR LINK";
     
