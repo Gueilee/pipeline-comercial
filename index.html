@@ -76,56 +76,62 @@ body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; ba
 .active-page { display: block !important; }
 
 /* CABEÇALHO */
-header { 
-    background: white; 
-    padding: 10px 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+header {
+    background: white;
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     position: sticky;
     top: 0;
     z-index: 1000;
+    gap: 12px;
 }
-.logo { height: 45px; width: auto; transition: transform 0.3s; }
+.logo { height: 38px; width: auto; transition: transform 0.3s; flex-shrink: 0; }
 .logo:hover { transform: scale(1.05); }
 
-.header-right { 
-    display: flex; 
-    gap: 8px; 
-    align-items: center; 
+.header-right {
+    display: flex;
+    gap: 4px;
+    align-items: center;
     background: #f8f9fa;
-    padding: 6px;
-    border-radius: 12px;
+    padding: 5px;
+    border-radius: 10px;
+    flex-wrap: nowrap;
+    overflow: hidden;
 }
 
 .nav-group {
     display: flex;
-    gap: 5px;
-    margin-right: 15px;
+    gap: 2px;
+    margin-right: 6px;
     border-right: 1px solid #ddd;
-    padding-right: 15px;
+    padding-right: 6px;
+    flex-shrink: 0;
 }
 
-.btn-header { 
-    border: none; 
-    padding: 10px 16px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    font-weight: 600; 
-    font-size: 13px; 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+.btn-header {
+    border: none;
+    padding: 7px 11px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
     color: var(--grafite);
     background: transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-header:hover {
     background: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
 }
 
 .btn-header.active {
@@ -133,12 +139,12 @@ header {
     color: white;
 }
 
-.btn-ia { 
-    background: linear-gradient(135deg, var(--ia-gold), #f3d060); 
-    color: white; 
-    box-shadow: 0 2px 6px rgba(212, 175, 55, 0.3);
+.btn-ia {
+    background: linear-gradient(135deg, var(--ia-gold), #f3d060);
+    color: white;
+    box-shadow: 0 2px 5px rgba(212, 175, 55, 0.3);
 }
-.btn-ia:hover { 
+.btn-ia:hover {
     background: linear-gradient(135deg, #b8962d, var(--ia-gold));
     color: white;
 }
@@ -149,8 +155,8 @@ header {
 .btn-novo-meta { background-color: #27ae60; color: white; }
 .btn-novo-meta:hover { background-color: #1e8449; }
 
-.btn-logoff { color: #c0392b; border-radius: 8px; padding: 10px; }
-.btn-logoff:hover { background-color: #fff1f0; box-shadow: 0 4px 8px rgba(192, 57, 43, 0.1); }
+.btn-logoff { color: #c0392b; border-radius: 7px; padding: 7px 9px; font-size: 12px; }
+.btn-logoff:hover { background-color: #fff1f0; box-shadow: 0 3px 6px rgba(192, 57, 43, 0.1); }
 
 .container{ padding:20px 30px; max-width:1650px; margin:auto; }
 .filters{ display:flex; gap:12px; margin-bottom:20px; align-items: center; flex-wrap: wrap; }
@@ -169,7 +175,147 @@ header {
 /* TELA DE METAS */
 .metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .kpis-metas { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:30px; }
-.charts-grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 35px; }
+.charts-grid-metas { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+
+/* SELETOR DE PERÍODO */
+.periodo-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: white; padding: 14px 20px; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 22px;
+}
+.periodo-label {
+    font-size: 11px; font-weight: 700; color: #999;
+    text-transform: uppercase; letter-spacing: 0.8px; margin-right: 2px; white-space: nowrap;
+}
+.pill-group { display: flex; gap: 4px; background: #f4f4f4; padding: 4px; border-radius: 9px; }
+.pill {
+    padding: 6px 14px; border: none; border-radius: 6px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    background: transparent; color: #666; transition: all 0.2s; white-space: nowrap;
+}
+.pill:hover { background: #e2e2e2; color: #333; }
+.pill.active {
+    background: var(--lilas); color: white;
+    box-shadow: 0 2px 8px rgba(66,44,118,0.35);
+}
+.periodo-sep { width: 1px; height: 28px; background: #eee; flex-shrink: 0; }
+.periodo-custom { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #777; }
+.periodo-custom select {
+    padding: 6px 10px; border: 1px solid #ddd; border-radius: 7px;
+    font-size: 12px; background: white; cursor: pointer; color: #333;
+    transition: border-color 0.2s;
+}
+.periodo-custom select:focus { outline: none; border-color: var(--lilas); }
+.periodo-badge {
+    margin-left: auto; background: #f0ebff; color: var(--lilas);
+    font-size: 11px; font-weight: 700; padding: 5px 14px;
+    border-radius: 20px; white-space: nowrap; letter-spacing: 0.3px;
+}
+
+/* MODO COMPARATIVO */
+.btn-comparar { background: white; border: 2px solid #ddd; color: #666; }
+.btn-comparar:hover { border-color: var(--lilas); color: var(--lilas); box-shadow: 0 3px 6px rgba(66,44,118,0.12); }
+.btn-comparar.ativo { background: var(--lilas); color: white; border-color: var(--lilas); }
+.btn-comparar.ativo:hover { background: #32215a; }
+
+.comp-selector-bar {
+    display: none; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: white; padding: 14px 20px; border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 22px;
+    border-left: 4px solid var(--lilas);
+}
+.comp-selector-bar.visivel { display: flex; }
+.comp-selector-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.8px; white-space: nowrap; }
+
+.comp-chip {
+    padding: 7px 16px; border: 2px solid #e0e0e0; border-radius: 20px;
+    font-size: 12px; font-weight: 700; cursor: pointer; background: white;
+    color: #666; transition: all 0.2s; white-space: nowrap; user-select: none;
+}
+.comp-chip:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+.comp-chip.sel { color: white; }
+
+.comp-panel { display: none; }
+.comp-panel.visivel { display: block; }
+
+.comp-ranking-grid {
+    display: grid; gap: 15px; margin-bottom: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.comp-rank-card {
+    background: white; border-radius: 14px; padding: 22px 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); text-align: center;
+    border-top: 4px solid #ddd; position: relative; transition: 0.25s;
+}
+.comp-rank-card:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(0,0,0,0.13); }
+.comp-rank-medal { font-size: 28px; margin-bottom: 6px; }
+.comp-rank-nome { font-size: 11px; font-weight: 700; color: #777; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.4; }
+.comp-rank-pct { font-size: 36px; font-weight: 800; margin-bottom: 2px; line-height: 1; }
+.comp-rank-label { font-size: 10px; color: #aaa; font-weight: 600; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.3px; }
+.comp-mini-stat { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 11px; }
+.comp-mini-stat-label { color: #999; min-width: 64px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+.comp-mini-track { flex: 1; height: 7px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+.comp-mini-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+.comp-mini-val { font-weight: 700; min-width: 36px; text-align: right; color: #555; font-size: 11px; }
+
+.comp-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+
+.comp-table-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+.comp-table-card h4 { margin: 0 0 18px 0; color: #333; font-size: 15px; font-weight: 700; }
+.comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.comp-table th { padding: 10px 14px; text-align: left; color: #aaa; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #f0f0f0; font-weight: 700; letter-spacing: 0.5px; }
+.comp-table td { padding: 13px 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table tr:hover td { background: #fafafa; }
+.comp-vendor-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 9px; vertical-align: middle; flex-shrink: 0; }
+.comp-pct-pill { display: inline-block; padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.comp-pct-verde   { background: #e8f8f0; color: #27ae60; }
+.comp-pct-amarelo { background: #fef9e7; color: #c9a800; }
+.comp-pct-vermelho{ background: #fdf0f0; color: #c0392b; }
+.comp-empty { text-align: center; padding: 40px; color: #bbb; font-size: 14px; }
+
+/* MULTI-SELECT FILTRO */
+.multi-select-wrapper { position: relative; flex-shrink: 0; }
+.multi-select-btn {
+    height: 40px; padding: 0 12px; border-radius: 6px; border: 1px solid #ccc;
+    font-size: 13px; background: white; cursor: pointer; display: flex;
+    align-items: center; gap: 8px; white-space: nowrap; min-width: 160px;
+    transition: border-color 0.2s; font-family: inherit; color: var(--grafite);
+}
+.multi-select-btn:hover { border-color: var(--lilas); }
+.multi-select-btn.ativo { border-color: var(--lilas); box-shadow: 0 0 0 2px rgba(66,44,118,0.1); }
+.multi-select-chevron { margin-left: auto; color: #aaa; font-size: 10px; transition: transform 0.2s; }
+.multi-select-btn.ativo .multi-select-chevron { transform: rotate(180deg); }
+.multi-select-badge { background: var(--lilas); color: white; border-radius: 10px; font-size: 10px; font-weight: 800; padding: 2px 7px; flex-shrink: 0; }
+.multi-select-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; background: white;
+    border: 1px solid #e0e0e0; border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.13); z-index: 600;
+    min-width: 230px; padding: 6px 0; display: none;
+}
+.multi-select-dropdown.aberto { display: block; }
+.multi-select-ctrl-row { display: flex; justify-content: space-between; padding: 7px 14px 10px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+.multi-select-ctrl { background: none; border: none; font-size: 11px; font-weight: 700; color: var(--lilas); cursor: pointer; padding: 0; font-family: inherit; }
+.multi-select-ctrl:hover { text-decoration: underline; }
+.multi-select-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; font-size: 13px; transition: background 0.1s; user-select: none; }
+.multi-select-item:hover { background: #f8f5ff; }
+.multi-select-item input[type=checkbox] { accent-color: var(--lilas); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+
+/* COMPARATIVO FINANCEIRO */
+.fin-dim-toggle { display: flex; background: #f4f4f4; border-radius: 8px; padding: 3px; gap: 2px; flex-shrink: 0; }
+.fin-dim-btn {
+    padding: 6px 16px; border: none; border-radius: 6px; font-size: 12px;
+    font-weight: 700; cursor: pointer; background: transparent; color: #888;
+    transition: all 0.2s; white-space: nowrap;
+}
+.fin-dim-btn.ativo { background: var(--lilas); color: white; box-shadow: 0 2px 6px rgba(66,44,118,0.3); }
+
+.fin-rank-valores { display: flex; gap: 8px; justify-content: center; margin: 10px 0 14px; flex-wrap: wrap; }
+.fin-rank-val { text-align: center; }
+.fin-rank-val-num { font-size: 13px; font-weight: 800; color: #444; }
+.fin-rank-val-label { font-size: 9px; color: #bbb; font-weight: 600; text-transform: uppercase; display: block; margin-top: 1px; }
+.fin-rank-gap-pos { color: #27ae60; }
+.fin-rank-gap-neg { color: #c0392b; }
 
 /* DATAGRID FINANCEIRO */
 .datagrid-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
@@ -255,6 +401,63 @@ header {
 .timeline-date { font-size: 11px; font-weight: bold; color: #888; margin-bottom: 4px; display: block; }
 .timeline-content { font-size: 13px; background: #f9f9f9; padding: 10px; border-radius: 6px; color: #444; border: 1px solid #eee; }
 .manual-history-box { background: #f4f7f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e0e0e0; }
+
+/* TOAST NOTIFICATIONS */
+#toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 99999;
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+}
+.toast {
+    padding: 13px 18px; border-radius: 10px; font-size: 13px; font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); animation: toastIn 0.3s ease;
+    max-width: 370px; display: flex; align-items: center; gap: 10px;
+    pointer-events: all; color: white; line-height: 1.4;
+}
+.toast-success { background: #27ae60; }
+.toast-error { background: #c0392b; }
+.toast-warning { background: #f39c12; color: #333; }
+.toast-info { background: var(--lilas); }
+@keyframes toastIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
+
+/* LOADING OVERLAY */
+#loading-overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.75);
+    z-index: 50000; display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 15px; backdrop-filter: blur(2px);
+}
+.spinner {
+    width: 46px; height: 46px; border: 5px solid #eee;
+    border-top-color: var(--lilas); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading-overlay p { color: var(--lilas); font-weight: 600; font-size: 14px; margin: 0; }
+
+/* CONFIRM DIALOG */
+#confirm-modal {
+    display: none; position: fixed; z-index: 99998; inset: 0;
+    background: rgba(0,0,0,0.55); align-items: center; justify-content: center;
+}
+#confirm-modal.show { display: flex; }
+.confirm-box {
+    background: white; padding: 32px; border-radius: 14px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25); max-width: 420px;
+    width: 90%; text-align: center;
+}
+.confirm-box p { font-size: 15px; color: #333; margin: 0 0 25px 0; line-height: 1.6; }
+.confirm-actions { display: flex; gap: 12px; justify-content: center; }
+
+/* BADGE DE PERFIL */
+.perfil-badge {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0;
+}
+.perfil-diretor   { background: #f0ebff; color: var(--lilas); }
+.perfil-financeiro{ background: #e8f5e9; color: #1b7a3e; }
+.perfil-vendedor  { background: #e3f2fd; color: #1565c0; }
+.perfil-viewer    { background: #f5f5f5; color: #777; }
 </style>
 </head>
 
@@ -306,18 +509,19 @@ header {
                 <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
             </div>
             
-            <button type="button" class="btn-header btn-ia" onclick="abrirModal('modalIA')"><span>✨</span> Prospecção IA</button>
-            <button type="button" class="btn-header" onclick="abrirModal('modalVendedor')"><span>👥</span> Vendedores</button>
-            <button type="button" class="btn-header" onclick="abrirModal('modalArea')"><span>🏢</span> Áreas</button>
-            <button type="button" class="btn-header btn-novo-op" onclick="prepararNovo()"><span>➕</span> Nova Oportunidade</button>
-            <div style="width: 1px; height: 25px; background: #ddd; margin: 0 5px;"></div>
+            <button type="button" id="btn-ia" class="btn-header btn-ia" onclick="abrirModal('modalIA')" title="Prospecção IA"><span>✨</span> Prospecção IA</button>
+            <button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
+            <button type="button" id="btn-areas" class="btn-header" onclick="abrirModal('modalArea')" title="Gerenciar Áreas"><span>🏢</span> Áreas</button>
+            <button type="button" id="btn-nova-op" class="btn-header btn-novo-op" onclick="prepararNovo()" title="Nova Oportunidade"><span>➕</span> Nova Oportunidade</button>
+            <div style="width:1px; height:22px; background:#ddd; margin:0 3px; flex-shrink:0;"></div>
+            <span id="perfilBadge" class="perfil-badge"></span>
             <button type="button" class="btn-header btn-logoff" onclick="logoff()" title="Sair do Sistema"><span>🚪</span> SAIR</button>
         </div>
     </header>
 
     <div class="container">
         <div class="filters" id="barraFiltros">
-            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="renderizar()" list="listaClientes">
+            <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="debouncedRenderizar()" list="listaClientes">
             <datalist id="listaClientes"></datalist>
             <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
             <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
@@ -339,11 +543,20 @@ header {
         </div>
 
         <div id="page-dashboard" class="active-page">
-            <div class="kpis">
-                <div class="kpi"><h3>Receita Ganha</h3><p id="receitaGanha">R$ 0</p></div>
+            <div class="kpis" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="kpi"><h3>Valor Estimado (Fechados)</h3><p id="receitaGanha">R$ 0</p></div>
                 <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
                 <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Conversão</h3><p id="conversao">0%</p></div>
+                <div class="kpi">
+                    <h3>Taxa de Conversão</h3>
+                    <p id="conversao">0%</p>
+                    <span id="conversaoSub" style="font-size:11px; color:#999; font-weight:500;"></span>
+                </div>
+                <div class="kpi">
+                    <h3>Win Rate</h3>
+                    <p id="winRate">0%</p>
+                    <span id="winRateSub" style="font-size:11px; color:#999; font-weight:500;"></span>
+                </div>
                 <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
             </div>
 
@@ -361,21 +574,110 @@ header {
             <div class="metas-header">
                 <div>
                     <h2 style="margin: 0; color: var(--lilas);">Acompanhamento de Metas</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Use o filtro superior de Vendedores para detalhar o desempenho individual.</p>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Combine o filtro de Vendedor com o seletor de período para análises detalhadas.</p>
                 </div>
-                <button type="button" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button type="button" id="btnComparar" class="btn-header btn-comparar" onclick="toggleModoComparativo()"><span>⚖️</span> Comparar Vendedores</button>
+                    <button type="button" id="btn-lancar-meta" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
+                </div>
             </div>
 
-            <div class="kpis-metas">
-                <div class="kpi"><h3>Atingimento Geral (Real vs Meta)</h3><p id="metaPercAtingimento">0%</p></div>
-                <div class="kpi"><h3>Faturamento Total Realizado YTD</h3><p id="metaRealizadoTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Reuniões (Realizadas vs Meta YTD)</h3><p id="metaReunioesYTD">0 / 0</p></div>
-                <div class="kpi"><h3>Propostas (Enviadas vs Meta YTD)</h3><p id="metaPropostasYTD">0 / 0</p></div>
+            <!-- SELETOR DE PERÍODO -->
+            <div class="periodo-bar">
+                <span class="periodo-label">Período</span>
+                <div class="pill-group" id="pillGroup">
+                    <button class="pill" onclick="setPeriodo('mes')">Este Mês</button>
+                    <button class="pill" onclick="setPeriodo('trim1')">T1 (Jan–Mar)</button>
+                    <button class="pill" onclick="setPeriodo('trim2')">T2 (Abr–Jun)</button>
+                    <button class="pill" onclick="setPeriodo('trim3')">T3 (Jul–Set)</button>
+                    <button class="pill" onclick="setPeriodo('trim4')">T4 (Out–Dez)</button>
+                    <button class="pill active" onclick="setPeriodo('ano')">Ano Completo</button>
+                </div>
+                <div class="periodo-sep"></div>
+                <div class="periodo-custom">
+                    <span style="font-weight:700; color:#555;">Ano</span>
+                    <select id="periodoAnoSelect" onchange="setPeriodoCustom()" style="font-weight:700; color:var(--lilas);"></select>
+                    <div class="periodo-sep" style="margin:0 4px;"></div>
+                    <span>De</span>
+                    <select id="periodoInicio" onchange="setPeriodoCustom()">
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                        <option value="3">Março</option><option value="4">Abril</option>
+                        <option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option>
+                        <option value="9">Setembro</option><option value="10">Outubro</option>
+                        <option value="11">Novembro</option><option value="12">Dezembro</option>
+                    </select>
+                    <span>até</span>
+                    <select id="periodoFim" onchange="setPeriodoCustom()">
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                        <option value="3">Março</option><option value="4">Abril</option>
+                        <option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option>
+                        <option value="9">Setembro</option><option value="10">Outubro</option>
+                        <option value="11">Novembro</option><option value="12" selected>Dezembro</option>
+                    </select>
+                </div>
+                <span class="periodo-badge" id="periodoBadge">Jan – Dez 2026</span>
             </div>
 
-            <div class="charts-grid-metas">
-                <div class="chart-card"><h4>Evolução Mensal (Receita Total)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
-                <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
+            <!-- BARRA DE SELEÇÃO — MODO COMPARATIVO -->
+            <div id="compSelectorBar" class="comp-selector-bar">
+                <span class="comp-selector-label">⚖️ Vendedores</span>
+                <div id="compChips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                <span style="font-size:11px; color:#bbb; margin-left:4px;">Selecione 2 ou mais para comparar</span>
+            </div>
+
+            <!-- PAINEL COMPARATIVO -->
+            <div id="compPanel" class="comp-panel">
+                <div class="comp-ranking-grid" id="compRankingGrid">
+                    <div class="comp-empty">Selecione ao menos 2 vendedores para ver o comparativo.</div>
+                </div>
+                <div class="comp-charts-grid">
+                    <div class="chart-card"><h4>Propostas — Meta vs Realizado</h4><canvas id="chartCompPropostas"></canvas></div>
+                    <div class="chart-card"><h4>Reuniões — Meta vs Realizado</h4><canvas id="chartCompBars"></canvas></div>
+                </div>
+                <div class="comp-table-card">
+                    <h4>📊 Comparativo Detalhado no Período</h4>
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th>Vendedor</th>
+                                <th>Meta Reuniões</th>
+                                <th>Real. Reuniões</th>
+                                <th>% Reuniões</th>
+                                <th>Meta Propostas</th>
+                                <th>Real. Propostas</th>
+                                <th>% Propostas</th>
+                                <th>% Geral</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO NORMAL (oculto no modo comparativo) -->
+            <div id="metasNormal">
+                <div class="kpis-metas">
+                    <div class="kpi"><h3 id="lblMetaAting">Atingimento no Período</h3><p id="metaPercAtingimento">0%</p></div>
+                    <div class="kpi"><h3 id="lblMetaFat">Faturamento Realizado</h3><p id="metaRealizadoTotal">R$ 0</p></div>
+                    <div class="kpi"><h3 id="lblMetaReun">Reuniões Realizadas</h3><p id="metaReunioesYTD">0 / 0</p></div>
+                    <div class="kpi"><h3 id="lblMetaProp">Propostas Enviadas</h3><p id="metaPropostasYTD">0 / 0</p></div>
+                </div>
+
+                <div class="charts-grid-metas">
+                    <div class="chart-card"><h4>Evolução Mensal (Ano Completo)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
+                    <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
+                </div>
+
+                <!-- GRÁFICO: PLANEJADO VS REALIZADO NO PERÍODO -->
+                <div class="chart-card" style="height: 380px; margin-bottom: 30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;">
+                        <h4 style="margin:0;" id="tituloChartPeriodo">Planejado vs Realizado — Ano Completo</h4>
+                        <span id="badgeChartPeriodo" style="font-size:11px; color:#888; font-weight:600;"></span>
+                    </div>
+                    <canvas id="chartMetaVsReal"></canvas>
+                </div>
             </div>
         </div>
 
@@ -386,61 +688,127 @@ header {
                     <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Acompanhamento orçamentário consolidado de Clientes por BU e Categoria.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="filtroFinCliente" class="input-search" placeholder="🔍 Buscar cliente..." oninput="renderizarFinanceiro()" list="listaClientesFin" style="min-width: 180px;">
+                    <input type="text" id="filtroFinCliente" class="input-search" placeholder="🔍 Buscar cliente..." oninput="debouncedRenderizarFin()" list="listaClientesFin" style="min-width: 180px;">
                     <datalist id="listaClientesFin"></datalist>
                     
-                    <select id="filtroFinBU" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
-                        <option value="">Todas as BUs</option>
-                        <option value="ARMAZEM (ARM)">ARMAZEM (ARM)</option>
-                        <option value="TRADING (VCI)">TRADING (VCI)</option>
-                        <option value="TRANSPORTE (TRP)">TRANSPORTE (TRP)</option>
-                    </select>
+                    <!-- MULTI-SELECT BU -->
+                    <div class="multi-select-wrapper">
+                        <button type="button" class="multi-select-btn" id="btnFinBU" onclick="toggleMultiSelectFin('BU')">
+                            <span id="labelFinBU">Todas as BUs</span>
+                            <span class="multi-select-badge" id="badgeFinBU" style="display:none"></span>
+                            <span class="multi-select-chevron">▼</span>
+                        </button>
+                        <div class="multi-select-dropdown" id="dropdownFinBU">
+                            <div class="multi-select-ctrl-row">
+                                <button type="button" class="multi-select-ctrl" onclick="selectAllFinFiltro('BU', true)">Selecionar todos</button>
+                                <button type="button" class="multi-select-ctrl" onclick="selectAllFinFiltro('BU', false)">Limpar</button>
+                            </div>
+                            <div id="finBUItems"></div>
+                        </div>
+                    </div>
 
-                    <select id="filtroFinCategoria" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px;">
-                        <option value="">Todas as Categorias</option>
-                        <option value="GRV - NOVOS NEGOCIOS">GRV - Novos Negocios</option>
-                        <option value="ITV - NOVOS NEGOCIOS">ITV - Novos Negocios</option>
-                        <option value="NVG - NOVOS NEGOCIOS">NVG - Novos Negocios</option>
-                        <option value="TRP - CTE PROPRIO - NOVOS">TRP - CTE PROPRIO - NOVOS</option>
-                        <option value="TRP - FRETE TERCEIRO - NOVOS">TRP - FRETE TERCEIRO - NOVOS</option>
-                        <option value="VCI - NEGOCIOS < 12M">VCI - Negocios &lt; 12M</option>
-                        <option value="VCI - NOVOS NEGOCIOS">VCI - Novos Negocios</option>
-                    </select>
+                    <!-- MULTI-SELECT CATEGORIA -->
+                    <div class="multi-select-wrapper">
+                        <button type="button" class="multi-select-btn" id="btnFinCat" onclick="toggleMultiSelectFin('Cat')">
+                            <span id="labelFinCat">Todas as Categorias</span>
+                            <span class="multi-select-badge" id="badgeFinCat" style="display:none"></span>
+                            <span class="multi-select-chevron">▼</span>
+                        </button>
+                        <div class="multi-select-dropdown" id="dropdownFinCat">
+                            <div class="multi-select-ctrl-row">
+                                <button type="button" class="multi-select-ctrl" onclick="selectAllFinFiltro('Cat', true)">Selecionar todas</button>
+                                <button type="button" class="multi-select-ctrl" onclick="selectAllFinFiltro('Cat', false)">Limpar</button>
+                            </div>
+                            <div id="finCatItems"></div>
+                        </div>
+                    </div>
                     
-                    <button type="button" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento Rápido</button>
+                    <select id="filtroFinTipo" onchange="renderizarFinanceiro()" style="height: 40px; padding: 0 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px; background: white; min-width: 190px;">
+                        <option value="">Todos os Tipos</option>
+                        <option value="NOVOS CLIENTES NOMINADOS">Novos Clientes Nominados</option>
+                        <option value="NOVOS CLIENTES">Novos Clientes</option>
+                    </select>
+
+                    <button type="button" id="btnCompararFin" class="btn-header btn-comparar" onclick="toggleModoCompFin()"><span>⚖️</span> Comparar</button>
+                    <button type="button" id="btn-lancar-fin" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento</button>
                 </div>
             </div>
 
-            <div class="kpis-metas">
-                <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoAnual">R$ 0</p></div>
-                <div class="kpi"><h3>Realizado Anual</h3><p id="finRealAnual">R$ 0</p></div>
-                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapAnual">R$ 0</p></div>
-                <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercAnual">0%</p></div>
-                <div class="kpi"><h3>Plano YTD</h3><p id="finPlanoYTD">R$ 0</p></div>
-                <div class="kpi"><h3>Realizado YTD</h3><p id="finRealYTD">R$ 0</p></div>
-                <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapYTD">R$ 0</p></div>
-                <div class="kpi"><h3>% Atingimento (YTD)</h3><p id="finPercYTD">0%</p></div>
+            <!-- BARRA DE SELEÇÃO — MODO COMPARATIVO FINANCEIRO -->
+            <div id="finCompSelectorBar" class="comp-selector-bar">
+                <span class="comp-selector-label">⚖️ Comparar por</span>
+                <div class="fin-dim-toggle">
+                    <button class="fin-dim-btn ativo" id="finDimBtnBU" onclick="setDimCompFin('bu')">BU</button>
+                    <button class="fin-dim-btn" id="finDimBtnCat" onclick="setDimCompFin('categoria')">Categoria</button>
+                </div>
+                <div class="periodo-sep" style="height:28px;"></div>
+                <div id="finCompChips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                <span style="font-size:11px; color:#bbb; margin-left:4px;">Selecione 2 ou mais para comparar</span>
             </div>
 
-            <div class="charts-grid-metas">
-                <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
-                <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
-            </div>
-
-            <div class="charts-grid-metas">
-                <div class="chart-card" style="height: auto; min-height: 300px;">
-                    <h4>🏆 Top 5 Clientes (Acima do Plano)</h4>
-                    <table class="ranking-table" id="tbDestaques">
-                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
-                        <tbody></tbody>
+            <!-- PAINEL COMPARATIVO FINANCEIRO -->
+            <div id="finCompPanel" class="comp-panel">
+                <div class="comp-ranking-grid" id="finCompRankingGrid">
+                    <div class="comp-empty">Selecione ao menos 2 itens para ver o comparativo.</div>
+                </div>
+                <div class="comp-charts-grid">
+                    <div class="chart-card"><h4 id="finCompChartBarTitle">Realizado Mensal por BU vs Plano</h4><canvas id="chartFinCompBars"></canvas></div>
+                    <div class="chart-card"><h4 id="finCompChartLineTitle">Evolução Mensal (Realizado)</h4><canvas id="chartFinCompLine"></canvas></div>
+                </div>
+                <div class="comp-table-card">
+                    <h4 id="finCompTableTitle">📊 Comparativo Detalhado</h4>
+                    <table class="comp-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Plano Anual</th>
+                                <th>Real Anual</th>
+                                <th>Gap Anual</th>
+                                <th>% Anual</th>
+                                <th>Plano YTD</th>
+                                <th>Real YTD</th>
+                                <th>Gap YTD</th>
+                                <th>% YTD</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finCompTableBody"></tbody>
                     </table>
                 </div>
-                <div class="chart-card" style="height: auto; min-height: 300px;">
-                    <h4>⚠️ Top 5 Ofensores (Abaixo do Plano)</h4>
-                    <table class="ranking-table" id="tbOfensores">
-                        <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+            </div>
+
+            <!-- CONTEÚDO NORMAL (oculto no modo comparativo) -->
+            <div id="finNormal">
+                <div class="kpis-metas">
+                    <div class="kpi"><h3>Plano Anual</h3><p id="finPlanoAnual">R$ 0</p></div>
+                    <div class="kpi"><h3>Realizado Anual</h3><p id="finRealAnual">R$ 0</p></div>
+                    <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapAnual">R$ 0</p></div>
+                    <div class="kpi"><h3>% Atingimento (Ano)</h3><p id="finPercAnual">0%</p></div>
+                    <div class="kpi"><h3>Plano YTD</h3><p id="finPlanoYTD">R$ 0</p></div>
+                    <div class="kpi"><h3>Realizado YTD</h3><p id="finRealYTD">R$ 0</p></div>
+                    <div class="kpi"><h3>Desvio (Gap)</h3><p id="finGapYTD">R$ 0</p></div>
+                    <div class="kpi"><h3>% Atingimento (YTD)</h3><p id="finPercYTD">0%</p></div>
+                </div>
+
+                <div class="charts-grid-metas">
+                    <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
+                    <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
+                </div>
+
+                <div class="charts-grid-metas">
+                    <div class="chart-card" style="height: auto; min-height: 300px;">
+                        <h4>🏆 Top 5 Clientes (Acima do Plano)</h4>
+                        <table class="ranking-table" id="tbDestaques">
+                            <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="chart-card" style="height: auto; min-height: 300px;">
+                        <h4>⚠️ Top 5 Ofensores (Abaixo do Plano)</h4>
+                        <table class="ranking-table" id="tbOfensores">
+                            <thead><tr><th>Cliente / BU</th><th>Plano</th><th>Realizado</th><th>Desvio</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -499,6 +867,9 @@ header {
         <p style="font-size: 13px; color: #666; margin-top: -10px;">Insira os valores realizados no mês. Dica: Se já existir um lançamento, ao selecionar Mês e Vendedor, ele será carregado para edição.</p>
         <form id="formMetasInput">
             <div class="form-row">
+                <div class="form-group" style="flex:1"><label>Ano</label>
+                    <select id="meta_input_ano" required onchange="carregarMetaExistente()"></select>
+                </div>
                 <div class="form-group" style="flex:1"><label>Mês</label>
                     <select id="meta_input_mes" required onchange="carregarMetaExistente()">
                         <option value="1">Janeiro</option>
@@ -521,16 +892,6 @@ header {
             <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
                 <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
                 <div class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas" required></div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Realizado Trading (R$)</label><input type="number" step="0.01" id="meta_input_trading" required></div>
-                <div class="form-group" style="flex:1"><label>Realizado Armazém (R$)</label><input type="number" step="0.01" id="meta_input_armazem" required></div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Realizado Transporte (R$)</label><input type="number" step="0.01" id="meta_input_transporte" required></div>
-                <div class="form-group" style="flex:1"><label>Realizado Analytics (R$)</label><input type="number" step="0.01" id="meta_input_analytics" required></div>
             </div>
 
             <div class="modal-footer">
@@ -693,14 +1054,167 @@ header {
     </div>
 </div>
 
+<div id="toast-container"></div>
+
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <p>Carregando dados...</p>
+</div>
+
+<div id="confirm-modal">
+    <div class="confirm-box">
+        <p id="confirm-msg"></p>
+        <div class="confirm-actions">
+            <button class="btn-header" style="background:#f0f0f0; color:#333;" id="btn-confirm-no">Cancelar</button>
+            <button class="btn-header btn-novo-op" id="btn-confirm-yes">Confirmar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-// DICIONÁRIO DE METAS MENSAIS
+// ── UTILITÁRIOS GLOBAIS ──────────────────────────────────────────────────────
+
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'toastOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+function showConfirm(message, onConfirm) {
+    const modal = document.getElementById('confirm-modal');
+    document.getElementById('confirm-msg').innerText = message;
+    modal.classList.add('show');
+    const btnYes = document.getElementById('btn-confirm-yes');
+    const btnNo = document.getElementById('btn-confirm-no');
+    const close = () => modal.classList.remove('show');
+    btnYes.onclick = () => { close(); onConfirm(); };
+    btnNo.onclick = close;
+}
+
+function setLoading(show) {
+    document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+// ── CONTROLE DE PERÍODO (METAS) ─────────────────────────────────────────────
+
+const NOMES_MESES_FULL  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const NOMES_MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+let periodoAno      = new Date().getFullYear();
+let periodoMesInicio = 1;
+let periodoMesFim    = 12;
+
+// Interpreta mes_ano do banco: "4" → {mes:4, ano:ANO_ATUAL}  |  "2026-4" → {mes:4, ano:2026}
+function parseMesAno(mesAno) {
+    const str = String(mesAno).trim();
+    if (str.includes('-')) {
+        const [a, m] = str.split('-');
+        return { ano: parseInt(a), mes: parseInt(m) };
+    }
+    return { ano: new Date().getFullYear(), mes: parseInt(str) };
+}
+
+// Gera a chave "YYYY-M" usada para gravar novos registros
+function chaveMetaMesAno(ano, mes) { return `${ano}-${mes}`; }
+
+// Inicializa os selects de ano (barra de período + modal de lançamento)
+function _popularSelectsAno() {
+    const anoAtual = new Date().getFullYear();
+    // Anos presentes nos dados + ano atual + próximo ano
+    const anosNoDados = baseMetasMensais.map(r => parseMesAno(r.mes_ano).ano);
+    const anos = [...new Set([...anosNoDados, anoAtual, anoAtual + 1])].sort((a, b) => a - b);
+    const opts = anos.map(a => `<option value="${a}">${a}</option>`).join('');
+
+    const sel1 = document.getElementById('periodoAnoSelect');
+    const sel2 = document.getElementById('meta_input_ano');
+    if (sel1) { sel1.innerHTML = opts; sel1.value = periodoAno; }
+    if (sel2) {
+        sel2.innerHTML = opts;
+        sel2.value = anoAtual;
+    }
+}
+
+function setPeriodo(tipo) {
+    const mesAtual = new Date().getMonth() + 1;
+    switch(tipo) {
+        case 'mes':   periodoMesInicio = mesAtual; periodoMesFim = mesAtual; break;
+        case 'trim1': periodoMesInicio = 1;  periodoMesFim = 3;  break;
+        case 'trim2': periodoMesInicio = 4;  periodoMesFim = 6;  break;
+        case 'trim3': periodoMesInicio = 7;  periodoMesFim = 9;  break;
+        case 'trim4': periodoMesInicio = 10; periodoMesFim = 12; break;
+        case 'ano':   periodoMesInicio = 1;  periodoMesFim = 12; break;
+    }
+    document.getElementById('periodoInicio').value = periodoMesInicio;
+    document.getElementById('periodoFim').value = periodoMesFim;
+    _sincronizarPills();
+    _atualizarBadge();
+    renderizarMetas();
+}
+
+function setPeriodoCustom() {
+    const selAno = document.getElementById('periodoAnoSelect');
+    if (selAno) periodoAno = parseInt(selAno.value);
+    periodoMesInicio = parseInt(document.getElementById('periodoInicio').value);
+    periodoMesFim    = parseInt(document.getElementById('periodoFim').value);
+    if (periodoMesFim < periodoMesInicio) {
+        periodoMesFim = periodoMesInicio;
+        document.getElementById('periodoFim').value = periodoMesFim;
+    }
+    _sincronizarPills();
+    _atualizarBadge();
+    renderizarMetas();
+}
+
+function _sincronizarPills() {
+    const mesAtual = new Date().getMonth() + 1;
+    const pills = document.querySelectorAll('#pillGroup .pill');
+    const presets = [
+        { i: mesAtual, f: mesAtual },
+        { i: 1,  f: 3  },
+        { i: 4,  f: 6  },
+        { i: 7,  f: 9  },
+        { i: 10, f: 12 },
+        { i: 1,  f: 12 }
+    ];
+    pills.forEach((p, idx) => {
+        const pr = presets[idx];
+        p.classList.toggle('active', pr && periodoMesInicio === pr.i && periodoMesFim === pr.f);
+    });
+}
+
+function _atualizarBadge() {
+    const badge = document.getElementById('periodoBadge');
+    if (!badge) return;
+    const ini = NOMES_MESES_SHORT[periodoMesInicio - 1];
+    const fim = NOMES_MESES_SHORT[periodoMesFim - 1];
+    badge.innerText = periodoMesInicio === periodoMesFim
+        ? `${ini} ${periodoAno}`
+        : `${ini} – ${fim} ${periodoAno}`;
+}
+
+// ── DICIONÁRIO DE METAS MENSAIS
 const METAS_MENSAIS = {
-    "ANDREA HEUCHLING": { reuniao: 5, propostas: 3, trading: 625000.00, armazem: 600000.00, transporte: 145833.33, analytics: 0 },
-    "GUILHERME ALMEIDA": { reuniao: 5, propostas: 3, trading: 2083333.33, armazem: 150000.00, transporte: 87500.00, analytics: 0 },
-    "MICHELE SILVA": { reuniao: 5, propostas: 3, trading: 1250000.00, armazem: 100000.00, transporte: 58333.33, analytics: 0 },
-    "RAFAEL SANTOS": { reuniao: 5, propostas: 3, trading: 208333.33, armazem: 150000.00, transporte: 416666.67, analytics: 0 },
-    "CARLA MORENO": { reuniao: 10, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 }
+    "ANDREA HEUCHLING":  { reuniao: 5,  propostas: 3, trading: 625000.00,    armazem: 600000.00, transporte: 145833.33, analytics: 0 },
+    "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0 },
+    "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0 },
+    "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0 },
+    "CARLA MORENO":      { reuniao: 10, propostas: 0, trading: 0,            armazem: 0,         transporte: 0,         analytics: 0 },
+    "THIAGO HENRIQUE":   { reuniao: 5,  propostas: 0, trading: 0,            armazem: 0,         transporte: 0,         analytics: 0 }
 };
 
 // NAVEGAÇÃO ENTRE TELAS
@@ -738,6 +1252,49 @@ function navegar(pagina) {
 }
 
 let USUARIO_LOGADO = "";
+let PERFIL_USUARIO = "viewer"; // padrão seguro: só leitura
+
+// ── PERMISSÕES ────────────────────────────────────────────────────────────────
+const PERMISSOES = {
+    diretor:    { kanban: true,  novaOp: true,  metaLancar: true,  finLancar: true,  gerenciar: true,  ia: true  },
+    financeiro: { kanban: false, novaOp: false, metaLancar: false, finLancar: true,  gerenciar: false, ia: false },
+    vendedor:   { kanban: false, novaOp: false, metaLancar: true,  finLancar: false, gerenciar: false, ia: false },
+    viewer:     { kanban: false, novaOp: false, metaLancar: false, finLancar: false, gerenciar: false, ia: false }
+};
+
+async function carregarPerfil(email) {
+    const { data } = await supabaseClient.from('perfis').select('perfil').eq('email', email).single();
+    PERFIL_USUARIO = (data && data.perfil) ? data.perfil.toLowerCase() : 'viewer';
+    aplicarPermissoes();
+}
+
+function aplicarPermissoes() {
+    const p = PERMISSOES[PERFIL_USUARIO] || PERMISSOES.viewer;
+
+    const mostrar = (id, visivel) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = visivel ? '' : 'none';
+    };
+
+    mostrar('btn-nova-op',     p.novaOp);
+    mostrar('btn-vendedores',  p.gerenciar);
+    mostrar('btn-areas',       p.gerenciar);
+    mostrar('btn-ia',          p.ia);
+    mostrar('btn-lancar-meta', p.metaLancar);
+    mostrar('btn-lancar-fin',  p.finLancar);
+
+    // Kanban: desabilita drag e clique nos cards se não tiver permissão
+    window._kanbanEditavel = p.kanban;
+
+    // Badge de perfil no header
+    const icones = { diretor: '👑', financeiro: '💰', vendedor: '🤝', viewer: '👁️' };
+    const nomes  = { diretor: 'Diretor', financeiro: 'Financeiro', vendedor: 'Vendedor', viewer: 'Visualizador' };
+    const badge = document.getElementById('perfilBadge');
+    if (badge) {
+        badge.className = `perfil-badge perfil-${PERFIL_USUARIO}`;
+        badge.innerHTML = `<span>${icones[PERFIL_USUARIO] || '👤'}</span>${nomes[PERFIL_USUARIO] || PERFIL_USUARIO}`;
+    }
+}
 
 // CONTROLE DE TELAS DE LOGIN
 function trocarTelaLogin(idTela) {
@@ -758,12 +1315,6 @@ async function autenticarSupabase() {
     const msgDiv = document.getElementById('login-msg');
     const btn = document.getElementById('btn-entrar');
 
-    if(email === "admin" && pass === "vendemmia2024") {
-        USUARIO_LOGADO = "ADMINISTRADOR";
-        iniciarSistema();
-        return;
-    }
-
     if(!email || !pass) return;
 
     btn.innerText = "Aguarde...";
@@ -775,6 +1326,7 @@ async function autenticarSupabase() {
         msgDiv.style.display = 'block';
     } else {
         USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+        await carregarPerfil(data.user.email);
         iniciarSistema();
     }
 }
@@ -782,8 +1334,12 @@ async function autenticarSupabase() {
 function iniciarSistema() {
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('main-system').style.display = 'block';
+    // Inicializa o seletor de período como "Ano Completo" no ano atual
+    periodoAno = new Date().getFullYear();
+    periodoMesInicio = 1; periodoMesFim = 12;
+    _atualizarBadge();
     navegar('dashboard');
-    carregarAuxiliares(); 
+    carregarAuxiliares();
     carregarDados();
 }
 
@@ -859,8 +1415,8 @@ const { data, error } = await supabaseClient.auth.resetPasswordForEmail(email, {
         document.getElementById('rec_email').value = "";
     }
 }
-async function logoff() {
-    if(confirm("Deseja realmente sair do sistema?")) {
+function logoff() {
+    showConfirm("Deseja realmente sair do sistema?", async () => {
         await supabaseClient.auth.signOut();
         document.getElementById('main-system').style.display = 'none';
         document.getElementById('login-overlay').style.display = 'flex';
@@ -868,8 +1424,9 @@ async function logoff() {
         document.getElementById('login_pass').value = "";
         document.getElementById('login-msg').style.display = 'none';
         USUARIO_LOGADO = "";
+        PERFIL_USUARIO = "viewer";
         trocarTelaLogin('box-login');
-    }
+    });
 }
 
 Chart.register(ChartDataLabels);
@@ -918,7 +1475,7 @@ function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.d
 
 function simularBuscaIA() {
     const termo = document.getElementById('ia_termo').value;
-    if(!termo) return alert("Digite o nome ou site!");
+    if(!termo) { showToast("Digite o nome ou site da empresa.", "warning"); return; }
     const loader = document.getElementById('ia_loading');
     const resultado = document.getElementById('ia_resultado');
     loader.style.display = 'block';
@@ -956,14 +1513,16 @@ document.getElementById('formVendedor').addEventListener('submit', async (e) => 
     let res;
     if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
     else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
+    if(res.error) { showToast("Erro ao salvar vendedor: " + res.error.message, "error"); }
+    else { showToast("Vendedor salvo com sucesso!", "success"); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
 });
 
-async function deletarVendedor(id) {
-    if(confirm("Deseja excluir este vendedor? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('vendedores').delete().eq('id', id); carregarAuxiliares();
-    }
+function deletarVendedor(id) {
+    showConfirm("Deseja excluir este vendedor? As oportunidades já criadas não serão afetadas.", async () => {
+        await supabaseClient.from('vendedores').delete().eq('id', id);
+        carregarAuxiliares();
+        showToast("Vendedor excluído.", "info");
+    });
 }
 function prepararEdicaoVendedor(id, nome) {
     document.getElementById('vend_id').value = id;
@@ -977,14 +1536,16 @@ document.getElementById('formArea').addEventListener('submit', async (e) => {
     let res;
     if(id) res = await supabaseClient.from('areas').update({ nome: nome }).eq('id', id);
     else res = await supabaseClient.from('areas').insert([{ nome: nome }]);
-    if(res.error) alert("Erro: " + res.error.message);
-    else { document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
+    if(res.error) { showToast("Erro ao salvar área: " + res.error.message, "error"); }
+    else { showToast("Área salva com sucesso!", "success"); document.getElementById('formArea').reset(); document.getElementById('area_id').value = ""; carregarAuxiliares(); }
 });
 
-async function deletarArea(id) {
-    if(confirm("Deseja excluir esta área? Isso não afetará as oportunidades já criadas.")) {
-        await supabaseClient.from('areas').delete().eq('id', id); carregarAuxiliares();
-    }
+function deletarArea(id) {
+    showConfirm("Deseja excluir esta área? As oportunidades já criadas não serão afetadas.", async () => {
+        await supabaseClient.from('areas').delete().eq('id', id);
+        carregarAuxiliares();
+        showToast("Área excluída.", "info");
+    });
 }
 function prepararEdicaoArea(id, nome) {
     document.getElementById('area_id').value = id;
@@ -1007,16 +1568,15 @@ function prepararNovo() {
     toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
-// CORREÇÃO: Função BLINDADA para aceitar IDs em minúsculo ou maiúsculo
 function editarOportunidade(idParam) {
-    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idParam));
-    
+    const item = base.find(x => String(x.id) === String(idParam));
+
     if(!item) {
-        alert("Erro crasso: Oportunidade não encontrada na memória. ID pesquisado: " + idParam);
+        showToast("Oportunidade não encontrada. Recarregue os dados.", "error");
         return;
     }
-    
-    const idReal = item.id !== undefined ? item.id : item.ID;
+
+    const idReal = item.id;
     
     document.getElementById('op_id').value = idReal;
     document.getElementById('op_cliente').value = item.cliente || "";
@@ -1038,17 +1598,19 @@ function editarOportunidade(idParam) {
 
 async function deletarOportunidade() {
     const id = document.getElementById('op_id').value;
-    if(id && confirm("Deseja realmente excluir esta oportunidade?")) {
-        let res = await supabaseClient.from('oportunidades').delete().eq('id', id);
-        if(res.error) await supabaseClient.from('oportunidades').delete().eq('ID', id); 
-        
-        fecharModal('modalOportunidade'); carregarDados();
-    }
+    if(!id) return;
+    showConfirm("Deseja realmente excluir esta oportunidade?", async () => {
+        const res = await supabaseClient.from('oportunidades').delete().eq('id', id);
+        if(res.error) { showToast("Erro ao excluir: " + res.error.message, "error"); return; }
+        fecharModal('modalOportunidade');
+        carregarDados();
+        showToast("Oportunidade excluída.", "info");
+    });
 }
 
 function abrirHistoricoPopup() {
     const id = document.getElementById('op_id').value;
-    if(!id) { alert("Salve a oportunidade primeiro para gerar um histórico."); return; }
+    if(!id) { showToast("Salve a oportunidade primeiro para gerar um histórico.", "warning"); return; }
     document.getElementById('txt_historico_manual').value = "";
     renderizarLinhaDoTempo(); abrirModal('modalHistoricoDetalhado');
 }
@@ -1077,17 +1639,16 @@ function renderizarLinhaDoTempo() {
 async function salvarHistoricoManual() {
     const id = document.getElementById('op_id').value;
     const comentario = document.getElementById('txt_historico_manual').value.trim();
-    if(!comentario) return alert("Digite algo para salvar no histórico!");
+    if(!comentario) { showToast("Digite algo para salvar no histórico!", "warning"); return; }
     const agora = new Date();
     const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
     const novoLog = `[${carimbo}] NOTA MANUAL: ${comentario.toUpperCase()}`;
     let historicoAntigo = document.getElementById('op_historico').value || "";
     const historicoAtualizado = novoLog + (historicoAntigo ? "\n" + historicoAntigo : "");
-    
-    let res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
-    if(res.error) res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('ID', id);
-    
-    if(res.error) alert("Erro ao salvar comentário: " + res.error.message);
+
+    const res = await supabaseClient.from('oportunidades').update({ historico: historicoAtualizado }).eq('id', id);
+
+    if(res.error) { showToast("Erro ao salvar comentário: " + res.error.message, "error"); }
     else {
         document.getElementById('op_historico').value = historicoAtualizado;
         document.getElementById('txt_historico_manual').value = "";
@@ -1121,7 +1682,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     };
 
     if(idValue) {
-        const antigo = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(idValue));
+        const antigo = base.find(x => String(x.id) === String(idValue));
         if(antigo) {
             let log = ""; const agora = new Date();
             const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}`;
@@ -1159,8 +1720,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     let erroNoBanco = null;
 
     if(idValue) {
-        let res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
-        if(res.error) res = await supabaseClient.from('oportunidades').update(payload).eq('ID', idValue);
+        const res = await supabaseClient.from('oportunidades').update(payload).eq('id', idValue);
         erroNoBanco = res.error;
     } else {
         let res = await supabaseClient.from('oportunidades').insert([payload]);
@@ -1170,14 +1730,14 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     btnSalvar.innerText = "Salvar Oportunidade";
     btnSalvar.disabled = false;
 
-    // Se houver erro, a tela avisa o usuário e não fecha o modal
     if (erroNoBanco) {
-        alert("O Supabase recusou a gravação!\nMotivo: " + erroNoBanco.message);
+        showToast("Erro ao salvar: " + erroNoBanco.message, "error");
         console.error("Detalhe do erro no Supabase:", erroNoBanco);
-        return; 
+        return;
     }
 
-    fecharModal('modalOportunidade'); 
+    fecharModal('modalOportunidade');
+    showToast("Oportunidade salva com sucesso!", "success");
     carregarDados();
 };
 // ---- MÓDULO DE METAS ----
@@ -1188,44 +1748,42 @@ function prepararNovaMeta() {
 }
 
 function carregarMetaExistente() {
-    const mes = document.getElementById('meta_input_mes').value;
+    const mes  = document.getElementById('meta_input_mes').value;
+    const ano  = document.getElementById('meta_input_ano').value;
     const vend = document.getElementById('meta_input_vendedor').value;
-    
-    if(!mes || !vend) return; 
 
-    const existente = baseMetasMensais.find(m => m.vendedor === vend && m.mes_ano === mes);
+    if(!mes || !ano || !vend) return;
+
+    const chave = chaveMetaMesAno(ano, mes);
+    // Busca pelo novo formato "YYYY-M" ou pelo formato legado (apenas número)
+    const existente = baseMetasMensais.find(m =>
+        m.vendedor === vend && (m.mes_ano === chave || m.mes_ano === mes)
+    );
     
     if(existente) {
         document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
         document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
-        document.getElementById('meta_input_trading').value = existente.realizado_trading || 0;
-        document.getElementById('meta_input_armazem').value = existente.realizado_armazem || 0;
-        document.getElementById('meta_input_transporte').value = existente.realizado_transporte || 0;
-        document.getElementById('meta_input_analytics').value = existente.realizado_analytics || 0;
     } else {
         document.getElementById('meta_input_reuniao').value = "";
         document.getElementById('meta_input_propostas').value = "";
-        document.getElementById('meta_input_trading').value = "";
-        document.getElementById('meta_input_armazem').value = "";
-        document.getElementById('meta_input_transporte').value = "";
-        document.getElementById('meta_input_analytics').value = "";
     }
 }
 
 document.getElementById('formMetasInput').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const _mes = document.getElementById('meta_input_mes').value;
+    const _ano = document.getElementById('meta_input_ano').value;
     const payload = {
-        mes_ano: document.getElementById('meta_input_mes').value,
+        mes_ano: chaveMetaMesAno(_ano, _mes),
         vendedor: document.getElementById('meta_input_vendedor').value,
         realizado_reuniao: parseInt(document.getElementById('meta_input_reuniao').value) || 0,
-        realizado_propostas: parseInt(document.getElementById('meta_input_propostas').value) || 0,
-        realizado_trading: parseFloat(document.getElementById('meta_input_trading').value) || 0,
-        realizado_armazem: parseFloat(document.getElementById('meta_input_armazem').value) || 0,
-        realizado_transporte: parseFloat(document.getElementById('meta_input_transporte').value) || 0,
-        realizado_analytics: parseFloat(document.getElementById('meta_input_analytics').value) || 0
+        realizado_propostas: parseInt(document.getElementById('meta_input_propostas').value) || 0
     };
 
-    const existente = baseMetasMensais.find(m => m.vendedor === payload.vendedor && m.mes_ano === payload.mes_ano);
+    // Compatibilidade: busca pelo novo formato ou pelo legado (apenas mês)
+    const existente = baseMetasMensais.find(m =>
+        m.vendedor === payload.vendedor && (m.mes_ano === payload.mes_ano || m.mes_ano === _mes)
+    );
     
     let res;
     if(existente) {
@@ -1234,119 +1792,153 @@ document.getElementById('formMetasInput').addEventListener('submit', async (e) =
         res = await supabaseClient.from('metas_mensais').insert([payload]);
     }
     
-    if(res && res.error) alert("Erro: " + res.error.message);
-    else { 
-        fecharModal('modalMetasInput'); 
-        carregarDados(); 
+    if(res && res.error) { showToast("Erro ao salvar meta: " + res.error.message, "error"); }
+    else {
+        showToast("Meta salva com sucesso!", "success");
+        fecharModal('modalMetasInput');
+        carregarDados();
     }
 });
 
 function renderizarMetas() {
-    const fV = document.getElementById('filtroVendedor').value;
-    const dadosMeses = baseMetasMensais.filter(r => !fV || r.vendedor === fV);
+    // No modo comparativo, atualiza o comparativo (período pode ter mudado) e sai
+    if (_modoComparativo) { renderizarComparativo(); return; }
 
+    const fV = document.getElementById('filtroVendedor').value;
+
+    // ── Todos os registros do vendedor selecionado NO ANO SELECIONADO ──
+    const dadosTodos = baseMetasMensais.filter(r => {
+        const p = parseMesAno(r.mes_ano);
+        return p.ano === periodoAno && (!fV || r.vendedor === fV);
+    });
+
+    // ── Registros filtrados pelo período (mês início–fim) ──
+    const dadosPeriodo = dadosTodos.filter(r => {
+        const p = parseMesAno(r.mes_ano);
+        return p.mes >= periodoMesInicio && p.mes <= periodoMesFim;
+    });
+
+    const numMeses = periodoMesFim - periodoMesInicio + 1;
+
+    // ── Meta por mês (base) ──
     let metaMensal = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0 };
-    
-    if(fV && METAS_MENSAIS[fV]) {
+    if (fV && METAS_MENSAIS[fV]) {
         metaMensal = METAS_MENSAIS[fV];
     } else if (!fV) {
         Object.values(METAS_MENSAIS).forEach(m => {
-            metaMensal.reuniao += m.reuniao;
-            metaMensal.propostas += m.propostas;
-            metaMensal.trading += m.trading;
-            metaMensal.armazem += m.armazem;
+            metaMensal.reuniao    += m.reuniao;
+            metaMensal.propostas  += m.propostas;
+            metaMensal.trading    += m.trading;
+            metaMensal.armazem    += m.armazem;
             metaMensal.transporte += m.transporte;
-            metaMensal.analytics += m.analytics;
+            metaMensal.analytics  += m.analytics;
         });
     }
 
+    const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
+
+    // ── Meta do período e meta anual (para os gráficos contextuais) ──
+    const metaPeriodo = {
+        reuniao:    metaMensal.reuniao    * numMeses,
+        propostas:  metaMensal.propostas  * numMeses,
+        trading:    metaMensal.trading    * numMeses,
+        armazem:    metaMensal.armazem    * numMeses,
+        transporte: metaMensal.transporte * numMeses,
+        analytics:  metaMensal.analytics  * numMeses,
+        faturamento: metaFaturamentoMensal * numMeses
+    };
     const metaAnual = {
-        reuniao: metaMensal.reuniao * 12,
-        propostas: metaMensal.propostas * 12,
-        trading: metaMensal.trading * 12,
-        armazem: metaMensal.armazem * 12,
+        trading:    metaMensal.trading    * 12,
+        armazem:    metaMensal.armazem    * 12,
         transporte: metaMensal.transporte * 12,
-        analytics: metaMensal.analytics * 12
+        analytics:  metaMensal.analytics  * 12
     };
 
-    const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
-    const metaTotalFaturamento = metaFaturamentoMensal * 12;
-
-    let realYTD = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
-    let arrayRealMensal = new Array(12).fill(0); 
-
-    dadosMeses.forEach(m => {
-        const mesIndex = parseInt(m.mes_ano) - 1; 
-        const faturamentoMes = (m.realizado_trading || 0) + (m.realizado_armazem || 0) + (m.realizado_transporte || 0) + (m.realizado_analytics || 0);
-        
-        realYTD.reuniao += (m.realizado_reuniao || 0);
-        realYTD.propostas += (m.realizado_propostas || 0);
-        realYTD.trading += (m.realizado_trading || 0);
-        realYTD.armazem += (m.realizado_armazem || 0);
-        realYTD.transporte += (m.realizado_transporte || 0);
-        realYTD.analytics += (m.realizado_analytics || 0);
-        realYTD.faturamento += faturamentoMes;
-
-        if(mesIndex >= 0 && mesIndex < 12) {
-            arrayRealMensal[mesIndex] += faturamentoMes;
-        }
+    // ── Acumuladores do período ──
+    let realPeriodo = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+    dadosPeriodo.forEach(m => {
+        const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
+        realPeriodo.reuniao    += (m.realizado_reuniao   ||0);
+        realPeriodo.propostas  += (m.realizado_propostas ||0);
+        realPeriodo.trading    += (m.realizado_trading   ||0);
+        realPeriodo.armazem    += (m.realizado_armazem   ||0);
+        realPeriodo.transporte += (m.realizado_transporte||0);
+        realPeriodo.analytics  += (m.realizado_analytics ||0);
+        realPeriodo.faturamento += fat;
     });
 
-    const percAting = metaTotalFaturamento > 0 ? ((realYTD.faturamento / metaTotalFaturamento) * 100).toFixed(1) : 0;
+    // ── Acumulador anual completo (para os gráficos contextuais e BU) ──
+    let realAnual = { trading: 0, armazem: 0, transporte: 0, analytics: 0 };
+    let arrayRealAnual = new Array(12).fill(0);
+    dadosTodos.forEach(m => {
+        const idx = parseMesAno(m.mes_ano).mes - 1;
+        const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
+        realAnual.trading    += (m.realizado_trading   ||0);
+        realAnual.armazem    += (m.realizado_armazem   ||0);
+        realAnual.transporte += (m.realizado_transporte||0);
+        realAnual.analytics  += (m.realizado_analytics ||0);
+        if(idx >= 0 && idx < 12) arrayRealAnual[idx] += fat;
+    });
+
+    // ── KPIs — refletem o período selecionado ──
+    const labelPeriodo = numMeses === 12 ? 'no Ano' : numMeses === 1
+        ? `em ${NOMES_MESES_SHORT[periodoMesInicio-1]}`
+        : `(${NOMES_MESES_SHORT[periodoMesInicio-1]}–${NOMES_MESES_SHORT[periodoMesFim-1]})`;
+
+    document.getElementById('lblMetaAting').innerText = `Atingimento ${labelPeriodo}`;
+    document.getElementById('lblMetaFat').innerText   = `Faturamento Realizado ${labelPeriodo}`;
+    document.getElementById('lblMetaReun').innerText  = `Reuniões ${labelPeriodo}`;
+    document.getElementById('lblMetaProp').innerText  = `Propostas ${labelPeriodo}`;
+
+    const percAting = metaPeriodo.faturamento > 0
+        ? ((realPeriodo.faturamento / metaPeriodo.faturamento) * 100).toFixed(1) : 0;
     document.getElementById('metaPercAtingimento').innerText = `${percAting}%`;
     document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
-    
-    document.getElementById('metaRealizadoTotal').innerText = `R$ ${realYTD.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-    document.getElementById('metaReunioesYTD').innerText = `${realYTD.reuniao} / ${metaAnual.reuniao}`;
-    document.getElementById('metaPropostasYTD').innerText = `${realYTD.propostas} / ${metaAnual.propostas}`;
 
+    document.getElementById('metaRealizadoTotal').innerText = `R$ ${realPeriodo.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${metaPeriodo.reuniao}`;
+    document.getElementById('metaPropostasYTD').innerText   = `${realPeriodo.propostas} / ${metaPeriodo.propostas}`;
+
+    // ── GRÁFICO 1: Evolução Mensal (ano completo — contexto geral) ──
     if(charts.evolucao) charts.evolucao.destroy();
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type: 'bar',
         data: {
-            labels: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],
+            labels: NOMES_MESES_SHORT,
             datasets: [
                 {
-                    label: 'Meta Mensal',
-                    data: new Array(12).fill(metaFaturamentoMensal),
-                    type: 'line',
-                    borderColor: '#01E18E',
-                    borderWidth: 2,
-                    borderDash: [5, 5], 
-                    pointRadius: 0,
-                    fill: false,
-                    datalabels: { 
-                        display: true, color: '#01E18E', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
-                        formatter: v => {
-                            if (v === 0) return "";
-                            if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
-                            return (v/1000).toFixed(0) + "k";
-                        }
-                    }
+                    label: 'Meta Mensal', data: new Array(12).fill(metaFaturamentoMensal),
+                    type: 'line', borderColor: '#01E18E', borderWidth: 2,
+                    borderDash: [5,5], pointRadius: 0, fill: false,
+                    datalabels: { display: false }
                 },
                 {
-                    label: 'Realizado', data: arrayRealMensal, backgroundColor: '#422c76', borderRadius: 4
+                    label: 'Realizado', data: arrayRealAnual,
+                    backgroundColor: arrayRealAnual.map((_, i) =>
+                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#422c76' : 'rgba(66,44,118,0.25)'
+                    ),
+                    borderRadius: 4
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false, 
-            layout: { padding: { top: 30, bottom: 0 } }, 
-            plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }, 
+            maintainAspectRatio: false, layout: { padding: { top: 20, bottom: 0 } },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
                 datalabels: {
-                    color: '#fff', anchor: 'end', align: 'bottom', font: {size: 10, weight:'bold'},
+                    color: '#fff', anchor: 'end', align: 'bottom', font: { size: 10, weight: 'bold' },
                     formatter: (v, ctx) => {
-                        if (ctx.datasetIndex === 0) return ""; 
-                        if (v === 0) return "";
+                        if (ctx.datasetIndex === 0 || v === 0) return "";
                         if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
                         return (v/1000).toFixed(0) + "k";
                     }
                 }
-            }, scales: { y: { display: false }, x: { grid: { display: false } } }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
         }
     });
 
+    // ── GRÁFICO 2: Desempenho por BU (meta do período vs realizado no período) ──
     if(charts.unidade) charts.unidade.destroy();
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type: 'bar',
@@ -1354,29 +1946,415 @@ function renderizarMetas() {
             labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
             datasets: [
                 {
-                    label: 'Meta Anual', data: [metaAnual.trading, metaAnual.armazem, metaAnual.transporte, metaAnual.analytics],
+                    label: `Meta ${labelPeriodo}`,
+                    data: [metaPeriodo.trading, metaPeriodo.armazem, metaPeriodo.transporte, metaPeriodo.analytics],
                     backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60
                 },
                 {
-                    label: 'Realizado YTD', data: [realYTD.trading, realYTD.armazem, realYTD.transporte, realYTD.analytics],
+                    label: `Realizado ${labelPeriodo}`,
+                    data: [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics],
                     backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 0 } }, plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: {
-                    color: '#444', anchor: 'end', align: 'top', font: {size: 10, weight:'bold'},
-                    formatter: (v) => {
+            maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 0 } },
+            plugins: {
+                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                datalabels: {
+                    color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
+                    formatter: v => {
                         if (v === 0) return "";
                         if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
                         if (v >= 1000) return "R$ " + (v/1000).toFixed(0) + "k";
                         return "R$ " + v;
                     }
                 }
-            }, scales: { y: { display: false }, x: { grid: { display: false } } }
+            },
+            scales: { y: { display: false }, x: { grid: { display: false } } }
+        }
+    });
+
+    // ── GRÁFICO 3: Reuniões — Meta vs Realizado por mês (período selecionado) ──
+    const labelsGraf3      = [];
+    const arrayMetaReuniao = [];  // meta de reuniões por mês
+    const arrayRealReuniao = [];  // realizadas por mês
+    const arrayAcingPct    = [];  // % de atingimento
+
+    for (let m = periodoMesInicio; m <= periodoMesFim; m++) {
+        labelsGraf3.push(NOMES_MESES_SHORT[m - 1]);
+        arrayMetaReuniao.push(metaMensal.reuniao);
+
+        // Soma TODOS os registros do mês (pode haver um por vendedor)
+        const regsDoMes = dadosTodos.filter(d => parseMesAno(d.mes_ano).mes === m);
+        const realizado = regsDoMes.reduce((acc, d) => acc + (d.realizado_reuniao || 0), 0);
+        arrayRealReuniao.push(realizado);
+        arrayAcingPct.push(
+            metaMensal.reuniao > 0 ? +((realizado / metaMensal.reuniao) * 100).toFixed(1) : 0
+        );
+    }
+
+    // Cores das barras: verde se bateu, vermelho se ficou abaixo, cinza se não lançado
+    const coresReuniao = arrayRealReuniao.map((v, i) => {
+        if (v === 0) return 'rgba(200,200,200,0.45)';
+        return v >= arrayMetaReuniao[i] ? '#27ae60' : '#ff2f69';
+    });
+
+    // Totais do período para o badge
+    const totalMetaReunPeriodo = metaMensal.reuniao * numMeses;
+    const totalRealReunPeriodo = arrayRealReuniao.reduce((a, b) => a + b, 0);
+    const percAtingReun = totalMetaReunPeriodo > 0
+        ? ((totalRealReunPeriodo / totalMetaReunPeriodo) * 100).toFixed(1) : 0;
+
+    // Título e badge dinâmicos
+    const nomePeriodoBadge = numMeses === 1
+        ? NOMES_MESES_FULL[periodoMesInicio - 1]
+        : `${NOMES_MESES_SHORT[periodoMesInicio - 1]} a ${NOMES_MESES_SHORT[periodoMesFim - 1]}`;
+    const nomeTitulo = fV
+        ? `Reuniões — Meta vs Realizado | ${nomePeriodoBadge} | ${fV}`
+        : `Reuniões — Meta vs Realizado | ${nomePeriodoBadge} (Todos os Vendedores)`;
+    document.getElementById('tituloChartPeriodo').innerText = nomeTitulo;
+
+    const badgeEl = document.getElementById('badgeChartPeriodo');
+    if (badgeEl) {
+        badgeEl.innerText = totalMetaReunPeriodo > 0
+            ? `${totalRealReunPeriodo} / ${totalMetaReunPeriodo} reuniões (${percAtingReun}%)`
+            : '';
+        badgeEl.style.color = percAtingReun >= 100 ? '#27ae60' : (percAtingReun > 80 ? '#f39c12' : '#c0392b');
+    }
+
+    if(charts.metaVsReal) charts.metaVsReal.destroy();
+    charts.metaVsReal = new Chart(document.getElementById('chartMetaVsReal'), {
+        type: 'bar',
+        data: {
+            labels: labelsGraf3,
+            datasets: [
+                {
+                    label: 'Meta de Reuniões',
+                    data: arrayMetaReuniao,
+                    type: 'line',
+                    borderColor: '#422c76',
+                    borderWidth: 2.5,
+                    borderDash: [6, 4],
+                    pointBackgroundColor: '#422c76',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: false,
+                    tension: 0,
+                    datalabels: {
+                        display: true,
+                        color: '#422c76', anchor: 'end', align: 'top',
+                        font: { size: 11, weight: 'bold' },
+                        formatter: v => v
+                    }
+                },
+                {
+                    label: 'Reuniões Realizadas',
+                    data: arrayRealReuniao,
+                    backgroundColor: coresReuniao,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    datalabels: {
+                        color: '#fff', anchor: 'center', align: 'center',
+                        font: { size: 13, weight: 'bold' },
+                        formatter: v => v === 0 ? '' : v
+                    }
+                },
+                {
+                    label: '% Atingimento',
+                    data: arrayAcingPct,
+                    type: 'line',
+                    yAxisID: 'yPct',
+                    borderColor: 'rgba(212,175,55,0.9)',
+                    borderWidth: 2,
+                    pointBackgroundColor: arrayAcingPct.map(v =>
+                        v >= 100 ? '#27ae60' : (v > 0 ? '#f39c12' : '#ccc')
+                    ),
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: false,
+                    tension: 0.3,
+                    datalabels: {
+                        anchor: 'end', align: 'top', offset: 4,
+                        font: { size: 10, weight: 'bold' },
+                        color: '#fff',
+                        backgroundColor: ctx => {
+                            const v = ctx.dataset.data[ctx.dataIndex];
+                            return v >= 100 ? '#27ae60' : (v > 0 ? '#d4af37' : 'transparent');
+                        },
+                        borderRadius: 4,
+                        padding: { top: 2, bottom: 2, left: 5, right: 5 },
+                        formatter: v => v > 0 ? v + '%' : ''
+                    }
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 30, bottom: 5, left: 5, right: 5 } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, font: { size: 11 }, padding: 16 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const v = ctx.raw;
+                            if (ctx.dataset.label === '% Atingimento') return ` Atingimento: ${v}%`;
+                            return ` ${ctx.dataset.label}: ${v} reunião(ões)`;
+                        }
+                    }
+                },
+                datalabels: {}
+            },
+            scales: {
+                y: {
+                    display: true,
+                    beginAtZero: true,
+                    ticks: { stepSize: 1, font: { size: 11 } },
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    suggestedMax: Math.max(...arrayMetaReuniao) + 3
+                },
+                yPct: {
+                    display: false,
+                    position: 'right',
+                    beginAtZero: true,
+                    max: Math.max(150, ...arrayAcingPct) + 10
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 12, weight: '600' } }
+                }
+            }
         }
     });
 }
+
+// ──────────────────────────────────────────────────────────────
+// MODO COMPARATIVO DE VENDEDORES
+// ──────────────────────────────────────────────────────────────
+const CORES_COMP = ['#422c76','#ff2f69','#01E18E','#f39c12','#17a2b8','#8e44ad','#e67e22'];
+
+let _modoComparativo = false;
+let _vendedoresComp  = new Set();
+
+function toggleModoComparativo() {
+    _modoComparativo = !_modoComparativo;
+    const btn          = document.getElementById('btnComparar');
+    const selectorBar  = document.getElementById('compSelectorBar');
+    const compPanel    = document.getElementById('compPanel');
+    const metasNormal  = document.getElementById('metasNormal');
+
+    if (_modoComparativo) {
+        btn.classList.add('ativo');
+        btn.innerHTML = '<span>✕</span> Fechar Comparativo';
+        // Pré-seleciona todos os vendedores
+        _vendedoresComp = new Set(Object.keys(METAS_MENSAIS));
+        selectorBar.classList.add('visivel');
+        compPanel.classList.add('visivel');
+        metasNormal.style.display = 'none';
+        _renderizarChipsComp();
+        renderizarComparativo();
+    } else {
+        btn.classList.remove('ativo');
+        btn.innerHTML = '<span>⚖️</span> Comparar Vendedores';
+        selectorBar.classList.remove('visivel');
+        compPanel.classList.remove('visivel');
+        metasNormal.style.display = '';
+    }
+}
+
+function _renderizarChipsComp() {
+    const container = document.getElementById('compChips');
+    const vendors = Object.keys(METAS_MENSAIS);
+    container.innerHTML = vendors.map((v, i) => {
+        const cor = CORES_COMP[i % CORES_COMP.length];
+        const sel = _vendedoresComp.has(v);
+        const style = sel
+            ? `background:${cor}; border-color:${cor};`
+            : `border-color:${cor}; color:${cor};`;
+        const firstName = v.split(' ')[0];
+        return `<button class="comp-chip${sel ? ' sel' : ''}" style="${style}"
+            onclick="toggleVendedorComp('${v}',${i})" title="${v}">${firstName}</button>`;
+    }).join('');
+}
+
+function toggleVendedorComp(nome, idx) {
+    if (_vendedoresComp.has(nome)) {
+        if (_vendedoresComp.size > 1) _vendedoresComp.delete(nome);
+        else return; // impede desselecionar o último
+    } else {
+        _vendedoresComp.add(nome);
+    }
+    _renderizarChipsComp();
+    renderizarComparativo();
+}
+
+function renderizarComparativo() {
+    const vendors = Object.keys(METAS_MENSAIS).filter(v => _vendedoresComp.has(v));
+    if (vendors.length < 1) return;
+
+    const numMeses = periodoMesFim - periodoMesInicio + 1;
+
+    // ── Calcula métricas de cada vendedor no período selecionado ──
+    const dadosPorVendedor = vendors.map((v, i) => {
+        const cor = CORES_COMP[i % CORES_COMP.length];
+        const dadosTodos = baseMetasMensais.filter(r => {
+            const p = parseMesAno(r.mes_ano);
+            return p.ano === periodoAno && r.vendedor === v;
+        });
+        const dadosPeriodo = dadosTodos.filter(r => {
+            const p = parseMesAno(r.mes_ano);
+            return p.mes >= periodoMesInicio && p.mes <= periodoMesFim;
+        });
+
+        const meta = METAS_MENSAIS[v] || { reuniao:0, propostas:0, trading:0, armazem:0, transporte:0, analytics:0 };
+        const metaP = {
+            reuniao:    meta.reuniao    * numMeses,
+            propostas:  meta.propostas  * numMeses,
+            faturamento:(meta.trading + meta.armazem + meta.transporte + meta.analytics) * numMeses
+        };
+
+        let real = { reuniao:0, propostas:0, faturamento:0 };
+        dadosPeriodo.forEach(m => {
+            real.reuniao    += (m.realizado_reuniao    || 0);
+            real.propostas  += (m.realizado_propostas  || 0);
+            real.faturamento+= (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
+        });
+
+        const pctReuniao   = metaP.reuniao    > 0 ? +(real.reuniao    / metaP.reuniao    * 100).toFixed(1) : null;
+        const pctPropostas = metaP.propostas  > 0 ? +(real.propostas  / metaP.propostas  * 100).toFixed(1) : null;
+        const pctFat       = metaP.faturamento> 0 ? +(real.faturamento/ metaP.faturamento* 100).toFixed(1) : null;
+
+        // Atingimento geral = média das dimensões disponíveis
+        const dims = [pctReuniao, pctPropostas, pctFat].filter(x => x !== null);
+        const pctGeral = dims.length > 0 ? +(dims.reduce((a,b)=>a+b,0) / dims.length).toFixed(1) : 0;
+
+        return { nome:v, cor, meta:metaP, real, pctReuniao, pctPropostas, pctFat, pctGeral };
+    });
+
+    // Ordenar por atingimento (ranking)
+    const ranking = [...dadosPorVendedor].sort((a, b) => b.pctGeral - a.pctGeral);
+    const medalhas = ['🥇','🥈','🥉'];
+
+    // ── Ranking cards ──
+    const grid = document.getElementById('compRankingGrid');
+    grid.innerHTML = ranking.map((d, rank) => {
+        const corPct = d.pctGeral >= 100 ? '#27ae60' : d.pctGeral >= 80 ? '#f39c12' : '#c0392b';
+        const fillReun = d.pctReuniao !== null ? Math.min(d.pctReuniao, 100) : 0;
+        const fillProp = d.pctPropostas !== null ? Math.min(d.pctPropostas, 100) : null;
+        const medalha  = rank < 3 ? medalhas[rank] : `#${rank+1}`;
+        return `
+        <div class="comp-rank-card" style="border-top-color:${d.cor}">
+            <div class="comp-rank-medal">${medalha}</div>
+            <div class="comp-rank-nome">${d.nome}</div>
+            <div class="comp-rank-pct" style="color:${corPct}">${d.pctGeral}%</div>
+            <div class="comp-rank-label">Atingimento Geral</div>
+            ${d.pctReuniao !== null ? `
+            <div class="comp-mini-stat">
+                <span class="comp-mini-stat-label">Reuniões</span>
+                <div class="comp-mini-track"><div class="comp-mini-fill" style="width:${fillReun}%;background:${d.cor}"></div></div>
+                <span class="comp-mini-val">${d.real.reuniao}/${d.meta.reuniao}</span>
+            </div>` : ''}
+            ${fillProp !== null ? `
+            <div class="comp-mini-stat">
+                <span class="comp-mini-stat-label">Propostas</span>
+                <div class="comp-mini-track"><div class="comp-mini-fill" style="width:${fillProp}%;background:${d.cor}"></div></div>
+                <span class="comp-mini-val">${d.real.propostas}/${d.meta.propostas}</span>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+
+    // ── Barras agrupadas: meta vs realizado de propostas ──
+    if (charts.compPropostas) charts.compPropostas.destroy();
+    charts.compPropostas = new Chart(document.getElementById('chartCompPropostas'), {
+        type: 'bar',
+        data: {
+            labels: dadosPorVendedor.map(d => d.nome.split(' ')[0]),
+            datasets: [
+                {
+                    label: 'Meta',
+                    data: dadosPorVendedor.map(d => d.meta.propostas),
+                    backgroundColor: dadosPorVendedor.map(d => d.cor + '45'),
+                    borderColor:     dadosPorVendedor.map(d => d.cor),
+                    borderWidth: 2, borderRadius: 6,
+                    datalabels: { color: '#666', anchor: 'end', align: 'top', font: { size: 11, weight:'700' }, formatter: v => v > 0 ? v : '' }
+                },
+                {
+                    label: 'Realizado',
+                    data: dadosPorVendedor.map(d => d.real.propostas),
+                    backgroundColor: dadosPorVendedor.map(d => d.cor),
+                    borderRadius: 6,
+                    datalabels: { color: '#fff', anchor: 'center', align: 'center', font: { size: 13, weight:'800' }, formatter: v => v > 0 ? v : '' }
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 28 } },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                datalabels: {}
+            },
+            scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }
+        }
+    });
+
+    // ── Barras agrupadas: meta vs realizado de reuniões ──
+    if (charts.compBars) charts.compBars.destroy();
+    charts.compBars = new Chart(document.getElementById('chartCompBars'), {
+        type: 'bar',
+        data: {
+            labels: dadosPorVendedor.map(d => d.nome.split(' ')[0]),
+            datasets: [
+                {
+                    label: 'Meta',
+                    data: dadosPorVendedor.map(d => d.meta.reuniao),
+                    backgroundColor: dadosPorVendedor.map(d => d.cor + '45'),
+                    borderColor:     dadosPorVendedor.map(d => d.cor),
+                    borderWidth: 2, borderRadius: 6,
+                    datalabels: { color: '#666', anchor: 'end', align: 'top', font: { size: 11, weight:'700' }, formatter: v => v > 0 ? v : '' }
+                },
+                {
+                    label: 'Realizado',
+                    data: dadosPorVendedor.map(d => d.real.reuniao),
+                    backgroundColor: dadosPorVendedor.map(d => d.cor),
+                    borderRadius: 6,
+                    datalabels: { color: '#fff', anchor: 'center', align: 'center', font: { size: 13, weight:'800' }, formatter: v => v > 0 ? v : '' }
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 28 } },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                datalabels: {}
+            },
+            scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } }
+        }
+    });
+
+    // ── Tabela comparativa ──
+    const pillaClass = pct => pct === null ? '' : pct >= 100 ? 'comp-pct-verde' : pct >= 80 ? 'comp-pct-amarelo' : 'comp-pct-vermelho';
+    const pillHtml   = pct => pct === null ? '<span style="color:#ccc">—</span>' : `<span class="comp-pct-pill ${pillaClass(pct)}">${pct}%</span>`;
+
+    document.getElementById('compTableBody').innerHTML = ranking.map(d => `
+        <tr>
+            <td><span class="comp-vendor-dot" style="background:${d.cor}"></span><strong>${d.nome}</strong></td>
+            <td>${d.meta.reuniao}</td>
+            <td><strong>${d.real.reuniao}</strong></td>
+            <td>${pillHtml(d.pctReuniao)}</td>
+            <td>${d.pctPropostas !== null ? d.meta.propostas : '<span style="color:#ccc">—</span>'}</td>
+            <td>${d.pctPropostas !== null ? `<strong>${d.real.propostas}</strong>` : '<span style="color:#ccc">—</span>'}</td>
+            <td>${pillHtml(d.pctPropostas)}</td>
+            <td>${pillHtml(d.pctGeral)}</td>
+        </tr>`).join('');
+}
+
+// ──────────────────────────────────────────────────────────────
 
 // ---- LOADS INICIAIS ----
 async function carregarAuxiliares(){
@@ -1404,9 +2382,14 @@ async function carregarAuxiliares(){
     }
 }
 
-async function carregarDados(){ 
-    const { data: ops } = await supabaseClient.from('oportunidades').select('*'); 
-    base = ops || []; 
+async function carregarDados(){
+    setLoading(true);
+    const { data: ops } = await supabaseClient.from('oportunidades').select('*');
+    // Normaliza: garante que toda oportunidade use sempre 'id' minúsculo
+    base = (ops || []).map(item => {
+        if (item.id === undefined && item.ID !== undefined) item.id = item.ID;
+        return item;
+    });
     
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
@@ -1417,7 +2400,10 @@ async function carregarDados(){
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
     
-    const vendedoresUnicos = [...new Set(base.map(item => item.vendedor).filter(c => c))].sort();
+    // Une vendedores das oportunidades + todos que têm metas definidas
+    const vendedoresDeOps = base.map(item => item.vendedor).filter(c => c);
+    const vendedoresComMeta = Object.keys(METAS_MENSAIS);
+    const vendedoresUnicos = [...new Set([...vendedoresDeOps, ...vendedoresComMeta])].sort();
     const filtroVend = document.getElementById('filtroVendedor');
     if(filtroVend) {
         const valAtual = filtroVend.value;
@@ -1433,7 +2419,9 @@ async function carregarDados(){
         filtroArea.value = valAtual;
     }
 
-    renderizar(); 
+    setLoading(false);
+    _popularSelectsAno();
+    renderizar();
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
     if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
 }
@@ -1441,6 +2429,7 @@ async function carregarDados(){
 async function carregarDadosFinanceiros() {
     const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
     baseResMensais = res || [];
+    populateMultiSelectFin();
 
     // Popular lista de clientes do Financeiro para o Auto-complete
     const clientesFin = [...new Set(baseResMensais.map(r => r.cliente).filter(c => c))].sort();
@@ -1461,8 +2450,8 @@ async function drop(ev, novoStatus) {
     
     const cardId = cardIdAttr.replace("card-", "");
     
-    const item = base.find(x => String(x.id !== undefined ? x.id : x.ID) === String(cardId));
-    if(!item || item.status === novoStatus) return; 
+    const item = base.find(x => String(x.id) === String(cardId));
+    if(!item || item.status === novoStatus) return;
 
     // Guarda o status antigo para reverter caso o banco dê erro
     const statusAntigo = item.status;
@@ -1478,18 +2467,14 @@ async function drop(ev, novoStatus) {
     }
 
     // 3. Salva no Supabase
-    const idParaBanco = item.id !== undefined ? item.id : item.ID;
-    
     const agora = new Date();
     const carimbo = `[${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')} - USUÁRIO: ${USUARIO_LOGADO}] STATUS MOVIDO VIA KANBAN PARA: ${novoStatus}`;
     const novoHist = carimbo + (item.historico ? "\n" + item.historico : "");
 
-    let res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', idParaBanco);
-    if(res.error) res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('ID', idParaBanco);
+    const res = await supabaseClient.from('oportunidades').update({ status: novoStatus, historico: novoHist }).eq('id', item.id);
 
-    // Validação de erro invisível
     if(res.error) {
-        alert("Erro ao mover no banco de dados!\nMotivo: " + res.error.message);
+        showToast("Erro ao mover: " + res.error.message, "error");
         console.error("ERRO KANBAN:", res.error);
         
         // Reverte a alteração visual no kanban para evitar ilusão de ótica
@@ -1510,23 +2495,101 @@ function renderizar(){
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
     let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}; let vendVal = {};
+    let statusCont = {}; let statusValor = {}; let vendVal = {};
     filtrados.forEach(r => {
         const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
         pipeTot += vA; mrrTotal += vM;
         if(r.status === 'FECHADO') { recGan += vA; nG++; }
         if(r.status === 'PERDIDO') nP++;
-        statusCont[r.status] = (statusCont[r.status] || 0) + 1;
+        statusCont[r.status]  = (statusCont[r.status]  || 0) + 1;
+        statusValor[r.status] = (statusValor[r.status] || 0) + vA;
         if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
     });
     document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
     document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {minimumFractionDigits:2});
-    document.getElementById('conversao').innerText = (nG+nP > 0 ? (nG/(nG+nP)*100) : 0).toFixed(1) + "%";
+    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {maximumFractionDigits:0});
+    // Taxa de Conversão: Fechadas ÷ Total (visão real do pipeline)
+    const nTotal = filtrados.length;
+    const taxaConv = nTotal > 0 ? (nG / nTotal * 100) : 0;
+    document.getElementById('conversao').innerText = taxaConv.toFixed(1) + "%";
+    document.getElementById('conversaoSub').innerText = `${nG} fechada${nG !== 1 ? 's' : ''} de ${nTotal}`;
+    document.getElementById('conversao').style.color = taxaConv >= 30 ? '#27ae60' : (taxaConv >= 15 ? '#f39c12' : '#c0392b');
+
+    // Win Rate: Fechadas ÷ (Fechadas + Perdidas) — eficiência nas decisões finais
+    const winRate = (nG + nP) > 0 ? (nG / (nG + nP) * 100) : 0;
+    document.getElementById('winRate').innerText = winRate.toFixed(1) + "%";
+    document.getElementById('winRateSub').innerText = `${nG} ganhas · ${nP} perdidas`;
+    document.getElementById('winRate').style.color = winRate >= 70 ? '#27ae60' : (winRate >= 50 ? '#f39c12' : '#c0392b');
+
     document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
     
     if(charts.st) charts.st.destroy();
-    charts.st = new Chart(document.getElementById('chartStatus'), { type: 'doughnut', data: { labels: Object.keys(statusCont), datasets: [{ data: Object.values(statusCont), backgroundColor: ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'] }]}, options: { maintainAspectRatio: false, plugins: { datalabels: { color: '#fff' }, legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15, font: { size: 11 } } } } }, plugins: [pluginCentroRosca] });
+    const _stLabels = Object.keys(statusCont);
+    const _stCores  = ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'];
+    // Mapeia cores na mesma ordem dos status presentes
+    const ORDEM_STATUS = ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'];
+    const _stCoresMapeadas = _stLabels.map(s => _stCores[ORDEM_STATUS.indexOf(s)] || '#aaa');
+
+    const _fmtValor = v => {
+        if (v >= 1000000) return 'R$ ' + (v / 1000000).toFixed(1).replace('.', ',') + 'M';
+        if (v >= 1000)    return 'R$ ' + (v / 1000).toFixed(0) + 'k';
+        return 'R$ ' + v;
+    };
+
+    charts.st = new Chart(document.getElementById('chartStatus'), {
+        type: 'doughnut',
+        data: {
+            labels: _stLabels,
+            datasets: [{
+                data: _stLabels.map(s => statusCont[s]),
+                backgroundColor: _stCoresMapeadas,
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverBorderWidth: 3
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 11, padding: 14, font: { size: 11 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const s = ctx.label;
+                            const qtd = statusCont[s] || 0;
+                            const val = statusValor[s] || 0;
+                            return [` ${qtd} oportunidade${qtd !== 1 ? 's' : ''}`, ` ${_fmtValor(val)}`];
+                        }
+                    }
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: ctx => {
+                        // linha 1 (quantidade) em negrito maior, linha 2 (valor) menor
+                        return ctx.dataIndex % 1 === 0
+                            ? { size: 11, weight: 'bold' }
+                            : { size: 10 };
+                    },
+                    textAlign: 'center',
+                    formatter: (value, ctx) => {
+                        const s = ctx.chart.data.labels[ctx.dataIndex];
+                        const val = statusValor[s] || 0;
+                        // Só exibe rótulo se a fatia for grande o suficiente (≥5%)
+                        const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        if (total === 0 || value / total < 0.05) return '';
+                        return `${value}\n${_fmtValor(val)}`;
+                    },
+                    // Linha dupla: número em cima, valor embaixo
+                    display: true
+                }
+            }
+        },
+        plugins: [pluginCentroRosca]
+    });
     
     if(charts.vd) charts.vd.destroy();
     const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
@@ -1588,26 +2651,26 @@ function renderizar(){
         const b = col.querySelector('.column-body');
         filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
             
-            // PROTEÇÃO MÁXIMA PARA PEGAR O ID CORRETO NO NAVEGADOR
-            const idReal = itemDaVez.id !== undefined ? itemDaVez.id : itemDaVez.ID;
+            const idReal = itemDaVez.id;
 
             const card = document.createElement('div'); 
             card.className = 'card'; 
             card.id = `card-${idReal}`; 
             card.dataset.id = idReal; 
 
-            card.draggable = true; 
+            const podeEditar = window._kanbanEditavel === true;
+            card.draggable = podeEditar;
             card.style.borderLeftColor = s.border;
-            card.style.cursor = 'pointer';
+            card.style.cursor = podeEditar ? 'grab' : 'default';
+            if (!podeEditar) card.style.opacity = '0.92';
 
-            // BLINDAGEM DO DRAG AND DROP: O card se "apresenta" com a ID correta e limpa pro navegador
-            card.ondragstart = function(ev) {
+            card.ondragstart = podeEditar ? function(ev) {
                 ev.dataTransfer.setData("text/plain", this.id);
-            };
-            
-            card.onclick = function() {
+            } : null;
+
+            card.onclick = podeEditar ? function() {
                 editarOportunidade(this.dataset.id);
-            };
+            } : null;
             
             card.innerHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR')}`;
             b.appendChild(card);
@@ -1620,7 +2683,478 @@ function renderizar(){
 // MÓDULO FINANCEIRO (PREVISTO X REALIZADO)
 // ----------------------------------------------------
 
+// ──────────────────────────────────────────────────────────────
+// MULTI-SELECT FILTROS FINANCEIRO
+// ──────────────────────────────────────────────────────────────
+let _allFinBUs   = [];
+let _allFinCats  = [];
+let _finBUsSelecionadas  = new Set();
+let _finCatsSelecionadas = new Set();
+
+function populateMultiSelectFin() {
+    _allFinBUs = [...new Set(
+        baseResMensais.map(r => r.bu ? r.bu.toUpperCase().replace(/\s+/g,' ').trim() : null).filter(Boolean)
+    )].sort();
+    _allFinCats = [...new Set(
+        baseResMensais.map(r => r.categoria ? r.categoria.toUpperCase().replace(/\s+/g,' ').trim() : null).filter(Boolean)
+    )].sort();
+    _finBUsSelecionadas  = new Set(_allFinBUs);
+    _finCatsSelecionadas = new Set(_allFinCats);
+    _renderMultiSelectFin('BU');
+    _renderMultiSelectFin('Cat');
+}
+
+function _renderMultiSelectFin(tipo) {
+    const isBU      = tipo === 'BU';
+    const all       = isBU ? _allFinBUs : _allFinCats;
+    const sel       = isBU ? _finBUsSelecionadas : _finCatsSelecionadas;
+    const itemsId   = isBU ? 'finBUItems'   : 'finCatItems';
+    const labelId   = isBU ? 'labelFinBU'   : 'labelFinCat';
+    const badgeId   = isBU ? 'badgeFinBU'   : 'badgeFinCat';
+    const defaultTx = isBU ? 'Todas as BUs' : 'Todas as Categorias';
+    const unit      = isBU ? 'BU'           : 'categoria';
+
+    const container = document.getElementById(itemsId);
+    if (container) {
+        container.innerHTML = all.map(v => `
+            <label class="multi-select-item">
+                <input type="checkbox" ${sel.has(v) ? 'checked' : ''}
+                    onchange="toggleFinFiltro('${tipo}','${v.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+                <span>${v}</span>
+            </label>`).join('');
+    }
+
+    const labelEl = document.getElementById(labelId);
+    const badgeEl = document.getElementById(badgeId);
+    if (labelEl) {
+        if (sel.size === 0 || sel.size === all.length) {
+            labelEl.textContent = defaultTx;
+        } else if (sel.size === 1) {
+            const v = [...sel][0];
+            labelEl.textContent = v.length > 22 ? v.substring(0,20) + '…' : v;
+        } else {
+            labelEl.textContent = `${sel.size} ${unit}s selecionadas`;
+        }
+    }
+    if (badgeEl) {
+        const parcial = sel.size > 0 && sel.size < all.length;
+        badgeEl.style.display = parcial ? '' : 'none';
+        badgeEl.textContent   = sel.size;
+    }
+}
+
+function toggleFinFiltro(tipo, valor) {
+    const sel = tipo === 'BU' ? _finBUsSelecionadas : _finCatsSelecionadas;
+    if (sel.has(valor)) sel.delete(valor); else sel.add(valor);
+    _renderMultiSelectFin(tipo);
+    renderizarFinanceiro();
+}
+
+function selectAllFinFiltro(tipo, selecionar) {
+    const all = tipo === 'BU' ? _allFinBUs : _allFinCats;
+    const sel = tipo === 'BU' ? _finBUsSelecionadas : _finCatsSelecionadas;
+    sel.clear();
+    if (selecionar) all.forEach(v => sel.add(v));
+    _renderMultiSelectFin(tipo);
+    renderizarFinanceiro();
+}
+
+function toggleMultiSelectFin(tipo) {
+    const dropId = tipo === 'BU' ? 'dropdownFinBU' : 'dropdownFinCat';
+    const btnId  = tipo === 'BU' ? 'btnFinBU'      : 'btnFinCat';
+    const drop   = document.getElementById(dropId);
+    const btn    = document.getElementById(btnId);
+    if (!drop) return;
+    const jaAberto = drop.classList.contains('aberto');
+    // fecha todos
+    document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('aberto'));
+    document.querySelectorAll('.multi-select-btn').forEach(b => b.classList.remove('ativo'));
+    if (!jaAberto) {
+        drop.classList.add('aberto');
+        btn.classList.add('ativo');
+    }
+}
+
+// Fecha ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multi-select-wrapper')) {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('aberto'));
+        document.querySelectorAll('.multi-select-btn').forEach(b => b.classList.remove('ativo'));
+    }
+});
+
+// ──────────────────────────────────────────────────────────────
+// MODO COMPARATIVO FINANCEIRO (BU / Categoria)
+// ──────────────────────────────────────────────────────────────
+let _modoCompFin    = false;
+let _dimCompFin     = 'bu';         // 'bu' | 'categoria'
+let _selecionadosCompFin = new Set();
+
+const MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function toggleModoCompFin() {
+    _modoCompFin = !_modoCompFin;
+    const btn    = document.getElementById('btnCompararFin');
+    const bar    = document.getElementById('finCompSelectorBar');
+    const panel  = document.getElementById('finCompPanel');
+    const normal = document.getElementById('finNormal');
+
+    if (_modoCompFin) {
+        btn.classList.add('ativo');
+        btn.innerHTML = '<span>✕</span> Fechar Comparativo';
+        bar.classList.add('visivel');
+        panel.classList.add('visivel');
+        normal.style.display = 'none';
+        _inicializarChipsCompFin();
+        renderizarCompFin();
+    } else {
+        btn.classList.remove('ativo');
+        btn.innerHTML = '<span>⚖️</span> Comparar';
+        bar.classList.remove('visivel');
+        panel.classList.remove('visivel');
+        normal.style.display = '';
+    }
+}
+
+function setDimCompFin(dim) {
+    if (_dimCompFin === dim) return;
+    _dimCompFin = dim;
+    document.getElementById('finDimBtnBU').classList.toggle('ativo', dim === 'bu');
+    document.getElementById('finDimBtnCat').classList.toggle('ativo', dim === 'categoria');
+    _inicializarChipsCompFin();
+    renderizarCompFin();
+}
+
+function _getOpcoesCompFin() {
+    const field = _dimCompFin === 'bu' ? 'bu' : 'categoria';
+    const raw = [...new Set(
+        baseResMensais
+            .map(r => r[field] ? r[field].toUpperCase().replace(/\s+/g,' ').trim() : null)
+            .filter(Boolean)
+    )].sort();
+    return raw;
+}
+
+function _inicializarChipsCompFin() {
+    const opcoes = _getOpcoesCompFin();
+    _selecionadosCompFin = new Set(opcoes); // pré-seleciona todos
+    _renderizarChipsCompFin(opcoes);
+}
+
+function _renderizarChipsCompFin(opcoes) {
+    opcoes = opcoes || _getOpcoesCompFin();
+    const container = document.getElementById('finCompChips');
+    container.innerHTML = opcoes.map((v, i) => {
+        const cor = CORES_COMP[i % CORES_COMP.length];
+        const sel = _selecionadosCompFin.has(v);
+        const style = sel ? `background:${cor}; border-color:${cor};` : `border-color:${cor}; color:${cor};`;
+        // label curto
+        const label = v.length > 22 ? v.substring(0, 20) + '…' : v;
+        return `<button class="comp-chip${sel ? ' sel' : ''}" style="${style}"
+            onclick="toggleChipCompFin('${v.replace(/'/g,"\\'")}',${i})" title="${v}">${label}</button>`;
+    }).join('');
+}
+
+function toggleChipCompFin(valor, idx) {
+    if (_selecionadosCompFin.has(valor)) {
+        if (_selecionadosCompFin.size > 1) _selecionadosCompFin.delete(valor);
+        else return;
+    } else {
+        _selecionadosCompFin.add(valor);
+    }
+    _renderizarChipsCompFin();
+    renderizarCompFin();
+}
+
+function _agregarFinPorChave(chave) {
+    const field = _dimCompFin === 'bu' ? 'bu' : 'categoria';
+    const currentMonthIndex = new Date().getMonth();
+    const fTipo = document.getElementById('filtroFinTipo')?.value.toUpperCase() || '';
+    let planoAnual=0, realAnual=0, planoYTD=0, realYTD=0;
+    const mensal = new Array(12).fill(0);
+    const mensalPlano = new Array(12).fill(0);
+
+    baseResMensais.forEach(r => {
+        const val = r[field] ? r[field].toUpperCase().replace(/\s+/g,' ').trim() : null;
+        if (val !== chave) return;
+        const tipo = r.tipo ? r.tipo.toUpperCase().replace(/\s+/g,' ').trim() : '';
+        if (fTipo && tipo !== fTipo) return;
+        const mesIdx = (r.mes_numero || 1) - 1;
+        const plan = parseFloat(r.valor_planejado) || 0;
+        const real = parseFloat(r.valor_realizado) || 0;
+        planoAnual += plan;
+        realAnual  += real;
+        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) { planoYTD += plan; realYTD += real; }
+        if (mesIdx >= 0 && mesIdx < 12) { mensal[mesIdx] += real; mensalPlano[mesIdx] += plan; }
+    });
+
+    const pctAnual = planoAnual > 0 ? +(realAnual  / planoAnual  * 100).toFixed(1) : 0;
+    const pctYTD   = planoYTD  > 0 ? +(realYTD    / planoYTD   * 100).toFixed(1) : 0;
+    const gapAnual = realAnual  - planoAnual;
+    const gapYTD   = realYTD   - planoYTD;
+    return { chave, planoAnual, realAnual, pctAnual, gapAnual, planoYTD, realYTD, pctYTD, gapYTD, mensal, mensalPlano };
+}
+
+function renderizarCompFin() {
+    const opcoes   = _getOpcoesCompFin();
+    const selecionados = opcoes.filter(v => _selecionadosCompFin.has(v));
+    if (selecionados.length === 0) return;
+
+    const label = _dimCompFin === 'bu' ? 'BU' : 'Categoria';
+    document.getElementById('finCompChartBarTitle').innerText  = `Plano vs Realizado Anual — por ${label}`;
+    document.getElementById('finCompChartLineTitle').innerText = `Evolução Mensal do Realizado — por ${label}`;
+    document.getElementById('finCompTableTitle').innerText     = `📊 Comparativo Detalhado por ${label}`;
+
+    const dados = selecionados.map((v, i) => ({
+        ...(_agregarFinPorChave(v)),
+        cor: CORES_COMP[opcoes.indexOf(v) % CORES_COMP.length]
+    }));
+
+    // Ranking ordenado por % atingimento anual
+    const ranking = [...dados].sort((a, b) => b.pctAnual - a.pctAnual);
+    const medalhas = ['🥇','🥈','🥉'];
+    const fmtM = v => {
+        const abs = Math.abs(v);
+        if (abs >= 1e6) return (v >= 0 ? '' : '-') + 'R$ ' + (abs/1e6).toFixed(1) + 'M';
+        if (abs >= 1e3) return (v >= 0 ? '' : '-') + 'R$ ' + (abs/1e3).toFixed(0) + 'k';
+        return 'R$ ' + v.toLocaleString('pt-BR', {maximumFractionDigits:0});
+    };
+
+    // ── Ranking cards ──
+    document.getElementById('finCompRankingGrid').innerHTML = ranking.map((d, rank) => {
+        const corPct   = d.pctAnual >= 100 ? '#27ae60' : d.pctAnual >= 80 ? '#f39c12' : '#c0392b';
+        const gapClass = d.gapAnual >= 0 ? 'fin-rank-gap-pos' : 'fin-rank-gap-neg';
+        const fillAnual = Math.min(d.planoAnual > 0 ? (d.realAnual / d.planoAnual * 100) : 0, 100);
+        const nomeLabel = d.chave.length > 28 ? d.chave.substring(0,26) + '…' : d.chave;
+        return `
+        <div class="comp-rank-card" style="border-top-color:${d.cor}">
+            <div class="comp-rank-medal">${rank < 3 ? medalhas[rank] : '#' + (rank+1)}</div>
+            <div class="comp-rank-nome" title="${d.chave}">${nomeLabel}</div>
+            <div class="comp-rank-pct" style="color:${corPct}">${d.pctAnual}%</div>
+            <div class="comp-rank-label">Atingimento Anual</div>
+            <div class="fin-rank-valores">
+                <div class="fin-rank-val"><span class="fin-rank-val-num">${fmtM(d.planoAnual)}</span><span class="fin-rank-val-label">Plano</span></div>
+                <div class="fin-rank-val"><span class="fin-rank-val-num">${fmtM(d.realAnual)}</span><span class="fin-rank-val-label">Real</span></div>
+                <div class="fin-rank-val"><span class="fin-rank-val-num ${gapClass}">${d.gapAnual >= 0 ? '+' : ''}${fmtM(d.gapAnual)}</span><span class="fin-rank-val-label">Gap</span></div>
+            </div>
+            <div class="comp-mini-stat">
+                <span class="comp-mini-stat-label">Anual</span>
+                <div class="comp-mini-track"><div class="comp-mini-fill" style="width:${fillAnual}%;background:${d.cor}"></div></div>
+                <span class="comp-mini-val" style="font-size:10px">${d.pctAnual}%</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    // ── Gráfico: Realizado Mensal (stacked ou acumulado) + Plano Total (linha) ──
+    document.getElementById('finCompChartBarTitle').innerText =
+        `Realizado Mensal por ${label} vs Plano`;
+
+    // Plano total por mês
+    const planoTotalMensal = MESES_SHORT.map((_, i) =>
+        dados.reduce((s, d) => s + (d.mensalPlano[i] || 0), 0)
+    );
+
+    // Verifica se TODAS as opções disponíveis estão selecionadas
+    const totalOpcoesFin = (_dimCompFin === 'bu' ? _allFinBUs : _allFinCats).length;
+    const todosSelecionados = dados.length === totalOpcoesFin;
+
+    // Linha do Plano Total (com rótulos em todos os pontos)
+    const planoDataset = {
+        type: 'line',
+        label: 'Plano Total',
+        data: planoTotalMensal,
+        borderColor: '#422c76',
+        borderWidth: 2.5,
+        borderDash: [7, 4],
+        pointBackgroundColor: '#422c76',
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        fill: false,
+        tension: 0,
+        order: 0,
+        datalabels: {
+            display: ctx => (ctx.dataset.data[ctx.dataIndex] || 0) > 0,
+            color: '#422c76',
+            anchor: 'end',
+            align: 'top',
+            offset: 8,
+            font: { size: 9, weight: '700' },
+            backgroundColor: 'rgba(66,44,118,0.09)',
+            borderRadius: 3,
+            padding: { top: 2, bottom: 2, left: 5, right: 5 },
+            formatter: v => fmtM(v)
+        }
+    };
+
+    let barDatasetsFinais;
+
+    // Maior total mensal acumulado — usado para decidir se barra é "curta"
+    const maxMensalTotal = Math.max(
+        ...MESES_SHORT.map((_, i) => dados.reduce((s, d) => s + (d.mensal[i] || 0), 0)), 1
+    );
+
+    // Retorna config de rótulo inteligente: dentro (branco) quando barra é alta,
+    // fora (cor da entidade ou cinza) quando barra é curta (< 14% do maior valor)
+    function smartBarLabel({ corFora = '#444', getTotal } = {}) {
+        return {
+            display: ctx => (getTotal ? getTotal(ctx) : ctx.dataset.data[ctx.dataIndex] || 0) > 0,
+            anchor: ctx => {
+                const total = getTotal ? getTotal(ctx) : ctx.dataset.data[ctx.dataIndex] || 0;
+                return total < maxMensalTotal * 0.14 ? 'end' : 'center';
+            },
+            align: ctx => {
+                const total = getTotal ? getTotal(ctx) : ctx.dataset.data[ctx.dataIndex] || 0;
+                return total < maxMensalTotal * 0.14 ? 'top' : 'center';
+            },
+            color: ctx => {
+                const total = getTotal ? getTotal(ctx) : ctx.dataset.data[ctx.dataIndex] || 0;
+                return total < maxMensalTotal * 0.14 ? corFora : '#fff';
+            },
+            font: { size: 9, weight: '800' },
+            formatter: (v, ctx) => {
+                const val = getTotal ? getTotal(ctx) : v;
+                return val > 0 ? fmtM(val) : '';
+            }
+        };
+    }
+
+    if (todosSelecionados) {
+        // ── Todos selecionados: barra única acumulada (cor roxa) ──
+        barDatasetsFinais = [{
+            type: 'bar',
+            label: 'Realizado Total',
+            data: MESES_SHORT.map((_, i) => dados.reduce((s, d) => s + (d.mensal[i] || 0), 0)),
+            backgroundColor: '#422c76bb',
+            borderColor: '#422c76',
+            borderWidth: 0,
+            borderRadius: 6,
+            datalabels: smartBarLabel({ corFora: '#422c76' })
+        }];
+    } else {
+        // ── Seleção parcial: barras empilhadas por entidade ──
+        barDatasetsFinais = dados.map((d, idx) => ({
+            type: 'bar',
+            label: d.chave.length > 20 ? d.chave.substring(0,18)+'…' : d.chave,
+            data: d.mensal,
+            backgroundColor: d.cor + 'cc',
+            borderColor: d.cor,
+            borderWidth: 0,
+            stack: 'real',
+            // Rótulo do total no último segmento com cor inteligente
+            datalabels: idx === dados.length - 1
+                ? smartBarLabel({
+                    corFora: dados.length === 1 ? d.cor : '#444',
+                    getTotal: ctx => dados.reduce((s, d) => s + (d.mensal[ctx.dataIndex] || 0), 0)
+                  })
+                : { display: false }
+        }));
+    }
+
+    if (charts.finCompBars) charts.finCompBars.destroy();
+    charts.finCompBars = new Chart(document.getElementById('chartFinCompBars'), {
+        type: 'bar',
+        data: { labels: MESES_SHORT, datasets: [...barDatasetsFinais, planoDataset] },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 36, right: 8 } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                datalabels: {},
+                tooltip: {
+                    callbacks: {
+                        footer: items => {
+                            const total = items
+                                .filter(i => i.dataset.type !== 'line')
+                                .reduce((s, i) => s + (i.raw || 0), 0);
+                            return total > 0 ? 'Total Real: ' + fmtM(total) : '';
+                        },
+                        label: ctx => ` ${ctx.dataset.label}: ${fmtM(ctx.raw || 0)}`
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true, grid: { display: false }, ticks: { font: { size: 11, weight: '600' } } },
+                y: { stacked: true, beginAtZero: true, display: false }
+            }
+        }
+    });
+
+    // ── Gráfico linha: Evolução Mensal do Realizado ──
+    if (charts.finCompLine) charts.finCompLine.destroy();
+    charts.finCompLine = new Chart(document.getElementById('chartFinCompLine'), {
+        type: 'line',
+        data: {
+            labels: MESES_SHORT,
+            datasets: dados.map(d => ({
+                label: d.chave.length > 18 ? d.chave.substring(0,16)+'…' : d.chave,
+                data: d.mensal,
+                borderColor: d.cor,
+                backgroundColor: d.cor + '15',
+                borderWidth: 2.5,
+                pointBackgroundColor: d.cor,
+                pointRadius: 4, pointHoverRadius: 6,
+                fill: false, tension: 0.3,
+                datalabels: {
+                    display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+                    color: d.cor,
+                    anchor: 'end',
+                    align: 'top',
+                    offset: 3,
+                    font: { size: 9, weight: '700' },
+                    backgroundColor: d.cor + '18',
+                    borderRadius: 3,
+                    padding: { top: 2, bottom: 2, left: 4, right: 4 },
+                    formatter: v => fmtM(v)
+                }
+            }))
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: { padding: { top: 28, right: 10 } },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                datalabels: {},
+                tooltip: {
+                    callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmtM(ctx.raw)}` }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { font: { size: 10 }, callback: v => fmtM(v) },
+                    grid: { color: 'rgba(0,0,0,0.04)' }
+                },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+
+    // ── Tabela detalhada ──
+    const pillFin = pct => {
+        const cls = pct >= 100 ? 'comp-pct-verde' : pct >= 80 ? 'comp-pct-amarelo' : 'comp-pct-vermelho';
+        return `<span class="comp-pct-pill ${cls}">${pct}%</span>`;
+    };
+    const gapHtml = v => `<span style="font-weight:700; color:${v >= 0 ? '#27ae60' : '#c0392b'}">${v >= 0 ? '+' : ''}${fmtM(v)}</span>`;
+
+    document.getElementById('finCompTableBody').innerHTML = ranking.map(d => `
+        <tr>
+            <td><span class="comp-vendor-dot" style="background:${d.cor}"></span><strong>${d.chave}</strong></td>
+            <td>${fmtM(d.planoAnual)}</td>
+            <td><strong>${fmtM(d.realAnual)}</strong></td>
+            <td>${gapHtml(d.gapAnual)}</td>
+            <td>${pillFin(d.pctAnual)}</td>
+            <td>${fmtM(d.planoYTD)}</td>
+            <td><strong>${fmtM(d.realYTD)}</strong></td>
+            <td>${gapHtml(d.gapYTD)}</td>
+            <td>${pillFin(d.pctYTD)}</td>
+        </tr>`).join('');
+}
+// ──────────────────────────────────────────────────────────────
+
 function renderizarFinanceiro() {
+    if (_modoCompFin) { renderizarCompFin(); return; }
     let planoTotalAnual = 0;
     let realTotalAnual = 0;
     let planoTotalYTD = 0;
@@ -1631,10 +3165,11 @@ function renderizarFinanceiro() {
     let faturamentoPorBU = {};
     let clientesDesempenho = {}; 
 
-    // PEGANDO OS VALORES DOS NOVOS FILTROS E NORMALIZANDO
+    // PEGANDO OS VALORES DOS FILTROS
     const fFinCli = document.getElementById('filtroFinCliente').value.toLowerCase();
-    const fFinBU = document.getElementById('filtroFinBU').value.toUpperCase();
-    const fFinCategoria = document.getElementById('filtroFinCategoria').value.toUpperCase();
+    const fFinTipo = document.getElementById('filtroFinTipo').value.toUpperCase();
+    const buFiltroAtivo  = _allFinBUs.length  > 0 && _finBUsSelecionadas.size  < _allFinBUs.length;
+    const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
 
     const currentMonthIndex = new Date().getMonth(); // 0 para Janeiro, 3 para Abril, etc.
 
@@ -1647,8 +3182,10 @@ function renderizarFinanceiro() {
 
         // APLICANDO OS FILTROS RIGOROSAMENTE COM BASE NOS NOVOS VALORES
         if (fFinCli && !cliName.toLowerCase().includes(fFinCli)) return;
-        if (fFinBU && bu !== fFinBU) return;
-        if (fFinCategoria && categoria !== fFinCategoria) return;
+        if (buFiltroAtivo  && !_finBUsSelecionadas.has(bu))        return;
+        if (catFiltroAtivo && !_finCatsSelecionadas.has(categoria)) return;
+        const tipo = rm.tipo ? rm.tipo.toUpperCase().replace(/\s+/g,' ').trim() : '';
+        if (fFinTipo && tipo !== fFinTipo) return;
 
         const mesIdx = rm.mes_numero - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
@@ -1882,7 +3419,7 @@ function carregarGridFin() {
 
 async function salvarGridFin() {
     const clienteSelecionado = document.getElementById('fin_input_cliente').value;
-    if(!clienteSelecionado) return alert("Selecione um cliente primeiro.");
+    if(!clienteSelecionado) { showToast("Selecione um cliente primeiro.", "warning"); return; }
 
     const btn = document.getElementById('btnSalvarFin');
     btn.innerText = "Salvando..."; 
@@ -1906,14 +3443,17 @@ async function salvarGridFin() {
 
     if(promessas.length > 0) {
         await Promise.all(promessas);
-        await carregarDadosFinanceiros(); 
+        await carregarDadosFinanceiros();
+        showToast("Lançamentos salvos com sucesso!", "success");
+    } else {
+        showToast("Nenhuma alteração detectada.", "info");
     }
 
     fecharModal('modalFinInput');
-    btn.innerText = "Salvar Lançamentos na Tela"; 
+    btn.innerText = "Salvar Lançamentos na Tela";
     btn.disabled = false;
-    
-    renderizarFinanceiro(); 
+
+    renderizarFinanceiro();
 }
 
 // ----------------------------------------------------------------------
@@ -1921,7 +3461,7 @@ async function salvarGridFin() {
 // ----------------------------------------------------------------------
 
 function baixarModeloExcel() {
-    if (!window.XLSX) return alert("Aguarde a biblioteca de planilhas carregar.");
+    if (!window.XLSX) { showToast("Aguarde a biblioteca de planilhas carregar.", "warning"); return; }
     
     const dados = [];
     const combinacoes = new Set();
@@ -1959,7 +3499,7 @@ async function subirPlanilhaExcel(event) {
     const file = event.target.files[0];
     if(!file) return;
 
-    if (!window.XLSX) return alert("Aguarde a biblioteca de planilhas carregar.");
+    if (!window.XLSX) { showToast("Aguarde a biblioteca de planilhas carregar.", "warning"); return; }
 
     const btn = document.getElementById('btnUploadExcel');
     const originalText = btn.innerText;
@@ -2007,12 +3547,12 @@ async function subirPlanilhaExcel(event) {
                 await carregarDadosFinanceiros();
                 renderizarFinanceiro();
                 carregarGridFin(); // Atualiza a grid se houver algum cliente selecionado por baixo
-                alert(`Sucesso! ${promessas.length} valores foram atualizados na base de dados.`);
+                showToast(`Sucesso! ${promessas.length} valores atualizados.`, "success");
             } else {
-                alert("Nenhum valor novo preenchido ou os valores já eram iguais aos do banco.");
+                showToast("Nenhum valor novo preenchido ou os valores já eram iguais.", "info");
             }
         } catch (error) {
-            alert("Erro ao processar a planilha: " + error.message);
+            showToast("Erro ao processar a planilha: " + error.message, "error");
         } finally {
             btn.innerText = originalText;
             btn.disabled = false;
@@ -2021,6 +3561,10 @@ async function subirPlanilhaExcel(event) {
     };
     reader.readAsArrayBuffer(file);
 }
+
+// Versões com debounce para os filtros de texto (evita query a cada tecla)
+const debouncedRenderizar = debounce(renderizar, 300);
+const debouncedRenderizarFin = debounce(renderizarFinanceiro, 300);
 
 // ANTENA: Detecta se o usuário veio pelo link do e-mail de recuperação
 supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -2080,8 +3624,9 @@ async function salvarNovaSenha() {
         
         if(data && data.user) {
             USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+            await carregarPerfil(data.user.email);
         }
-        
+
         setTimeout(() => {
             iniciarSistema();
         }, 2000);
