@@ -22,7 +22,6 @@
     --bg-fechamento: #007bff;
     --bg-fechado: #27ae60;
     --bg-perdido: #c0392b;
-    --ia-gold: #d4af37;
 }
 
 body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:var(--offwhite); color:var(--grafite); }
@@ -139,15 +138,6 @@ header {
     color: white;
 }
 
-.btn-ia {
-    background: linear-gradient(135deg, var(--ia-gold), #f3d060);
-    color: white;
-    box-shadow: 0 2px 5px rgba(212, 175, 55, 0.3);
-}
-.btn-ia:hover {
-    background: linear-gradient(135deg, #b8962d, var(--ia-gold));
-    color: white;
-}
 
 .btn-novo-op { background-color: var(--lilas); color: white; }
 .btn-novo-op:hover { background-color: #32215a; color: white; }
@@ -171,6 +161,49 @@ header {
 .charts-grid { display: grid; grid-template-columns: 480px 1fr; gap: 25px; margin-bottom: 35px; }
 .chart-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 420px; display: flex; flex-direction: column; box-sizing: border-box; }
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
+
+/* ── HOME / DASHBOARD ── */
+.home-filter-bar { display:flex; gap:10px; align-items:center; background:white; border-radius:12px; padding:12px 18px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px; flex-wrap:wrap; }
+.home-filter-bar label { font-size:11px; font-weight:700; color:#aaa; letter-spacing:.5px; margin-right:-4px; white-space:nowrap; }
+.home-filter-bar select, .home-filter-bar input { height:34px; padding:0 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:12px; color:#555; background:#fff; outline:none; }
+.home-filter-bar select:focus, .home-filter-bar input:focus { border-color:var(--lilas); }
+.home-filter-sep { width:1px; height:24px; background:#e8e8e8; margin:0 4px; }
+
+.home-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:28px; }
+.home-kpi { background:white; border-radius:12px; padding:16px 18px; box-shadow:0 2px 10px rgba(0,0,0,0.05); display:flex; align-items:center; gap:14px; }
+.home-kpi-icon { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.home-kpi-text h4 { margin:0; font-size:11px; font-weight:700; color:#aaa; letter-spacing:.4px; text-transform:uppercase; }
+.home-kpi-text p { margin:4px 0 0 0; font-size:18px; font-weight:800; color:#333; line-height:1; }
+.home-kpi-text span { font-size:10px; color:#999; }
+
+.home-section { margin-bottom:32px; }
+.home-section-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #f0f0f0; }
+.home-section-badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:white; flex-shrink:0; }
+.home-section-header h3 { margin:0; font-size:16px; font-weight:700; color:#333; }
+.home-section-header p { margin:0; font-size:12px; color:#999; }
+.home-section-header .hsh-text { display:flex; flex-direction:column; gap:1px; }
+.home-connector { width:2px; background:linear-gradient(to bottom, var(--c,#422c76) 0%, transparent 100%); height:16px; margin:0 auto 0 13px; }
+
+.home-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.home-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+.home-chart-card { background:white; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); display:flex; flex-direction:column; }
+.home-chart-card h5 { margin:0 0 4px 0; font-size:13px; font-weight:700; color:#333; }
+.home-chart-card p { margin:0 0 12px 0; font-size:11px; color:#aaa; }
+.home-chart-card canvas { flex:1; min-height:0; }
+.home-donut-wrap { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+.home-donut-wrap canvas { width:auto !important; height:100% !important; max-width:100%; aspect-ratio:1; }
+.home-chart-h260 { height:380px; }
+.home-chart-h220 { height:340px; }
+.home-chart-h180 { height:280px; }
+
+.home-metas-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; }
+.home-meta-card { background:white; border-radius:12px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+.home-meta-card .hmc-name { font-size:13px; font-weight:700; color:var(--lilas); margin-bottom:12px; }
+.home-meta-bar-row { margin-bottom:8px; }
+.home-meta-bar-row .label { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-bottom:3px; }
+.home-meta-bar-row .label strong { color:#333; }
+.home-meta-bar-bg { height:6px; background:#f0f0f0; border-radius:4px; overflow:hidden; }
+.home-meta-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
 
 /* TELA DE METAS */
 .metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -361,10 +394,6 @@ header {
 }
 .modal-content h3 { margin-top: 0; color: var(--lilas); font-size: 20px; border-bottom: 2px solid var(--offwhite); padding-bottom: 10px; margin-bottom: 20px; }
 
-.ia-result-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 15px; display: none; }
-.ia-badge { background: var(--ia-gold); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-.ia-loading { display: none; text-align: center; padding: 20px; color: var(--ia-gold); font-weight: bold; }
-.ia-section-title { font-size: 12px; font-weight: bold; color: var(--lilas); margin-top: 10px; border-left: 3px solid var(--ia-gold); padding-left: 8px; }
 
 .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
 .form-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 5px; }
@@ -484,8 +513,8 @@ header {
         <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
         <h2>Acesso ao Pipeline</h2>
         <div id="login-msg" class="msg-box msg-error" style="display: none;"></div>
-        <input type="email" id="login_user" placeholder="E-mail corporativo">
-        <input type="password" id="login_pass" placeholder="Senha">
+        <input type="email" id="login_user" placeholder="E-mail corporativo" onkeydown="if(event.key==='Enter') autenticarSupabase()">
+        <input type="password" id="login_pass" placeholder="Senha" onkeydown="if(event.key==='Enter') autenticarSupabase()">
         <button class="btn-login" onclick="autenticarSupabase()" id="btn-entrar">ENTRAR</button>
         <div class="login-links" style="justify-content: center;">
     <a href="#" onclick="trocarTelaLogin('box-recuperar')">Esqueci a senha</a>
@@ -519,14 +548,13 @@ header {
         <img src="Pipeline.png" class="logo">
         <div class="header-right">
             <div class="nav-group">
-                <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>📊</span> Dashboard</button>
+                <button type="button" id="nav-dash" class="btn-header active" onclick="navegar('dashboard')"><span>🏠</span> Home</button>
                 <button type="button" id="nav-kanban" class="btn-header" onclick="navegar('kanban')"><span>📋</span> Kanban</button>
                 <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
                 <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
             </div>
             
-            <button type="button" id="btn-ia" class="btn-header btn-ia" onclick="abrirModal('modalIA')" title="Prospecção IA"><span>✨</span> Prospecção IA</button>
-            <button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
+<button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
             <button type="button" id="btn-areas" class="btn-header" onclick="abrirModal('modalArea')" title="Gerenciar Áreas"><span>🏢</span> Áreas</button>
             <button type="button" id="btn-nova-op" class="btn-header btn-novo-op" onclick="prepararNovo()" title="Nova Oportunidade"><span>➕</span> Nova Oportunidade</button>
             <div style="width:1px; height:22px; background:#ddd; margin:0 3px; flex-shrink:0;"></div>
@@ -559,27 +587,199 @@ header {
         </div>
 
         <div id="page-dashboard" class="active-page">
-            <div class="kpis" style="grid-template-columns: repeat(6, 1fr);">
-                <div class="kpi"><h3>Valor Estimado (Fechados)</h3><p id="receitaGanha">R$ 0</p></div>
-                <div class="kpi"><h3>Valor Estimado no Ano</h3><p id="pipelineTotal">R$ 0</p></div>
-                <div class="kpi"><h3>Valor Mensal Recorrente</h3><p id="mrrTotal">R$ 0</p></div>
-                <div class="kpi">
-                    <h3>Taxa de Conversão</h3>
-                    <p id="conversao">0%</p>
-                    <span id="conversaoSub" style="font-size:11px; color:#999; font-weight:500;"></span>
-                </div>
-                <div class="kpi">
-                    <h3>Win Rate</h3>
-                    <p id="winRate">0%</p>
-                    <span id="winRateSub" style="font-size:11px; color:#999; font-weight:500;"></span>
-                </div>
-                <div class="kpi"><h3>Ticket Médio</h3><p id="ticket">R$ 0</p></div>
+
+            <!-- Barra de Filtros Home -->
+            <div class="home-filter-bar">
+                <label>ANO</label>
+                <select id="homeAno" onchange="renderizarHome()">
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <label>BU</label>
+                <select id="homeBU" onchange="renderizarHome()">
+                    <option value="">Todas as BUs</option>
+                    <option value="TRADING">Trading (VCI)</option>
+                    <option value="ARMAZEM">Armazém</option>
+                    <option value="TRANSPORTE">Transporte</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <label>VENDEDOR</label>
+                <select id="homeVend" onchange="renderizarHome()">
+                    <option value="">Todos os Vendedores</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <label>CLIENTE</label>
+                <select id="homeCliente" onchange="renderizarHome()" style="min-width:160px; max-width:220px;">
+                    <option value="">Todos os Clientes</option>
+                </select>
+                <div style="flex:1"></div>
+                <span id="homeAtualizado" style="font-size:11px; color:#bbb;"></span>
             </div>
 
-            <div class="charts-grid">
-                <div class="chart-card"><h4>Status das Oportunidades</h4><canvas id="chartStatus"></canvas></div>
-                <div class="chart-card"><h4>Ranking por Vendedor</h4><canvas id="chartVendedor"></canvas></div>
+            <!-- KPIs Rápidos -->
+            <div class="home-kpis">
+                <div class="home-kpi">
+                    <div class="home-kpi-icon" style="background:#f3eeff;">🎯</div>
+                    <div class="home-kpi-text">
+                        <h4>Oportunidades</h4>
+                        <p id="hKpiOps">0</p>
+                        <span id="hKpiOpsSub"></span>
+                    </div>
+                </div>
+                <div class="home-kpi">
+                    <div class="home-kpi-icon" style="background:#fff3e0;">💰</div>
+                    <div class="home-kpi-text">
+                        <h4>Pipeline Total (Estimado)</h4>
+                        <p id="hKpiPipe">R$ 0</p>
+                        <span id="hKpiPipeSub"></span>
+                    </div>
+                </div>
+                <div class="home-kpi">
+                    <div class="home-kpi-icon" style="background:#e8f5e9;">🎯</div>
+                    <div class="home-kpi-text">
+                        <h4>% de Conversão</h4>
+                        <p id="hKpiWin">0%</p>
+                        <span id="hKpiWinSub"></span>
+                    </div>
+                </div>
+                <div class="home-kpi">
+                    <div class="home-kpi-icon" style="background:#fce4ec;">📊</div>
+                    <div class="home-kpi-text">
+                        <h4>Plano Financeiro</h4>
+                        <p id="hKpiPlano">R$ 0</p>
+                        <span id="hKpiPlanoSub"></span>
+                    </div>
+                </div>
+                <div class="home-kpi">
+                    <div class="home-kpi-icon" style="background:#e3f2fd;">✅</div>
+                    <div class="home-kpi-text">
+                        <h4>Realizado + Carteira</h4>
+                        <p id="hKpiReal">R$ 0</p>
+                        <span id="hKpiRealSub"></span>
+                    </div>
+                </div>
             </div>
+
+            <!-- Conector -->
+            <div class="home-connector" style="--c:#422c76;"></div>
+
+            <!-- SEÇÃO 01: Pipeline Geral -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#422c76;">01</div>
+                    <div class="hsh-text">
+                        <h3>Pipeline de Oportunidades</h3>
+                        <p>Distribuição por status — quantidade e valor estimado</p>
+                    </div>
+                </div>
+                <div class="home-grid-2">
+                    <div class="home-chart-card home-chart-h260">
+                        <h5>Status das Oportunidades</h5>
+                        <p>Proporção por quantidade</p>
+                        <div class="home-donut-wrap"><canvas id="chartHomeStatus"></canvas></div>
+                    </div>
+                    <div class="home-chart-card home-chart-h260">
+                        <h5>Valor Estimado por Status</h5>
+                        <p>R$ total em cada fase do funil</p>
+                        <canvas id="chartHomeStatusValor"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-connector" style="--c:#17a2b8;"></div>
+
+            <!-- SEÇÃO 02: Pipeline por BU -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#17a2b8;">02</div>
+                    <div class="hsh-text">
+                        <h3>Prospecções por Unidade de Negócio</h3>
+                        <p>Distribuição das oportunidades dentro de cada BU</p>
+                    </div>
+                </div>
+                <div class="home-grid-3">
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Trading (VCI)</h5>
+                        <p id="hBuTradingSub">—</p>
+                        <div class="home-donut-wrap"><canvas id="chartHomeBuTrading"></canvas></div>
+                    </div>
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Armazém</h5>
+                        <p id="hBuArmazemSub">—</p>
+                        <div class="home-donut-wrap"><canvas id="chartHomeBuArmazem"></canvas></div>
+                    </div>
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Transporte</h5>
+                        <p id="hBuTransporteSub">—</p>
+                        <div class="home-donut-wrap"><canvas id="chartHomeBuTransporte"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-connector" style="--c:#ff2f69;"></div>
+
+            <!-- SEÇÃO 03: Orçado vs Realizado por BU -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#ff2f69;">03</div>
+                    <div class="hsh-text">
+                        <h3>Orçado vs Realizado Financeiro por BU</h3>
+                        <p>Plano mensal x Faturado + Pedidos em Casa</p>
+                    </div>
+                </div>
+                <div class="home-grid-3">
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Trading (VCI)</h5>
+                        <p id="hFinTradingSub">—</p>
+                        <canvas id="chartHomeFinTrading"></canvas>
+                    </div>
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Armazém</h5>
+                        <p id="hFinArmazemSub">—</p>
+                        <canvas id="chartHomeFinArmazem"></canvas>
+                    </div>
+                    <div class="home-chart-card home-chart-h220">
+                        <h5>Transporte</h5>
+                        <p id="hFinTransporteSub">—</p>
+                        <canvas id="chartHomeFinTransporte"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="home-connector" style="--c:#27ae60;"></div>
+
+            <!-- SEÇÃO 04: Metas dos Vendedores -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#27ae60;">04</div>
+                    <div class="hsh-text">
+                        <h3>Performance dos Vendedores</h3>
+                        <p>Meta vs Realizado — Reuniões e Propostas (ano completo)</p>
+                    </div>
+                </div>
+                <div class="home-metas-grid" id="homeMetasGrid"></div>
+            </div>
+
+            <div class="home-connector" style="--c:#f39c12;"></div>
+
+            <!-- SEÇÃO 05: Financeiro Mensal -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#f39c12;">05</div>
+                    <div class="hsh-text">
+                        <h3>Evolução Financeira Mensal</h3>
+                        <p>Plano Orçamentário x Faturado x Pedidos em Casa (mês a mês)</p>
+                    </div>
+                </div>
+                <div class="home-chart-card" style="height:360px;">
+                    <h5>Realizado Geral por Mês</h5>
+                    <p id="hFinMensalSub">—</p>
+                    <canvas id="chartHomeFinMensal"></canvas>
+                </div>
+            </div>
+
         </div>
 
         <div id="page-kanban">
@@ -879,6 +1079,29 @@ header {
     </div>
 </div>
 
+<!-- Modal: Confirmar registro no Financeiro ao fechar negócio -->
+<div id="modalRegistrarFechado" class="modal">
+    <div class="modal-content" style="width:480px;">
+        <h3>🎉 Negócio Fechado!</h3>
+        <p style="font-size:13px; color:#666; margin-top:-8px;">Deseja registrar este cliente no <strong>Financeiro</strong> com 12 meses (plano zero)?</p>
+        <div style="background:#f8f9fa; border-radius:10px; padding:14px 16px; margin-bottom:16px; border-left:4px solid #27ae60;">
+            <div style="font-size:13px; color:#555; margin-bottom:4px;">Cliente</div>
+            <div id="rfClienteNome" style="font-size:15px; font-weight:700; color:var(--lilas);"></div>
+            <div id="rfBUNome" style="font-size:12px; color:#888; margin-top:2px;"></div>
+        </div>
+        <div class="form-group">
+            <label>CATEGORIA <span style="color:#aaa; font-weight:400;">(opcional — pode preencher depois)</span></label>
+            <select id="rfCategoria" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; color:#555; background:#fff;">
+                <option value="">-- Deixar em branco --</option>
+            </select>
+        </div>
+        <div class="modal-footer" style="margin-top:16px;">
+            <button type="button" class="btn-header" style="background:#f0f0f0;" onclick="fecharModal('modalRegistrarFechado')">Não agora</button>
+            <button type="button" class="btn-header btn-novo-meta" onclick="confirmarRegistroFechado()">✅ Sim, registrar no Financeiro</button>
+        </div>
+    </div>
+</div>
+
 <div id="modalFinInput" class="modal">
     <div class="modal-content" style="width: 850px;">
         <h3>⚡ Lançamento Rápido e Lote</h3>
@@ -981,35 +1204,6 @@ header {
     </div>
 </div>
 
-<div id="modalIA" class="modal">
-    <div class="modal-content">
-        <h3>✨ Inteligência de Prospecção</h3>
-        <p style="font-size: 13px; color: #666; margin-top: -10px;">Digite o nome ou site da empresa para buscar dados estratégicos.</p>
-        <div class="form-group">
-            <label>Empresa ou Site</label>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="ia_termo" placeholder="Ex: Google ou www.google.com" style="flex:1;">
-                <button type="button" class="btn-header btn-ia" onclick="simularBuscaIA()">PESQUISAR</button>
-            </div>
-        </div>
-        <div id="ia_loading" class="ia-loading">🔍 Analisando presença digital e notícias...</div>
-        <div id="ia_resultado" class="ia-result-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 id="res_empresa" style="margin:0; color:var(--lilas);">NOME DA EMPRESA</h4>
-                <span class="ia-badge">Insights IA</span>
-            </div>
-            <div class="ia-section-title">O QUE FAZEM (CORE BUSINESS)</div>
-            <p id="res_descricao" style="font-size: 13px; line-height: 1.4;"></p>
-            <div class="ia-section-title">SEGMENTO E PORTE</div>
-            <p id="res_segmento" style="font-size: 13px;"></p>
-            <div class="ia-section-title">GANCHOS PARA ABORDAGEM (NEWS)</div>
-            <ul id="res_noticias" style="font-size: 13px; padding-left: 18px;"></ul>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalIA')">Fechar</button>
-        </div>
-    </div>
-</div>
 
 <div id="modalVendedor" class="modal">
     <div class="modal-content" style="width: 500px;">
@@ -1310,12 +1504,13 @@ function navegar(pagina) {
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
-        barraFiltros.style.display = (pagina === 'dashboard' || pagina === 'kanban' || pagina === 'metas') ? 'flex' : 'none';
+        barraFiltros.style.display = (pagina === 'kanban' || pagina === 'metas') ? 'flex' : 'none';
     }
 
     if (pagina === 'dashboard') {
         document.getElementById('page-dashboard').classList.add('active-page');
         document.getElementById('nav-dash').classList.add('active');
+        renderizarHome();
     } else if (pagina === 'kanban') {
         document.getElementById('page-kanban').classList.add('active-page');
         document.getElementById('nav-kanban').classList.add('active');
@@ -1358,7 +1553,6 @@ function aplicarPermissoes() {
     mostrar('btn-nova-op',     p.novaOp);
     mostrar('btn-vendedores',  p.gerenciar);
     mostrar('btn-areas',       p.gerenciar);
-    mostrar('btn-ia',          p.ia);
     mostrar('btn-lancar-meta', p.metaLancar);
     mostrar('btn-lancar-fin',  p.finLancar);
 
@@ -1552,26 +1746,6 @@ let charts={};
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
 function fecharModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'none'; }
 
-function simularBuscaIA() {
-    const termo = document.getElementById('ia_termo').value;
-    if(!termo) { showToast("Digite o nome ou site da empresa.", "warning"); return; }
-    const loader = document.getElementById('ia_loading');
-    const resultado = document.getElementById('ia_resultado');
-    loader.style.display = 'block';
-    resultado.style.display = 'none';
-    setTimeout(() => {
-        loader.style.display = 'none';
-        resultado.style.display = 'block';
-        document.getElementById('res_empresa').innerText = termo.toUpperCase();
-        document.getElementById('res_descricao').innerText = "Isso é apenas um teste, falta a conexão para consultas reais";
-        document.getElementById('res_segmento').innerText = "Setor: Logística Tech | Porte: Grande Empresa | Sede: Brasil";
-        document.getElementById('res_noticias').innerHTML = `
-            <li>Recentemente expandiu operações para o Nordeste com novo CD.</li>
-            <li>Abriu rodada de investimento focada em descarbonização da frota.</li>
-            <li>Lançou nova plataforma de rastreamento em tempo real semana passada.</li>
-        `;
-    }, 1500);
-}
 
 function toggleMotivoPerda() {
     const status = document.getElementById('op_status').value;
@@ -1815,9 +1989,17 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         return;
     }
 
+    // Captura status anterior ANTES de recarregar o array
+    const statusAnterior = idValue ? (base.find(x => String(x.id) === String(idValue))?.status || '') : '';
+
     fecharModal('modalOportunidade');
     showToast("Oportunidade salva com sucesso!", "success");
     carregarDados();
+
+    // Se mudou para FECHADO, oferece registro no Financeiro
+    if (novo_status === 'FECHADO' && statusAnterior !== 'FECHADO') {
+        abrirModalRegistrarFechado({ cliente: novo_cliente, area: nova_area });
+    }
 };
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
@@ -2435,6 +2617,372 @@ function renderizarComparativo() {
 
 // ──────────────────────────────────────────────────────────────
 
+// ──────────────────────────────────────────────────────────────
+// ---- HOME / DASHBOARD ----
+
+function _getBUGroup(area) {
+    if (!area) return 'OUTROS';
+    const a = area.toUpperCase();
+    if (a.includes('TRADING') || a.includes('VCI')) return 'TRADING';
+    if (a.includes('ARMAZEM') || a.includes('ARM')) return 'ARMAZEM';
+    if (a.includes('TRANSPORT')) return 'TRANSPORTE';
+    return 'OUTROS';
+}
+
+function _fmtHome(v) {
+    if (v >= 1e6) return 'R$ ' + (v/1e6).toFixed(1).replace('.',',') + 'M';
+    if (v >= 1e3) return 'R$ ' + (v/1e3).toFixed(0) + 'k';
+    return 'R$ ' + v.toLocaleString('pt-BR');
+}
+
+function renderizarHome() {
+    if (!document.getElementById('page-dashboard').classList.contains('active-page')) return;
+
+    const anoHome      = parseInt(document.getElementById('homeAno')?.value)  || new Date().getFullYear();
+    const buHome       = document.getElementById('homeBU')?.value      || '';
+    const vendHome     = document.getElementById('homeVend')?.value    || '';
+    const clienteHome  = document.getElementById('homeCliente')?.value || '';
+
+    const STATUS_CORES = {
+        'AINDA FRIO':    '#17a2b8',
+        'FUP':           '#f39c12',
+        'MAIOR QUE 50%': '#8e44ad',
+        'EM FECHAMENTO': '#007bff',
+        'FECHADO':       '#27ae60',
+        'PERDIDO':       '#c0392b'
+    };
+    const MESES_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+    // ── Filtrar oportunidades ──
+    // Sem filtro de cliente: usado nos gráficos de pipeline (Seções 01 e 02)
+    const opsFiltradas = (base || []).filter(r =>
+        (!buHome   || _getBUGroup(r.area) === buHome) &&
+        (!vendHome || r.vendedor          === vendHome)
+    );
+    // Com filtro de cliente: usado nos KPIs de pipeline e no financeiro (Seções 03+)
+    const opsFiltCliente = clienteHome
+        ? opsFiltradas.filter(r => r.cliente === clienteHome)
+        : opsFiltradas;
+
+    // ── KPIs (com filtro de cliente) ──
+    let pipeTot=0, recGan=0, nG=0, nP=0, nAtivas=0;
+    opsFiltCliente.forEach(r => {
+        const v = parseFloat(r.valor_estimado_ano)||0;
+        pipeTot += v;
+        if (r.status==='FECHADO') { recGan += v; nG++; }
+        if (r.status==='PERDIDO') nP++;
+        if (r.status!=='PERDIDO') nAtivas++;
+    });
+    // % de Conversão = Fechadas / Total de Prospecções ativas (excluindo perdidas)
+    const taxaConv = nAtivas>0 ? (nG/nAtivas*100) : 0;
+
+    // ── Financeiro ──
+    const finFilt = (baseResMensais||[]).filter(r =>
+        r.ano == anoHome &&
+        (!buHome      || _getBUGroup(r.bu) === buHome) &&
+        (!clienteHome || r.cliente         === clienteHome)
+    );
+    let planoAnual=0, realAnual=0, pedidosAnual=0;
+    finFilt.forEach(r => {
+        planoAnual   += parseFloat(r.valor_planejado)||0;
+        const st = (r.status||'').toUpperCase().trim();
+        if (st==='FATURADO')        realAnual   += parseFloat(r.valor_realizado)||0;
+        if (st==='PEDIDOS EM CASA') pedidosAnual+= parseFloat(r.valor_realizado)||0;
+    });
+
+    // Atualiza KPIs
+    document.getElementById('hKpiOps').innerText    = opsFiltCliente.length;
+    document.getElementById('hKpiOpsSub').innerText = `${nG} fechadas · ${nP} perdidas`;
+    document.getElementById('hKpiPipe').innerText   = _fmtHome(pipeTot);
+    document.getElementById('hKpiPipeSub').innerText= `${_fmtHome(recGan)} fechados`;
+    const wr = document.getElementById('hKpiWin');
+    wr.innerText = taxaConv.toFixed(1)+'%';
+    wr.style.color = taxaConv>=30?'#27ae60':taxaConv>=15?'#f39c12':'#c0392b';
+    document.getElementById('hKpiWinSub').innerText = `${nG} fechadas de ${nAtivas} ativas`;
+    document.getElementById('hKpiPlano').innerText  = _fmtHome(planoAnual);
+    document.getElementById('hKpiPlanoSub').innerText = `Orçamento ${anoHome}`;
+    document.getElementById('hKpiReal').innerText   = _fmtHome(realAnual + pedidosAnual);
+    document.getElementById('hKpiRealSub').innerText= `${_fmtHome(realAnual)} fat. + ${_fmtHome(pedidosAnual)} carteira`;
+    document.getElementById('homeAtualizado').innerText = '⟳ Atualizado agora';
+
+    // ── SEÇÃO 01: Pipeline por Status ──
+    const statusCont={}, statusValor={};
+    opsFiltradas.forEach(r => {
+        const s = r.status||'SEM STATUS';
+        const v = parseFloat(r.valor_estimado_ano)||0;
+        statusCont[s]  = (statusCont[s]||0)+1;
+        statusValor[s] = (statusValor[s]||0)+v;
+    });
+    const sLabels = Object.keys(statusCont).sort((a,b)=>
+        ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'].indexOf(a) -
+        ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'].indexOf(b)
+    );
+    const sCores = sLabels.map(s => STATUS_CORES[s]||'#aaa');
+
+    if(charts.homeStatus) charts.homeStatus.destroy();
+    charts.homeStatus = new Chart(document.getElementById('chartHomeStatus'), {
+        type: 'doughnut',
+        data: { labels: sLabels, datasets: [{ data: sLabels.map(s=>statusCont[s]), backgroundColor: sCores, borderWidth:3, borderColor:'#fff', hoverOffset:6 }] },
+        options: {
+            maintainAspectRatio:false, cutout:'58%',
+            layout:{ padding:{top:52, left:42, right:42, bottom:10} },
+            plugins: {
+                legend:{ position:'bottom', labels:{ boxWidth:12, padding:14, font:{size:12} } },
+                datalabels:{
+                    clamp: false,
+                    anchor: ctx => {
+                        const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                        return (ctx.dataset.data[ctx.dataIndex]/tot)<0.08 ? 'end' : 'center';
+                    },
+                    align: ctx => {
+                        const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                        return (ctx.dataset.data[ctx.dataIndex]/tot)<0.08 ? 'end' : 'center';
+                    },
+                    color: ctx => {
+                        const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                        return (ctx.dataset.data[ctx.dataIndex]/tot)<0.08 ? '#555' : '#fff';
+                    },
+                    font:{size:12,weight:'800'},
+                    textAlign:'center',
+                    formatter:(v,ctx)=>{
+                        if(!v) return '';
+                        const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                        return `${v}\n${((v/tot)*100).toFixed(0)}%`;
+                    }
+                }
+            }
+        }
+    });
+
+    if(charts.homeStatusValor) charts.homeStatusValor.destroy();
+    charts.homeStatusValor = new Chart(document.getElementById('chartHomeStatusValor'), {
+        type: 'bar',
+        data: { labels: sLabels, datasets: [{ data: sLabels.map(s=>statusValor[s]||0), backgroundColor: sCores, borderRadius:8, barThickness:28 }] },
+        options: {
+            indexAxis:'y', maintainAspectRatio:false,
+            layout:{ padding:{right:110, top:4, bottom:4} },
+            scales:{ x:{display:false, beginAtZero:true}, y:{grid:{display:false}, ticks:{font:{size:12,weight:'700'}}} },
+            plugins:{
+                legend:{display:false},
+                datalabels:{ anchor:'end', align:'right', offset:8, font:{size:12,weight:'800'}, color:'#444',
+                    formatter: v => v>0 ? _fmtHome(v) : ''
+                }
+            }
+        }
+    });
+
+    // ── SEÇÃO 02: Mini-donuts por BU (oportunidades) ──
+    const BU_CONFIG = [
+        { key:'TRADING',    id:'chartHomeBuTrading',    subId:'hBuTradingSub',    cor:'#422c76' },
+        { key:'ARMAZEM',    id:'chartHomeBuArmazem',    subId:'hBuArmazemSub',    cor:'#17a2b8' },
+        { key:'TRANSPORTE', id:'chartHomeBuTransporte', subId:'hBuTransporteSub', cor:'#f39c12' }
+    ];
+    BU_CONFIG.forEach(bu => {
+        const ops = opsFiltradas.filter(r => _getBUGroup(r.area)===bu.key);
+        const cont={}, val={};
+        ops.forEach(r => {
+            const s=r.status||'SEM STATUS'; const v=parseFloat(r.valor_estimado_ano)||0;
+            cont[s]=(cont[s]||0)+1; val[s]=(val[s]||0)+v;
+        });
+        const lbls = Object.keys(cont);
+        const total = ops.reduce((a,r)=>a+(parseFloat(r.valor_estimado_ano)||0),0);
+        document.getElementById(bu.subId).innerText = `${ops.length} ops · ${_fmtHome(total)}`;
+        const ckey = 'homeBu'+bu.key;
+        if(charts[ckey]) charts[ckey].destroy();
+        if(ops.length===0){
+            charts[ckey]=null;
+            const cv=document.getElementById(bu.id); const cx=cv.getContext('2d');
+            cx.clearRect(0,0,cv.width,cv.height);
+            cx.fillStyle='#eee'; cx.font='13px Segoe UI'; cx.textAlign='center';
+            cx.fillText('Sem dados',cv.width/2,cv.height/2);
+            return;
+        }
+        charts[ckey] = new Chart(document.getElementById(bu.id), {
+            type: 'doughnut',
+            data: { labels:lbls, datasets:[{ data:lbls.map(s=>cont[s]), backgroundColor:lbls.map(s=>STATUS_CORES[s]||'#aaa'), borderWidth:3, borderColor:'#fff', hoverOffset:5 }] },
+            options: {
+                maintainAspectRatio:false, cutout:'55%',
+                layout:{ padding:{top:48, left:38, right:38, bottom:8} },
+                plugins:{
+                    legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:11}}},
+                    datalabels:{
+                        clamp: false,
+                        anchor: ctx => {
+                            const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                            return (ctx.dataset.data[ctx.dataIndex]/tot)<0.09 ? 'end' : 'center';
+                        },
+                        align: ctx => {
+                            const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                            return (ctx.dataset.data[ctx.dataIndex]/tot)<0.09 ? 'end' : 'center';
+                        },
+                        color: ctx => {
+                            const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                            return (ctx.dataset.data[ctx.dataIndex]/tot)<0.09 ? '#555' : '#fff';
+                        },
+                        font:{size:11,weight:'800'},
+                        formatter:(v,ctx)=>{
+                            if(!v) return '';
+                            const tot=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                            return `${v}\n${((v/tot)*100).toFixed(0)}%`;
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    // ── SEÇÃO 03: Orçado vs Realizado por BU (barras mensais) ──
+    const FIN_BU_CONFIG = [
+        { key:'TRADING',    id:'chartHomeFinTrading',    subId:'hFinTradingSub',    cor:'#422c76' },
+        { key:'ARMAZEM',    id:'chartHomeFinArmazem',    subId:'hFinArmazemSub',    cor:'#17a2b8' },
+        { key:'TRANSPORTE', id:'chartHomeFinTransporte', subId:'hFinTransporteSub', cor:'#f39c12' }
+    ];
+    FIN_BU_CONFIG.forEach(bu => {
+        const regs = finFilt.filter(r => _getBUGroup(r.bu)===bu.key);
+        const plano=new Array(12).fill(0), fat=new Array(12).fill(0), ped=new Array(12).fill(0);
+        regs.forEach(r => {
+            const m=(r.mes_numero||1)-1;
+            plano[m] += parseFloat(r.valor_planejado)||0;
+            const st=(r.status||'').toUpperCase().trim();
+            if(st==='FATURADO')        fat[m] += parseFloat(r.valor_realizado)||0;
+            if(st==='PEDIDOS EM CASA') ped[m] += parseFloat(r.valor_realizado)||0;
+        });
+        const totalPlano=plano.reduce((a,b)=>a+b,0);
+        const totalReal=(fat.reduce((a,b)=>a+b,0)+ped.reduce((a,b)=>a+b,0));
+        document.getElementById(bu.subId).innerText = `Plano ${_fmtHome(totalPlano)} · Realizado ${_fmtHome(totalReal)}`;
+        const ckey='homeFinBU'+bu.key;
+        if(charts[ckey]) charts[ckey].destroy();
+        charts[ckey] = new Chart(document.getElementById(bu.id), {
+            type:'bar',
+            data:{
+                labels: MESES_SHORT,
+                datasets:[
+                    { label:'Plano', data:plano, backgroundColor:'#e0e0e0', borderRadius:4,
+                        datalabels:{
+                            anchor:'end', align:'top',
+                            font:{size:8, weight:'700'}, color:'#bbb',
+                            formatter: v => v > 0 ? _fmtHome(v) : ''
+                        }
+                    },
+                    { label:'Faturado', data:fat, backgroundColor:'#ff2f69cc', borderRadius:4, stack:'r',
+                        datalabels:{ display:false }
+                    },
+                    { label:'Pedidos', data:ped, backgroundColor:'#f39c12cc', borderRadius:4, stack:'r',
+                        datalabels:{
+                            anchor:'end', align:'top',
+                            font:{size:9,weight:'800'}, color:'#555',
+                            formatter:(v,ctx)=>{
+                                const tot=fat[ctx.dataIndex]+ped[ctx.dataIndex];
+                                return tot>0?_fmtHome(tot):'';
+                            }
+                        }
+                    }
+                ]
+            },
+            options:{
+                maintainAspectRatio:false,
+                layout:{padding:{top:24}},
+                scales:{
+                    x:{stacked:true, grid:{display:false}, ticks:{font:{size:10,weight:'600'}}},
+                    y:{stacked:false, display:false, beginAtZero:true}
+                },
+                plugins:{
+                    legend:{position:'bottom',labels:{boxWidth:10,padding:10,font:{size:11}}},
+                    datalabels:{}
+                }
+            }
+        });
+    });
+
+    // ── SEÇÃO 04: Metas dos Vendedores ──
+    const anoHomeM = anoHome;
+    const vendedoresMeta = vendHome ? [vendHome] : Object.keys(METAS_MENSAIS);
+    const metaGrid = document.getElementById('homeMetasGrid');
+    if (metaGrid) {
+        metaGrid.innerHTML = vendedoresMeta.map(vend => {
+            const m = METAS_MENSAIS[vend] || {};
+            const metaReu  = (m.reuniao||0)*12;
+            const metaProp = (m.propostas||0)*12;
+            const dadosVend = baseMetasMensais.filter(r => r.vendedor===vend && parseMesAno(r.mes_ano).ano===anoHomeM);
+            const realReu  = dadosVend.reduce((s,r)=>s+(r.realizado_reuniao||0),0);
+            const realProp = dadosVend.reduce((s,r)=>s+(r.realizado_propostas||0),0);
+            const pctReu  = metaReu  >0 ? Math.min(Math.round(realReu /metaReu *100),100) : 0;
+            const pctProp = metaProp >0 ? Math.min(Math.round(realProp/metaProp*100),100) : 0;
+            const cor = pctReu>=100&&pctProp>=100?'#27ae60':pctReu>=70&&pctProp>=70?'#17a2b8':'#f39c12';
+            const firstName = vend.split(' ')[0];
+            return `<div class="home-meta-card">
+                <div class="hmc-name">👤 ${firstName}</div>
+                ${metaReu>0?`<div class="home-meta-bar-row">
+                    <div class="label"><span>Reuniões</span><strong>${realReu} / ${metaReu}</strong></div>
+                    <div class="home-meta-bar-bg"><div class="home-meta-bar-fill" style="width:${pctReu}%;background:${cor}"></div></div>
+                </div>`:''}
+                ${metaProp>0?`<div class="home-meta-bar-row">
+                    <div class="label"><span>Propostas</span><strong>${realProp} / ${metaProp}</strong></div>
+                    <div class="home-meta-bar-bg"><div class="home-meta-bar-fill" style="width:${pctProp}%;background:${cor}"></div></div>
+                </div>`:''}
+                ${metaReu===0&&metaProp===0?'<span style="font-size:11px;color:#ccc;">Sem metas definidas</span>':''}
+            </div>`;
+        }).join('');
+    }
+
+    // ── SEÇÃO 05: Financeiro Mensal (geral) ──
+    const planoGeral=new Array(12).fill(0), fatGeral=new Array(12).fill(0), pedGeral=new Array(12).fill(0);
+    finFilt.forEach(r => {
+        const m=(r.mes_numero||1)-1;
+        planoGeral[m] += parseFloat(r.valor_planejado)||0;
+        const st=(r.status||'').toUpperCase().trim();
+        if(st==='FATURADO')        fatGeral[m] += parseFloat(r.valor_realizado)||0;
+        if(st==='PEDIDOS EM CASA') pedGeral[m] += parseFloat(r.valor_realizado)||0;
+    });
+    const totalFatG  = fatGeral.reduce((a,b)=>a+b,0);
+    const totalPedG  = pedGeral.reduce((a,b)=>a+b,0);
+    const totalPlanoG= planoGeral.reduce((a,b)=>a+b,0);
+    document.getElementById('hFinMensalSub').innerText =
+        `Plano ${_fmtHome(totalPlanoG)} · Faturado ${_fmtHome(totalFatG)} · Pedidos ${_fmtHome(totalPedG)}`;
+
+    if(charts.homeFinMensal) charts.homeFinMensal.destroy();
+    charts.homeFinMensal = new Chart(document.getElementById('chartHomeFinMensal'), {
+        type:'bar',
+        data:{
+            labels: MESES_SHORT,
+            datasets:[
+                { label:'Plano', data:planoGeral, backgroundColor:'#e8e8e8', borderRadius:5, order:2,
+                    datalabels:{
+                        anchor:'end', align:'top',
+                        font:{size:10,weight:'700'}, color:'#bbb',
+                        formatter:v=>v>0?_fmtHome(v):''
+                    }
+                },
+                { label:'Faturado', data:fatGeral, backgroundColor:'#ff2f69', borderRadius:5, stack:'r', order:1,
+                    datalabels:{ display:false }
+                },
+                { label:'Pedidos em Casa', data:pedGeral, backgroundColor:'#f39c12', borderRadius:5, stack:'r', order:1,
+                    datalabels:{
+                        anchor:'end', align:'top',
+                        font:{size:11,weight:'800'}, color:'#555',
+                        formatter:(v,ctx)=>{
+                            const tot=fatGeral[ctx.dataIndex]+pedGeral[ctx.dataIndex];
+                            return tot>0?_fmtHome(tot):'';
+                        }
+                    }
+                }
+            ]
+        },
+        options:{
+            maintainAspectRatio:false,
+            layout:{padding:{top:36}},
+            scales:{
+                x:{stacked:true, grid:{display:false}, ticks:{font:{size:12,weight:'600'}}},
+                y:{stacked:false, display:false, beginAtZero:true}
+            },
+            plugins:{
+                legend:{position:'bottom',labels:{boxWidth:12,padding:14,font:{size:12}}},
+                datalabels:{}
+            }
+        }
+    });
+}
+
 // ---- LOADS INICIAIS ----
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
@@ -2498,9 +3046,31 @@ async function carregarDados(){
         filtroArea.value = valAtual;
     }
 
+    // Popular select de vendedor do Home
+    const homeVend = document.getElementById('homeVend');
+    if (homeVend) {
+        const valAtual = homeVend.value;
+        homeVend.innerHTML = '<option value="">Todos os Vendedores</option>'
+            + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
+        homeVend.value = valAtual;
+    }
+
+    // Popular select de cliente do Home (une oportunidades + financeiro)
+    const homeCliente = document.getElementById('homeCliente');
+    if (homeCliente) {
+        const valAtual = homeCliente.value;
+        const clientesOps = (base||[]).map(r => r.cliente).filter(Boolean);
+        const clientesFin = (baseResMensais||[]).map(r => r.cliente).filter(Boolean);
+        const clientesUnicos = [...new Set([...clientesOps, ...clientesFin])].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+        homeCliente.innerHTML = '<option value="">Todos os Clientes</option>'
+            + clientesUnicos.map(c => `<option value="${c}">${c}</option>`).join('');
+        homeCliente.value = valAtual;
+    }
+
     setLoading(false);
     _popularSelectsAno();
     renderizar();
+    if(document.getElementById('page-dashboard').classList.contains('active-page')) renderizarHome();
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
     if(document.getElementById('page-financeiro').classList.contains('active-page')) renderizarFinanceiro();
 }
@@ -2555,12 +3125,14 @@ async function drop(ev, novoStatus) {
     if(res.error) {
         showToast("Erro ao mover: " + res.error.message, "error");
         console.error("ERRO KANBAN:", res.error);
-        
-        // Reverte a alteração visual no kanban para evitar ilusão de ótica
         item.status = statusAntigo;
         renderizar();
     } else {
-        item.historico = novoHist; // Confirma o histórico localmente se deu certo
+        item.historico = novoHist;
+        // Se arrastou para FECHADO, oferece registro no Financeiro
+        if (novoStatus === 'FECHADO' && statusAntigo !== 'FECHADO') {
+            abrirModalRegistrarFechado({ cliente: item.cliente, area: item.area });
+        }
     }
 }
 function renderizar(){
@@ -2573,146 +3145,8 @@ function renderizar(){
 
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
-    let mrrTotal = 0, pipeTot = 0, recGan = 0, nG = 0, nP = 0;
-    let statusCont = {}; let statusValor = {}; let vendVal = {};
-    filtrados.forEach(r => {
-        const vA = parseFloat(r.valor_estimado_ano) || 0; const vM = parseFloat(r.valor_mensal_recorrente) || 0;
-        pipeTot += vA; mrrTotal += vM;
-        if(r.status === 'FECHADO') { recGan += vA; nG++; }
-        if(r.status === 'PERDIDO') nP++;
-        statusCont[r.status]  = (statusCont[r.status]  || 0) + 1;
-        statusValor[r.status] = (statusValor[r.status] || 0) + vA;
-        if(r.vendedor) vendVal[r.vendedor] = (vendVal[r.vendedor] || 0) + vA;
-    });
-    document.getElementById('pipelineTotal').innerText = "R$ " + pipeTot.toLocaleString('pt-BR');
-    document.getElementById('receitaGanha').innerText = "R$ " + recGan.toLocaleString('pt-BR');
-    document.getElementById('mrrTotal').innerText = "R$ " + mrrTotal.toLocaleString('pt-BR', {maximumFractionDigits:0});
-    // Taxa de Conversão: Fechadas ÷ Total (visão real do pipeline)
-    const nTotal = filtrados.length;
-    const taxaConv = nTotal > 0 ? (nG / nTotal * 100) : 0;
-    document.getElementById('conversao').innerText = taxaConv.toFixed(1) + "%";
-    document.getElementById('conversaoSub').innerText = `${nG} fechada${nG !== 1 ? 's' : ''} de ${nTotal}`;
-    document.getElementById('conversao').style.color = taxaConv >= 30 ? '#27ae60' : (taxaConv >= 15 ? '#f39c12' : '#c0392b');
-
-    // Win Rate: Fechadas ÷ (Fechadas + Perdidas) — eficiência nas decisões finais
-    const winRate = (nG + nP) > 0 ? (nG / (nG + nP) * 100) : 0;
-    document.getElementById('winRate').innerText = winRate.toFixed(1) + "%";
-    document.getElementById('winRateSub').innerText = `${nG} ganhas · ${nP} perdidas`;
-    document.getElementById('winRate').style.color = winRate >= 70 ? '#27ae60' : (winRate >= 50 ? '#f39c12' : '#c0392b');
-
-    document.getElementById('ticket').innerText = "R$ " + (nG > 0 ? recGan/nG : 0).toLocaleString('pt-BR', {maximumFractionDigits:0});
-    
-    if(charts.st) charts.st.destroy();
-    const _stLabels = Object.keys(statusCont);
-    const _stCores  = ['#17a2b8','#f39c12','#8e44ad','#007bff','#27ae60','#c0392b'];
-    // Mapeia cores na mesma ordem dos status presentes
-    const ORDEM_STATUS = ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'];
-    const _stCoresMapeadas = _stLabels.map(s => _stCores[ORDEM_STATUS.indexOf(s)] || '#aaa');
-
-    const _fmtValor = v => {
-        if (v >= 1000000) return 'R$ ' + (v / 1000000).toFixed(1).replace('.', ',') + 'M';
-        if (v >= 1000)    return 'R$ ' + (v / 1000).toFixed(0) + 'k';
-        return 'R$ ' + v;
-    };
-
-    charts.st = new Chart(document.getElementById('chartStatus'), {
-        type: 'doughnut',
-        data: {
-            labels: _stLabels,
-            datasets: [{
-                data: _stLabels.map(s => statusCont[s]),
-                backgroundColor: _stCoresMapeadas,
-                borderWidth: 2,
-                borderColor: '#fff',
-                hoverBorderWidth: 3
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { boxWidth: 11, padding: 14, font: { size: 11 } }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: ctx => {
-                            const s = ctx.label;
-                            const qtd = statusCont[s] || 0;
-                            const val = statusValor[s] || 0;
-                            return [` ${qtd} oportunidade${qtd !== 1 ? 's' : ''}`, ` ${_fmtValor(val)}`];
-                        }
-                    }
-                },
-                datalabels: {
-                    color: '#fff',
-                    font: ctx => {
-                        // linha 1 (quantidade) em negrito maior, linha 2 (valor) menor
-                        return ctx.dataIndex % 1 === 0
-                            ? { size: 11, weight: 'bold' }
-                            : { size: 10 };
-                    },
-                    textAlign: 'center',
-                    formatter: (value, ctx) => {
-                        const s = ctx.chart.data.labels[ctx.dataIndex];
-                        const val = statusValor[s] || 0;
-                        // Só exibe rótulo se a fatia for grande o suficiente (≥5%)
-                        const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        if (total === 0 || value / total < 0.05) return '';
-                        return `${value}\n${_fmtValor(val)}`;
-                    },
-                    // Linha dupla: número em cima, valor embaixo
-                    display: true
-                }
-            }
-        },
-        plugins: [pluginCentroRosca]
-    });
-    
-    if(charts.vd) charts.vd.destroy();
-    const sv = Object.entries(vendVal).sort((a,b)=>b[1]-a[1]);
-    
-    const labelsVendedores = sv.map((x, i) => {
-        if(i === 0) return '🥇 ' + x[0];
-        if(i === 1) return '🥈 ' + x[0];
-        if(i === 2) return '🥉 ' + x[0];
-        return x[0];
-    });
-
-    charts.vd = new Chart(document.getElementById('chartVendedor'), { 
-        type: 'bar', 
-        data: { 
-            labels: labelsVendedores, 
-            datasets: [{ 
-                data: sv.map(x=>x[1]), 
-                backgroundColor: 'rgba(66, 44, 118, 0.85)', 
-                borderRadius: 8, 
-                barThickness: 22, 
-                maxBarThickness: 30 
-            }]
-        }, 
-        options: { 
-            indexAxis: 'y', 
-            maintainAspectRatio: false, 
-            layout: { padding: { right: 80 } },
-            scales: { 
-                x: { display: false }, 
-                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } } 
-            }, 
-            plugins: { 
-                legend: { display: false }, 
-                datalabels: { 
-                    color: '#422c76', 
-                    anchor: 'end', 
-                    align: 'right', 
-                    offset: 5, 
-                    font: { weight: 'bold', size: 11 }, 
-                    formatter: v => "R$ " + v.toLocaleString('pt-BR') 
-                } 
-            } 
-        } 
-    });
+    // Home é atualizada via renderizarHome() separadamente
+    if(document.getElementById('page-dashboard').classList.contains('active-page')) renderizarHome();
     
     const kan = document.getElementById('kanban'); kan.innerHTML = "";
     const colunas = [
@@ -3230,6 +3664,85 @@ function renderizarCompFin() {
             <td>${pillFin(d.pctYTD)}</td>
         </tr>`).join('');
 }
+// ──────────────────────────────────────────────────────────────
+// ---- REGISTRO AUTOMÁTICO NO FINANCEIRO AO FECHAR NEGÓCIO ----
+
+let _rfOportunidade = null; // oportunidade pendente de registro
+
+function abrirModalRegistrarFechado(oportunidade) {
+    _rfOportunidade = oportunidade;
+
+    document.getElementById('rfClienteNome').innerText = oportunidade.cliente || '';
+    document.getElementById('rfBUNome').innerText      = 'BU: ' + (oportunidade.area || '—');
+
+    // Popula categorias a partir dos dados já existentes no financeiro
+    const cats = [...new Set(
+        (baseResMensais || [])
+            .map(r => (r.categoria || '').trim())
+            .filter(c => c.length > 0)
+    )].sort();
+
+    const sel = document.getElementById('rfCategoria');
+    sel.innerHTML = '<option value="">-- Deixar em branco --</option>'
+        + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+    abrirModal('modalRegistrarFechado');
+}
+
+async function confirmarRegistroFechado() {
+    if (!_rfOportunidade) { fecharModal('modalRegistrarFechado'); return; }
+
+    const cliente  = (_rfOportunidade.cliente || '').trim();
+    const bu       = (_rfOportunidade.area    || '').toUpperCase().trim();
+    const categoria= document.getElementById('rfCategoria').value || null;
+    const anoAtual = new Date().getFullYear();
+
+    fecharModal('modalRegistrarFechado');
+
+    // Verifica se já existe registro para evitar duplicação
+    const { data: existente } = await supabaseClient
+        .from('resultados_mensais')
+        .select('id')
+        .eq('cliente', cliente)
+        .eq('bu', bu)
+        .eq('ano', anoAtual)
+        .eq('tipo', 'NOVOS CLIENTES')
+        .limit(1);
+
+    if (existente && existente.length > 0) {
+        showToast(`"${cliente}" já está registrado no Financeiro para ${anoAtual}.`, 'info');
+        return;
+    }
+
+    // Cria 12 linhas — uma por mês
+    const linhas = Array.from({ length: 12 }, (_, i) => ({
+        mes_numero:      i + 1,
+        cliente:         cliente,
+        bu:              bu,
+        categoria:       categoria,
+        ano:             anoAtual,
+        valor_planejado: 0,
+        valor_realizado: 0,
+        tipo:            'NOVOS CLIENTES',
+        status:          null
+    }));
+
+    const { error } = await supabaseClient.from('resultados_mensais').insert(linhas);
+
+    if (error) {
+        showToast('Erro ao registrar no Financeiro: ' + error.message, 'error');
+        console.error('ERRO registrarFechado:', error);
+    } else {
+        showToast(`✅ "${cliente}" adicionado ao Financeiro com 12 meses!`, 'success');
+        await carregarDadosFinanceiros();
+        if (document.getElementById('page-financeiro').classList.contains('active-page')) {
+            renderizarFinanceiro();
+        }
+    }
+
+    _rfOportunidade = null;
+}
+
 // ──────────────────────────────────────────────────────────────
 
 function renderizarFinanceiro() {
