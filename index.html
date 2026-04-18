@@ -205,6 +205,17 @@ header {
 .home-meta-bar-bg { height:6px; background:#f0f0f0; border-radius:4px; overflow:hidden; }
 .home-meta-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
 
+/* VCI — Novos Negócios */
+.home-nn-kpis { display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+.home-nn-kpi { background:white; border-radius:12px; padding:14px 20px; box-shadow:0 2px 10px rgba(0,0,0,0.05); display:flex; flex-direction:column; gap:4px; min-width:140px; }
+.home-nn-kpi span { font-size:11px; color:#888; font-weight:500; text-transform:uppercase; letter-spacing:.3px; }
+.home-nn-kpi strong { font-size:20px; font-weight:800; color:#333; }
+.home-nn-clientes { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+.home-nn-chip { background:white; border-radius:10px; padding:10px 16px; box-shadow:0 2px 8px rgba(0,0,0,0.06); display:flex; align-items:center; gap:10px; border-left:3px solid #422c76; }
+.home-nn-chip .chip-nome { font-size:12px; font-weight:700; color:#422c76; }
+.chip-fat { background:#fff0f4; color:#ff2f69; padding:3px 8px; border-radius:5px; font-size:11px; font-weight:700; }
+.chip-ped { background:#fff8ee; color:#f39c12; padding:3px 8px; border-radius:5px; font-size:11px; font-weight:700; }
+
 /* TELA DE METAS */
 .metas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .kpis-metas { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:30px; }
@@ -753,13 +764,22 @@ header {
             <!-- SEÇÃO 04: Metas dos Vendedores -->
             <div class="home-section">
                 <div class="home-section-header">
-                    <div class="home-section-badge" style="background:#27ae60;">04</div>
+                    <div class="home-section-badge" style="background:#422c76;">04</div>
                     <div class="hsh-text">
-                        <h3>Performance dos Vendedores</h3>
-                        <p>Meta vs Realizado — Reuniões e Propostas (ano completo)</p>
+                        <h3>VCI — Novos Negócios</h3>
+                        <p>Plano orçado x absorção de novos clientes (Trading · tipo: Novos Clientes)</p>
                     </div>
                 </div>
-                <div class="home-metas-grid" id="homeMetasGrid"></div>
+                <!-- KPI chips -->
+                <div class="home-nn-kpis" id="homeNNKpis"></div>
+                <!-- Gráfico mensal -->
+                <div class="home-chart-card" style="height:300px;">
+                    <h5>Plano Mensal vs Absorção</h5>
+                    <p id="hNNSub">—</p>
+                    <canvas id="chartHomeNN"></canvas>
+                </div>
+                <!-- Clientes com realizado -->
+                <div class="home-nn-clientes" id="homeNNClientes"></div>
             </div>
 
             <div class="home-connector" style="--c:#f39c12;"></div>
@@ -2115,8 +2135,22 @@ function renderizarMetas() {
         analytics:  metaMensal.analytics  * 12
     };
 
+    // ── Novos Negócios VCI: lê resultados_mensais (tipo=NOVOS CLIENTES, BU=Trading) ──
+    const _cliVendMap = {};
+    (base||[]).forEach(op => { if (op.cliente && op.vendedor) _cliVendMap[op.cliente] = op.vendedor; });
+
+    const _novosNN = (baseResMensais||[]).filter(r =>
+        r.ano == periodoAno &&
+        _getBUGroup(r.bu) === 'TRADING' &&
+        (r.tipo||'').toUpperCase().trim() === 'NOVOS CLIENTES' &&
+        ['PEDIDOS EM CASA','FATURADO'].includes((r.status||'').toUpperCase().trim())
+    );
+    const _novosNNFilt = fV
+        ? _novosNN.filter(r => _cliVendMap[r.cliente] === fV)
+        : _novosNN;
+
     // ── Acumuladores do período ──
-    let realPeriodo = { reuniao: 0, propostas: 0, trading: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+    let realPeriodo = { reuniao: 0, propostas: 0, trading: 0, tradingPed: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
     dadosPeriodo.forEach(m => {
         const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
         realPeriodo.reuniao    += (m.realizado_reuniao   ||0);
@@ -2127,10 +2161,24 @@ function renderizarMetas() {
         realPeriodo.analytics  += (m.realizado_analytics ||0);
         realPeriodo.faturamento += fat;
     });
+    // Novos Negócios no período — separados por status
+    _novosNNFilt.filter(r => (r.mes_numero||1) >= periodoMesInicio && (r.mes_numero||1) <= periodoMesFim)
+        .forEach(r => {
+            const v = parseFloat(r.valor_realizado)||0;
+            const st = (r.status||'').toUpperCase().trim();
+            if (st === 'FATURADO') {
+                realPeriodo.trading     += v;
+                realPeriodo.faturamento += v;
+            } else { // PEDIDOS EM CASA
+                realPeriodo.tradingPed  += v;
+                // não entra no faturamento realizado
+            }
+        });
 
-    // ── Acumulador anual completo (para os gráficos contextuais e BU) ──
-    let realAnual = { trading: 0, armazem: 0, transporte: 0, analytics: 0 };
-    let arrayRealAnual = new Array(12).fill(0);
+    // ── Acumuladores anuais completos ──
+    let realAnual = { trading: 0, tradingPed: 0, armazem: 0, transporte: 0, analytics: 0 };
+    let arrayRealFaturado = new Array(12).fill(0); // faturado tradicional + novos faturados
+    let arrayRealPedidos  = new Array(12).fill(0); // novos negócios — pedidos em casa
     dadosTodos.forEach(m => {
         const idx = parseMesAno(m.mes_ano).mes - 1;
         const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
@@ -2138,7 +2186,20 @@ function renderizarMetas() {
         realAnual.armazem    += (m.realizado_armazem   ||0);
         realAnual.transporte += (m.realizado_transporte||0);
         realAnual.analytics  += (m.realizado_analytics ||0);
-        if(idx >= 0 && idx < 12) arrayRealAnual[idx] += fat;
+        if(idx >= 0 && idx < 12) arrayRealFaturado[idx] += fat;
+    });
+    // Novos Negócios anuais — por status
+    _novosNNFilt.forEach(r => {
+        const idx = (r.mes_numero||1)-1;
+        const v = parseFloat(r.valor_realizado)||0;
+        const st = (r.status||'').toUpperCase().trim();
+        if (st === 'FATURADO') {
+            realAnual.trading += v;
+            if(idx >= 0 && idx < 12) arrayRealFaturado[idx] += v;
+        } else {
+            realAnual.tradingPed += v;
+            if(idx >= 0 && idx < 12) arrayRealPedidos[idx] += v;
+        }
     });
 
     // ── KPIs — refletem o período selecionado ──
@@ -2160,7 +2221,8 @@ function renderizarMetas() {
     document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${metaPeriodo.reuniao}`;
     document.getElementById('metaPropostasYTD').innerText   = `${realPeriodo.propostas} / ${metaPeriodo.propostas}`;
 
-    // ── GRÁFICO 1: Evolução Mensal (ano completo — contexto geral) ──
+    // ── GRÁFICO 1: Evolução Mensal (ano completo — faturado + pedidos em casa) ──
+    const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(v);
     if(charts.evolucao) charts.evolucao.destroy();
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type: 'bar',
@@ -2168,38 +2230,61 @@ function renderizarMetas() {
             labels: NOMES_MESES_SHORT,
             datasets: [
                 {
-                    label: 'Meta Mensal', data: new Array(12).fill(metaFaturamentoMensal),
+                    label: 'Meta Mensal',
+                    data: new Array(12).fill(metaFaturamentoMensal),
                     type: 'line', borderColor: '#01E18E', borderWidth: 2,
                     borderDash: [5,5], pointRadius: 0, fill: false,
+                    datalabels: {
+                        // Mostra apenas no último ponto (Dez)
+                        display: ctx => ctx.dataIndex === 11,
+                        anchor: 'center', align: 'top', offset: 6,
+                        color: '#01c17a', font: { size: 10, weight: '700' },
+                        formatter: v => _fmtM(v) + '/mês'
+                    }
+                },
+                {
+                    label: 'Faturado',
+                    data: arrayRealFaturado,
+                    backgroundColor: arrayRealFaturado.map((_, i) =>
+                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#422c76' : 'rgba(66,44,118,0.25)'
+                    ),
+                    borderRadius: 4, stack: 'real',
                     datalabels: { display: false }
                 },
                 {
-                    label: 'Realizado', data: arrayRealAnual,
-                    backgroundColor: arrayRealAnual.map((_, i) =>
-                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#422c76' : 'rgba(66,44,118,0.25)'
+                    label: 'Pedidos em Casa',
+                    data: arrayRealPedidos,
+                    backgroundColor: arrayRealPedidos.map((_, i) =>
+                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#f39c12' : 'rgba(243,156,18,0.25)'
                     ),
-                    borderRadius: 4
+                    borderRadius: 4, stack: 'real',
+                    datalabels: {
+                        // Rótulo no topo da barra empilhada (mostra total faturado+pedidos)
+                        anchor: 'end', align: 'top', offset: 2,
+                        color: '#555', font: { size: 10, weight: '700' },
+                        display: (ctx) => {
+                            const i = ctx.dataIndex;
+                            return (arrayRealFaturado[i] + arrayRealPedidos[i]) > 0;
+                        },
+                        formatter: (v, ctx) => {
+                            const tot = arrayRealFaturado[ctx.dataIndex] + arrayRealPedidos[ctx.dataIndex];
+                            return _fmtM(tot);
+                        }
+                    }
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false, layout: { padding: { top: 20, bottom: 0 } },
+            maintainAspectRatio: false, layout: { padding: { top: 28, bottom: 0 } },
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                datalabels: {
-                    color: '#fff', anchor: 'end', align: 'bottom', font: { size: 10, weight: 'bold' },
-                    formatter: (v, ctx) => {
-                        if (ctx.datasetIndex === 0 || v === 0) return "";
-                        if (v >= 1000000) return (v/1000000).toFixed(1) + "M";
-                        return (v/1000).toFixed(0) + "k";
-                    }
-                }
+                datalabels: {}
             },
-            scales: { y: { display: false }, x: { grid: { display: false } } }
+            scales: { y: { display: false }, x: { grid: { display: false }, stacked: true } }
         }
     });
 
-    // ── GRÁFICO 2: Desempenho por BU (meta do período vs realizado no período) ──
+    // ── GRÁFICO 2: Desempenho por BU — Meta / Faturado / Pedidos em Casa ──
     if(charts.unidade) charts.unidade.destroy();
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type: 'bar',
@@ -2209,30 +2294,47 @@ function renderizarMetas() {
                 {
                     label: `Meta ${labelPeriodo}`,
                     data: [metaPeriodo.trading, metaPeriodo.armazem, metaPeriodo.transporte, metaPeriodo.analytics],
-                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 60
+                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 55,
+                    datalabels: {
+                        color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
+                        formatter: v => v > 0 ? 'R$ ' + _fmtM(v) : ''
+                    }
                 },
                 {
-                    label: `Realizado ${labelPeriodo}`,
+                    label: `Faturado ${labelPeriodo}`,
                     data: [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics],
-                    backgroundColor: '#ff2f69', borderRadius: 4, maxBarThickness: 60
+                    backgroundColor: '#ff2f69', borderRadius: [4,4,0,0], maxBarThickness: 55, stack: 'real',
+                    datalabels: { display: false }
+                },
+                {
+                    label: `Pedidos em Casa ${labelPeriodo}`,
+                    data: [realPeriodo.tradingPed, 0, 0, 0],
+                    backgroundColor: '#f39c12', borderRadius: 4, maxBarThickness: 55, stack: 'real',
+                    datalabels: {
+                        color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
+                        display: (ctx) => {
+                            const i = ctx.dataIndex;
+                            const totFat = [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics][i];
+                            const totPed = [realPeriodo.tradingPed, 0, 0, 0][i];
+                            return (totFat + totPed) > 0;
+                        },
+                        formatter: (v, ctx) => {
+                            const i = ctx.dataIndex;
+                            const totFat = [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics][i];
+                            const totPed = [realPeriodo.tradingPed, 0, 0, 0][i];
+                            return 'R$ ' + _fmtM(totFat + totPed);
+                        }
+                    }
                 }
             ]
         },
         options: {
-            maintainAspectRatio: false, layout: { padding: { top: 0, bottom: 0 } },
+            maintainAspectRatio: false, layout: { padding: { top: 28, bottom: 0 } },
             plugins: {
                 legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
-                datalabels: {
-                    color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
-                    formatter: v => {
-                        if (v === 0) return "";
-                        if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M";
-                        if (v >= 1000) return "R$ " + (v/1000).toFixed(0) + "k";
-                        return "R$ " + v;
-                    }
-                }
+                datalabels: {}
             },
-            scales: { y: { display: false }, x: { grid: { display: false } } }
+            scales: { y: { display: false, stacked: true }, x: { grid: { display: false } } }
         }
     });
 
@@ -2894,36 +2996,118 @@ function renderizarHome() {
         });
     });
 
-    // ── SEÇÃO 04: Metas dos Vendedores ──
-    const anoHomeM = anoHome;
-    const vendedoresMeta = vendHome ? [vendHome] : Object.keys(METAS_MENSAIS);
-    const metaGrid = document.getElementById('homeMetasGrid');
-    if (metaGrid) {
-        metaGrid.innerHTML = vendedoresMeta.map(vend => {
-            const m = METAS_MENSAIS[vend] || {};
-            const metaReu  = (m.reuniao||0)*12;
-            const metaProp = (m.propostas||0)*12;
-            const dadosVend = baseMetasMensais.filter(r => r.vendedor===vend && parseMesAno(r.mes_ano).ano===anoHomeM);
-            const realReu  = dadosVend.reduce((s,r)=>s+(r.realizado_reuniao||0),0);
-            const realProp = dadosVend.reduce((s,r)=>s+(r.realizado_propostas||0),0);
-            const pctReu  = metaReu  >0 ? Math.min(Math.round(realReu /metaReu *100),100) : 0;
-            const pctProp = metaProp >0 ? Math.min(Math.round(realProp/metaProp*100),100) : 0;
-            const cor = pctReu>=100&&pctProp>=100?'#27ae60':pctReu>=70&&pctProp>=70?'#17a2b8':'#f39c12';
-            const firstName = vend.split(' ')[0];
-            return `<div class="home-meta-card">
-                <div class="hmc-name">👤 ${firstName}</div>
-                ${metaReu>0?`<div class="home-meta-bar-row">
-                    <div class="label"><span>Reuniões</span><strong>${realReu} / ${metaReu}</strong></div>
-                    <div class="home-meta-bar-bg"><div class="home-meta-bar-fill" style="width:${pctReu}%;background:${cor}"></div></div>
-                </div>`:''}
-                ${metaProp>0?`<div class="home-meta-bar-row">
-                    <div class="label"><span>Propostas</span><strong>${realProp} / ${metaProp}</strong></div>
-                    <div class="home-meta-bar-bg"><div class="home-meta-bar-fill" style="width:${pctProp}%;background:${cor}"></div></div>
-                </div>`:''}
-                ${metaReu===0&&metaProp===0?'<span style="font-size:11px;color:#ccc;">Sem metas definidas</span>':''}
+    // ── SEÇÃO 04: VCI — Novos Negócios ──
+    const novosFilt = (baseResMensais||[]).filter(r =>
+        r.ano == anoHome &&
+        _getBUGroup(r.bu) === 'TRADING' &&
+        (r.tipo||'').toUpperCase().trim() === 'NOVOS CLIENTES'
+    );
+
+    const planoNN = new Array(12).fill(0);
+    const fatNN   = new Array(12).fill(0);
+    const pedNN   = new Array(12).fill(0);
+    const clienteNN = {}; // { nome: { plano, fat, ped } }
+
+    novosFilt.forEach(r => {
+        const m  = (r.mes_numero||1)-1;
+        const pl = parseFloat(r.valor_planejado)||0;
+        const rv = parseFloat(r.valor_realizado)||0;
+        const st = (r.status||'').toUpperCase().trim();
+        planoNN[m] += pl;
+        if (st==='FATURADO')        fatNN[m] += rv;
+        if (st==='PEDIDOS EM CASA') pedNN[m] += rv;
+        const cli = r.cliente || '(sem cliente)';
+        if (!clienteNN[cli]) clienteNN[cli] = {plano:0, fat:0, ped:0};
+        clienteNN[cli].plano += pl;
+        if (st==='FATURADO')        clienteNN[cli].fat += rv;
+        if (st==='PEDIDOS EM CASA') clienteNN[cli].ped += rv;
+    });
+
+    const totalPlanoNN = planoNN.reduce((a,b)=>a+b,0);
+    const totalFatNN   = fatNN.reduce((a,b)=>a+b,0);
+    const totalPedNN   = pedNN.reduce((a,b)=>a+b,0);
+    const absorvidoNN  = totalFatNN + totalPedNN;
+    const pctAbsNN     = totalPlanoNN > 0 ? (absorvidoNN/totalPlanoNN*100) : 0;
+    const corPctNN     = pctAbsNN>=80?'#27ae60':pctAbsNN>=40?'#17a2b8':'#f39c12';
+
+    // KPI chips
+    const kpisNNEl = document.getElementById('homeNNKpis');
+    if (kpisNNEl) {
+        kpisNNEl.innerHTML = `
+            <div class="home-nn-kpi">
+                <span>Plano Anual</span>
+                <strong>${_fmtHome(totalPlanoNN)}</strong>
+            </div>
+            <div class="home-nn-kpi">
+                <span>Faturado</span>
+                <strong style="color:${totalFatNN>0?'#ff2f69':'#ccc'}">${_fmtHome(totalFatNN)}</strong>
+            </div>
+            <div class="home-nn-kpi">
+                <span>Pedidos em Casa</span>
+                <strong style="color:${totalPedNN>0?'#f39c12':'#ccc'}">${_fmtHome(totalPedNN)}</strong>
+            </div>
+            <div class="home-nn-kpi">
+                <span>% Captado</span>
+                <strong style="color:${corPctNN}">${pctAbsNN.toFixed(1)}%</strong>
             </div>`;
-        }).join('');
     }
+
+    // Clientes com realizado
+    const cliNNEl = document.getElementById('homeNNClientes');
+    if (cliNNEl) {
+        const comRealizado = Object.entries(clienteNN).filter(([,v]) => v.fat+v.ped > 0);
+        if (comRealizado.length > 0) {
+            cliNNEl.innerHTML = comRealizado.map(([nome, v]) => `
+                <div class="home-nn-chip">
+                    <span class="chip-nome">${nome}</span>
+                    ${v.fat>0?`<span class="chip-fat">FAT ${_fmtHome(v.fat)}</span>`:''}
+                    ${v.ped>0?`<span class="chip-ped">PED ${_fmtHome(v.ped)}</span>`:''}
+                </div>`).join('');
+        } else {
+            cliNNEl.innerHTML = '<span style="font-size:12px;color:#bbb;padding:6px 0;">Nenhum cliente com realizado ainda</span>';
+        }
+    }
+
+    // Subtítulo e gráfico
+    document.getElementById('hNNSub').innerText =
+        `Plano ${_fmtHome(totalPlanoNN)} · Absorvido ${_fmtHome(absorvidoNN)} · ${pctAbsNN.toFixed(1)}% do orçamento`;
+
+    if(charts.homeNN) charts.homeNN.destroy();
+    charts.homeNN = new Chart(document.getElementById('chartHomeNN'), {
+        type: 'bar',
+        data: {
+            labels: MESES_SHORT,
+            datasets: [
+                { label:'Plano Orçamentário', data:planoNN, backgroundColor:'#e8e8e8', borderRadius:5, order:2,
+                    datalabels:{ anchor:'end', align:'top', font:{size:9,weight:'700'}, color:'#bbb',
+                        formatter: v => v>0 ? _fmtHome(v) : '' }
+                },
+                { label:'Faturado', data:fatNN, backgroundColor:'#ff2f69', borderRadius:5, stack:'r', order:1,
+                    datalabels:{ display:false }
+                },
+                { label:'Pedidos em Casa', data:pedNN, backgroundColor:'#f39c12', borderRadius:5, stack:'r', order:1,
+                    datalabels:{ anchor:'end', align:'top', font:{size:11,weight:'800'}, color:'#555',
+                        formatter:(v,ctx) => {
+                            const tot = fatNN[ctx.dataIndex]+pedNN[ctx.dataIndex];
+                            return tot>0 ? _fmtHome(tot) : '';
+                        }
+                    }
+                }
+            ]
+        },
+        options:{
+            maintainAspectRatio:false,
+            layout:{ padding:{top:32} },
+            scales:{
+                x:{ stacked:true, grid:{display:false}, ticks:{font:{size:11,weight:'600'}} },
+                y:{ stacked:false, display:false, beginAtZero:true }
+            },
+            plugins:{
+                legend:{ position:'bottom', labels:{boxWidth:10, font:{size:11}} },
+                datalabels:{}
+            }
+        }
+    });
 
     // ── SEÇÃO 05: Financeiro Mensal (geral) ──
     const planoGeral=new Array(12).fill(0), fatGeral=new Array(12).fill(0), pedGeral=new Array(12).fill(0);
