@@ -601,14 +601,12 @@ header {
 
             <!-- Barra de Filtros Home -->
             <div class="home-filter-bar">
-                <label>ANO</label>
                 <select id="homeAno" onchange="renderizarHome()">
                     <option value="2025">2025</option>
                     <option value="2026" selected>2026</option>
                     <option value="2027">2027</option>
                 </select>
                 <div class="home-filter-sep"></div>
-                <label>BU</label>
                 <select id="homeBU" onchange="renderizarHome()">
                     <option value="">Todas as BUs</option>
                     <option value="TRADING">Trading (VCI)</option>
@@ -616,14 +614,26 @@ header {
                     <option value="TRANSPORTE">Transporte</option>
                 </select>
                 <div class="home-filter-sep"></div>
-                <label>VENDEDOR</label>
                 <select id="homeVend" onchange="renderizarHome()">
                     <option value="">Todos os Vendedores</option>
                 </select>
                 <div class="home-filter-sep"></div>
-                <label>CLIENTE</label>
-                <select id="homeCliente" onchange="renderizarHome()" style="min-width:160px; max-width:220px;">
+                <select id="homeCliente" onchange="renderizarHome()" style="min-width:150px; max-width:200px;">
                     <option value="">Todos os Clientes</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <select id="homeCategoria" onchange="renderizarHome()">
+                    <option value="">Categoria</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <select id="homeTipo" onchange="renderizarHome()">
+                    <option value="">Tipo</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <select id="homeStatusFin" onchange="renderizarHome()">
+                    <option value="">Status Fin.</option>
+                    <option value="FATURADO">Faturado</option>
+                    <option value="PEDIDOS EM CASA">Pedidos em Casa</option>
                 </select>
                 <div style="flex:1"></div>
                 <span id="homeAtualizado" style="font-size:11px; color:#bbb;"></span>
@@ -766,8 +776,8 @@ header {
                 <div class="home-section-header">
                     <div class="home-section-badge" style="background:#422c76;">04</div>
                     <div class="hsh-text">
-                        <h3>VCI — Novos Negócios</h3>
-                        <p>Plano orçado x absorção de novos clientes (Trading · tipo: Novos Clientes)</p>
+                        <h3 id="homeNNTitle">VCI — Novos Negócios</h3>
+                        <p id="homeNNSubtitle">Plano orçado x absorção de novos clientes (Trading · tipo: Novos Clientes)</p>
                     </div>
                 </div>
                 <!-- KPI chips -->
@@ -2740,10 +2750,13 @@ function _fmtHome(v) {
 function renderizarHome() {
     if (!document.getElementById('page-dashboard').classList.contains('active-page')) return;
 
-    const anoHome      = parseInt(document.getElementById('homeAno')?.value)  || new Date().getFullYear();
-    const buHome       = document.getElementById('homeBU')?.value      || '';
-    const vendHome     = document.getElementById('homeVend')?.value    || '';
-    const clienteHome  = document.getElementById('homeCliente')?.value || '';
+    const anoHome      = parseInt(document.getElementById('homeAno')?.value)    || new Date().getFullYear();
+    const buHome       = document.getElementById('homeBU')?.value        || '';
+    const vendHome     = document.getElementById('homeVend')?.value      || '';
+    const clienteHome  = document.getElementById('homeCliente')?.value   || '';
+    const catHome      = document.getElementById('homeCategoria')?.value || '';
+    const tipoHome     = document.getElementById('homeTipo')?.value      || '';
+    const statusFinHome= document.getElementById('homeStatusFin')?.value || '';
 
     const STATUS_CORES = {
         'AINDA FRIO':    '#17a2b8',
@@ -2996,12 +3009,27 @@ function renderizarHome() {
         });
     });
 
-    // ── SEÇÃO 04: VCI — Novos Negócios ──
+    // ── SEÇÃO 04: Plano vs Absorção (filtros dinâmicos) ──
     const novosFilt = (baseResMensais||[]).filter(r =>
         r.ano == anoHome &&
-        _getBUGroup(r.bu) === 'TRADING' &&
-        (r.tipo||'').toUpperCase().trim() === 'NOVOS CLIENTES'
+        (!buHome       || _getBUGroup(r.bu)              === buHome) &&
+        (!clienteHome  || r.cliente                      === clienteHome) &&
+        (!catHome      || r.categoria                    === catHome) &&
+        (!tipoHome     || (r.tipo||'').trim()            === tipoHome) &&
+        (!statusFinHome|| (r.status||'').toUpperCase().trim() === statusFinHome)
     );
+
+    // Atualiza título da seção com filtros ativos
+    const _nnLabels = [
+        buHome      ? (buHome==='TRADING'?'Trading':buHome==='ARMAZEM'?'Armazém':'Transporte') : null,
+        catHome     ? catHome  : null,
+        tipoHome    ? tipoHome : null,
+        clienteHome ? clienteHome : null
+    ].filter(Boolean);
+    const _nnTitleEl    = document.getElementById('homeNNTitle');
+    const _nnSubtitleEl = document.getElementById('homeNNSubtitle');
+    if (_nnTitleEl)    _nnTitleEl.innerText    = _nnLabels.length ? _nnLabels.join(' · ') : 'VCI — Novos Negócios';
+    if (_nnSubtitleEl) _nnSubtitleEl.innerText = `Plano orçado x absorção${statusFinHome ? ' · '+statusFinHome : ''} — ${novosFilt.length} registro(s) encontrado(s)`;
 
     const planoNN = new Array(12).fill(0);
     const fatNN   = new Array(12).fill(0);
@@ -3249,6 +3277,26 @@ async function carregarDados(){
         homeCliente.innerHTML = '<option value="">Todos os Clientes</option>'
             + clientesUnicos.map(c => `<option value="${c}">${c}</option>`).join('');
         homeCliente.value = valAtual;
+    }
+
+    // Popular select de Categoria do Home
+    const homeCategoria = document.getElementById('homeCategoria');
+    if (homeCategoria) {
+        const valAtual = homeCategoria.value;
+        const cats = [...new Set((baseResMensais||[]).map(r => r.categoria).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+        homeCategoria.innerHTML = '<option value="">Categoria</option>'
+            + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        homeCategoria.value = valAtual;
+    }
+
+    // Popular select de Tipo do Home
+    const homeTipo = document.getElementById('homeTipo');
+    if (homeTipo) {
+        const valAtual = homeTipo.value;
+        const tipos = [...new Set((baseResMensais||[]).map(r => r.tipo).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+        homeTipo.innerHTML = '<option value="">Tipo</option>'
+            + tipos.map(t => `<option value="${t}">${t}</option>`).join('');
+        homeTipo.value = valAtual;
     }
 
     setLoading(false);
