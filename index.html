@@ -668,7 +668,7 @@ header {
                 <div class="home-kpi">
                     <div class="home-kpi-icon" style="background:#fce4ec;">📊</div>
                     <div class="home-kpi-text">
-                        <h4>Plano de Novos Negócios</h4>
+                        <h4>Plano Financeiro</h4>
                         <p id="hKpiPlano">R$ 0</p>
                         <span id="hKpiPlanoSub"></span>
                     </div>
@@ -1295,12 +1295,27 @@ header {
                 <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
                 <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
             </div>
-            
-            <div class="form-row">
-                <div class="form-group" style="flex:1"><label>Valor Estimado no Ano</label><input type="number" step="0.01" id="op_valor_estimado_ano" oninput="calcularMRR()" required></div>
-                <div class="form-group" style="flex:1"><label>Valor Mensal Recorrente</label><input type="number" step="0.01" id="op_valor_mensal_recorrente" readonly style="background:#f4f4f4;"></div>
-            </div>
-            
+<div class="form-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div class="form-group" style="flex: 1;">
+        <label>Início de Faturamento</label>
+        <input type="date" id="op_data_inicio_faturamento" oninput="calcularMRR()">
+    </div>
+    <div class="form-group" style="flex: 1;">
+        <label>Valor Mensal</label>
+        <input type="number" step="0.01" id="op_valor_mensal_recorrente" oninput="calcularMRR()" placeholder="R$ 0,00">
+    </div>
+</div>
+
+<div class="form-row" style="display: flex; gap: 10px;">
+    <div class="form-group" style="flex: 1;">
+        <label>Estimado Dentro do Ano (2026)</label>
+        <input type="number" step="0.01" id="op_valor_estimado_ano" readonly style="background:#f4f4f4; font-weight: bold; color: #422c76;" placeholder="R$ 0,00">
+    </div>
+    <div class="form-group" style="flex: 1;">
+        <label>Estimado em 12 meses</label>
+        <input type="number" step="0.01" id="op_valor_anualizado" readonly style="background:#f4f4f4; color: #ff2f69;" placeholder="R$ 0,00">
+    </div>
+</div>
             <div class="form-group">
                 <label>Status</label>
                 <select id="op_status" required onchange="toggleMotivoPerda()">
@@ -1837,10 +1852,44 @@ function prepararEdicaoArea(id, nome) {
 
 // ---- OPORTUNIDADES ----
 function calcularMRR() { 
-    const v = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0; 
-    document.getElementById('op_valor_mensal_recorrente').value = (v / 12).toFixed(2); 
-}
+    // Captura os elementos
+    const campoMensal = document.getElementById('op_valor_mensal_recorrente');
+    const campoDataFat = document.getElementById('op_data_inicio_faturamento');
+    const campoValorAno = document.getElementById('op_valor_estimado_ano');
+    const campoAnualizado = document.getElementById('op_valor_anualizado'); // PEGANDO O NOVO CAMPO
 
+    const valorMensal = parseFloat(campoMensal.value) || 0;
+    const dataInicioFat = campoDataFat.value;
+
+    // 1. CÁLCULO SEMPRE ATIVO: Valor Anualizado (Independente da data, sempre x12)
+    const valor12Meses = valorMensal * 12;
+    campoAnualizado.value = valor12Meses.toFixed(2);
+
+    // 2. CÁLCULO CONDICIONAL: Estimado Dentro do Ano 2026
+    if (dataInicioFat && valorMensal > 0) {
+        const partesData = dataInicioFat.split('-');
+        const anoInicio = parseInt(partesData[0]);
+        const mesInicio = parseInt(partesData[1]);
+
+        if (anoInicio === 2026) {
+            // Regra: Meses restantes no ano atual
+            const mesesRestantes = 12 - mesInicio + 1;
+            const faturamentoProjetado = valorMensal * mesesRestantes;
+            campoValorAno.value = faturamentoProjetado.toFixed(2);
+        } 
+        else if (anoInicio < 2026) {
+            // Se começou antes de 2026, o faturamento em 2026 é o ano cheio
+            campoValorAno.value = valor12Meses.toFixed(2);
+        } 
+        else {
+            // Se começa em 2027+, o faturamento para o exercício de 2026 é zero
+            campoValorAno.value = "0.00";
+        }
+    } else {
+        // Se não houver data ou valor mensal, zera o campo de 2026
+        campoValorAno.value = "0.00";
+    }
+}
 function prepararNovo() {
     document.getElementById('formOportunidade').reset();
     document.getElementById('op_id').value = "";
@@ -1853,7 +1902,7 @@ function prepararNovo() {
 
 function editarOportunidade(idParam) {
     const item = base.find(x => String(x.id) === String(idParam));
-
+    
     if(!item) {
         showToast("Oportunidade não encontrada. Recarregue os dados.", "error");
         return;
@@ -1869,7 +1918,9 @@ function editarOportunidade(idParam) {
     document.getElementById('op_area').value = item.area || "";
     document.getElementById('op_data_oportunidade').value = item.data_oportunidade || "";
     document.getElementById('op_previsao_fechamento').value = item.previsao_fechamento || "";
+    document.getElementById('op_data_inicio_faturamento').value = item.data_inicio_faturamento || "";
     document.getElementById('op_valor_estimado_ano').value = item.valor_estimado_ano || 0;
+    document.getElementById('op_valor_anualizado').value = item.valor_anualizado || 0;
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente || 0;
     document.getElementById('op_status').value = item.status || "";
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
@@ -1952,10 +2003,13 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     const novo_vend = document.getElementById('op_vendedor').value;
     const nova_data = document.getElementById('op_data_oportunidade').value;
     const nova_prev = document.getElementById('op_previsao_fechamento').value || "";
+    const nova_data_faturamento = document.getElementById('op_data_inicio_faturamento').value || "";
     const novo_valor = parseFloat(document.getElementById('op_valor_estimado_ano').value) || 0;
+    const novo_anualizado = parseFloat(document.getElementById('op_valor_anualizado').value) || 0;
     const novo_status = document.getElementById('op_status').value;
     const nova_area = document.getElementById('op_area').value;
     const novo_motivo = document.getElementById('op_motivo_perda').value || "";
+
     let historico_atual = document.getElementById('op_historico').value || "";
 
     const formatBr = (dataSql) => {
@@ -1986,19 +2040,27 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     }
 
     const payload = { 
-        cliente: novo_cliente, 
-        tipo: novo_tipo, 
-        breve_descricao: nova_desc, 
-        vendedor: novo_vend, 
-        data_oportunidade: nova_data, 
-        previsao_fechamento: nova_prev || null, 
-        valor_estimado_ano: novo_valor, 
-        valor_mensal_recorrente: (novo_valor / 12), 
-        status: novo_status, 
-        area: nova_area, 
-        motivo_perda: novo_motivo || null, 
-        historico: historico_atual 
-    };
+    cliente: novo_cliente, 
+    tipo: novo_tipo, 
+    breve_descricao: nova_desc, 
+    vendedor: novo_vend, 
+    data_oportunidade: nova_data, 
+    previsao_fechamento: nova_prev || null, 
+    
+    // CORREÇÃO: O nome da variável deve ser igual ao que você declarou acima
+    data_inicio_faturamento: nova_data_faturamento || null,
+    
+    valor_estimado_ano: novo_valor, 
+    valor_anualizado: novo_anualizado, // ESTA É A NOVA COLUNA (12 meses cheios)
+    
+    // CORREÇÃO: Pegar o valor mensal direto do campo, para respeitar o cálculo de 2026
+    valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
+    
+    status: novo_status, 
+    area: nova_area, 
+    motivo_perda: novo_motivo || null, 
+    historico: historico_atual 
+};
 
     let erroNoBanco = null;
 
@@ -2821,13 +2883,14 @@ function renderizarHome() {
     document.getElementById('homeAtualizado').innerText = '⟳ Atualizado agora';
 
     // ── SEÇÃO 01: Pipeline por Status ──
-    const statusCont={}, statusValor={};
-    opsFiltradas.forEach(r => {
-        const s = r.status||'SEM STATUS';
-        const v = parseFloat(r.valor_estimado_ano)||0;
-        statusCont[s]  = (statusCont[s]||0)+1;
-        statusValor[s] = (statusValor[s]||0)+v;
-    });
+const statusCont={}, statusValor={};
+// ALTERADO: Agora usa opsFiltCliente para respeitar o filtro de cliente selecionado
+opsFiltCliente.forEach(r => { 
+    const s = r.status||'SEM STATUS';
+    const v = parseFloat(r.valor_estimado_ano)||0;
+    statusCont[s]  = (statusCont[s]||0)+1;
+    statusValor[s] = (statusValor[s]||0)+v;
+});
     const sLabels = Object.keys(statusCont).sort((a,b)=>
         ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'].indexOf(a) -
         ['AINDA FRIO','FUP','MAIOR QUE 50%','EM FECHAMENTO','FECHADO','PERDIDO'].indexOf(b)
@@ -2869,18 +2932,54 @@ function renderizarHome() {
         }
     });
 
-    if(charts.homeStatusValor) charts.homeStatusValor.destroy();
+if(charts.homeStatusValor) charts.homeStatusValor.destroy();
     charts.homeStatusValor = new Chart(document.getElementById('chartHomeStatusValor'), {
         type: 'bar',
-        data: { labels: sLabels, datasets: [{ data: sLabels.map(s=>statusValor[s]||0), backgroundColor: sCores, borderRadius:8, barThickness:28 }] },
+        data: { 
+            labels: sLabels, 
+            datasets: [
+                { 
+                    label: 'Estimado 2026',
+                    data: sLabels.map(s => statusValor[s] || 0), 
+                    backgroundColor: '#422c76', // Roxo Vendemmia
+                    borderRadius: 5,
+                    barThickness: 15 // Ajustado para caber as duas barras
+                },
+                { 
+                    label: 'Total 12 meses',
+    data: sLabels.map(s => {
+        // ALTERADO: Também usar opsFiltCliente aqui para o cálculo da segunda barra
+        return opsFiltCliente
+            .filter(r => (r.status || 'SEM STATUS') === s)
+            .reduce((acc, r) => acc + (parseFloat(r.valor_anualizado) || 0), 0);
+    }),
+                    backgroundColor: '#ff2f69', // Rosa Vendemmia
+                    borderRadius: 5,
+                    barThickness: 15
+                }
+            ] 
+        },
         options: {
-            indexAxis:'y', maintainAspectRatio:false,
-            layout:{ padding:{right:110, top:4, bottom:4} },
-            scales:{ x:{display:false, beginAtZero:true}, y:{grid:{display:false}, ticks:{font:{size:12,weight:'700'}}} },
-            plugins:{
-                legend:{display:false},
-                datalabels:{ anchor:'end', align:'right', offset:8, font:{size:12,weight:'800'}, color:'#444',
-                    formatter: v => v>0 ? _fmtHome(v) : ''
+            indexAxis: 'y', 
+            maintainAspectRatio: false,
+            layout: { padding: { right: 110, top: 4, bottom: 4 } },
+            scales: { 
+                x: { display: false, beginAtZero: true }, 
+                y: { grid: { display: false }, ticks: { font: { size: 12, weight: '700' } } } 
+            },
+            plugins: {
+                legend: { 
+                    display: true, 
+                    position: 'top',
+                    labels: { boxWidth: 12, font: { size: 10 } }
+                },
+                datalabels: { 
+                    anchor: 'end', 
+                    align: 'right', 
+                    offset: 8, 
+                    font: { size: 10, weight: '800' }, 
+                    color: '#444',
+                    formatter: v => v > 0 ? _fmtHome(v) : ''
                 }
             }
         }
