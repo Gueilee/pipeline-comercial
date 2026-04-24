@@ -1289,15 +1289,6 @@ header {
                                 <option value="ARMAZEM">Armazém</option>
                                 <option value="TRANSPORTE">Transporte</option>
                             </select>
-                            <select id="histFiltroStatus" onchange="renderizarHistorico()">
-                                <option value="">Todos os Status</option>
-                                <option value="FECHADO">Fechado</option>
-                                <option value="EM FECHAMENTO">Em Fechamento</option>
-                                <option value="MAIOR QUE 50%">Maior que 50%</option>
-                                <option value="FUP">FUP</option>
-                                <option value="AINDA FRIO">Ainda Frio</option>
-                                <option value="PERDIDO">Perdido</option>
-                            </select>
                         </div>
                         <div class="hist-filter-row">
                             <select id="histFiltroVend" onchange="renderizarHistorico()">
@@ -5004,16 +4995,12 @@ let _histSelected = null;
 let _histVendPopulado = false;
 
 function renderizarHistorico() {
-    // Merged list: all oportunidades that are FECHADO or have financial records
-    const clientesComFin = new Set((baseResMensais || []).map(r => r.cliente).filter(Boolean));
-    const todos = (base || []).filter(r =>
-        r.status === 'FECHADO' || clientesComFin.has(r.cliente)
-    );
+    // Apenas oportunidades com status FECHADO no Kanban
+    const todos = (base || []).filter(r => r.status === 'FECHADO');
 
-    const q      = (document.getElementById('histBusca')?.value || '').toLowerCase().trim();
-    const bu     = document.getElementById('histFiltroBU')?.value || '';
-    const status = document.getElementById('histFiltroStatus')?.value || '';
-    const vend   = document.getElementById('histFiltroVend')?.value || '';
+    const q    = (document.getElementById('histBusca')?.value || '').toLowerCase().trim();
+    const bu   = document.getElementById('histFiltroBU')?.value || '';
+    const vend = document.getElementById('histFiltroVend')?.value || '';
 
     // Populate vendor dropdown once
     if (!_histVendPopulado) {
@@ -5030,19 +5017,16 @@ function renderizarHistorico() {
     }
 
     const filtrados = todos.filter(r => {
-        if (q      && !(r.cliente || '').toLowerCase().includes(q)) return false;
-        if (bu     && _getBUGroup(r.area) !== bu)                   return false;
-        if (status && r.status !== status)                          return false;
-        if (vend   && r.vendedor !== vend)                          return false;
+        if (q    && !(r.cliente || '').toLowerCase().includes(q)) return false;
+        if (bu   && _getBUGroup(r.area) !== bu)                   return false;
+        if (vend && r.vendedor !== vend)                          return false;
         return true;
     });
 
-    // Sort: FECHADO first, then by estimated value desc
-    filtrados.sort((a, b) => {
-        if (a.status === 'FECHADO' && b.status !== 'FECHADO') return -1;
-        if (a.status !== 'FECHADO' && b.status === 'FECHADO') return  1;
-        return (parseFloat(b.valor_estimado_ano) || 0) - (parseFloat(a.valor_estimado_ano) || 0);
-    });
+    // Sort by estimated value desc
+    filtrados.sort((a, b) =>
+        (parseFloat(b.valor_estimado_ano) || 0) - (parseFloat(a.valor_estimado_ano) || 0)
+    );
 
     const countEl = document.getElementById('histCount');
     if (countEl) countEl.textContent = `${filtrados.length} processo${filtrados.length !== 1 ? 's' : ''}`;
@@ -5057,20 +5041,17 @@ function renderizarHistorico() {
     }
 
     filtrados.forEach(item => {
-        const isFechado = item.status === 'FECHADO';
-        const buGroup   = _getBUGroup(item.area) || item.area || '—';
-        const buClass   = buGroup === 'TRADING' ? 'hist-bu-trading' : buGroup === 'ARMAZEM' ? 'hist-bu-armazem' : 'hist-bu-transporte';
-        const posvDone  = [item.chk_contrato, item.chk_especificacao, item.chk_reuniao_operacional, item.chk_handover].filter(Boolean).length;
+        const buGroup  = _getBUGroup(item.area) || item.area || '—';
+        const buClass  = buGroup === 'TRADING' ? 'hist-bu-trading' : buGroup === 'ARMAZEM' ? 'hist-bu-armazem' : 'hist-bu-transporte';
+        const posvDone = [item.chk_contrato, item.chk_especificacao, item.chk_reuniao_operacional, item.chk_handover].filter(Boolean).length;
 
         // Financial totals for this client
         const finCliente = (baseResMensais || []).filter(r => r.cliente === item.cliente);
         const totalReal  = finCliente.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
         const hasFin     = finCliente.length > 0;
 
-        const valFmt = _fmtHome(parseFloat(item.valor_estimado_ano) || 0);
-        const realFmt= hasFin ? _fmtHome(totalReal) : null;
-
-        const statusClass = isFechado ? 'hist-status-fechado' : 'hist-status-outros';
+        const valFmt  = _fmtHome(parseFloat(item.valor_estimado_ano) || 0);
+        const realFmt = hasFin ? _fmtHome(totalReal) : null;
 
         const div = document.createElement('div');
         div.className = 'hist-item' + (String(_histSelected) === String(item.id) ? ' selected' : '');
@@ -5079,7 +5060,7 @@ function renderizarHistorico() {
         div.innerHTML = `
             <div class="hist-item-top">
                 <div class="hist-item-name">${item.cliente || '—'}</div>
-                <span class="hist-item-status ${statusClass}">${item.status}</span>
+                <span class="hist-item-status hist-status-fechado">FECHADO</span>
             </div>
             <div class="hist-item-mid">
                 <span class="hist-bu-tag ${buClass}">${buGroup}</span>
@@ -5090,7 +5071,7 @@ function renderizarHistorico() {
                     <span style="color:#aaa; font-size:10px; font-weight:600;">Est. </span>R$ ${valFmt}
                     ${realFmt ? `<span style="color:#aaa; font-size:10px;"> · </span><span style="color:#27ae60; font-size:11px;">R$ ${realFmt} real</span>` : ''}
                 </span>
-                ${isFechado ? `<span class="hist-posv-mini">${posvDone === 4 ? '✅' : posvDone > 0 ? '🔄' : '📋'} ${posvDone}/4</span>` : ''}
+                <span class="hist-posv-mini">${posvDone === 4 ? '✅' : posvDone > 0 ? '🔄' : '📋'} ${posvDone}/4</span>
             </div>`;
         listEl.appendChild(div);
     });
