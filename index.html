@@ -5060,7 +5060,7 @@ function renderizarHistorico() {
 
         // Financial totals for this client
         const finCliente = (baseResMensais || []).filter(r => r.cliente === item.cliente);
-        const totalReal  = finCliente.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+        const totalReal  = finCliente.reduce((s, r) => s + (parseFloat(r.valor_realizado) || 0), 0);
         const hasFin     = finCliente.length > 0;
 
         const valFmt  = _fmtHome(parseFloat(item.valor_estimado_ano) || 0);
@@ -5106,9 +5106,9 @@ function abrirDetalheHistorico(id) {
     // Financial aggregation
     const finData  = (baseResMensais || []).filter(r => r.cliente === item.cliente);
     const totalFat = finData.filter(r => _statusEfetivo(r) === 'FATURADO')
-                            .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+                            .reduce((s, r) => s + (parseFloat(r.valor_realizado) || 0), 0);
     const totalPed = finData.filter(r => _statusEfetivo(r) === 'PEDIDOS EM CASA')
-                            .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+                            .reduce((s, r) => s + (parseFloat(r.valor_realizado) || 0), 0);
     const valEst   = parseFloat(item.valor_estimado_ano) || 0;
     const pct      = valEst > 0 ? Math.round(((totalFat + totalPed) / valEst) * 100) : 0;
     const pctColor = pct >= 100 ? '#27ae60' : pct >= 50 ? '#f39c12' : '#e74c3c';
@@ -5198,9 +5198,11 @@ function abrirDetalheHistorico(id) {
         anos.forEach(ano => {
             const porMes = {};
             finData.filter(r => r.ano == ano).forEach(r => {
-                if (!porMes[r.mes]) porMes[r.mes] = { fat: 0, ped: 0 };
-                if (_statusEfetivo(r) === 'FATURADO')          porMes[r.mes].fat += parseFloat(r.valor)||0;
-                else if (_statusEfetivo(r) === 'PEDIDOS EM CASA') porMes[r.mes].ped += parseFloat(r.valor)||0;
+                const m = r.mes_numero || 0;
+                if (!m) return;
+                if (!porMes[m]) porMes[m] = { fat: 0, ped: 0 };
+                if (_statusEfetivo(r) === 'FATURADO')             porMes[m].fat += parseFloat(r.valor_realizado)||0;
+                else if (_statusEfetivo(r) === 'PEDIDOS EM CASA') porMes[m].ped += parseFloat(r.valor_realizado)||0;
             });
             const mesesOrdenados = Object.keys(porMes).map(Number).sort((a,b) => a-b);
             if (mesesOrdenados.length === 0) return;
