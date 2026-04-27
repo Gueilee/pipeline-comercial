@@ -2692,13 +2692,12 @@ function renderizarMetas() {
     _novosNNFilt.filter(r => (r.mes_numero||1) >= periodoMesInicio && (r.mes_numero||1) <= periodoMesFim)
         .forEach(r => {
             const v = parseFloat(r.valor_realizado)||0;
-            const st = (r.status||'').toUpperCase().trim();
+            const st = _statusEfetivo(r);
             if (st === 'FATURADO') {
                 realPeriodo.trading     += v;
                 realPeriodo.faturamento += v;
             } else { // PEDIDOS EM CASA
                 realPeriodo.tradingPed  += v;
-                // não entra no faturamento realizado
             }
         });
 
@@ -2719,7 +2718,7 @@ function renderizarMetas() {
     _novosNNFilt.forEach(r => {
         const idx = (r.mes_numero||1)-1;
         const v = parseFloat(r.valor_realizado)||0;
-        const st = (r.status||'').toUpperCase().trim();
+        const st = _statusEfetivo(r);
         if (st === 'FATURADO') {
             realAnual.trading += v;
             if(idx >= 0 && idx < 12) arrayRealFaturado[idx] += v;
@@ -3258,6 +3257,20 @@ function _getBUGroup(area) {
     return 'OUTROS';
 }
 
+// Retorna o status efetivo de um registro de resultados_mensais:
+// Mês corrente e anteriores → FATURADO; meses futuros → PEDIDOS EM CASA.
+// Ignora o valor armazenado no campo status do banco.
+function _statusEfetivo(r) {
+    const agora    = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtual = agora.getMonth() + 1; // 1-12
+    const rAno     = parseInt(r.ano) || 0;
+    const rMes     = parseInt(r.mes_numero || r.mes) || 0;
+    if (!rAno || !rMes) return (r.status || '').toUpperCase().trim(); // sem data: mantém o banco
+    if (rAno < anoAtual || (rAno === anoAtual && rMes <= mesAtual)) return 'FATURADO';
+    return 'PEDIDOS EM CASA';
+}
+
 function _fmtHome(v) {
     if (v >= 1e6) return 'R$ ' + (v/1e6).toFixed(1).replace('.',',') + 'M';
     if (v >= 1e3) return 'R$ ' + (v/1e3).toFixed(0) + 'k';
@@ -3317,7 +3330,7 @@ function renderizarHome() {
     let planoAnual=0, realAnual=0, pedidosAnual=0;
     finFilt.forEach(r => {
         planoAnual   += parseFloat(r.valor_planejado)||0;
-        const st = (r.status||'').toUpperCase().trim();
+        const st = _statusEfetivo(r);
         if (st==='FATURADO')        realAnual   += parseFloat(r.valor_realizado)||0;
         if (st==='PEDIDOS EM CASA') pedidosAnual+= parseFloat(r.valor_realizado)||0;
     });
@@ -3512,7 +3525,7 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
         regs.forEach(r => {
             const m=(r.mes_numero||1)-1;
             plano[m] += parseFloat(r.valor_planejado)||0;
-            const st=(r.status||'').toUpperCase().trim();
+            const st=_statusEfetivo(r);
             if(st==='FATURADO')        fat[m] += parseFloat(r.valor_realizado)||0;
             if(st==='PEDIDOS EM CASA') ped[m] += parseFloat(r.valor_realizado)||0;
         });
@@ -3570,7 +3583,7 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
         (!clienteHome  || r.cliente                      === clienteHome) &&
         (!catHome      || r.categoria                    === catHome) &&
         (!tipoHome     || (r.tipo||'').trim()            === tipoHome) &&
-        (!statusFinHome|| (r.status||'').toUpperCase().trim() === statusFinHome)
+        (!statusFinHome|| _statusEfetivo(r) === statusFinHome)
     );
 
     // Atualiza título da seção com filtros ativos
@@ -3594,7 +3607,7 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
         const m  = (r.mes_numero||1)-1;
         const pl = parseFloat(r.valor_planejado)||0;
         const rv = parseFloat(r.valor_realizado)||0;
-        const st = (r.status||'').toUpperCase().trim();
+        const st = _statusEfetivo(r);
         planoNN[m] += pl;
         if (st==='FATURADO')        fatNN[m] += rv;
         if (st==='PEDIDOS EM CASA') pedNN[m] += rv;
@@ -3696,7 +3709,7 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
     finFilt.forEach(r => {
         const m=(r.mes_numero||1)-1;
         planoGeral[m] += parseFloat(r.valor_planejado)||0;
-        const st=(r.status||'').toUpperCase().trim();
+        const st=_statusEfetivo(r);
         if(st==='FATURADO')        fatGeral[m] += parseFloat(r.valor_realizado)||0;
         if(st==='PEDIDOS EM CASA') pedGeral[m] += parseFloat(r.valor_realizado)||0;
     });
@@ -5092,9 +5105,9 @@ function abrirDetalheHistorico(id) {
 
     // Financial aggregation
     const finData  = (baseResMensais || []).filter(r => r.cliente === item.cliente);
-    const totalFat = finData.filter(r => (r.status||'').toUpperCase().trim() === 'FATURADO')
+    const totalFat = finData.filter(r => _statusEfetivo(r) === 'FATURADO')
                             .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
-    const totalPed = finData.filter(r => (r.status||'').toUpperCase().trim() === 'PEDIDOS EM CASA')
+    const totalPed = finData.filter(r => _statusEfetivo(r) === 'PEDIDOS EM CASA')
                             .reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
     const valEst   = parseFloat(item.valor_estimado_ano) || 0;
     const pct      = valEst > 0 ? Math.round(((totalFat + totalPed) / valEst) * 100) : 0;
@@ -5186,8 +5199,8 @@ function abrirDetalheHistorico(id) {
             const porMes = {};
             finData.filter(r => r.ano == ano).forEach(r => {
                 if (!porMes[r.mes]) porMes[r.mes] = { fat: 0, ped: 0 };
-                if ((r.status||'').toUpperCase().trim() === 'FATURADO')          porMes[r.mes].fat += parseFloat(r.valor)||0;
-                else if ((r.status||'').toUpperCase().trim() === 'PEDIDOS EM CASA') porMes[r.mes].ped += parseFloat(r.valor)||0;
+                if (_statusEfetivo(r) === 'FATURADO')          porMes[r.mes].fat += parseFloat(r.valor)||0;
+                else if (_statusEfetivo(r) === 'PEDIDOS EM CASA') porMes[r.mes].ped += parseFloat(r.valor)||0;
             });
             const mesesOrdenados = Object.keys(porMes).map(Number).sort((a,b) => a-b);
             if (mesesOrdenados.length === 0) return;
@@ -5452,7 +5465,7 @@ function renderizarFinanceiro() {
         let bu       = rm.bu       ? rm.bu.toUpperCase().replace(/\s+/g,' ').trim()       : 'OUTROS';
         let categoria= rm.categoria? rm.categoria.toUpperCase().replace(/\s+/g,' ').trim(): '';
         const cliName= rm.cliente  || 'Sem Nome';
-        const status = rm.status   ? rm.status.toUpperCase().replace(/\s+/g,' ').trim()   : '';
+        const status = _statusEfetivo(rm);
         const tipo   = rm.tipo     ? rm.tipo.toUpperCase().replace(/\s+/g,' ').trim()     : '';
 
         if (fFinCli    && !cliName.toLowerCase().includes(fFinCli)) return;
