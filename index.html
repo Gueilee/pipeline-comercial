@@ -4032,20 +4032,6 @@ function renderizar(){
                          + `<div class="card-mini-item"><span class="cmi-label">12m</span><span class="cmi-val">${_val12m}</span></div>`
                          + `</div>`;
 
-            // Pós-Venda pill for FECHADO cards
-            if (s.n === 'FECHADO') {
-                const checks = [
-                    itemDaVez.chk_contrato,
-                    itemDaVez.chk_especificacao,
-                    itemDaVez.chk_reuniao_operacional,
-                    itemDaVez.chk_handover
-                ];
-                const done = checks.filter(Boolean).length;
-                const pillClass = done === 0 ? 'empty' : done === 4 ? 'full' : 'partial';
-                const pillIcon  = done === 4 ? '✅' : done === 0 ? '📋' : '🔄';
-                const pillLabel = done === 4 ? 'Pós-Venda ✓' : `Pós-Venda ${done}/4`;
-                cardHTML += `<br><span class="posv-pill ${pillClass}" onclick="event.stopPropagation(); abrirPosVenda('${idReal}')">${pillIcon} ${pillLabel}</span>`;
-            }
 
             card.innerHTML = cardHTML;
             b.appendChild(card);
