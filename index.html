@@ -1433,7 +1433,7 @@ header {
             
             <div class="form-row" style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
                 <div class="form-group" style="flex:1; margin-bottom:0;"><label>Reuniões Realizadas</label><input type="number" id="meta_input_reuniao" required></div>
-                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas" required></div>
+                <div id="meta_row_propostas" class="form-group" style="flex:1; margin-bottom:0;"><label>Propostas Enviadas</label><input type="number" id="meta_input_propostas"></div>
             </div>
 
             <div class="modal-footer">
@@ -2556,7 +2556,9 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 // ---- MÓDULO DE METAS ----
 function prepararNovaMeta() {
     document.getElementById('formMetasInput').reset();
-    document.getElementById('meta_input_vendedor').value = ""; 
+    document.getElementById('meta_input_vendedor').value = "";
+    const rowProp = document.getElementById('meta_row_propostas');
+    if (rowProp) rowProp.style.display = '';
     abrirModal('modalMetasInput');
 }
 
@@ -2565,6 +2567,11 @@ function carregarMetaExistente() {
     const ano  = document.getElementById('meta_input_ano').value;
     const vend = document.getElementById('meta_input_vendedor').value;
 
+    // Oculta "Propostas" para PRÉ VENDAS
+    const rowProp = document.getElementById('meta_row_propostas');
+    const isPreVendas = vend === 'PRÉ VENDAS';
+    if (rowProp) rowProp.style.display = isPreVendas ? 'none' : '';
+
     if(!mes || !ano || !vend) return;
 
     const chave = chaveMetaMesAno(ano, mes);
@@ -2572,7 +2579,7 @@ function carregarMetaExistente() {
     const existente = baseMetasMensais.find(m =>
         m.vendedor === vend && (m.mes_ano === chave || m.mes_ano === mes)
     );
-    
+
     if(existente) {
         document.getElementById('meta_input_reuniao').value = existente.realizado_reuniao || 0;
         document.getElementById('meta_input_propostas').value = existente.realizado_propostas || 0;
