@@ -589,9 +589,15 @@ header {
 .col-fechado { background-color: #e8f5e9; } .col-fechado h4 { background-color: var(--bg-fechado); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
-.card{ background:white; padding:12px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
+.card{ background:white; padding:10px 12px 8px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
 .card:active { cursor: grabbing; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.card-vend { display:block; color:#888; font-size:10px; margin-top:1px; }
+.card-mini { display:flex; justify-content:space-between; align-items:stretch; margin-top:7px; padding-top:6px; border-top:1px solid #efefef; gap:0; }
+.card-mini-item { display:flex; flex-direction:column; align-items:center; flex:1; padding:0 2px; }
+.card-mini-item:not(:last-child) { border-right:1px solid #efefef; }
+.cmi-label { font-size:8.5px; color:#bbb; text-transform:uppercase; font-weight:700; letter-spacing:.4px; white-space:nowrap; }
+.cmi-val   { font-size:10.5px; font-weight:700; color:#422c76; margin-top:2px; white-space:nowrap; }
 .form-row { display: flex; gap: 15px; }
 
 .column-over { filter: brightness(0.95); border: 2px dashed var(--lilas) !important; }
@@ -4002,8 +4008,30 @@ function renderizar(){
             } : null;
 
             // Build card content
-            const valorFmt = parseFloat(itemDaVez.valor_estimado_ano).toLocaleString('pt-BR');
-            let cardHTML = `<b>${itemDaVez.cliente}</b><br><small>${itemDaVez.vendedor}</small><br>R$ ${valorFmt}`;
+            const _meses3 = ['','jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+            const _fmtDataCard = d => {
+                if (!d) return '—';
+                const p = String(d).split('-');
+                if (p.length < 2) return '—';
+                const m = parseInt(p[1],10);
+                return (_meses3[m]||'?') + '/' + String(p[0]).slice(2);
+            };
+            const _fmtKVal = v => {
+                const n = parseFloat(v) || 0;
+                if (!n) return '—';
+                if (n >= 1000000) return 'R$' + (n/1000000).toFixed(1).replace('.',',') + 'M';
+                if (n >= 1000)    return 'R$' + Math.round(n/1000) + 'k';
+                return 'R$' + Math.round(n);
+            };
+            const _inicio   = _fmtDataCard(itemDaVez.data_inicio_faturamento);
+            const _valAno   = _fmtKVal(itemDaVez.valor_estimado_ano);
+            const _val12m   = _fmtKVal(itemDaVez.valor_anualizado);
+            let cardHTML = `<b>${itemDaVez.cliente}</b><span class="card-vend">${itemDaVez.vendedor || '—'}</span>`
+                         + `<div class="card-mini">`
+                         + `<div class="card-mini-item"><span class="cmi-label">Início</span><span class="cmi-val">${_inicio}</span></div>`
+                         + `<div class="card-mini-item"><span class="cmi-label">Ano</span><span class="cmi-val">${_valAno}</span></div>`
+                         + `<div class="card-mini-item"><span class="cmi-label">12m</span><span class="cmi-val">${_val12m}</span></div>`
+                         + `</div>`;
 
             // Pós-Venda pill for FECHADO cards
             if (s.n === 'FECHADO') {
