@@ -3991,7 +3991,9 @@ function renderizar(){
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
         col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n).forEach(itemDaVez => {
+        filtrados.filter(f => f.status === s.n)
+                 .sort((a, b) => (parseFloat(b.valor_anualizado) || 0) - (parseFloat(a.valor_anualizado) || 0))
+                 .forEach(itemDaVez => {
             
             const idReal = itemDaVez.id;
 
