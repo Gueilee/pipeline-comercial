@@ -5851,12 +5851,26 @@ function renderizarFinanceiro() {
         // Para BU share: usa apenas FATURADO
         if (isFat) faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
 
-        const cliKey = cliName + " (" + bu + ")";
-        if (!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { planoAnual:0, planoYTD:0, faturado:0, pedidos:0 };
+        // NOVOS CLIENTES NOMINADOS consolidam sob a linha "NOVOS CLIENTES" da mesma BU
+        const cliKey = tipo === 'NOVOS CLIENTES NOMINADOS'
+            ? 'NOVOS CLIENTES (' + bu + ')'
+            : cliName + ' (' + bu + ')';
+        if (!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { planoAnual:0, planoYTD:0, faturado:0, pedidos:0, nominados:[] };
         clientesDesempenho[cliKey].planoAnual += valPlan;
         if (mesIdx >= 0 && mesIdx <= currentMonthIndex) clientesDesempenho[cliKey].planoYTD += valPlan;
         if (isFat) clientesDesempenho[cliKey].faturado += valReal;
         if (isPed) clientesDesempenho[cliKey].pedidos  += valReal;
+        // Registra clientes individuais para exibir como sub-itens
+        if (tipo === 'NOVOS CLIENTES NOMINADOS' && cliName !== 'NOVOS CLIENTES') {
+            const nominados = clientesDesempenho[cliKey].nominados;
+            const existente = nominados.find(n => n.nome === cliName);
+            if (existente) {
+                if (isFat) existente.faturado += valReal;
+                if (isPed) existente.pedidos  += valReal;
+            } else {
+                nominados.push({ nome: cliName, faturado: isFat ? valReal : 0, pedidos: isPed ? valReal : 0 });
+            }
+        }
     });
 
     // ── KPIs ──
@@ -5994,7 +6008,7 @@ function renderizarFinanceiro() {
     window._dadosClientesFin = Object.entries(clientesDesempenho).map(([nome, v]) => {
         const desvioYTD = v.faturado - v.planoYTD;
         const pctYTD    = v.planoYTD > 0 ? (v.faturado / v.planoYTD * 100) : 0;
-        return { nome, planoAnual: v.planoAnual, planoYTD: v.planoYTD, faturado: v.faturado, pedidos: v.pedidos, desvioYTD, pctYTD };
+        return { nome, planoAnual: v.planoAnual, planoYTD: v.planoYTD, faturado: v.faturado, pedidos: v.pedidos, desvioYTD, pctYTD, nominados: v.nominados || [] };
     });
     renderTbClientesFin();
 }
@@ -6020,7 +6034,9 @@ function renderTbClientesFin() {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999; padding:20px;">Nenhum cliente encontrado.</td></tr>`;
         return;
     }
-    tbody.innerHTML = lista.map(c => `
+    tbody.innerHTML = lista.map(c => {
+        const hasNom = c.nominados && c.nominados.some(n => n.faturado > 0 || n.pedidos > 0);
+        const mainRow = `
         <tr>
             <td style="font-weight:600; white-space:nowrap;">${c.nome}</td>
             <td style="text-align:right;">${fmt(c.planoAnual)}</td>
@@ -6029,7 +6045,19 @@ function renderTbClientesFin() {
             <td style="text-align:right; color:#f39c12; font-weight:600;">${fmt(c.pedidos)}</td>
             <td style="text-align:right;">${gap(c.desvioYTD)}</td>
             <td style="text-align:center;">${pill(c.pctYTD)}</td>
-        </tr>`).join('');
+        </tr>`;
+        const subRows = hasNom ? c.nominados
+            .filter(n => n.faturado > 0 || n.pedidos > 0)
+            .map(n => `
+        <tr style="background:#f9f9f9; font-size:11px;">
+            <td style="padding-left:28px; color:#666; white-space:nowrap;">↳ ${n.nome}</td>
+            <td></td><td></td>
+            <td style="text-align:right; color:#ff2f69;">${fmt(n.faturado)}</td>
+            <td style="text-align:right; color:#f39c12;">${fmt(n.pedidos)}</td>
+            <td></td><td></td>
+        </tr>`).join('') : '';
+        return mainRow + subRows;
+    }).join('');
 }
 
 function filtrarTbClientes() {
