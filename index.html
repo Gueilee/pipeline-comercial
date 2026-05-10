@@ -2049,17 +2049,47 @@ function parseMesAno(mesAno) {
 // Gera a chave "YYYY-M" usada para gravar novos registros
 function chaveMetaMesAno(ano, mes) { return `${ano}-${mes}`; }
 
-// Conta atividades de um tipo/vendedor/período diretamente de baseAtividades
-function _contarAtiv(tipo, vendedor, anoFiltro, mesInicio, mesFim) {
+// Conta atividades de um tipo/vendedor/mês exato em baseAtividades
+function _contarAtiv(tipo, vendedor, anoFiltro, mes) {
     return baseAtividades.filter(a => {
         if (tipo     && a.tipo     !== tipo)     return false;
         if (vendedor && a.vendedor !== vendedor) return false;
         const p = parseMesAno(a.mes_ano);
-        if (anoFiltro && p.ano  !== anoFiltro)  return false;
-        if (mesInicio && p.mes  <  mesInicio)    return false;
-        if (mesFim    && p.mes  >  mesFim)       return false;
+        if (anoFiltro && p.ano !== anoFiltro)    return false;
+        if (mes       && p.mes !== mes)           return false;
         return true;
     }).length;
+}
+
+// Corte histórico: antes de Mai/2026 usa metas_mensais; Mai/2026 em diante usa atividades
+const _CORTE_ANO = 2026, _CORTE_MES = 5;
+function _isHistorico(ano, mes) { return ano < _CORTE_ANO || (ano === _CORTE_ANO && mes < _CORTE_MES); }
+
+function _realReuniao(vendedor, ano, mes) {
+    if (_isHistorico(ano, mes)) {
+        return baseMetasMensais
+            .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
+            .reduce((acc, r) => acc + (r.realizado_reuniao || 0), 0);
+    }
+    return _contarAtiv('REUNIÃO', vendedor || null, ano, mes);
+}
+function _realProposta(vendedor, ano, mes) {
+    if (_isHistorico(ano, mes)) {
+        return baseMetasMensais
+            .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
+            .reduce((acc, r) => acc + (r.realizado_propostas || 0), 0);
+    }
+    return _contarAtiv('PROPOSTA', vendedor || null, ano, mes);
+}
+function _totalReunioes(vendedor, ano, mesInicio, mesFim) {
+    let t = 0;
+    for (let m = mesInicio; m <= mesFim; m++) t += _realReuniao(vendedor, ano, m);
+    return t;
+}
+function _totalPropostas(vendedor, ano, mesInicio, mesFim) {
+    let t = 0;
+    for (let m = mesInicio; m <= mesFim; m++) t += _realProposta(vendedor, ano, m);
+    return t;
 }
 
 // Inicializa os selects de ano (barra de período + modal de lançamento)
@@ -2850,9 +2880,9 @@ function renderizarMetas() {
     // ── Acumuladores do período ──
     let realPeriodo = { reuniao: 0, propostas: 0, trading: 0, tradingPed: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
 
-    // Reuniões e propostas vêm diretamente das atividades registradas (sem duplo lançamento)
-    realPeriodo.reuniao   = _contarAtiv('REUNIÃO',  fV || null, periodoAno, periodoMesInicio, periodoMesFim);
-    realPeriodo.propostas = _contarAtiv('PROPOSTA', fV || null, periodoAno, periodoMesInicio, periodoMesFim);
+    // Híbrido: histórico (metas_mensais) até Abr/2026, atividades a partir de Mai/2026
+    realPeriodo.reuniao   = _totalReunioes (fV || null, periodoAno, periodoMesInicio, periodoMesFim);
+    realPeriodo.propostas = _totalPropostas(fV || null, periodoAno, periodoMesInicio, periodoMesFim);
 
     dadosPeriodo.forEach(m => {
         const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
@@ -3048,8 +3078,8 @@ function renderizarMetas() {
         labelsGraf3.push(NOMES_MESES_SHORT[m - 1]);
         arrayMetaReuniao.push(metaMensal.reuniao);
 
-        // Conta reuniões registradas em atividades para esse mês
-        const realizado = _contarAtiv('REUNIÃO', fV || null, periodoAno, m, m);
+        // Híbrido: histórico até Abr/2026, atividades a partir de Mai/2026
+        const realizado = _realReuniao(fV || null, periodoAno, m);
         arrayRealReuniao.push(realizado);
         arrayAcingPct.push(
             metaMensal.reuniao > 0 ? +((realizado / metaMensal.reuniao) * 100).toFixed(1) : 0
@@ -3280,9 +3310,9 @@ function renderizarComparativo() {
         };
 
         let real = { reuniao:0, propostas:0, faturamento:0 };
-        // Reuniões e propostas vêm das atividades registradas
-        real.reuniao   = _contarAtiv('REUNIÃO',  v, periodoAno, periodoMesInicio, periodoMesFim);
-        real.propostas = _contarAtiv('PROPOSTA', v, periodoAno, periodoMesInicio, periodoMesFim);
+        // Híbrido: histórico até Abr/2026, atividades a partir de Mai/2026
+        real.reuniao   = _totalReunioes (v, periodoAno, periodoMesInicio, periodoMesFim);
+        real.propostas = _totalPropostas(v, periodoAno, periodoMesInicio, periodoMesFim);
         dadosPeriodo.forEach(m => {
             real.faturamento+= (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
         });
