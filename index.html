@@ -1073,11 +1073,11 @@ header {
             <div class="metas-header">
                 <div>
                     <h2 style="margin: 0; color: var(--lilas);">Acompanhamento de Metas</h2>
-                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Combine o filtro de Vendedor com o seletor de período para análises detalhadas.</p>
+                    <p style="margin: 5px 0 0 0; font-size: 13px; color: #666;">Reuniões e propostas são contabilizadas automaticamente via <b>Registrar Atividade</b>.</p>
                 </div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <button type="button" id="btnComparar" class="btn-header btn-comparar" onclick="toggleModoComparativo()"><span>⚖️</span> Comparar Vendedores</button>
-                    <button type="button" id="btn-lancar-meta" class="btn-header btn-novo-meta" onclick="prepararNovaMeta()"><span>📝</span> Lançar Resultados</button>
+                    <button type="button" id="btn-lancar-meta" class="btn-header" onclick="abrirModalAtividade()" style="background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9;"><span>📞</span> Registrar Atividade</button>
                 </div>
             </div>
 
@@ -2049,6 +2049,19 @@ function parseMesAno(mesAno) {
 // Gera a chave "YYYY-M" usada para gravar novos registros
 function chaveMetaMesAno(ano, mes) { return `${ano}-${mes}`; }
 
+// Conta atividades de um tipo/vendedor/período diretamente de baseAtividades
+function _contarAtiv(tipo, vendedor, anoFiltro, mesInicio, mesFim) {
+    return baseAtividades.filter(a => {
+        if (tipo     && a.tipo     !== tipo)     return false;
+        if (vendedor && a.vendedor !== vendedor) return false;
+        const p = parseMesAno(a.mes_ano);
+        if (anoFiltro && p.ano  !== anoFiltro)  return false;
+        if (mesInicio && p.mes  <  mesInicio)    return false;
+        if (mesFim    && p.mes  >  mesFim)       return false;
+        return true;
+    }).length;
+}
+
 // Inicializa os selects de ano (barra de período + modal de lançamento)
 function _popularSelectsAno() {
     const anoAtual = new Date().getFullYear();
@@ -2836,10 +2849,13 @@ function renderizarMetas() {
 
     // ── Acumuladores do período ──
     let realPeriodo = { reuniao: 0, propostas: 0, trading: 0, tradingPed: 0, armazem: 0, transporte: 0, analytics: 0, faturamento: 0 };
+
+    // Reuniões e propostas vêm diretamente das atividades registradas (sem duplo lançamento)
+    realPeriodo.reuniao   = _contarAtiv('REUNIÃO',  fV || null, periodoAno, periodoMesInicio, periodoMesFim);
+    realPeriodo.propostas = _contarAtiv('PROPOSTA', fV || null, periodoAno, periodoMesInicio, periodoMesFim);
+
     dadosPeriodo.forEach(m => {
         const fat = (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
-        realPeriodo.reuniao    += (m.realizado_reuniao   ||0);
-        realPeriodo.propostas  += (m.realizado_propostas ||0);
         realPeriodo.trading    += (m.realizado_trading   ||0);
         realPeriodo.armazem    += (m.realizado_armazem   ||0);
         realPeriodo.transporte += (m.realizado_transporte||0);
@@ -3032,9 +3048,8 @@ function renderizarMetas() {
         labelsGraf3.push(NOMES_MESES_SHORT[m - 1]);
         arrayMetaReuniao.push(metaMensal.reuniao);
 
-        // Soma TODOS os registros do mês (pode haver um por vendedor)
-        const regsDoMes = dadosTodos.filter(d => parseMesAno(d.mes_ano).mes === m);
-        const realizado = regsDoMes.reduce((acc, d) => acc + (d.realizado_reuniao || 0), 0);
+        // Conta reuniões registradas em atividades para esse mês
+        const realizado = _contarAtiv('REUNIÃO', fV || null, periodoAno, m, m);
         arrayRealReuniao.push(realizado);
         arrayAcingPct.push(
             metaMensal.reuniao > 0 ? +((realizado / metaMensal.reuniao) * 100).toFixed(1) : 0
@@ -3265,9 +3280,10 @@ function renderizarComparativo() {
         };
 
         let real = { reuniao:0, propostas:0, faturamento:0 };
+        // Reuniões e propostas vêm das atividades registradas
+        real.reuniao   = _contarAtiv('REUNIÃO',  v, periodoAno, periodoMesInicio, periodoMesFim);
+        real.propostas = _contarAtiv('PROPOSTA', v, periodoAno, periodoMesInicio, periodoMesFim);
         dadosPeriodo.forEach(m => {
-            real.reuniao    += (m.realizado_reuniao    || 0);
-            real.propostas  += (m.realizado_propostas  || 0);
             real.faturamento+= (m.realizado_trading||0)+(m.realizado_armazem||0)+(m.realizado_transporte||0)+(m.realizado_analytics||0);
         });
 
@@ -3962,6 +3978,9 @@ async function carregarDados(){
 
     const { data: ativs } = await supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false });
     baseAtividades = ativs || [];
+    // Pré-seleciona o mês atual no filtro do radar
+    const _rFM = document.getElementById('rFiltroMes');
+    if (_rFM && !_rFM.value) _rFM.value = String(new Date().getMonth() + 1);
     renderizarRadar();
 
     await carregarDadosFinanceiros();
