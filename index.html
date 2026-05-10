@@ -267,6 +267,33 @@ header {
 #btnConfirmarFechamento:disabled { opacity:.45; cursor:not-allowed; }
 #btnConfirmarFechamento:not(:disabled):hover { opacity:.9; }
 
+/* ── RADAR DE LEADS ── */
+.radar-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+.radar-kpi { background:white; border-radius:14px; padding:18px 20px; box-shadow:0 2px 8px rgba(0,0,0,.06); display:flex; flex-direction:column; gap:4px; border-left:5px solid #ccc; }
+.radar-kpi-val { font-size:28px; font-weight:800; color:#422c76; line-height:1; }
+.radar-kpi-label { font-size:11px; color:#999; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.radar-filtros { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+.radar-filtros select { padding:7px 12px; border-radius:20px; border:1.5px solid #e0e0e0; font-size:12px; font-weight:600; color:#555; background:white; cursor:pointer; }
+.radar-lista { display:flex; flex-direction:column; gap:8px; }
+.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:90px 1fr 1fr 120px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
+.radar-item:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); }
+.radar-badge { display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.5px; white-space:nowrap; }
+.radar-badge.reuniao  { background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9; }
+.radar-badge.proposta { background:#fce4ec; color:#c62828; border:1.5px solid #f48fb1; }
+.radar-cliente { font-weight:700; font-size:13px; color:#222; }
+.radar-cnpj { font-size:10px; color:#aaa; margin-top:2px; }
+.radar-contato { font-size:12px; color:#555; }
+.radar-cargo { font-size:10px; color:#999; margin-top:2px; }
+.radar-meta { text-align:right; }
+.radar-data { font-size:12px; font-weight:700; color:#422c76; }
+.radar-vend { font-size:10px; color:#999; margin-top:2px; }
+.radar-empty { text-align:center; padding:40px; color:#bbb; font-size:14px; }
+.ativ-tipo-btn { display:flex; gap:8px; }
+.ativ-tipo-btn label { flex:1; cursor:pointer; }
+.ativ-tipo-btn input[type=radio] { display:none; }
+.ativ-tipo-btn .tipo-opt { border:2px solid #e0e0e0; border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:700; color:#999; transition:all .2s; }
+.ativ-tipo-btn input:checked + .tipo-opt.r { border-color:#1565c0; background:#e8f4fd; color:#1565c0; }
+.ativ-tipo-btn input:checked + .tipo-opt.p { border-color:#c62828; background:#fce4ec; color:#c62828; }
 /* ── PÓS-VENDA CHECKLIST ── */
 .posv-pill { display:inline-flex; align-items:center; gap:5px; margin-top:8px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; border:1.5px solid transparent; user-select:none; }
 .posv-pill.empty  { background:#f5f5f5; color:#aaa; border-color:#e0e0e0; }
@@ -742,6 +769,7 @@ header {
 <button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
             <button type="button" id="btn-areas" class="btn-header" onclick="abrirModal('modalArea')" title="Gerenciar Áreas"><span>🏢</span> Áreas</button>
             <button type="button" id="btn-nova-op" class="btn-header btn-novo-op" onclick="prepararNovo()" title="Nova Oportunidade"><span>➕</span> Nova Oportunidade</button>
+            <button type="button" id="btn-atividade" class="btn-header" onclick="abrirModalAtividade()" title="Registrar Atividade de Lead" style="background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9;"><span>📞</span> Registrar Atividade</button>
             <div style="width:1px; height:22px; background:#ddd; margin:0 3px; flex-shrink:0;"></div>
             <span id="perfilBadge" class="perfil-badge"></span>
             <button type="button" class="btn-header btn-logoff" onclick="logoff()" title="Sair do Sistema"><span>🚪</span> SAIR</button>
@@ -982,6 +1010,57 @@ header {
                     <p id="hFinMensalSub">—</p>
                     <canvas id="chartHomeFinMensal"></canvas>
                 </div>
+            </div>
+
+            <!-- SEÇÃO 06: Radar de Leads -->
+            <div class="home-section" id="secRadarLeads">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#1565c0;">06</div>
+                    <div class="hsh-text">
+                        <h3>Radar de Leads</h3>
+                        <p>Atividades de prospecção — reuniões e propostas registradas pelo time</p>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="radar-kpis">
+                    <div class="radar-kpi" style="border-left-color:#1565c0;">
+                        <span class="radar-kpi-val" id="rKpiReunioes">—</span>
+                        <span class="radar-kpi-label">Reuniões este mês</span>
+                    </div>
+                    <div class="radar-kpi" style="border-left-color:#c62828;">
+                        <span class="radar-kpi-val" id="rKpiPropostas">—</span>
+                        <span class="radar-kpi-label">Propostas este mês</span>
+                    </div>
+                    <div class="radar-kpi" style="border-left-color:#422c76;">
+                        <span class="radar-kpi-val" id="rKpiEmpresas">—</span>
+                        <span class="radar-kpi-label">Empresas contactadas este mês</span>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="radar-filtros">
+                    <select id="rFiltroMes" onchange="renderizarRadar()">
+                        <option value="">Todos os meses</option>
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                        <option value="3">Março</option><option value="4">Abril</option>
+                        <option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option>
+                        <option value="9">Setembro</option><option value="10">Outubro</option>
+                        <option value="11">Novembro</option><option value="12">Dezembro</option>
+                    </select>
+                    <select id="rFiltroTipo" onchange="renderizarRadar()">
+                        <option value="">Todos os tipos</option>
+                        <option value="REUNIÃO">Reuniões</option>
+                        <option value="PROPOSTA">Propostas</option>
+                    </select>
+                    <select id="rFiltroVend" onchange="renderizarRadar()">
+                        <option value="">Todos os vendedores</option>
+                    </select>
+                </div>
+
+                <!-- Lista -->
+                <div class="radar-lista" id="radarLista"></div>
             </div>
 
         </div>
@@ -1444,6 +1523,71 @@ header {
     </div>
 </div>
 
+
+<!-- ── MODAL REGISTRAR ATIVIDADE ── -->
+<div id="modalAtividade" class="modal">
+    <div class="modal-content" style="max-width:520px;">
+        <div class="modal-header">
+            <h3>📞 Registrar Atividade</h3>
+            <button type="button" class="modal-close" onclick="fecharModal('modalAtividade')">✕</button>
+        </div>
+        <form id="formAtividade" onsubmit="salvarAtividade(event)">
+            <!-- Tipo -->
+            <div class="form-group" style="margin-bottom:18px;">
+                <label style="margin-bottom:8px; display:block;">Tipo de Atividade</label>
+                <div class="ativ-tipo-btn">
+                    <label>
+                        <input type="radio" name="ativ_tipo" value="REUNIÃO" id="ativ_tipo_r" required>
+                        <div class="tipo-opt r">🤝 Reunião</div>
+                    </label>
+                    <label>
+                        <input type="radio" name="ativ_tipo" value="PROPOSTA" id="ativ_tipo_p">
+                        <div class="tipo-opt p">📄 Proposta</div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex:2;">
+                    <label>Nome do Cliente *</label>
+                    <input type="text" id="ativ_cliente" placeholder="Razão social ou nome comercial" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Data *</label>
+                    <input type="date" id="ativ_data" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>CNPJ</label>
+                    <input type="text" id="ativ_cnpj" placeholder="00.000.000/0000-00" maxlength="18" oninput="mascaraCNPJ(this)">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex:1;">
+                    <label>Nome do Contato</label>
+                    <input type="text" id="ativ_nome_contato" placeholder="Nome da pessoa">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Cargo</label>
+                    <input type="text" id="ativ_cargo_contato" placeholder="Ex: Gerente de Logística">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Vendedor *</label>
+                <select id="ativ_vendedor" required></select>
+            </div>
+
+            <div class="modal-footer" style="margin-top:20px;">
+                <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalAtividade')">Cancelar</button>
+                <button type="submit" class="btn-header" style="background:#1565c0; color:white;">Salvar Atividade</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- ── MODAL CHECKLIST: EM FECHAMENTO → FECHADO ── -->
 <div id="modalChecklistFechamento" class="modal">
@@ -2060,6 +2204,7 @@ function aplicarPermissoes() {
     mostrar('btn-areas',       p.gerenciar);
     mostrar('btn-lancar-meta', p.metaLancar);
     mostrar('btn-lancar-fin',  p.finLancar);
+    mostrar('btn-atividade',   p.metaLancar); // visível para quem pode lançar metas (vendedores e diretores)
 
     // Kanban: desabilita drag e clique nos cards se não tiver permissão
     window._kanbanEditavel = p.kanban;
@@ -2243,9 +2388,10 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let base=[]; 
-let baseMetasMensais=[]; 
+let base=[];
+let baseMetasMensais=[];
 let baseResMensais = [];
+let baseAtividades = [];
 let charts={};
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
@@ -3784,9 +3930,10 @@ async function carregarAuxiliares(){
         const el = document.getElementById(id); 
         if(el) el.innerHTML = `<option value="">${label}</option>` + d.map(i => `<option value="${i.nome}">${i.nome}</option>`).join(''); 
     };
-    fill('op_vendedor', v || [], "Selecione..."); 
-    fill('op_area', a || [], "Selecione..."); 
-    fill('meta_input_vendedor', v || [], "Vendedor..."); 
+    fill('op_vendedor', v || [], "Selecione...");
+    fill('op_area', a || [], "Selecione...");
+    fill('meta_input_vendedor', v || [], "Vendedor...");
+    fill('ativ_vendedor', v || [], "Selecione..."); 
     
     const listV = document.getElementById('listaVendedoresGerenciamento');
     if(listV) {
@@ -3812,6 +3959,10 @@ async function carregarDados(){
     
     const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
     baseMetasMensais = metas || [];
+
+    const { data: ativs } = await supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false });
+    baseAtividades = ativs || [];
+    renderizarRadar();
 
     await carregarDadosFinanceiros();
 
@@ -4048,6 +4199,132 @@ function renderizar(){
         });
         kan.appendChild(col);
     });
+}
+
+// ----------------------------------------------------
+// MÓDULO ATIVIDADES / RADAR DE LEADS
+// ----------------------------------------------------
+
+function mascaraCNPJ(el) {
+    let v = el.value.replace(/\D/g,'').slice(0,14);
+    if(v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5');
+    else if(v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})/,'$1.$2.$3/$4');
+    else if(v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{3})/,'$1.$2.$3');
+    else if(v.length > 2) v = v.replace(/^(\d{2})(\d+)/,'$1.$2');
+    el.value = v;
+}
+
+function abrirModalAtividade() {
+    document.getElementById('formAtividade').reset();
+    // Pre-preenche data com hoje
+    document.getElementById('ativ_data').value = new Date().toISOString().slice(0,10);
+    // Pre-preenche vendedor com o usuário logado (se for vendedor)
+    const sel = document.getElementById('ativ_vendedor');
+    if (sel && USUARIO_LOGADO) {
+        // Tenta casar e-mail do usuário com nome do vendedor via perfil
+        const nomeLogado = _nomeVendedorLogado();
+        if (nomeLogado) sel.value = nomeLogado;
+    }
+    abrirModal('modalAtividade');
+}
+
+function _nomeVendedorLogado() {
+    // Mapeia e-mail → nome do vendedor conforme tabela perfis/vendedores
+    const mapa = {
+        'mssilva@vendemmia.com.br':   'MICHELE SILVA',
+        'cmoreno@vendemmia.com.br':   'PRÉ VENDAS',
+        'rasantos@vendemmia.com.br':  'RAFAEL SANTOS',
+        'galmeida@vendemmia.com.br':  'GUILHERME ALMEIDA',
+        'aheuchling@vendemmia.com.br':'ANDREA HEUCHLING'
+    };
+    return mapa[USUARIO_LOGADO] || '';
+}
+
+async function salvarAtividade(e) {
+    e.preventDefault();
+    const tipo   = document.querySelector('input[name="ativ_tipo"]:checked')?.value;
+    const data   = document.getElementById('ativ_data').value;
+    const [ano, mes] = data.split('-');
+    const payload = {
+        vendedor:      document.getElementById('ativ_vendedor').value,
+        tipo,
+        cliente:       document.getElementById('ativ_cliente').value.trim(),
+        cnpj:          document.getElementById('ativ_cnpj').value.trim() || null,
+        nome_contato:  document.getElementById('ativ_nome_contato').value.trim() || null,
+        cargo_contato: document.getElementById('ativ_cargo_contato').value.trim() || null,
+        data_atividade: data,
+        mes_ano:       `${ano}-${parseInt(mes)}`
+    };
+    const { data: ins, error } = await supabaseClient.from('atividades').insert([payload]).select().single();
+    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+    baseAtividades.unshift(ins);
+    fecharModal('modalAtividade');
+    renderizarRadar();
+    showToast('Atividade registrada com sucesso!', 'success');
+}
+
+function renderizarRadar() {
+    const mesAtual = new Date().getMonth() + 1;
+    const anoAtual = new Date().getFullYear();
+    const chaveAtual = `${anoAtual}-${mesAtual}`;
+
+    // KPIs — este mês
+    const deste = baseAtividades.filter(a => a.mes_ano === chaveAtual);
+    document.getElementById('rKpiReunioes').textContent  = deste.filter(a => a.tipo === 'REUNIÃO').length;
+    document.getElementById('rKpiPropostas').textContent = deste.filter(a => a.tipo === 'PROPOSTA').length;
+    document.getElementById('rKpiEmpresas').textContent  = new Set(deste.map(a => (a.cnpj||a.cliente).replace(/\D/g,'') || a.cliente)).size;
+
+    // Popular filtro de vendedor
+    const rFV = document.getElementById('rFiltroVend');
+    const vendAtual = rFV ? rFV.value : '';
+    if (rFV) {
+        const vends = [...new Set(baseAtividades.map(a => a.vendedor).filter(Boolean))].sort();
+        rFV.innerHTML = '<option value="">Todos os vendedores</option>'
+            + vends.map(v => `<option value="${v}">${v}</option>`).join('');
+        rFV.value = vendAtual;
+    }
+
+    // Filtros
+    const fMes  = document.getElementById('rFiltroMes')?.value  || '';
+    const fTipo = document.getElementById('rFiltroTipo')?.value || '';
+    const fVend = document.getElementById('rFiltroVend')?.value || '';
+
+    let lista = [...baseAtividades].sort((a,b) => b.data_atividade.localeCompare(a.data_atividade));
+    if (fMes)  lista = lista.filter(a => a.mes_ano && a.mes_ano.split('-')[1] === fMes);
+    if (fTipo) lista = lista.filter(a => a.tipo === fTipo);
+    if (fVend) lista = lista.filter(a => a.vendedor === fVend);
+
+    const meses3 = ['','jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const fmtData = d => {
+        if (!d) return '—';
+        const [y,m,day] = d.split('-');
+        return `${day}/${meses3[parseInt(m)]}/${y.slice(2)}`;
+    };
+
+    const el = document.getElementById('radarLista');
+    if (!el) return;
+    if (!lista.length) {
+        el.innerHTML = `<div class="radar-empty">Nenhuma atividade registrada ainda.<br><small>Clique em "Registrar Atividade" para começar.</small></div>`;
+        return;
+    }
+    el.innerHTML = lista.map(a => `
+        <div class="radar-item">
+            <div>
+                <span class="radar-badge ${a.tipo==='REUNIÃO'?'reuniao':'proposta'}">${a.tipo}</span>
+                <div style="margin-top:6px; font-size:11px; color:#888;">${fmtData(a.data_atividade)}</div>
+            </div>
+            <div>
+                <div class="radar-cliente">${a.cliente}</div>
+                <div class="radar-cnpj">${a.cnpj||'CNPJ não informado'}</div>
+            </div>
+            <div>
+                <div class="radar-contato">${a.nome_contato||'—'}</div>
+                <div class="radar-cargo">${a.cargo_contato||''}</div>
+            </div>
+            <div class="radar-meta">
+                <div class="radar-vend">👤 ${a.vendedor}</div>
+            </div>
+        </div>`).join('');
 }
 
 // ----------------------------------------------------
