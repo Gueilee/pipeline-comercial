@@ -3080,33 +3080,37 @@ function renderizarMetas() {
             };
         })];
     } else {
-        // Vendedor selecionado: barras únicas (faturado + pedidos)
+        // Vendedor selecionado: usa _vendFatArr[fV] que consolida metas_mensais + resultados_mensais
+        const fa = (_vendFatArr[fV] || new Array(12).fill(0));
+        const pa = (_vendPedArr[fV] || new Array(12).fill(0));
         ev1Datasets = [_metaLineDs,
-            { label:'Faturado', data:arrayRealFaturado,
-              backgroundColor: arrayRealFaturado.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#422c76':'rgba(66,44,118,0.25)'),
+            { label:'Faturado', data: fa,
+              backgroundColor: fa.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#422c76':'rgba(66,44,118,0.25)'),
               borderRadius:4, stack:'real', datalabels:{display:false} },
-            { label:'Pedidos em Casa', data:arrayRealPedidos,
-              backgroundColor: arrayRealPedidos.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#f39c12':'rgba(243,156,18,0.25)'),
+            { label:'Pedidos em Casa', data: pa,
+              backgroundColor: pa.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#f39c12':'rgba(243,156,18,0.25)'),
               borderRadius:4, stack:'real',
               datalabels:{ anchor:'end', align:'top', offset:2, color:'#555', font:{size:10,weight:'700'},
-                display: ctx=>{ const i=ctx.dataIndex; return (arrayRealFaturado[i]+arrayRealPedidos[i])>0; },
-                formatter: (_,ctx)=> _fmtM(arrayRealFaturado[ctx.dataIndex]+arrayRealPedidos[ctx.dataIndex]) } }
+                display: ctx=>{ const i=ctx.dataIndex; return (fa[i]+pa[i])>0; },
+                formatter: (_,ctx)=> _fmtM(fa[ctx.dataIndex]+pa[ctx.dataIndex]) } }
         ];
     }
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type:'bar', data:{ labels:NOMES_MESES_SHORT, datasets:ev1Datasets },
-        options:{ maintainAspectRatio:false, layout:{padding:{top:28,bottom:0}},
-            plugins:{ legend:{position:'bottom', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
+        options:{ maintainAspectRatio:false, layout:{padding:{top:28,bottom:8}},
+            plugins:{ legend:{position:'top', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
             scales:{ y:{display:false}, x:{grid:{display:false}, stacked:true} } }
     });
 
     // ── GRÁFICO 2: Atingimento por Vendedor (all) / Desempenho por BU (vendedor selecionado) ──
     if(charts.unidade) charts.unidade.destroy();
     const _h4Unid = document.getElementById('chartUnidTitle');
+    // Abreviação: "ANDREA HEUCHLING" → "Andrea H."
+    const _abrevVend = v => { const p=v.split(' '); return p[0][0]+p[0].slice(1).toLowerCase()+(p.length>1?' '+p[p.length-1][0]+'.':''); };
     let unidLabels, unidDatasets;
     if (!fV) {
         if (_h4Unid) _h4Unid.textContent = 'Atingimento por Vendedor';
-        unidLabels = _vendsMeta.map(([v]) => v.split(' ').map(w=>w[0]+w.slice(1).toLowerCase()).join(' '));
+        unidLabels = _vendsMeta.map(([v]) => _abrevVend(v));
         const vMeta = _vendsMeta.map(([v,m]) => (m.trading+m.armazem+m.transporte+m.analytics)*numMeses);
         const vFat  = _vendsMeta.map(([v]) => _sumPer(_vendFatArr[v], periodoMesInicio, periodoMesFim));
         const vPed  = _vendsMeta.map(([v]) => _sumPer(_vendPedArr[v], periodoMesInicio, periodoMesFim));
@@ -3134,26 +3138,44 @@ function renderizarMetas() {
     } else {
         if (_h4Unid) _h4Unid.textContent = 'Desempenho por Unidade de Negócio';
         unidLabels = ['Trading','Armazém','Transporte','Analytics'];
+        // Consolida BU faturado: metas_mensais + resultados_mensais por vendedor
+        const buFat = {trading:0, armazem:0, transporte:0, analytics:0};
+        const buPed = {trading:0, armazem:0, transporte:0, analytics:0};
+        dadosPeriodo.forEach(m => {
+            buFat.trading    += (m.realizado_trading||0);
+            buFat.armazem    += (m.realizado_armazem||0);
+            buFat.transporte += (m.realizado_transporte||0);
+            buFat.analytics  += (m.realizado_analytics||0);
+        });
+        (baseResMensais||[]).filter(r =>
+            r.ano==periodoAno && r.vendedor===fV &&
+            (parseInt(r.mes_numero)||1)>=periodoMesInicio && (parseInt(r.mes_numero)||1)<=periodoMesFim &&
+            ['PEDIDOS EM CASA','FATURADO'].includes((r.status||'').toUpperCase().trim())
+        ).forEach(r => {
+            const bg=_getBUGroup(r.bu), val=parseFloat(r.valor_realizado)||0;
+            const key = bg==='TRADING'?'trading': bg==='ARMAZEM'?'armazem': bg==='TRANSPORTE'?'transporte':'analytics';
+            if (_statusEfetivo(r)==='FATURADO') buFat[key]+=val; else buPed[key]+=val;
+        });
         unidDatasets = [
             { label:`Meta ${labelPeriodo}`, data:[metaPeriodo.trading,metaPeriodo.armazem,metaPeriodo.transporte,metaPeriodo.analytics],
               backgroundColor:'#422c76', borderRadius:4, maxBarThickness:55,
               datalabels:{ color:'#444', anchor:'end', align:'top', font:{size:10,weight:'bold'}, formatter:v=>v>0?'R$ '+_fmtM(v):'' } },
-            { label:`Faturado ${labelPeriodo}`, data:[realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics],
+            { label:`Faturado ${labelPeriodo}`, data:[buFat.trading,buFat.armazem,buFat.transporte,buFat.analytics],
               backgroundColor:'#ff2f69', borderRadius:[4,4,0,0], maxBarThickness:55, stack:'real', datalabels:{display:false} },
-            { label:`Pedidos em Casa ${labelPeriodo}`, data:[realPeriodo.tradingPed,0,0,0],
+            { label:`Pedidos em Casa ${labelPeriodo}`, data:[buPed.trading,buPed.armazem,buPed.transporte,buPed.analytics],
               backgroundColor:'#f39c12', borderRadius:4, maxBarThickness:55, stack:'real',
               datalabels:{ color:'#444', anchor:'end', align:'top', font:{size:10,weight:'bold'},
-                display: ctx=>{ const i=ctx.dataIndex; return ([realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics][i]+[realPeriodo.tradingPed,0,0,0][i])>0; },
-                formatter: (_,ctx)=>{ const i=ctx.dataIndex; return 'R$ '+_fmtM([realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics][i]+[realPeriodo.tradingPed,0,0,0][i]); }
+                display: ctx=>{ const i=ctx.dataIndex; return ([buFat.trading,buFat.armazem,buFat.transporte,buFat.analytics][i]+[buPed.trading,buPed.armazem,buPed.transporte,buPed.analytics][i])>0; },
+                formatter: (_,ctx)=>{ const i=ctx.dataIndex; return 'R$ '+_fmtM([buFat.trading,buFat.armazem,buFat.transporte,buFat.analytics][i]+[buPed.trading,buPed.armazem,buPed.transporte,buPed.analytics][i]); }
               }
             }
         ];
     }
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type:'bar', data:{ labels:unidLabels, datasets:unidDatasets },
-        options:{ maintainAspectRatio:false, layout:{padding:{top:36,bottom:0}},
+        options:{ maintainAspectRatio:false, layout:{padding:{top:36,bottom:12}},
             plugins:{ legend:{position:'top', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
-            scales:{ y:{display:false, stacked:true}, x:{grid:{display:false}} } }
+            scales:{ y:{display:false, stacked:true}, x:{grid:{display:false}, ticks:{font:{size:12}}} } }
     });
 
     // ── GRÁFICO 3: Reuniões — Meta vs Realizado por mês (período selecionado) ──
