@@ -6153,25 +6153,27 @@ function abrirLancamentoFin() {
     const selectCliente = document.getElementById('fin_input_cliente');
     const combinacoes = [];
     const setMap = new Set();
-    
-    // Busca todas as combinações únicas de Cliente + BU que existem na base de resultados
+
+    // Busca combinações únicas de Cliente + BU + Categoria para evitar misturar tipos
     baseResMensais.forEach(r => {
         const cli = r.cliente || 'Desconhecido';
-        const bu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
-        const key = cli + '@@@' + bu;
-        const label = cli + ' | ' + bu;
-        if(!setMap.has(key)) {
+        const bu  = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
+        const cat = r.categoria ? r.categoria.trim() : '';
+        const key = cli + '@@@' + bu + '@@@' + cat;
+        const buShort = bu.includes('TRADING')||bu.includes('VCI') ? 'VCI' : bu.includes('ARMAZEM')||bu.includes('ARM') ? 'ARM' : bu.includes('TRANSPORTE')||bu.includes('TRP') ? 'TRP' : bu;
+        const label = cli + ' | ' + buShort + (cat ? ' | ' + cat : '');
+        if (!setMap.has(key)) {
             setMap.add(key);
-            combinacoes.push({key, label});
+            combinacoes.push({ key, label });
         }
     });
-    
+
     combinacoes.sort((a,b) => a.label.localeCompare(b.label));
-    
-    selectCliente.innerHTML = '<option value="">Selecione o Cliente / BU para editar na tela...</option>' + 
+
+    selectCliente.innerHTML = '<option value="">Selecione o Cliente / BU para editar na tela...</option>' +
                               combinacoes.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
-                              
-    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
+
+    document.getElementById('gridFinBody').innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
     abrirModal('modalFinInput');
 }
 
@@ -6180,18 +6182,22 @@ const nomesMesesGrid = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junh
 function carregarGridFin() {
     const clienteSelecionado = document.getElementById('fin_input_cliente').value;
     const tbody = document.getElementById('gridFinBody');
-    if(!clienteSelecionado) {
-        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
+    if (!clienteSelecionado) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 20px; color:#888;">Selecione um cliente acima para carregar a planilha...</td></tr>`;
         return;
     }
 
-    const [clienteNome, buNome] = clienteSelecionado.split('@@@');
-    
-    // Filtra apenas os registros daquele cliente e daquela BU específica normalizada
+    const parts = clienteSelecionado.split('@@@');
+    const clienteNome = parts[0];
+    const buNome      = parts[1];
+    const catNome     = parts[2] || '';
+
+    // Filtra por Cliente + BU + Categoria (evita misturar Analytics com principais)
     const regsCliente = baseResMensais.filter(r => {
         const rCli = r.cliente || 'Desconhecido';
-        const rBu = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
-        return rCli === clienteNome && rBu === buNome;
+        const rBu  = r.bu ? r.bu.toUpperCase().replace(/\s+/g, ' ').trim() : '-';
+        const rCat = r.categoria ? r.categoria.trim() : '';
+        return rCli === clienteNome && rBu === buNome && rCat === catNome;
     });
     
     const formatCurrency = (v) => "R$ " + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -6234,7 +6240,7 @@ function carregarGridFin() {
 
 async function salvarGridFin() {
     const clienteSelecionado = document.getElementById('fin_input_cliente').value;
-    if(!clienteSelecionado) { showToast("Selecione um cliente primeiro.", "warning"); return; }
+    if (!clienteSelecionado) { showToast("Selecione um cliente primeiro.", "warning"); return; }
 
     const btn = document.getElementById('btnSalvarFin');
     btn.innerText = "Salvando..."; 
@@ -6288,8 +6294,8 @@ function baixarModeloExcel() {
     if (!window.XLSX) { showToast("Aguarde a biblioteca de planilhas carregar.", "warning"); return; }
 
     const mesSel = parseInt(document.getElementById('filtroMesModelo')?.value) || null;
+    const nomesMes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-    // Usa os dados reais do banco, filtrando por mês se selecionado
     let registros = baseResMensais.slice();
     if (mesSel) registros = registros.filter(r => r.mes_numero == mesSel);
 
@@ -6298,82 +6304,114 @@ function baixarModeloExcel() {
         return;
     }
 
-    // Ordena por cliente → mes_numero
+    // Ordena por BU → Categoria → Cliente → Mês (lógico para preencher)
     registros.sort((a, b) => {
-        const cmp = (a.cliente || '').localeCompare(b.cliente || '');
-        return cmp !== 0 ? cmp : (a.mes_numero || 0) - (b.mes_numero || 0);
+        const bu  = (a.bu || '').localeCompare(b.bu || '');
+        if (bu !== 0) return bu;
+        const cat = (a.categoria || '').localeCompare(b.categoria || '');
+        if (cat !== 0) return cat;
+        const cli = (a.cliente || '').localeCompare(b.cliente || '');
+        if (cli !== 0) return cli;
+        return (parseInt(a.mes_numero)||0) - (parseInt(b.mes_numero)||0);
     });
 
-    const dados = registros.map(r => ({
-        "id":               r.id,
-        "mes_numero":       r.mes_numero,
-        "cliente":          r.cliente  || '',
-        "bu":               r.bu       || '',
-        "categoria":        r.categoria|| '',
-        "ano":              r.ano      || '',
-        "valor_planejado":  r.valor_planejado  || 0,
-        "valor_realizado":  r.valor_realizado  || '',
-        "tipo":             r.tipo     || '',
-        "status":           r.status   || ''
-    }));
+    const dados = registros.map(r => {
+        const mesNum = parseInt(r.mes_numero) || 0;
+        const valReal = r.valor_realizado;
+        return {
+            "id":               r.id,
+            "mes":              nomesMes[mesNum] || mesNum,
+            "mes_numero":       mesNum,
+            "cliente":          r.cliente   || '',
+            "bu":               r.bu        || '',
+            "categoria":        r.categoria || '',
+            "tipo":             r.tipo      || '',
+            "ano":              r.ano       || '',
+            "valor_planejado":  parseFloat(r.valor_planejado) || 0,
+            "valor_realizado":  valReal !== null && valReal !== undefined ? parseFloat(valReal) : '',
+            "status":           r.status    || ''
+        };
+    });
 
     const ws = XLSX.utils.json_to_sheet(dados);
     ws['!cols'] = [
-        { wch: 8 }, { wch: 10 }, { wch: 30 }, { wch: 22 }, { wch: 28 },
-        { wch: 6 }, { wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 20 }
+        { wch: 8 },  // id
+        { wch: 6 },  // mes
+        { wch: 5 },  // mes_numero
+        { wch: 30 }, // cliente
+        { wch: 22 }, // bu
+        { wch: 28 }, // categoria
+        { wch: 24 }, // tipo
+        { wch: 6 },  // ano
+        { wch: 18 }, // valor_planejado
+        { wch: 18 }, // valor_realizado  ← PREENCHA AQUI
+        { wch: 20 }  // status           ← PREENCHA AQUI
     ];
 
     const wb = XLSX.utils.book_new();
-    const sheetName = mesSel ? `Mes_${String(mesSel).padStart(2,'0')}` : "Todos_os_Meses";
+    const sheetName = mesSel ? `Mes_${String(mesSel).padStart(2,'0')}` : "Todos_Meses";
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    const fileName = mesSel
-        ? `Lancamento_Fin_Mes${String(mesSel).padStart(2,'0')}.xlsx`
-        : "Lancamento_Fin_Completo.xlsx";
-    XLSX.writeFile(wb, fileName);
+    const nomeArquivo = mesSel
+        ? `Lancamento_${nomesMes[mesSel]}_2026.xlsx`
+        : `Lancamento_Financeiro_Completo.xlsx`;
+    XLSX.writeFile(wb, nomeArquivo);
+    showToast(`📥 Arquivo baixado: ${nomeArquivo} (${dados.length} linhas)`, 'success');
 }
 
 async function subirPlanilhaExcel(event) {
     const file = event.target.files[0];
-    if(!file) return;
-
+    if (!file) return;
     if (!window.XLSX) { showToast("Aguarde a biblioteca de planilhas carregar.", "warning"); return; }
 
     const btn = document.getElementById('btnUploadExcel');
     const originalText = btn.innerText;
-    btn.innerText = "Processando...";
+    btn.innerText = "⏳ Processando...";
     btn.disabled = true;
+
+    // Converte valor para número aceitando tanto ponto quanto vírgula decimal
+    const parseBR = v => {
+        if (v === null || v === undefined || v === '') return null;
+        if (typeof v === 'number') return v;
+        const s = String(v).trim().replace(/\./g, '').replace(',', '.');
+        const n = parseFloat(s);
+        return isNaN(n) ? null : n;
+    };
+
+    const validStatuses = new Set(['FATURADO', 'PEDIDOS EM CASA', '']);
 
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
+            const data     = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array', cellText: false, cellDates: true });
             const firstSheet = workbook.SheetNames[0];
-            const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
+            const sheetData  = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet], { defval: null });
 
             const promessas = [];
-            let ignoradas = 0;
+            let ignoradas = 0, semId = 0, naoEncontrado = 0, statusInvalido = 0;
 
             sheetData.forEach(row => {
-                const rowId       = row["id"];
-                const valStr      = row["valor_realizado"];
-                const novoStatus  = row["status"] != null ? String(row["status"]).trim().toUpperCase() : null;
+                const rowId = row["id"];
+                if (rowId === null || rowId === undefined || rowId === '') { semId++; return; }
 
-                // Precisa de um id para encontrar o registro
-                if (!rowId) { ignoradas++; return; }
-
-                // Encontra o registro local pelo id
                 const reg = baseResMensais.find(r => String(r.id) === String(rowId));
-                if (!reg) { ignoradas++; return; }
+                if (!reg) { naoEncontrado++; return; }
 
-                const valRealizado  = valStr !== '' && valStr != null ? parseFloat(valStr) : null;
-                const realAtual     = parseFloat(reg.valor_realizado) || 0;
-                const statusAtual   = (reg.status || '').toUpperCase().trim();
+                const valStr     = row["valor_realizado"];
+                const statusRaw  = row["status"];
+                const novoStatus = statusRaw != null ? String(statusRaw).trim().toUpperCase() : null;
 
-                const realMudou   = valRealizado !== null && !isNaN(valRealizado) && realAtual !== valRealizado;
+                // Valida status
+                if (novoStatus !== null && !validStatuses.has(novoStatus)) { statusInvalido++; }
+
+                const valRealizado = parseBR(valStr);
+                const realAtual    = parseFloat(reg.valor_realizado) ?? 0;
+                const statusAtual  = (reg.status || '').toUpperCase().trim();
+
+                const realMudou   = valRealizado !== null && realAtual !== valRealizado;
                 const statusMudou = novoStatus !== null && novoStatus !== statusAtual;
 
-                if (!realMudou && !statusMudou) return;
+                if (!realMudou && !statusMudou) { ignoradas++; return; }
 
                 const payload = {};
                 if (realMudou)   payload.valor_realizado = valRealizado;
@@ -6384,23 +6422,32 @@ async function subirPlanilhaExcel(event) {
                 );
             });
 
-            if(promessas.length > 0) {
-                btn.innerText = "Salvando no Banco...";
-                await Promise.all(promessas);
+            if (promessas.length > 0) {
+                btn.innerText = "💾 Salvando...";
+                const results = await Promise.allSettled(promessas);
+                const erros = results.filter(r => r.status === 'rejected').length;
                 await carregarDadosFinanceiros();
                 renderizarFinanceiro();
                 carregarGridFin();
-                const msg = `Sucesso! ${promessas.length} linha(s) atualizadas.` + (ignoradas > 0 ? ` (${ignoradas} ignoradas — id não encontrado)` : '');
-                showToast(msg, "success");
+                let msg = `✅ ${promessas.length - erros} linha(s) atualizadas com sucesso!`;
+                if (erros)         msg += ` ⚠️ ${erros} erro(s) no banco.`;
+                if (ignoradas)     msg += ` (${ignoradas} sem alteração)`;
+                if (naoEncontrado) msg += ` (${naoEncontrado} ID não encontrado)`;
+                if (statusInvalido) msg += ` ⚠️ ${statusInvalido} status inválido(s) ignorado(s).`;
+                showToast(msg, erros > 0 ? 'warning' : 'success');
             } else {
-                showToast("Nenhuma alteração detectada. Verifique se os valores ou status foram modificados.", "info");
+                let msg = "Nenhuma alteração detectada.";
+                if (semId)         msg += ` ${semId} linha(s) sem ID.`;
+                if (naoEncontrado) msg += ` ${naoEncontrado} ID(s) não encontrado(s).`;
+                showToast(msg, "info");
             }
         } catch (error) {
+            console.error(error);
             showToast("Erro ao processar a planilha: " + error.message, "error");
         } finally {
             btn.innerText = originalText;
             btn.disabled = false;
-            event.target.value = ""; // Limpa o input do file
+            event.target.value = "";
         }
     };
     reader.readAsArrayBuffer(file);
