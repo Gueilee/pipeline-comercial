@@ -1170,7 +1170,7 @@ header {
 
                 <div class="charts-grid-metas">
                     <div class="chart-card"><h4>Evolução Mensal (Ano Completo)</h4><canvas id="chartEvolucaoMensal"></canvas></div>
-                    <div class="chart-card"><h4>Desempenho por Unidade de Negócio</h4><canvas id="chartUnidadeNegocio"></canvas></div>
+                    <div class="chart-card"><h4 id="chartUnidTitle">Atingimento por Vendedor</h4><canvas id="chartUnidadeNegocio"></canvas></div>
                 </div>
 
                 <!-- GRÁFICO: PLANEJADO VS REALIZADO NO PERÍODO -->
@@ -3037,121 +3037,123 @@ function renderizarMetas() {
     document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${metaPeriodo.reuniao}`;
     document.getElementById('metaPropostasYTD').innerText   = `${realPeriodo.propostas} / ${metaPeriodo.propostas}`;
 
-    // ── GRÁFICO 1: Evolução Mensal (ano completo — faturado + pedidos em casa) ──
+    // ── Per-vendedor: arrays mensais de faturado e pedidos ──
     const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(v);
+    const _VEND_COLORS = ['#7c8cf8','#27ae60','#f39c12','#e74c3c'];
+    const _vendsMeta = Object.entries(METAS_MENSAIS).filter(([,m]) => (m.trading+m.armazem+m.transporte+m.analytics)>0);
+    const _vendFatArr = {}, _vendPedArr = {};
+    _vendsMeta.forEach(([vend]) => {
+        const fa = new Array(12).fill(0), pa = new Array(12).fill(0);
+        baseMetasMensais.filter(r => { const p=parseMesAno(r.mes_ano); return p.ano===periodoAno && r.vendedor===vend; })
+            .forEach(r => { const idx=parseMesAno(r.mes_ano).mes-1; if(idx>=0&&idx<12) fa[idx]+=(r.realizado_trading||0)+(r.realizado_armazem||0)+(r.realizado_transporte||0)+(r.realizado_analytics||0); });
+        (baseResMensais||[]).filter(r => r.ano==periodoAno && r.vendedor===vend && ['PEDIDOS EM CASA','FATURADO'].includes((r.status||'').toUpperCase().trim()))
+            .forEach(r => { const idx=(parseInt(r.mes_numero)||1)-1; const val=parseFloat(r.valor_realizado)||0; if(idx>=0&&idx<12){ if(_statusEfetivo(r)==='FATURADO') fa[idx]+=val; else pa[idx]+=val; } });
+        _vendFatArr[vend]=fa; _vendPedArr[vend]=pa;
+    });
+    const _sumPer = (arr, s, e) => arr.slice(s-1, e).reduce((a,b)=>a+b, 0);
+
+    // ── GRÁFICO 1: Evolução Mensal ──
     if(charts.evolucao) charts.evolucao.destroy();
+    const _metaLineDs = {
+        label:'Meta Mensal', data: new Array(12).fill(metaFaturamentoMensal),
+        type:'line', borderColor:'#01E18E', borderWidth:2, borderDash:[5,5], pointRadius:0, fill:false,
+        datalabels:{ display: ctx=>ctx.dataIndex===11, anchor:'center', align:'top', offset:6,
+            color:'#01c17a', font:{size:10,weight:'700'}, formatter: v=>_fmtM(v)+'/mês' }
+    };
+    let ev1Datasets;
+    if (!fV) {
+        // Barras empilhadas por vendedor + linha de meta total
+        ev1Datasets = [_metaLineDs, ..._vendsMeta.map(([vend], vi) => {
+            const fa = _vendFatArr[vend];
+            const isLast = vi === _vendsMeta.length - 1;
+            return {
+                label: vend.split(' ').map(w=>w[0]+w.slice(1).toLowerCase()).join(' '),
+                data: fa,
+                backgroundColor: fa.map((_,i) => (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim ? _VEND_COLORS[vi] : _VEND_COLORS[vi]+'55'),
+                borderRadius: isLast ? 4 : 0,
+                stack: 'real',
+                datalabels: isLast ? {
+                    anchor:'end', align:'top', offset:2, color:'#555', font:{size:10,weight:'700'},
+                    display: ctx => { const i=ctx.dataIndex; return _vendsMeta.reduce((acc,[v])=>acc+(_vendFatArr[v][i]||0),0)>0; },
+                    formatter: (_,ctx) => { const i=ctx.dataIndex; return _fmtM(_vendsMeta.reduce((acc,[v])=>acc+(_vendFatArr[v][i]||0),0)); }
+                } : {display:false}
+            };
+        })];
+    } else {
+        // Vendedor selecionado: barras únicas (faturado + pedidos)
+        ev1Datasets = [_metaLineDs,
+            { label:'Faturado', data:arrayRealFaturado,
+              backgroundColor: arrayRealFaturado.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#422c76':'rgba(66,44,118,0.25)'),
+              borderRadius:4, stack:'real', datalabels:{display:false} },
+            { label:'Pedidos em Casa', data:arrayRealPedidos,
+              backgroundColor: arrayRealPedidos.map((_,i)=> (i+1)>=periodoMesInicio&&(i+1)<=periodoMesFim?'#f39c12':'rgba(243,156,18,0.25)'),
+              borderRadius:4, stack:'real',
+              datalabels:{ anchor:'end', align:'top', offset:2, color:'#555', font:{size:10,weight:'700'},
+                display: ctx=>{ const i=ctx.dataIndex; return (arrayRealFaturado[i]+arrayRealPedidos[i])>0; },
+                formatter: (_,ctx)=> _fmtM(arrayRealFaturado[ctx.dataIndex]+arrayRealPedidos[ctx.dataIndex]) } }
+        ];
+    }
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
-        type: 'bar',
-        data: {
-            labels: NOMES_MESES_SHORT,
-            datasets: [
-                {
-                    label: 'Meta Mensal',
-                    data: new Array(12).fill(metaFaturamentoMensal),
-                    type: 'line', borderColor: '#01E18E', borderWidth: 2,
-                    borderDash: [5,5], pointRadius: 0, fill: false,
-                    datalabels: {
-                        // Mostra apenas no último ponto (Dez)
-                        display: ctx => ctx.dataIndex === 11,
-                        anchor: 'center', align: 'top', offset: 6,
-                        color: '#01c17a', font: { size: 10, weight: '700' },
-                        formatter: v => _fmtM(v) + '/mês'
-                    }
-                },
-                {
-                    label: 'Faturado',
-                    data: arrayRealFaturado,
-                    backgroundColor: arrayRealFaturado.map((_, i) =>
-                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#422c76' : 'rgba(66,44,118,0.25)'
-                    ),
-                    borderRadius: 4, stack: 'real',
-                    datalabels: { display: false }
-                },
-                {
-                    label: 'Pedidos em Casa',
-                    data: arrayRealPedidos,
-                    backgroundColor: arrayRealPedidos.map((_, i) =>
-                        (i+1) >= periodoMesInicio && (i+1) <= periodoMesFim ? '#f39c12' : 'rgba(243,156,18,0.25)'
-                    ),
-                    borderRadius: 4, stack: 'real',
-                    datalabels: {
-                        // Rótulo no topo da barra empilhada (mostra total faturado+pedidos)
-                        anchor: 'end', align: 'top', offset: 2,
-                        color: '#555', font: { size: 10, weight: '700' },
-                        display: (ctx) => {
-                            const i = ctx.dataIndex;
-                            return (arrayRealFaturado[i] + arrayRealPedidos[i]) > 0;
-                        },
-                        formatter: (v, ctx) => {
-                            const tot = arrayRealFaturado[ctx.dataIndex] + arrayRealPedidos[ctx.dataIndex];
-                            return _fmtM(tot);
-                        }
-                    }
-                }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false, layout: { padding: { top: 28, bottom: 0 } },
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                datalabels: {}
-            },
-            scales: { y: { display: false }, x: { grid: { display: false }, stacked: true } }
-        }
+        type:'bar', data:{ labels:NOMES_MESES_SHORT, datasets:ev1Datasets },
+        options:{ maintainAspectRatio:false, layout:{padding:{top:28,bottom:0}},
+            plugins:{ legend:{position:'bottom', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
+            scales:{ y:{display:false}, x:{grid:{display:false}, stacked:true} } }
     });
 
-    // ── GRÁFICO 2: Desempenho por BU — Meta / Faturado / Pedidos em Casa ──
+    // ── GRÁFICO 2: Atingimento por Vendedor (all) / Desempenho por BU (vendedor selecionado) ──
     if(charts.unidade) charts.unidade.destroy();
-    charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
-        type: 'bar',
-        data: {
-            labels: ['Trading', 'Armazém', 'Transporte', 'Analytics'],
-            datasets: [
-                {
-                    label: `Meta ${labelPeriodo}`,
-                    data: [metaPeriodo.trading, metaPeriodo.armazem, metaPeriodo.transporte, metaPeriodo.analytics],
-                    backgroundColor: '#422c76', borderRadius: 4, maxBarThickness: 55,
-                    datalabels: {
-                        color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
-                        formatter: v => v > 0 ? 'R$ ' + _fmtM(v) : ''
-                    }
-                },
-                {
-                    label: `Faturado ${labelPeriodo}`,
-                    data: [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics],
-                    backgroundColor: '#ff2f69', borderRadius: [4,4,0,0], maxBarThickness: 55, stack: 'real',
-                    datalabels: { display: false }
-                },
-                {
-                    label: `Pedidos em Casa ${labelPeriodo}`,
-                    data: [realPeriodo.tradingPed, 0, 0, 0],
-                    backgroundColor: '#f39c12', borderRadius: 4, maxBarThickness: 55, stack: 'real',
-                    datalabels: {
-                        color: '#444', anchor: 'end', align: 'top', font: { size: 10, weight: 'bold' },
-                        display: (ctx) => {
-                            const i = ctx.dataIndex;
-                            const totFat = [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics][i];
-                            const totPed = [realPeriodo.tradingPed, 0, 0, 0][i];
-                            return (totFat + totPed) > 0;
-                        },
-                        formatter: (v, ctx) => {
-                            const i = ctx.dataIndex;
-                            const totFat = [realPeriodo.trading, realPeriodo.armazem, realPeriodo.transporte, realPeriodo.analytics][i];
-                            const totPed = [realPeriodo.tradingPed, 0, 0, 0][i];
-                            return 'R$ ' + _fmtM(totFat + totPed);
-                        }
-                    }
+    const _h4Unid = document.getElementById('chartUnidTitle');
+    let unidLabels, unidDatasets;
+    if (!fV) {
+        if (_h4Unid) _h4Unid.textContent = 'Atingimento por Vendedor';
+        unidLabels = _vendsMeta.map(([v]) => v.split(' ').map(w=>w[0]+w.slice(1).toLowerCase()).join(' '));
+        const vMeta = _vendsMeta.map(([v,m]) => (m.trading+m.armazem+m.transporte+m.analytics)*numMeses);
+        const vFat  = _vendsMeta.map(([v]) => _sumPer(_vendFatArr[v], periodoMesInicio, periodoMesFim));
+        const vPed  = _vendsMeta.map(([v]) => _sumPer(_vendPedArr[v], periodoMesInicio, periodoMesFim));
+        unidDatasets = [
+            { label:`Meta ${labelPeriodo}`, data:vMeta,
+              backgroundColor:'#422c76', borderRadius:4, maxBarThickness:65,
+              datalabels:{ color:'#555', anchor:'end', align:'top', font:{size:10,weight:'bold'}, formatter:v=>v>0?'R$ '+_fmtM(v):'' } },
+            { label:`Faturado ${labelPeriodo}`, data:vFat,
+              backgroundColor:'#ff2f69', borderRadius:[4,4,0,0], maxBarThickness:65, stack:'real',
+              datalabels:{display:false} },
+            { label:`Pedidos em Casa ${labelPeriodo}`, data:vPed,
+              backgroundColor:'#f39c12', borderRadius:4, maxBarThickness:65, stack:'real',
+              datalabels:{
+                anchor:'end', align:'top', offset:4, font:{size:11,weight:'bold'},
+                display: ctx => (vFat[ctx.dataIndex]+vPed[ctx.dataIndex])>0,
+                color: ctx => { const i=ctx.dataIndex; const pct=vMeta[i]>0?Math.round((vFat[i]+vPed[i])/vMeta[i]*100):0; return pct>=100?'#27ae60':pct>=70?'#f39c12':'#c0392b'; },
+                formatter: (_,ctx) => {
+                    const i=ctx.dataIndex;
+                    const tot=vFat[i]+vPed[i], pct=vMeta[i]>0?Math.round(tot/vMeta[i]*100):0;
+                    return ['R$ '+_fmtM(tot), pct+'%'];
                 }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false, layout: { padding: { top: 28, bottom: 0 } },
-            plugins: {
-                legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
-                datalabels: {}
-            },
-            scales: { y: { display: false, stacked: true }, x: { grid: { display: false } } }
-        }
+              }
+            }
+        ];
+    } else {
+        if (_h4Unid) _h4Unid.textContent = 'Desempenho por Unidade de Negócio';
+        unidLabels = ['Trading','Armazém','Transporte','Analytics'];
+        unidDatasets = [
+            { label:`Meta ${labelPeriodo}`, data:[metaPeriodo.trading,metaPeriodo.armazem,metaPeriodo.transporte,metaPeriodo.analytics],
+              backgroundColor:'#422c76', borderRadius:4, maxBarThickness:55,
+              datalabels:{ color:'#444', anchor:'end', align:'top', font:{size:10,weight:'bold'}, formatter:v=>v>0?'R$ '+_fmtM(v):'' } },
+            { label:`Faturado ${labelPeriodo}`, data:[realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics],
+              backgroundColor:'#ff2f69', borderRadius:[4,4,0,0], maxBarThickness:55, stack:'real', datalabels:{display:false} },
+            { label:`Pedidos em Casa ${labelPeriodo}`, data:[realPeriodo.tradingPed,0,0,0],
+              backgroundColor:'#f39c12', borderRadius:4, maxBarThickness:55, stack:'real',
+              datalabels:{ color:'#444', anchor:'end', align:'top', font:{size:10,weight:'bold'},
+                display: ctx=>{ const i=ctx.dataIndex; return ([realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics][i]+[realPeriodo.tradingPed,0,0,0][i])>0; },
+                formatter: (_,ctx)=>{ const i=ctx.dataIndex; return 'R$ '+_fmtM([realPeriodo.trading,realPeriodo.armazem,realPeriodo.transporte,realPeriodo.analytics][i]+[realPeriodo.tradingPed,0,0,0][i]); }
+              }
+            }
+        ];
+    }
+    charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
+        type:'bar', data:{ labels:unidLabels, datasets:unidDatasets },
+        options:{ maintainAspectRatio:false, layout:{padding:{top:36,bottom:0}},
+            plugins:{ legend:{position:'top', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
+            scales:{ y:{display:false, stacked:true}, x:{grid:{display:false}} } }
     });
 
     // ── GRÁFICO 3: Reuniões — Meta vs Realizado por mês (período selecionado) ──
