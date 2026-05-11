@@ -621,6 +621,10 @@ header {
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 .card-vend { display:block; color:#888; font-size:10px; margin-top:1px; }
 .card-mini { display:flex; justify-content:space-between; align-items:stretch; margin-top:7px; padding-top:6px; border-top:1px solid #efefef; gap:0; }
+.fin-arrow { display:inline-block; width:14px; font-size:10px; color:#888; user-select:none; cursor:pointer; transition:transform .15s; }
+.fin-bu:hover td { opacity:.9; }
+.fin-cat:hover { background:#dde3ff !important; }
+.fin-cli:hover { background:#f5f7ff !important; }
 .card-mini-item { display:flex; flex-direction:column; align-items:center; flex:1; padding:0 2px; }
 .card-mini-item:not(:last-child) { border-right:1px solid #efefef; }
 .cmi-label { font-size:8.5px; color:#bbb; text-transform:uppercase; font-weight:700; letter-spacing:.4px; white-space:nowrap; }
@@ -1237,6 +1241,7 @@ header {
                     <option value="">Todos os Tipos</option>
                     <option value="NOVOS CLIENTES NOMINADOS">Nominados</option>
                     <option value="NOVOS CLIENTES">Novos Clientes</option>
+                    <option value="ANALYTICS">Analytics</option>
                 </select>
 
                 <select id="filtroFinStatus" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white;">
@@ -1331,25 +1336,26 @@ header {
                                 style="padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:180px;">
                             <select id="sortTbCliente" onchange="filtrarTbClientes()"
                                 style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555;">
+                                <option value="total">Ordenar: Realizado Total</option>
                                 <option value="planoAnual">Ordenar: Plano Anual</option>
                                 <option value="faturado">Ordenar: Faturado</option>
                                 <option value="pedidos">Ordenar: Pedidos em Casa</option>
-                                <option value="desvioYTD">Ordenar: Desvio YTD</option>
-                                <option value="pctYTD">Ordenar: % Atingimento</option>
                             </select>
+                            <button onclick="expandirTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Expandir Tudo</button>
+                            <button onclick="recolherTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Recolher Tudo</button>
                         </div>
                     </div>
-                    <div style="overflow-x:auto; max-height:420px; overflow-y:auto;">
-                        <table class="ranking-table" id="tbClientesFin" style="width:100%;">
-                            <thead style="position:sticky; top:0; background:#fff; z-index:1;">
+                    <div style="overflow-x:auto; max-height:600px; overflow-y:auto;">
+                        <table class="ranking-table" id="tbClientesFin" style="width:100%; border-collapse:collapse;">
+                            <thead style="position:sticky; top:0; background:#fff; z-index:1; box-shadow:0 1px 3px rgba(0,0,0,.1);">
                                 <tr>
-                                    <th style="text-align:left; min-width:200px;">Cliente / BU</th>
-                                    <th>Plano Anual</th>
-                                    <th>Plano YTD</th>
-                                    <th>Faturado</th>
-                                    <th>Pedidos em Casa</th>
-                                    <th>Desvio YTD</th>
-                                    <th>% Ating. YTD</th>
+                                    <th style="text-align:left; min-width:220px;">BU / Categoria / Cliente</th>
+                                    <th style="min-width:110px;">Plano Anual</th>
+                                    <th style="min-width:110px;">Plano YTD</th>
+                                    <th style="min-width:110px;">Faturado</th>
+                                    <th style="min-width:120px;">Pedidos em Casa</th>
+                                    <th style="min-width:100px;">Desvio YTD</th>
+                                    <th style="min-width:90px;">% Ating.</th>
                                 </tr>
                             </thead>
                             <tbody id="tbClientesFinBody"></tbody>
@@ -5803,7 +5809,7 @@ function renderizarFinanceiro() {
     let arrayFaturadoMensal = new Array(12).fill(0);
     let arrayPedidosMensal  = new Array(12).fill(0);
     let faturamentoPorBU = {};
-    let clientesDesempenho = {};
+    let hierarquia = {};
 
     const fFinCli    = document.getElementById('filtroFinCliente').value.toLowerCase();
     const fFinTipo   = document.getElementById('filtroFinTipo').value.toUpperCase();
@@ -5851,25 +5857,34 @@ function renderizarFinanceiro() {
         // Para BU share: usa apenas FATURADO
         if (isFat) faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
 
-        // NOVOS CLIENTES NOMINADOS consolidam sob a linha "NOVOS CLIENTES" da mesma BU
-        const cliKey = tipo === 'NOVOS CLIENTES NOMINADOS'
-            ? 'NOVOS CLIENTES (' + bu + ')'
-            : cliName + ' (' + bu + ')';
-        if (!clientesDesempenho[cliKey]) clientesDesempenho[cliKey] = { planoAnual:0, planoYTD:0, faturado:0, pedidos:0, nominados:[] };
-        clientesDesempenho[cliKey].planoAnual += valPlan;
-        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) clientesDesempenho[cliKey].planoYTD += valPlan;
-        if (isFat) clientesDesempenho[cliKey].faturado += valReal;
-        if (isPed) clientesDesempenho[cliKey].pedidos  += valReal;
-        // Registra clientes individuais para exibir como sub-itens
+        // ── Hierarquia BU → Categoria → Cliente ──
+        const _hInit = (obj, key, extra) => { if (!obj[key]) obj[key] = { planoAnual:0, planoYTD:0, faturado:0, pedidos:0, ...extra }; };
+        _hInit(hierarquia, bu, { displayLabel: rm.bu || bu, categorias:{} });
+        const buObj = hierarquia[bu];
+        buObj.planoAnual += valPlan;
+        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) buObj.planoYTD += valPlan;
+        if (isFat) buObj.faturado += valReal;
+        if (isPed) buObj.pedidos  += valReal;
+
+        const catKey2 = categoria || 'SEM CATEGORIA';
+        _hInit(buObj.categorias, catKey2, { displayLabel: rm.categoria || catKey2, clientes:{} });
+        const catObj = buObj.categorias[catKey2];
+        catObj.planoAnual += valPlan;
+        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) catObj.planoYTD += valPlan;
+        if (isFat) catObj.faturado += valReal;
+        if (isPed) catObj.pedidos  += valReal;
+
+        const effectiveCli = tipo === 'NOVOS CLIENTES NOMINADOS' ? 'NOVOS CLIENTES' : cliName;
+        _hInit(catObj.clientes, effectiveCli, { nominados:{} });
+        const cliObjH = catObj.clientes[effectiveCli];
+        cliObjH.planoAnual += valPlan;
+        if (mesIdx >= 0 && mesIdx <= currentMonthIndex) cliObjH.planoYTD += valPlan;
+        if (isFat) cliObjH.faturado += valReal;
+        if (isPed) cliObjH.pedidos  += valReal;
         if (tipo === 'NOVOS CLIENTES NOMINADOS' && cliName !== 'NOVOS CLIENTES') {
-            const nominados = clientesDesempenho[cliKey].nominados;
-            const existente = nominados.find(n => n.nome === cliName);
-            if (existente) {
-                if (isFat) existente.faturado += valReal;
-                if (isPed) existente.pedidos  += valReal;
-            } else {
-                nominados.push({ nome: cliName, faturado: isFat ? valReal : 0, pedidos: isPed ? valReal : 0 });
-            }
+            _hInit(cliObjH.nominados, cliName, {});
+            if (isFat) cliObjH.nominados[cliName].faturado = (cliObjH.nominados[cliName].faturado||0) + valReal;
+            if (isPed) cliObjH.nominados[cliName].pedidos  = (cliObjH.nominados[cliName].pedidos ||0) + valReal;
         }
     });
 
@@ -6004,60 +6019,130 @@ function renderizarFinanceiro() {
         plugins: [pluginCentroRosca]
     });
 
-    // ── Tabela Completa de Clientes ──
-    window._dadosClientesFin = Object.entries(clientesDesempenho).map(([nome, v]) => {
-        const desvioYTD = v.faturado - v.planoYTD;
-        const pctYTD    = v.planoYTD > 0 ? (v.faturado / v.planoYTD * 100) : 0;
-        return { nome, planoAnual: v.planoAnual, planoYTD: v.planoYTD, faturado: v.faturado, pedidos: v.pedidos, desvioYTD, pctYTD, nominados: v.nominados || [] };
-    });
+    // ── Tabela Hierárquica de Clientes ──
+    window._hierarquiaFin = hierarquia;
     renderTbClientesFin();
 }
 
 function renderTbClientesFin() {
-    const dados = window._dadosClientesFin || [];
-    const busca  = (document.getElementById('filtroTbCliente')?.value || '').toLowerCase();
-    const sortBy = document.getElementById('sortTbCliente')?.value || 'planoAnual';
-
-    const fmt = v => "R$ " + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
-    const pill = pct => {
-        const cor = pct >= 100 ? '#27ae60' : pct >= 70 ? '#17a2b8' : '#c0392b';
-        return `<span style="background:${cor}; color:#fff; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700;">${pct.toFixed(1)}%</span>`;
-    };
-    const gap = v => `<span style="font-weight:700; color:${v >= 0 ? '#27ae60' : '#c0392b'}">${v >= 0 ? '+' : ''}${fmt(v)}</span>`;
-
-    let lista = dados.filter(c => !busca || c.nome.toLowerCase().includes(busca));
-    lista.sort((a,b) => b[sortBy] - a[sortBy]);
-
     const tbody = document.getElementById('tbClientesFinBody');
     if (!tbody) return;
-    if (lista.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999; padding:20px;">Nenhum cliente encontrado.</td></tr>`;
-        return;
+    const hierarquia = window._hierarquiaFin || {};
+    const busca   = (document.getElementById('filtroTbCliente')?.value || '').toLowerCase();
+    const sortKey = document.getElementById('sortTbCliente')?.value || 'total';
+
+    const fmt  = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
+    const fmtK = v => { const a=Math.abs(v); if(a>=1e6) return (v/1e6).toFixed(1).replace('.',',')+'M'; if(a>=1e3) return (v/1e3).toFixed(0)+'k'; return String(Math.round(v)); };
+    const pill = pct => { const c=pct>=100?'#27ae60':pct>=70?'#17a2b8':'#c0392b'; return `<span style="background:${c};color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-weight:700;">${pct.toFixed(0)}%</span>`; };
+    const gapSpan = v => `<span style="font-weight:700;color:${v>=0?'#27ae60':'#c0392b'}">${v>=0?'+':''}${fmtK(v)}</span>`;
+    const sortVal = o => sortKey==='total'?(o.faturado+o.pedidos) : (o[sortKey]||0);
+    const buName  = k => k.includes('TRADING')||k.includes('VCI') ? '🏭 VCI' : k.includes('ARMAZEM')||k.includes('ARM') ? '🏢 Armazém' : k.includes('TRANSPORTE')||k.includes('TRP') ? '🚛 Transporte' : k;
+
+    let html = '';
+    let buCount = 0;
+    const buEntries = Object.entries(hierarquia).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
+
+    buEntries.forEach(([buKey, buObj]) => {
+        const bid = 'fbu' + buCount++;
+        let catHtml = '';
+        let catCount = 0;
+        const catEntries = Object.entries(buObj.categorias).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
+
+        catEntries.forEach(([catKey, catObj]) => {
+            const cid = bid + 'c' + catCount++;
+            let cliHtml = '';
+            let anyClient = false;
+            const cliEntries = Object.entries(catObj.clientes).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
+
+            cliEntries.forEach(([cliKey, cliObj]) => {
+                if (busca && !cliKey.toLowerCase().includes(busca) && !catObj.displayLabel.toLowerCase().includes(busca) && !buName(buKey).toLowerCase().includes(busca)) return;
+                anyClient = true;
+                const dev = cliObj.faturado - cliObj.planoYTD;
+                const pct = cliObj.planoYTD>0 ? (cliObj.faturado/cliObj.planoYTD*100) : 0;
+                const nomKeys = Object.keys(cliObj.nominados);
+                const nid = cid + 'n' + cliKey.replace(/\W/g,'_');
+                const hasNom = nomKeys.length > 0;
+                cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:#fff;">
+  <td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span></td>
+  <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoAnual)}</td>
+  <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoYTD)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:7px 8px;">${fmt(cliObj.faturado)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:600;color:#f39c12;padding:7px 8px;">${fmt(cliObj.pedidos)}</td>
+  <td style="text-align:right;font-size:12px;padding:7px 8px;">${gapSpan(dev)}</td>
+  <td style="text-align:center;padding:7px 8px;">${pill(pct)}</td>
+</tr>`;
+                nomKeys.sort().forEach(nomKey => {
+                    const n = cliObj.nominados[nomKey];
+                    cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fafafa;">
+  <td style="padding:5px 8px 5px 64px;font-size:11px;color:#777;white-space:nowrap;">↳ ${nomKey}</td>
+  <td></td><td></td>
+  <td style="text-align:right;font-size:11px;color:#ff2f69;padding:5px 8px;">${fmt(n.faturado||0)}</td>
+  <td style="text-align:right;font-size:11px;color:#f39c12;padding:5px 8px;">${fmt(n.pedidos||0)}</td>
+  <td></td><td></td>
+</tr>`;
+                });
+            });
+
+            if (!anyClient && busca) return;
+            const devC = catObj.faturado - catObj.planoYTD;
+            const pctC = catObj.planoYTD>0?(catObj.faturado/catObj.planoYTD*100):0;
+            catHtml += `<tr class="fin-cat fin-ch-${bid}" style="display:none;background:#eef2ff;cursor:pointer;" onclick="_finToggle('${cid}',event)">
+  <td style="padding:8px 8px 8px 24px;font-weight:600;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;"><span class="fin-arrow" id="arr-${cid}">▶</span> ${catObj.displayLabel||catKey}</td>
+  <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoAnual)}</td>
+  <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoYTD)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:8px;">${fmt(catObj.faturado)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:600;color:#f39c12;padding:8px;">${fmt(catObj.pedidos)}</td>
+  <td style="text-align:right;font-size:12px;padding:8px;">${gapSpan(devC)}</td>
+  <td style="text-align:center;padding:8px;">${pill(pctC)}</td>
+</tr>` + cliHtml;
+        });
+
+        const devB = buObj.faturado - buObj.planoYTD;
+        const pctB = buObj.planoYTD>0?(buObj.faturado/buObj.planoYTD*100):0;
+        html += `<tr class="fin-bu" style="background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;cursor:pointer;font-weight:700;" onclick="_finToggle('${bid}',event)">
+  <td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buName(buKey)}</td>
+  <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoAnual)}</td>
+  <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoYTD)}</td>
+  <td style="text-align:right;padding:11px 8px;color:#ff7fa5;font-weight:700;">${fmt(buObj.faturado)}</td>
+  <td style="text-align:right;padding:11px 8px;color:#ffd080;font-weight:700;">${fmt(buObj.pedidos)}</td>
+  <td style="text-align:right;padding:11px 8px;">${gapSpan(devB)}</td>
+  <td style="text-align:center;padding:11px 8px;">${pill(pctB)}</td>
+</tr>` + catHtml;
+    });
+
+    tbody.innerHTML = html || `<tr><td colspan="7" style="text-align:center;color:#999;padding:24px;">Nenhum dado encontrado.</td></tr>`;
+
+    if (busca) {
+        document.querySelectorAll('[class^="fin-ch-"],.fin-cat,.fin-cli,.fin-nom').forEach(el => el.style.display = '');
+        document.querySelectorAll('[id^="arr-"]').forEach(el => el.textContent = '▼');
     }
-    tbody.innerHTML = lista.map(c => {
-        const hasNom = c.nominados && c.nominados.some(n => n.faturado > 0 || n.pedidos > 0);
-        const mainRow = `
-        <tr>
-            <td style="font-weight:600; white-space:nowrap;">${c.nome}</td>
-            <td style="text-align:right;">${fmt(c.planoAnual)}</td>
-            <td style="text-align:right;">${fmt(c.planoYTD)}</td>
-            <td style="text-align:right; color:#ff2f69; font-weight:600;">${fmt(c.faturado)}</td>
-            <td style="text-align:right; color:#f39c12; font-weight:600;">${fmt(c.pedidos)}</td>
-            <td style="text-align:right;">${gap(c.desvioYTD)}</td>
-            <td style="text-align:center;">${pill(c.pctYTD)}</td>
-        </tr>`;
-        const subRows = hasNom ? c.nominados
-            .filter(n => n.faturado > 0 || n.pedidos > 0)
-            .map(n => `
-        <tr style="background:#f9f9f9; font-size:11px;">
-            <td style="padding-left:28px; color:#666; white-space:nowrap;">↳ ${n.nome}</td>
-            <td></td><td></td>
-            <td style="text-align:right; color:#ff2f69;">${fmt(n.faturado)}</td>
-            <td style="text-align:right; color:#f39c12;">${fmt(n.pedidos)}</td>
-            <td></td><td></td>
-        </tr>`).join('') : '';
-        return mainRow + subRows;
-    }).join('');
+}
+
+function _finToggle(id, e) {
+    if (e) e.stopPropagation();
+    const arr = document.getElementById('arr-' + id);
+    const open = arr && arr.textContent === '▼';
+    if (open) {
+        if (arr) arr.textContent = '▶';
+        // Hide ALL descendants (direct + nested) by substring match on class
+        document.querySelectorAll('[class*="fin-ch-' + id + '"]').forEach(el => el.style.display = 'none');
+        // Reset all nested arrows
+        document.querySelectorAll('[id^="arr-' + id + '"]').forEach(el => { if (el.id !== 'arr-'+id) el.textContent = '▶'; });
+    } else {
+        if (arr) arr.textContent = '▼';
+        // Show only DIRECT children (exact class match)
+        document.querySelectorAll('.fin-ch-' + id).forEach(el => el.style.display = '');
+    }
+}
+
+function expandirTodasBUs() {
+    document.querySelectorAll('.fin-cat,.fin-cli,.fin-nom').forEach(el => el.style.display = '');
+    document.querySelectorAll('[id^="arr-"]').forEach(el => el.textContent = '▼');
+}
+
+function recolherTodasBUs() {
+    document.querySelectorAll('.fin-cat,.fin-cli,.fin-nom').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('[id^="arr-"]').forEach(el => el.textContent = '▶');
 }
 
 function filtrarTbClientes() {
