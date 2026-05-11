@@ -5951,7 +5951,7 @@ function renderizarFinanceiro() {
         if (isPed) catObj.pedidos  += valReal;
 
         const effectiveCli = tipo === 'NOVOS CLIENTES NOMINADOS' ? 'NOVOS CLIENTES' : cliName;
-        _hInit(catObj.clientes, effectiveCli, { nominados:{} });
+        _hInit(catObj.clientes, effectiveCli, { nominados:{}, _rows:[] });
         const cliObjH = catObj.clientes[effectiveCli];
         cliObjH.planoAnual += valPlan;
         if (mesIdx >= 0 && mesIdx <= currentMonthIndex) cliObjH.planoYTD += valPlan;
@@ -5961,6 +5961,10 @@ function renderizarFinanceiro() {
             _hInit(cliObjH.nominados, cliName, {});
             if (isFat) cliObjH.nominados[cliName].faturado = (cliObjH.nominados[cliName].faturado||0) + valReal;
             if (isPed) cliObjH.nominados[cliName].pedidos  = (cliObjH.nominados[cliName].pedidos ||0) + valReal;
+        } else {
+            // Armazena referência direta ao registro do DB para uso no painel de edição
+            if (!cliObjH._rows) cliObjH._rows = [];
+            cliObjH._rows.push(rm);
         }
     });
 
@@ -6171,11 +6175,8 @@ function renderTbClientesFin() {
 
                 // Inline edit panel: 12 months editable (only in edit mode)
                 if (em) {
-                    const regsCliente = baseResMensais.filter(r => {
-                        const rBuN = (buKey||'').toUpperCase().replace(/\s+/g,' ').trim();
-                        const rBu  = (r.bu||'').toUpperCase().replace(/\s+/g,' ').trim();
-                        return rBu === rBuN && (r.categoria||'').trim() === catKey && (r.cliente||'').trim() === cliKey;
-                    });
+                    // Usa _rows armazenado durante a construção da hierarquia (evita filtro por string)
+                    const regsCliente = cliObj._rows || [];
                     let mesesHtml = '';
                     for (let m = 1; m <= 12; m++) {
                         const reg = regsCliente.find(r => parseInt(r.mes_numero) === m);
