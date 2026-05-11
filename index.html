@@ -1335,15 +1335,15 @@ header {
                             <input id="filtroTbCliente" type="text" placeholder="🔍 Buscar cliente..." onkeyup="filtrarTbClientes()"
                                 style="padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:180px;">
                             <select id="filtroTbVendedor" onchange="filtrarTbClientes()"
-                                style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555; max-width:160px;">
+                                style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555; width:148px;">
                                 <option value="">👤 Todos os Vendedores</option>
                             </select>
                             <select id="sortTbCliente" onchange="filtrarTbClientes()"
-                                style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555;">
-                                <option value="total">Ordenar: Realizado Total</option>
-                                <option value="planoAnual">Ordenar: Plano Anual</option>
-                                <option value="faturado">Ordenar: Faturado</option>
-                                <option value="pedidos">Ordenar: Pedidos em Casa</option>
+                                style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555; width:148px;">
+                                <option value="total">↕ Realizado Total</option>
+                                <option value="planoAnual">↕ Plano Anual</option>
+                                <option value="faturado">↕ Faturado</option>
+                                <option value="pedidos">↕ Pedidos em Casa</option>
                             </select>
                             <button onclick="expandirTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Expandir Tudo</button>
                             <button onclick="recolherTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Recolher Tudo</button>
@@ -6153,6 +6153,7 @@ function renderTbClientesFin() {
     buEntries.forEach(([buKey, buObj]) => {
         const bid = 'fbu' + buCount++;
         let catHtml = '';
+        let anyCat = false;
         let catCount = 0;
         const catEntries = Object.entries(buObj.categorias).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
 
@@ -6263,7 +6264,8 @@ function renderTbClientesFin() {
                 }
             });
 
-            if (!anyClient && busca) return;
+            if (!anyClient && (busca || filtroVend)) return;
+            anyCat = true;
             const devC = catObj.faturado - catObj.planoYTD;
             const pctC = catObj.planoYTD>0?(catObj.faturado/catObj.planoYTD*100):0;
             let catNameCell;
@@ -6285,6 +6287,7 @@ function renderTbClientesFin() {
 </tr>` + cliHtml;
         });
 
+        if (!anyCat && (busca || filtroVend)) return;
         const devB = buObj.faturado - buObj.planoYTD;
         const pctB = buObj.planoYTD>0?(buObj.faturado/buObj.planoYTD*100):0;
         let buNameCell;
@@ -6308,7 +6311,7 @@ function renderTbClientesFin() {
 
     tbody.innerHTML = html || `<tr><td colspan="7" style="text-align:center;color:#999;padding:24px;">Nenhum dado encontrado.</td></tr>`;
 
-    if (busca) {
+    if (busca || filtroVend) {
         document.querySelectorAll('[class^="fin-ch-"],.fin-cat,.fin-cli,.fin-nom').forEach(el => el.style.display = '');
         document.querySelectorAll('[id^="arr-"]').forEach(el => el.textContent = '▼');
     }
