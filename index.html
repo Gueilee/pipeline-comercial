@@ -1334,6 +1334,10 @@ header {
                         <div style="display:flex; align-items:center; gap:8px;">
                             <input id="filtroTbCliente" type="text" placeholder="🔍 Buscar cliente..." onkeyup="filtrarTbClientes()"
                                 style="padding:6px 10px; border:1px solid #ddd; border-radius:6px; font-size:12px; width:180px;">
+                            <select id="filtroTbVendedor" onchange="filtrarTbClientes()"
+                                style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555; max-width:160px;">
+                                <option value="">👤 Todos os Vendedores</option>
+                            </select>
                             <select id="sortTbCliente" onchange="filtrarTbClientes()"
                                 style="padding:6px 8px; border:1px solid #ddd; border-radius:6px; font-size:12px; color:#555;">
                                 <option value="total">Ordenar: Realizado Total</option>
@@ -5961,10 +5965,12 @@ function renderizarFinanceiro() {
             _hInit(cliObjH.nominados, cliName, {});
             if (isFat) cliObjH.nominados[cliName].faturado = (cliObjH.nominados[cliName].faturado||0) + valReal;
             if (isPed) cliObjH.nominados[cliName].pedidos  = (cliObjH.nominados[cliName].pedidos ||0) + valReal;
+            if (!cliObjH.nominados[cliName]._vendedor && rm.vendedor) cliObjH.nominados[cliName]._vendedor = rm.vendedor;
         } else {
             // Armazena referência direta ao registro do DB para uso no painel de edição
             if (!cliObjH._rows) cliObjH._rows = [];
             cliObjH._rows.push(rm);
+            if (!cliObjH._vendedor && rm.vendedor) cliObjH._vendedor = rm.vendedor;
         }
     });
 
@@ -6101,6 +6107,19 @@ function renderizarFinanceiro() {
 
     // ── Tabela Hierárquica de Clientes ──
     window._hierarquiaFin = hierarquia;
+
+    // Popula o dropdown de vendedores a partir dos dados carregados
+    const vendSel = document.getElementById('filtroTbVendedor');
+    if (vendSel) {
+        const vendedores = [...new Set(baseResMensais.map(r => r.vendedor).filter(v => v))].sort();
+        const prevVal = vendSel.value;
+        vendSel.innerHTML = '<option value="">👤 Todos os Vendedores</option>' +
+            vendedores.map(v => {
+                const label = v.split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+                return `<option value="${v}" ${prevVal===v?'selected':''}>${label}</option>`;
+            }).join('');
+    }
+
     renderTbClientesFin();
 }
 
@@ -6108,9 +6127,10 @@ function renderTbClientesFin() {
     const tbody = document.getElementById('tbClientesFinBody');
     if (!tbody) return;
     const hierarquia = window._hierarquiaFin || {};
-    const busca   = (document.getElementById('filtroTbCliente')?.value || '').toLowerCase();
-    const sortKey = document.getElementById('sortTbCliente')?.value || 'total';
-    const em      = _finEditMode;
+    const busca      = (document.getElementById('filtroTbCliente')?.value || '').toLowerCase();
+    const filtroVend = (document.getElementById('filtroTbVendedor')?.value || '').toUpperCase();
+    const sortKey    = document.getElementById('sortTbCliente')?.value || 'total';
+    const em         = _finEditMode;
 
     const fmt  = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
     const fmtK = v => { const a=Math.abs(v); if(a>=1e6) return (v/1e6).toFixed(1).replace('.',',')+'M'; if(a>=1e3) return (v/1e3).toFixed(0)+'k'; return String(Math.round(v)); };
@@ -6118,6 +6138,8 @@ function renderTbClientesFin() {
     const gapSpan = v => `<span style="font-weight:700;color:${v>=0?'#27ae60':'#c0392b'}">${v>=0?'+':''}${fmtK(v)}</span>`;
     const sortVal = o => sortKey==='total'?(o.faturado+o.pedidos) : (o[sortKey]||0);
     const buName  = k => k.includes('TRADING')||k.includes('VCI') ? '🏭 VCI' : k.includes('ARMAZEM')||k.includes('ARM') ? '🏢 Armazém' : k.includes('TRANSPORTE')||k.includes('TRP') ? '🚛 Transporte' : k;
+    const fmtVend = v => v ? v.split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ') : '';
+    const vendChip = v => v ? `<span style="font-size:10px;background:#eef2ff;color:#5563d4;border-radius:10px;padding:2px 8px;margin-left:6px;white-space:nowrap;font-weight:500;">${fmtVend(v)}</span>` : '';
     const editInp = (metaKey, val, placeholder, w) =>
         `<input type="text" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${placeholder}"
          oninput="_finMetaChange('${metaKey}',this.value)"
@@ -6143,6 +6165,12 @@ function renderTbClientesFin() {
 
             cliEntries.forEach(([cliKey, cliObj]) => {
                 if (busca && !cliKey.toLowerCase().includes(busca) && !catObj.displayLabel.toLowerCase().includes(busca) && !buName(buKey).toLowerCase().includes(busca)) return;
+                // Filtro por vendedor: verifica o cliente ou qualquer nominado
+                if (filtroVend) {
+                    const cliVend = (cliObj._vendedor || '').toUpperCase();
+                    const nomVend = Object.values(cliObj.nominados).some(n => (n._vendedor||'').toUpperCase() === filtroVend);
+                    if (cliVend !== filtroVend && !nomVend) return;
+                }
                 anyClient = true;
                 const dev = cliObj.faturado - cliObj.planoYTD;
                 const pct = cliObj.planoYTD>0 ? (cliObj.faturado/cliObj.planoYTD*100) : 0;
@@ -6161,7 +6189,7 @@ function renderTbClientesFin() {
                         ${editInp(metaKey, curVal, 'Nome do cliente', '180px')}
                     </td>`;
                 } else {
-                    cliNameCell = `<td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span></td>`;
+                    cliNameCell = `<td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span>${vendChip(cliObj._vendedor)}</td>`;
                 }
                 cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:${em?'#f8f9ff':'#fff'};">
   ${cliNameCell}
@@ -6225,7 +6253,7 @@ function renderTbClientesFin() {
                     nomKeys.sort().forEach(nomKey => {
                         const n = cliObj.nominados[nomKey];
                         cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fafafa;">
-  <td style="padding:5px 8px 5px 64px;font-size:11px;color:#777;white-space:nowrap;">↳ ${nomKey}</td>
+  <td style="padding:5px 8px 5px 64px;font-size:11px;color:#777;white-space:nowrap;">↳ ${nomKey}${vendChip(n._vendedor)}</td>
   <td></td><td></td>
   <td style="text-align:right;font-size:11px;color:#ff2f69;padding:5px 8px;">${fmt(n.faturado||0)}</td>
   <td style="text-align:right;font-size:11px;color:#f39c12;padding:5px 8px;">${fmt(n.pedidos||0)}</td>
