@@ -1343,6 +1343,8 @@ header {
                             </select>
                             <button onclick="expandirTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Expandir Tudo</button>
                             <button onclick="recolherTodasBUs()" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f5f5f5;cursor:pointer;color:#555;">Recolher Tudo</button>
+                            <button id="btnEditModeFin" onclick="toggleEditModeFin()" style="padding:5px 12px;border:1px solid #7c8cf8;border-radius:6px;font-size:11px;background:#eef2ff;cursor:pointer;color:#4a5af7;font-weight:600;">✏️ Editar</button>
+                            <button onclick="abrirModalNovoClienteFin()" style="padding:5px 12px;border:1px solid #27ae60;border-radius:6px;font-size:11px;background:#f0fdf4;cursor:pointer;color:#27ae60;font-weight:600;">➕ Novo Cliente</button>
                         </div>
                     </div>
                     <div style="overflow-x:auto; max-height:600px; overflow-y:auto;">
@@ -1484,6 +1486,80 @@ header {
         <div class="modal-footer">
             <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalFinInput')">Cancelar</button>
             <button type="button" id="btnSalvarFin" class="btn-header btn-novo-meta" onclick="salvarGridFin()">Salvar Lançamentos na Tela</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Barra flutuante de edição ── -->
+<div id="finEditBar" style="display:none;position:fixed;bottom:28px;right:28px;background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;border-radius:14px;padding:14px 22px;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.35);z-index:2000;font-size:13px;">
+    <span style="opacity:.8;">✏️ Modo Edição Ativo</span>
+    <button onclick="salvarEditFin()" style="background:#27ae60;color:#fff;border:none;border-radius:8px;padding:9px 18px;cursor:pointer;font-weight:700;font-size:13px;">💾 Salvar Tudo</button>
+    <button onclick="cancelarEditFin()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:9px 14px;cursor:pointer;font-size:13px;">✖ Cancelar</button>
+</div>
+
+<!-- ── Modal Novo Cliente Financeiro ── -->
+<div id="modalNovoClienteFin" class="modal">
+    <div class="modal-content" style="width:620px;max-height:90vh;overflow-y:auto;">
+        <h3>➕ Novo Cliente / Resultado</h3>
+        <p style="font-size:13px;color:#666;margin-top:-10px;">Insira os dados do novo cliente e os valores mensais planejados/realizados.</p>
+        <div class="form-row">
+            <div class="form-group" style="flex:1">
+                <label>Unidade de Negócio (BU)</label>
+                <select id="ncf_bu" onchange="ncfAtualizarCategorias()" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="">— Selecione —</option>
+                    <option value="TRADING (VCI)">🏭 VCI (Trading)</option>
+                    <option value="ARMAZEM (ARM)">🏢 Armazém</option>
+                    <option value="TRANSPORTE (TRP)">🚛 Transporte</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1">
+                <label>Categoria</label>
+                <select id="ncf_cat" onchange="ncfMostrarNovaCat()" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="">— Selecione a BU primeiro —</option>
+                </select>
+            </div>
+        </div>
+        <div id="ncf_novaCatBox" style="display:none;" class="form-group">
+            <label>Nome da Nova Categoria</label>
+            <input id="ncf_novaCat" type="text" placeholder="Ex: VCI - Novos Mercados" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex:2">
+                <label>Nome do Cliente</label>
+                <input id="ncf_cliente" type="text" placeholder="Ex: EMPRESA XYZ LTDA" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group" style="flex:1">
+                <label>Tipo</label>
+                <select id="ncf_tipo" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="NOVOS CLIENTES">NOVOS CLIENTES</option>
+                    <option value="NOVOS CLIENTES NOMINADOS">NOMINADOS</option>
+                    <option value="ANALYTICS">ANALYTICS</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px;">
+            <span style="font-weight:600;font-size:13px;">📅 Valores por Mês (2026)</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <input type="number" id="ncf_planoAnual" placeholder="Plano Anual (R$)" style="padding:6px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px;width:160px;">
+                <button onclick="ncfDistribuirPlano()" style="padding:6px 14px;background:#7c8cf8;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;">Distribuir Plano</button>
+            </div>
+        </div>
+        <div style="overflow-x:auto;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:16px;">
+            <table style="width:100%;border-collapse:collapse;font-size:12px;" id="ncfTabela">
+                <thead style="background:#f5f5f5;">
+                    <tr>
+                        <th style="padding:8px;text-align:left;font-weight:600;color:#555;">Mês</th>
+                        <th style="padding:8px;text-align:right;font-weight:600;color:#555;">Plano (R$)</th>
+                        <th style="padding:8px;text-align:right;font-weight:600;color:#555;">Realizado (R$)</th>
+                        <th style="padding:8px;text-align:center;font-weight:600;color:#555;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ncfTabelaBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalNovoClienteFin')">Cancelar</button>
+            <button type="button" id="btnSalvarNcf" class="btn-header btn-novo-meta" onclick="salvarNovoClienteFin()">Salvar Cliente no Banco</button>
         </div>
     </div>
 </div>
@@ -6030,6 +6106,7 @@ function renderTbClientesFin() {
     const hierarquia = window._hierarquiaFin || {};
     const busca   = (document.getElementById('filtroTbCliente')?.value || '').toLowerCase();
     const sortKey = document.getElementById('sortTbCliente')?.value || 'total';
+    const em      = _finEditMode;
 
     const fmt  = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
     const fmtK = v => { const a=Math.abs(v); if(a>=1e6) return (v/1e6).toFixed(1).replace('.',',')+'M'; if(a>=1e3) return (v/1e3).toFixed(0)+'k'; return String(Math.round(v)); };
@@ -6037,6 +6114,11 @@ function renderTbClientesFin() {
     const gapSpan = v => `<span style="font-weight:700;color:${v>=0?'#27ae60':'#c0392b'}">${v>=0?'+':''}${fmtK(v)}</span>`;
     const sortVal = o => sortKey==='total'?(o.faturado+o.pedidos) : (o[sortKey]||0);
     const buName  = k => k.includes('TRADING')||k.includes('VCI') ? '🏭 VCI' : k.includes('ARMAZEM')||k.includes('ARM') ? '🏢 Armazém' : k.includes('TRANSPORTE')||k.includes('TRP') ? '🚛 Transporte' : k;
+    const editInp = (metaKey, val, placeholder, w) =>
+        `<input type="text" value="${(val||'').replace(/"/g,'&quot;')}" placeholder="${placeholder}"
+         oninput="_finMetaChange('${metaKey}',this.value)"
+         style="border:1px solid #c5ccff;border-radius:5px;padding:3px 7px;font-size:12px;width:${w||'160px'};background:#fff;color:#222;">`;
+    const _nomesMeses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
     let html = '';
     let buCount = 0;
@@ -6052,6 +6134,7 @@ function renderTbClientesFin() {
             const cid = bid + 'c' + catCount++;
             let cliHtml = '';
             let anyClient = false;
+            let cliCount = 0;
             const cliEntries = Object.entries(catObj.clientes).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
 
             cliEntries.forEach(([cliKey, cliObj]) => {
@@ -6062,8 +6145,22 @@ function renderTbClientesFin() {
                 const nomKeys = Object.keys(cliObj.nominados);
                 const nid = cid + 'n' + cliKey.replace(/\W/g,'_');
                 const hasNom = nomKeys.length > 0;
-                cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:#fff;">
-  <td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span></td>
+                const cliRowId = cid + 'cli' + cliCount++;
+                const isEditOpen = em && _finEditOpen.has(cliRowId);
+                // Client name cell: edit mode shows input + expand toggle, normal shows text
+                let cliNameCell;
+                if (em) {
+                    const metaKey = 'cli@@' + buKey + '@@' + catKey + '@@' + cliKey;
+                    const curVal  = _finEditMeta[metaKey] !== undefined ? _finEditMeta[metaKey] : cliKey;
+                    cliNameCell = `<td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">
+                        <span onclick="_finToggleEditPanel('${cliRowId}',event)" style="cursor:pointer;margin-right:6px;font-size:12px;color:#7c8cf8;" title="Editar meses">${isEditOpen?'▼':'▶'}</span>
+                        ${editInp(metaKey, curVal, 'Nome do cliente', '180px')}
+                    </td>`;
+                } else {
+                    cliNameCell = `<td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span></td>`;
+                }
+                cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:${em?'#f8f9ff':'#fff'};">
+  ${cliNameCell}
   <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoAnual)}</td>
   <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoYTD)}</td>
   <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:7px 8px;">${fmt(cliObj.faturado)}</td>
@@ -6071,23 +6168,85 @@ function renderTbClientesFin() {
   <td style="text-align:right;font-size:12px;padding:7px 8px;">${gapSpan(dev)}</td>
   <td style="text-align:center;padding:7px 8px;">${pill(pct)}</td>
 </tr>`;
-                nomKeys.sort().forEach(nomKey => {
-                    const n = cliObj.nominados[nomKey];
-                    cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fafafa;">
+
+                // Inline edit panel: 12 months editable (only in edit mode)
+                if (em) {
+                    const regsCliente = baseResMensais.filter(r => {
+                        const rBuN = (buKey||'').toUpperCase().replace(/\s+/g,' ').trim();
+                        const rBu  = (r.bu||'').toUpperCase().replace(/\s+/g,' ').trim();
+                        return rBu === rBuN && (r.categoria||'').trim() === catKey && (r.cliente||'').trim() === cliKey;
+                    });
+                    let mesesHtml = '';
+                    for (let m = 1; m <= 12; m++) {
+                        const reg = regsCliente.find(r => parseInt(r.mes_numero) === m);
+                        if (reg) {
+                            const rId    = reg.id;
+                            const edPlan = _finEdits[rId]?.valor_planejado !== undefined ? _finEdits[rId].valor_planejado : (parseFloat(reg.valor_planejado)||0);
+                            const edReal = _finEdits[rId]?.valor_realizado !== undefined ? _finEdits[rId].valor_realizado : (reg.valor_realizado !== null && reg.valor_realizado !== undefined ? parseFloat(reg.valor_realizado) : '');
+                            const edStat = _finEdits[rId]?.status !== undefined ? _finEdits[rId].status : (reg.status||'');
+                            const sC     = edStat==='FATURADO'?'#ff2f69':edStat==='PEDIDOS EM CASA'?'#f39c12':'#aaa';
+                            mesesHtml += `<tr style="border-bottom:1px solid #eef0ff;">
+                                <td style="padding:5px 8px;font-weight:600;color:#555;font-size:11px;white-space:nowrap;">${_nomesMeses[m-1]}</td>
+                                <td style="padding:4px;"><input type="number" step="0.01" value="${edPlan}" oninput="_finRowChange(${rId},'valor_planejado',this.value)" style="width:110px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:right;"></td>
+                                <td style="padding:4px;"><input type="number" step="0.01" value="${edReal}" placeholder="0" oninput="_finRowChange(${rId},'valor_realizado',this.value)" style="width:110px;padding:4px 6px;border:1px solid #ddd;border-radius:4px;font-size:11px;text-align:right;"></td>
+                                <td style="padding:4px;"><select onchange="_finRowChange(${rId},'status',this.value)" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:11px;color:${sC};font-weight:600;">
+                                    <option value="" ${!edStat?'selected':''}>—</option>
+                                    <option value="FATURADO" ${edStat==='FATURADO'?'selected':''}>FATURADO</option>
+                                    <option value="PEDIDOS EM CASA" ${edStat==='PEDIDOS EM CASA'?'selected':''}>PED. EM CASA</option>
+                                </select></td>
+                            </tr>`;
+                        } else {
+                            mesesHtml += `<tr style="border-bottom:1px solid #eef0ff;opacity:.4;">
+                                <td style="padding:5px 8px;font-size:11px;color:#aaa;">${_nomesMeses[m-1]}</td>
+                                <td colspan="3" style="padding:5px 8px;font-size:11px;color:#bbb;">sem registro</td>
+                            </tr>`;
+                        }
+                    }
+                    cliHtml += `<tr class="fin-edit fin-ch-${cid}" style="display:${isEditOpen?'':'none'};background:#f0f2ff;" data-finedit="true">
+  <td colspan="7" style="padding:0 12px 10px 44px;">
+    <div style="background:#fff;border:1px solid #c5ccff;border-radius:8px;overflow:hidden;margin-top:4px;">
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead style="background:#eef2ff;"><tr>
+          <th style="padding:6px 8px;text-align:left;color:#555;width:55px;">Mês</th>
+          <th style="padding:6px 8px;text-align:right;color:#555;">Plano (R$)</th>
+          <th style="padding:6px 8px;text-align:right;color:#555;">Realizado (R$)</th>
+          <th style="padding:6px 8px;text-align:center;color:#555;">Status</th>
+        </tr></thead>
+        <tbody>${mesesHtml}</tbody>
+      </table>
+    </div>
+  </td>
+</tr>`;
+                }
+
+                // Nominados only in normal (non-edit) mode
+                if (!em) {
+                    nomKeys.sort().forEach(nomKey => {
+                        const n = cliObj.nominados[nomKey];
+                        cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fafafa;">
   <td style="padding:5px 8px 5px 64px;font-size:11px;color:#777;white-space:nowrap;">↳ ${nomKey}</td>
   <td></td><td></td>
   <td style="text-align:right;font-size:11px;color:#ff2f69;padding:5px 8px;">${fmt(n.faturado||0)}</td>
   <td style="text-align:right;font-size:11px;color:#f39c12;padding:5px 8px;">${fmt(n.pedidos||0)}</td>
   <td></td><td></td>
 </tr>`;
-                });
+                    });
+                }
             });
 
             if (!anyClient && busca) return;
             const devC = catObj.faturado - catObj.planoYTD;
             const pctC = catObj.planoYTD>0?(catObj.faturado/catObj.planoYTD*100):0;
-            catHtml += `<tr class="fin-cat fin-ch-${bid}" style="display:none;background:#eef2ff;cursor:pointer;" onclick="_finToggle('${cid}',event)">
-  <td style="padding:8px 8px 8px 24px;font-weight:600;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;"><span class="fin-arrow" id="arr-${cid}">▶</span> ${catObj.displayLabel||catKey}</td>
+            let catNameCell;
+            if (em) {
+                const mKey = 'cat@@' + buKey + '@@' + catKey;
+                const cVal = _finEditMeta[mKey] !== undefined ? _finEditMeta[mKey] : (catObj.displayLabel||catKey);
+                catNameCell = `<td style="padding:8px 8px 8px 24px;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;">${editInp(mKey, cVal, 'Categoria', '200px')}</td>`;
+            } else {
+                catNameCell = `<td style="padding:8px 8px 8px 24px;font-weight:600;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;"><span class="fin-arrow" id="arr-${cid}">▶</span> ${catObj.displayLabel||catKey}</td>`;
+            }
+            catHtml += `<tr class="fin-cat fin-ch-${bid}" style="display:none;background:#eef2ff;cursor:${em?'default':'pointer'};" ${em?'':'onclick="_finToggle(\''+cid+'\',event)"'}>
+  ${catNameCell}
   <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoAnual)}</td>
   <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoYTD)}</td>
   <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:8px;">${fmt(catObj.faturado)}</td>
@@ -6099,8 +6258,16 @@ function renderTbClientesFin() {
 
         const devB = buObj.faturado - buObj.planoYTD;
         const pctB = buObj.planoYTD>0?(buObj.faturado/buObj.planoYTD*100):0;
-        html += `<tr class="fin-bu" style="background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;cursor:pointer;font-weight:700;" onclick="_finToggle('${bid}',event)">
-  <td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buName(buKey)}</td>
+        let buNameCell;
+        if (em) {
+            const mKey = 'bu@@' + buKey;
+            const bVal = _finEditMeta[mKey] !== undefined ? _finEditMeta[mKey] : (buObj.displayLabel||buKey);
+            buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;">${editInp(mKey, bVal, 'BU', '140px')}</td>`;
+        } else {
+            buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buName(buKey)}</td>`;
+        }
+        html += `<tr class="fin-bu" style="background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;cursor:${em?'default':'pointer'};font-weight:700;" ${em?'':'onclick="_finToggle(\''+bid+'\',event)"'}>
+  ${buNameCell}
   <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoAnual)}</td>
   <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoYTD)}</td>
   <td style="text-align:right;padding:11px 8px;color:#ff7fa5;font-weight:700;">${fmt(buObj.faturado)}</td>
@@ -6115,6 +6282,11 @@ function renderTbClientesFin() {
     if (busca) {
         document.querySelectorAll('[class^="fin-ch-"],.fin-cat,.fin-cli,.fin-nom').forEach(el => el.style.display = '');
         document.querySelectorAll('[id^="arr-"]').forEach(el => el.textContent = '▼');
+    }
+
+    // In edit mode: auto-expand BU and category rows so all clients are visible
+    if (em) {
+        document.querySelectorAll('.fin-cat,.fin-cli').forEach(el => el.style.display = '');
     }
 }
 
@@ -6147,6 +6319,254 @@ function recolherTodasBUs() {
 
 function filtrarTbClientes() {
     renderTbClientesFin();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  EDIT MODE — Detalhamento por Cliente
+// ══════════════════════════════════════════════════════════════
+
+let _finEditMode = false;
+let _finEdits    = {}; // { [rowId]: { valor_planejado, valor_realizado, status } }
+let _finEditMeta = {}; // { 'bu:BU_KEY': newLabel, 'cat:BU@@CAT': newLabel, 'cli:BU@@CAT@@CLI': newName }
+let _finEditOpen = new Set(); // cliRowIds whose edit panels are expanded
+
+function toggleEditModeFin() {
+    _finEditMode = !_finEditMode;
+    _finEdits    = {};
+    _finEditMeta = {};
+    _finEditOpen = new Set();
+    const btn = document.getElementById('btnEditModeFin');
+    const bar = document.getElementById('finEditBar');
+    if (_finEditMode) {
+        btn.textContent = '✖ Cancelar';
+        btn.style.background = '#fde8e8';
+        btn.style.borderColor = '#e74c3c';
+        btn.style.color = '#c0392b';
+        bar.style.display = 'flex';
+    } else {
+        btn.textContent = '✏️ Editar';
+        btn.style.background = '#eef2ff';
+        btn.style.borderColor = '#7c8cf8';
+        btn.style.color = '#4a5af7';
+        bar.style.display = 'none';
+    }
+    renderTbClientesFin();
+}
+
+function cancelarEditFin() {
+    _finEditMode = false;
+    _finEdits    = {};
+    _finEditMeta = {};
+    _finEditOpen = new Set();
+    const btn = document.getElementById('btnEditModeFin');
+    if (btn) { btn.textContent = '✏️ Editar'; btn.style.background='#eef2ff'; btn.style.borderColor='#7c8cf8'; btn.style.color='#4a5af7'; }
+    const bar = document.getElementById('finEditBar');
+    if (bar) bar.style.display = 'none';
+    renderTbClientesFin();
+}
+
+function _finToggleEditPanel(cliRowId, e) {
+    if (e) e.stopPropagation();
+    if (_finEditOpen.has(cliRowId)) {
+        _finEditOpen.delete(cliRowId);
+    } else {
+        _finEditOpen.add(cliRowId);
+    }
+    renderTbClientesFin();
+}
+
+function _finMetaChange(metaKey, value) {
+    _finEditMeta[metaKey] = value;
+}
+
+function _finRowChange(rowId, field, value) {
+    if (!_finEdits[rowId]) _finEdits[rowId] = {};
+    _finEdits[rowId][field] = value;
+}
+
+async function salvarEditFin() {
+    const bar = document.getElementById('finEditBar');
+    const saveBtn = bar ? bar.querySelector('button') : null;
+    if (saveBtn) { saveBtn.textContent = '⏳ Salvando...'; saveBtn.disabled = true; }
+
+    const promessas = [];
+
+    // 1. Salva alterações de valores mensais (valor_planejado, valor_realizado, status)
+    Object.entries(_finEdits).forEach(([rowId, changes]) => {
+        const reg = baseResMensais.find(r => String(r.id) === String(rowId));
+        if (!reg) return;
+        const payload = {};
+        if (changes.valor_planejado !== undefined) {
+            const v = parseFloat(changes.valor_planejado);
+            if (!isNaN(v) && v !== parseFloat(reg.valor_planejado)) payload.valor_planejado = v;
+        }
+        if (changes.valor_realizado !== undefined) {
+            const v = parseFloat(changes.valor_realizado);
+            if (!isNaN(v) && v !== parseFloat(reg.valor_realizado)) payload.valor_realizado = v;
+            else if (changes.valor_realizado === '' && reg.valor_realizado !== null) payload.valor_realizado = null;
+        }
+        if (changes.status !== undefined && changes.status !== (reg.status || '')) {
+            payload.status = changes.status || null;
+        }
+        if (Object.keys(payload).length > 0) {
+            promessas.push(supabaseClient.from('resultados_mensais').update(payload).eq('id', rowId));
+        }
+    });
+
+    // 2. Salva renomeações de BU, Categoria, Cliente
+    Object.entries(_finEditMeta).forEach(([metaKey, novoNome]) => {
+        const parts = metaKey.split('@@');
+        const tipo  = parts[0]; // 'bu', 'cat', 'cli'
+        if (!novoNome || !novoNome.trim()) return;
+
+        if (tipo === 'bu') {
+            const buKey = parts[1];
+            // Atualiza todos os registros desta BU
+            promessas.push(supabaseClient.from('resultados_mensais').update({ bu: novoNome.trim() }).eq('bu', buKey));
+        } else if (tipo === 'cat') {
+            const buKey  = parts[1];
+            const catKey = parts[2];
+            promessas.push(supabaseClient.from('resultados_mensais').update({ categoria: novoNome.trim() }).eq('bu', buKey).eq('categoria', catKey));
+        } else if (tipo === 'cli') {
+            const buKey  = parts[1];
+            const catKey = parts[2];
+            const cliKey = parts[3];
+            promessas.push(supabaseClient.from('resultados_mensais').update({ cliente: novoNome.trim() }).eq('bu', buKey).eq('categoria', catKey).eq('cliente', cliKey));
+        }
+    });
+
+    if (promessas.length === 0) {
+        showToast('Nenhuma alteração detectada.', 'info');
+        if (saveBtn) { saveBtn.textContent = '💾 Salvar Tudo'; saveBtn.disabled = false; }
+        return;
+    }
+
+    const results = await Promise.allSettled(promessas);
+    const erros   = results.filter(r => r.status === 'rejected').length;
+    const ok      = results.length - erros;
+
+    await carregarDadosFinanceiros();
+    renderizarHome();
+    renderizarFinanceiro();
+
+    showToast(`✅ ${ok} operação(ões) salva(s)${erros ? ` | ⚠️ ${erros} erro(s)` : ''}`, erros ? 'warning' : 'success');
+    cancelarEditFin();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NOVO CLIENTE — Modal
+// ══════════════════════════════════════════════════════════════
+
+const _ncfMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function abrirModalNovoClienteFin() {
+    const hierarquia = window._hierarquiaFin || {};
+    // Reset campos
+    document.getElementById('ncf_bu').value      = '';
+    document.getElementById('ncf_cat').innerHTML = '<option value="">— Selecione a BU primeiro —</option>';
+    document.getElementById('ncf_novaCatBox').style.display = 'none';
+    document.getElementById('ncf_cliente').value = '';
+    document.getElementById('ncf_tipo').value    = 'NOVOS CLIENTES';
+    document.getElementById('ncf_planoAnual').value = '';
+    ncfIniciarTabela();
+    abrirModal('modalNovoClienteFin');
+}
+
+function ncfAtualizarCategorias() {
+    const bu = document.getElementById('ncf_bu').value;
+    const hierarquia = window._hierarquiaFin || {};
+    const catSel = document.getElementById('ncf_cat');
+    catSel.innerHTML = '<option value="">— Selecione —</option>';
+    if (bu && hierarquia[bu]) {
+        Object.keys(hierarquia[bu].categorias || {}).sort().forEach(cat => {
+            catSel.innerHTML += `<option value="${cat}">${cat}</option>`;
+        });
+    }
+    catSel.innerHTML += '<option value="__nova__">➕ Nova categoria...</option>';
+    ncfMostrarNovaCat();
+}
+
+function ncfMostrarNovaCat() {
+    const val = document.getElementById('ncf_cat').value;
+    document.getElementById('ncf_novaCatBox').style.display = val === '__nova__' ? 'block' : 'none';
+}
+
+function ncfIniciarTabela() {
+    const tbody = document.getElementById('ncfTabelaBody');
+    let html = '';
+    _ncfMeses.forEach((mes, i) => {
+        const mesNum = i + 1;
+        html += `<tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="padding:6px 8px;font-weight:600;color:#555;white-space:nowrap;">${mes}</td>
+            <td style="padding:6px 8px;"><input type="number" step="0.01" id="ncf_plan_${mesNum}" placeholder="0" style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:right;"></td>
+            <td style="padding:6px 8px;"><input type="number" step="0.01" id="ncf_real_${mesNum}" placeholder="0" style="width:100%;padding:5px 7px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:right;"></td>
+            <td style="padding:6px 8px;">
+                <select id="ncf_status_${mesNum}" style="width:100%;padding:5px;border:1px solid #ddd;border-radius:5px;font-size:11px;">
+                    <option value="">—</option>
+                    <option value="FATURADO">FATURADO</option>
+                    <option value="PEDIDOS EM CASA">PEDIDOS EM CASA</option>
+                </select>
+            </td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+function ncfDistribuirPlano() {
+    const total = parseFloat(document.getElementById('ncf_planoAnual').value) || 0;
+    const mensal = total / 12;
+    for (let m = 1; m <= 12; m++) {
+        const inp = document.getElementById('ncf_plan_' + m);
+        if (inp) inp.value = mensal > 0 ? mensal.toFixed(2) : '';
+    }
+}
+
+async function salvarNovoClienteFin() {
+    const bu       = document.getElementById('ncf_bu').value;
+    const catRaw   = document.getElementById('ncf_cat').value;
+    const novaCat  = document.getElementById('ncf_novaCat').value.trim();
+    const cat      = catRaw === '__nova__' ? novaCat : catRaw;
+    const cliente  = document.getElementById('ncf_cliente').value.trim();
+    const tipo     = document.getElementById('ncf_tipo').value;
+
+    if (!bu)      { showToast('Selecione a BU.', 'warning'); return; }
+    if (!cat)     { showToast('Informe a categoria.', 'warning'); return; }
+    if (!cliente) { showToast('Informe o nome do cliente.', 'warning'); return; }
+
+    const btn = document.getElementById('btnSalvarNcf');
+    btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+
+    const rows = [];
+    for (let m = 1; m <= 12; m++) {
+        const planVal  = parseFloat(document.getElementById('ncf_plan_' + m).value) || 0;
+        const realVal  = parseFloat(document.getElementById('ncf_real_' + m).value);
+        const statusV  = document.getElementById('ncf_status_' + m).value;
+        rows.push({
+            bu:               bu,
+            categoria:        cat,
+            cliente:          cliente,
+            tipo:             tipo,
+            ano:              2026,
+            mes_numero:       m,
+            valor_planejado:  planVal,
+            valor_realizado:  isNaN(realVal) ? null : realVal,
+            status:           statusV || null
+        });
+    }
+
+    const { error } = await supabaseClient.from('resultados_mensais').insert(rows);
+    btn.textContent = 'Salvar Cliente no Banco'; btn.disabled = false;
+
+    if (error) {
+        showToast('Erro ao salvar: ' + error.message, 'error');
+        return;
+    }
+
+    showToast(`✅ Cliente "${cliente}" inserido com sucesso (12 meses)!`, 'success');
+    fecharModal('modalNovoClienteFin');
+    await carregarDadosFinanceiros();
+    renderizarHome();
+    renderizarFinanceiro();
 }
 
 function abrirLancamentoFin() {
