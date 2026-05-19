@@ -4178,7 +4178,7 @@ async function carregarDados(){
     if (homeVend) {
         const valAtual = homeVend.value;
         homeVend.innerHTML = '<option value="">Todos os Vendedores</option>'
-            + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
+            + _allKanVendedores.map(v => `<option value="${v}">${v}</option>`).join('');
         homeVend.value = valAtual;
     }
 
