@@ -784,23 +784,62 @@ header {
         <div class="filters" id="barraFiltros">
             <input type="text" id="filtroCliente" class="input-search" placeholder="🔍 Digite para buscar cliente..." oninput="debouncedRenderizar()" list="listaClientes">
             <datalist id="listaClientes"></datalist>
-            <select id="filtroVendedor" onchange="renderizar()"><option value="">Vendedor</option></select>
-            <select id="filtroArea" onchange="renderizar()"><option value="">Área</option></select>
-            <select id="filtroTipo" onchange="renderizar()">
-                <option value="">Tipo (Todos)</option>
-                <option value="UP-SELLING">UP-SELLING</option>
-                <option value="CROSS-SELLING">CROSS-SELLING</option>
-                <option value="NOVOS CLIENTES">NOVOS CLIENTES</option>
-            </select>
-            <select id="filtroStatus" onchange="renderizar()">
-                <option value="">Status</option>
-                <option value="AINDA FRIO">AINDA FRIO</option>
-                <option value="FUP">FUP</option>
-                <option value="MAIOR QUE 50%">MAIOR QUE 50%</option>
-                <option value="EM FECHAMENTO">EM FECHAMENTO</option>
-                <option value="FECHADO">FECHADO</option>
-                <option value="PERDIDO">PERDIDO</option>
-            </select>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanVendedor" onclick="toggleKanMs('Vendedor')">
+                    <span id="labelKanVendedor">Vendedor</span>
+                    <span class="multi-select-badge" id="badgeKanVendedor" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanVendedor">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Vendedor',true)">Selecionar todos</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Vendedor',false)">Limpar</button>
+                    </div>
+                    <div id="kanVendedorItems"></div>
+                </div>
+            </div>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanArea" onclick="toggleKanMs('Area')">
+                    <span id="labelKanArea">Área</span>
+                    <span class="multi-select-badge" id="badgeKanArea" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanArea">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Area',true)">Selecionar todas</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Area',false)">Limpar</button>
+                    </div>
+                    <div id="kanAreaItems"></div>
+                </div>
+            </div>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanTipo" onclick="toggleKanMs('Tipo')">
+                    <span id="labelKanTipo">Tipo (Todos)</span>
+                    <span class="multi-select-badge" id="badgeKanTipo" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanTipo">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Tipo',true)">Selecionar todos</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Tipo',false)">Limpar</button>
+                    </div>
+                    <div id="kanTipoItems"></div>
+                </div>
+            </div>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanStatus" onclick="toggleKanMs('Status')">
+                    <span id="labelKanStatus">Status</span>
+                    <span class="multi-select-badge" id="badgeKanStatus" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanStatus">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Status',true)">Selecionar todos</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Status',false)">Limpar</button>
+                    </div>
+                    <div id="kanStatusItems"></div>
+                </div>
+            </div>
         </div>
 
         <div id="page-dashboard" class="active-page">
@@ -2899,7 +2938,9 @@ function renderizarMetas() {
     // No modo comparativo, atualiza o comparativo (período pode ter mudado) e sai
     if (_modoComparativo) { renderizarComparativo(); return; }
 
-    const fV = document.getElementById('filtroVendedor').value;
+    // No filtro multi-select: 1 vendedor selecionado = filtra; 0 ou vários = mostra tudo
+    const _kanVendAtivo = _allKanVendedores.length > 0 && _kanVendedores.size < _allKanVendedores.length;
+    const fV = (_kanVendAtivo && _kanVendedores.size === 1) ? [..._kanVendedores][0] : '';
 
     // ── Todos os registros do vendedor selecionado NO ANO SELECIONADO ──
     const dadosTodos = baseMetasMensais.filter(r => {
@@ -4129,24 +4170,8 @@ async function carregarDados(){
     const dl = document.getElementById('listaClientes');
     if(dl) dl.innerHTML = clientesUnicos.map(c => `<option value="${c}">`).join('');
     
-    // Une vendedores das oportunidades + todos que têm metas definidas
-    const vendedoresDeOps = base.map(item => item.vendedor).filter(c => c);
-    const vendedoresComMeta = Object.keys(METAS_MENSAIS);
-    const vendedoresUnicos = [...new Set([...vendedoresDeOps, ...vendedoresComMeta])].sort();
-    const filtroVend = document.getElementById('filtroVendedor');
-    if(filtroVend) {
-        const valAtual = filtroVend.value;
-        filtroVend.innerHTML = '<option value="">Vendedor</option>' + vendedoresUnicos.map(v => `<option value="${v}">${v}</option>`).join('');
-        filtroVend.value = valAtual;
-    }
-
-    const areasUnicas = [...new Set(base.map(item => item.area).filter(c => c))].sort();
-    const filtroArea = document.getElementById('filtroArea');
-    if(filtroArea) {
-        const valAtual = filtroArea.value;
-        filtroArea.innerHTML = '<option value="">Area</option>' + areasUnicas.map(a => `<option value="${a}">${a}</option>`).join('');
-        filtroArea.value = valAtual;
-    }
+    // Popula multi-selects do Kanban
+    populateKanMultiSelect();
 
     // Popular select de vendedor do Home
     const homeVend = document.getElementById('homeVend');
@@ -4276,11 +4301,22 @@ async function drop(ev, novoStatus) {
 }
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const fV = document.getElementById('filtroVendedor').value;
-    const fA = document.getElementById('filtroArea').value;
-    const fS = document.getElementById('filtroStatus').value;
-    const fT = document.getElementById('filtroTipo').value;
-    const filtrados = base.filter(r => (!fC || (r.cliente && r.cliente.toLowerCase().includes(fC))) && (!fV || r.vendedor === fV) && (!fA || r.area === fA) && (!fS || r.status === fS) && (!fT || ((!r.tipo || r.tipo.trim() === "") ? "NOVOS CLIENTES" : r.tipo.toUpperCase()) === fT || (fT === "NOVOS CLIENTES" && r.tipo && r.tipo.toUpperCase() === "NOVO NEGÓCIO")));
+    const vendAtivo   = _allKanVendedores.length > 0 && _kanVendedores.size < _allKanVendedores.length;
+    const areaAtivo   = _allKanAreas.length      > 0 && _kanAreas.size      < _allKanAreas.length;
+    const tipoAtivo   = _kanTipos.size            < _allKanTipos.length;
+    const statusAtivo = _kanStatus.size           < _allKanStatus.length;
+    const filtrados = base.filter(r => {
+        if (fC && !(r.cliente && r.cliente.toLowerCase().includes(fC))) return false;
+        if (vendAtivo   && !_kanVendedores.has(r.vendedor)) return false;
+        if (areaAtivo   && !_kanAreas.has(r.area))          return false;
+        if (statusAtivo && !_kanStatus.has(r.status))       return false;
+        if (tipoAtivo) {
+            const t = (!r.tipo || r.tipo.trim() === '') ? 'NOVOS CLIENTES' : r.tipo.toUpperCase();
+            const tNorm = (t === 'NOVO NEGÓCIO') ? 'NOVOS CLIENTES' : t;
+            if (!_kanTipos.has(tNorm)) return false;
+        }
+        return true;
+    });
 
     if(document.getElementById('page-metas').classList.contains('active-page')) renderizarMetas();
 
@@ -4489,6 +4525,83 @@ function renderizarRadar() {
 // ----------------------------------------------------
 // MÓDULO FINANCEIRO (PREVISTO X REALIZADO)
 // ----------------------------------------------------
+
+// ──────────────────────────────────────────────────────────────
+// MULTI-SELECT FILTROS KANBAN
+// ──────────────────────────────────────────────────────────────
+let _allKanVendedores = [];
+let _allKanAreas      = [];
+const _allKanTipos    = ['UP-SELLING', 'CROSS-SELLING', 'NOVOS CLIENTES'];
+const _allKanStatus   = ['AINDA FRIO', 'FUP', 'MAIOR QUE 50%', 'EM FECHAMENTO', 'FECHADO', 'PERDIDO'];
+let _kanVendedores    = new Set();
+let _kanAreas         = new Set();
+let _kanTipos         = new Set();
+let _kanStatus        = new Set();
+
+const _kanMsCfg = {
+    Vendedor: { allFn: ()=>_allKanVendedores, sel: ()=>_kanVendedores, label:'Vendedor',   labelId:'labelKanVendedor', badgeId:'badgeKanVendedor', itemsId:'kanVendedorItems', dropId:'dropdownKanVendedor', btnId:'btnKanVendedor' },
+    Area:     { allFn: ()=>_allKanAreas,      sel: ()=>_kanAreas,      label:'Área',        labelId:'labelKanArea',     badgeId:'badgeKanArea',     itemsId:'kanAreaItems',     dropId:'dropdownKanArea',     btnId:'btnKanArea'     },
+    Tipo:     { allFn: ()=>_allKanTipos,      sel: ()=>_kanTipos,      label:'Tipo (Todos)', labelId:'labelKanTipo',     badgeId:'badgeKanTipo',     itemsId:'kanTipoItems',     dropId:'dropdownKanTipo',     btnId:'btnKanTipo'     },
+    Status:   { allFn: ()=>_allKanStatus,     sel: ()=>_kanStatus,     label:'Status',      labelId:'labelKanStatus',   badgeId:'badgeKanStatus',   itemsId:'kanStatusItems',   dropId:'dropdownKanStatus',   btnId:'btnKanStatus'   },
+};
+
+function populateKanMultiSelect() {
+    _allKanVendedores = [...new Set([
+        ...base.map(i => i.vendedor).filter(Boolean),
+        ...Object.keys(METAS_MENSAIS)
+    ])].sort();
+    _allKanAreas = [...new Set(base.map(i => i.area).filter(Boolean))].sort();
+    // Inicializa com tudo selecionado (= sem filtro ativo)
+    _kanVendedores = new Set(_allKanVendedores);
+    _kanAreas      = new Set(_allKanAreas);
+    _kanTipos      = new Set(_allKanTipos);
+    _kanStatus     = new Set(_allKanStatus);
+    ['Vendedor','Area','Tipo','Status'].forEach(_renderKanMs);
+}
+
+function _renderKanMs(tipo) {
+    const cfg = _kanMsCfg[tipo];
+    const all = cfg.allFn(), sel = cfg.sel();
+    const container = document.getElementById(cfg.itemsId);
+    if (container) {
+        container.innerHTML = all.map(v =>
+            `<label class="multi-select-item">
+                <input type="checkbox" ${sel.has(v)?'checked':''} onchange="toggleKanFiltro('${tipo}','${v.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+                <span>${v}</span>
+            </label>`
+        ).join('');
+    }
+    const nSel = sel.size, nAll = all.length;
+    const labelEl = document.getElementById(cfg.labelId);
+    const badgeEl = document.getElementById(cfg.badgeId);
+    if (labelEl) labelEl.textContent = (nSel === 0 || nSel === nAll) ? cfg.label : `${cfg.label} (${nSel})`;
+    if (badgeEl) { badgeEl.textContent = nSel; badgeEl.style.display = (nSel > 0 && nSel < nAll) ? '' : 'none'; }
+}
+
+function toggleKanMs(tipo) {
+    const cfg = _kanMsCfg[tipo];
+    const drop = document.getElementById(cfg.dropId), btn = document.getElementById(cfg.btnId);
+    const jaAberto = drop.classList.contains('aberto');
+    document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('aberto'));
+    document.querySelectorAll('.multi-select-btn').forEach(b => b.classList.remove('ativo'));
+    if (!jaAberto) { drop.classList.add('aberto'); btn.classList.add('ativo'); }
+}
+
+function toggleKanFiltro(tipo, valor) {
+    const sel = _kanMsCfg[tipo].sel();
+    if (sel.has(valor)) sel.delete(valor); else sel.add(valor);
+    _renderKanMs(tipo);
+    renderizar();
+}
+
+function selectAllKan(tipo, selecionar) {
+    const cfg = _kanMsCfg[tipo];
+    const all = cfg.allFn(), sel = cfg.sel();
+    sel.clear();
+    if (selecionar) all.forEach(v => sel.add(v));
+    _renderKanMs(tipo);
+    renderizar();
+}
 
 // ──────────────────────────────────────────────────────────────
 // MULTI-SELECT FILTROS FINANCEIRO
