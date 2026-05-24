@@ -2898,18 +2898,42 @@ function _renderListaMetasVendedor() {
         el.innerHTML = '<p style="color:#bbb; font-size:13px; text-align:center; padding:10px 0;">Selecione um vendedor para ver as metas configuradas.</p>';
         return;
     }
+
     const registros = baseMetasAnuais.filter(r => r.vendedor === vendedor && r.ano === ano);
+    const NM = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(Math.round(v));
+
     if (registros.length === 0) {
-        el.innerHTML = '<p style="color:#bbb; font-size:13px; text-align:center; padding:10px 0;">Nenhuma meta configurada para este vendedor/ano.</p>';
+        // Se o vendedor tem meta hardcoded no METAS_MENSAIS, exibe como "Meta Padrão"
+        // (situação de quem ainda não migrou para o banco)
+        const fb = METAS_MENSAIS[vendedor];
+        if (fb) {
+            const fat = (fb.trading||0)+(fb.armazem||0)+(fb.transporte||0)+(fb.analytics||0);
+            const tipo = vendedor === 'PRÉ VENDAS' ? 'SDR_TEAM' : 'VENDEDOR';
+            el.innerHTML = `<div class="meta-lista-item" style="border-color:#f5c97a; background:#fffbf0;">
+                <div>
+                    <span class="meta-tag" style="background:#fff3cd; color:#856404; border:1px solid #f5c97a;">PADRÃO</span>
+                    <span style="font-size:12px; font-weight:700; color:#333;">Jan → Dez ${ano}</span>
+                    <span style="font-size:11px; color:#888; margin-left:10px;">
+                        ${Math.round(fb.reuniao||0)} reun/mês${fat > 0 ? ' · R$ '+_fmtM(fat)+'/mês' : ''}
+                    </span>
+                    <span style="font-size:10px; color:#e67e22; margin-left:8px; font-style:italic;">Meta padrão — clique em Salvar no Banco para personalizar</span>
+                </div>
+                <div>
+                    <button type="button" class="btn-mini btn-edit-mini" onclick="cmPreencherFallback('${vendedor}', ${ano}, '${tipo}')">SALVAR NO BANCO</button>
+                </div>
+            </div>`;
+        } else {
+            el.innerHTML = '<p style="color:#bbb; font-size:13px; text-align:center; padding:10px 0;">Nenhuma meta configurada para este vendedor/ano.</p>';
+        }
         return;
     }
-    const NM = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
     el.innerHTML = registros.map(r => {
         const tCls   = r.tipo === 'SDR' ? 'sdr' : r.tipo === 'SDR_TEAM' ? 'sdr-team' : 'vendedor';
         const tLabel = r.tipo === 'SDR' ? 'SDR'  : r.tipo === 'SDR_TEAM' ? 'PRÉ VENDAS' : 'Vendedor';
         const per    = `${NM[(r.mes_inicio||1)-1]} → ${NM[(r.mes_fim||12)-1]} ${r.ano}`;
         const fat    = (parseFloat(r.trading_mes)||0)+(parseFloat(r.armazem_mes)||0)+(parseFloat(r.transporte_mes)||0)+(parseFloat(r.analytics_mes)||0);
-        const _fmtM  = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(Math.round(v));
         return `<div class="meta-lista-item">
             <div>
                 <span class="meta-tag ${tCls}">${tLabel}</span>
@@ -2924,6 +2948,22 @@ function _renderListaMetasVendedor() {
             </div>
         </div>`;
     }).join('');
+}
+
+function cmPreencherFallback(vendedor, ano, tipo) {
+    const m = METAS_MENSAIS[vendedor];
+    if (!m) return;
+    document.getElementById('cmAno').value         = String(ano);
+    document.getElementById('cmTipo').value         = tipo || 'VENDEDOR';
+    document.getElementById('cmMesInicio').value    = String(m.mes_inicio || 1);
+    document.getElementById('cmMesFim').value       = String(m.mes_fim    || 12);
+    document.getElementById('cmReuniaoMes').value   = m.reuniao    || 0;
+    document.getElementById('cmPropostasMes').value = m.propostas  || 0;
+    document.getElementById('cmTrading').value      = m.trading    || 0;
+    document.getElementById('cmArmazem').value      = m.armazem    || 0;
+    document.getElementById('cmTransporte').value   = m.transporte || 0;
+    document.getElementById('cmAnalytics').value    = m.analytics  || 0;
+    onChangeTipoMeta();
 }
 
 document.getElementById('formArea').addEventListener('submit', async (e) => {
