@@ -275,6 +275,17 @@ header {
 .radar-filtros { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
 .radar-filtros select { padding:7px 12px; border-radius:20px; border:1.5px solid #e0e0e0; font-size:12px; font-weight:600; color:#555; background:white; cursor:pointer; }
 .radar-lista { display:flex; flex-direction:column; gap:8px; }
+/* ── MODAL CONFIGURAR METAS ── */
+.meta-lista-item { background:#f9f9f9; border-radius:8px; padding:10px 14px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #ede9f5; }
+.meta-tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-right:6px; }
+.meta-tag.vendedor { background:#e8f4fd; color:#1565c0; }
+.meta-tag.sdr { background:#fce4ec; color:#c62828; }
+.meta-tag.sdr-team { background:#e8f5e9; color:#2e7d32; }
+.meta-grp-sep { font-size:11px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:.4px; margin:14px 0 8px; padding-bottom:4px; border-bottom:1px solid #eee; }
+.vend-tipo-badge { display:inline-block; font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px; margin-left:6px; }
+.vend-tipo-badge.sdr { background:#fce4ec; color:#c62828; }
+.vend-tipo-badge.vendedor { background:#e8f4fd; color:#1565c0; }
+
 .radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
 .radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
 .radar-del-btn { background:none; border:none; cursor:pointer; color:#ccc; font-size:16px; padding:4px; border-radius:6px; transition:color .2s, background .2s; line-height:1; }
@@ -1072,6 +1083,7 @@ header {
                 </div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <button type="button" id="btnComparar" class="btn-header btn-comparar" onclick="toggleModoComparativo()"><span>⚖️</span> Comparar Vendedores</button>
+                    <button type="button" class="btn-header" onclick="abrirModalConfigurarMeta()" style="background:#f7f5fb; color:#422c76; border:1.5px solid #c9b8e8;"><span>🎯</span> Configurar Metas</button>
                     <button type="button" id="btn-lancar-meta" class="btn-header" onclick="abrirModalAtividade()" style="background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9;"><span>📞</span> Registrar Atividade</button>
                 </div>
             </div>
@@ -1977,8 +1989,16 @@ header {
         <h3>Vendedores</h3>
         <form id="formVendedor">
             <input type="hidden" id="vend_id">
-            <div class="form-group"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
-            <div class="modal-footer">
+            <div class="form-row" style="gap:12px;">
+                <div class="form-group" style="flex:2; margin-bottom:0;"><label>Nome do Vendedor</label><input type="text" id="vend_nome" required></div>
+                <div class="form-group" style="flex:1; margin-bottom:0;"><label>Tipo</label>
+                    <select id="vend_tipo" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                        <option value="VENDEDOR">Vendedor Direto</option>
+                        <option value="SDR">SDR (Pré Vendas)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top:14px;">
                 <button type="button" class="btn-header" style="background:#f0f0f0" onclick="fecharModal('modalVendedor'); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value='';">Cancelar</button>
                 <button type="submit" class="btn-header btn-novo-op">Salvar Vendedor</button>
             </div>
@@ -1999,6 +2019,104 @@ header {
             </div>
         </form>
         <div class="lista-auxiliar" id="listaAreasGerenciamento"></div>
+    </div>
+</div>
+
+<!-- ── MODAL CONFIGURAR METAS ANUAIS ── -->
+<div id="modalConfigurarMeta" class="modal">
+    <div class="modal-content" style="max-width:700px;">
+        <div class="modal-header">
+            <h3>🎯 Configurar Metas por Vendedor</h3>
+            <button type="button" class="modal-close" onclick="fecharModal('modalConfigurarMeta')">✕</button>
+        </div>
+
+        <div class="form-row" style="gap:12px; margin-bottom:16px;">
+            <div class="form-group" style="flex:2; margin-bottom:0;">
+                <label>Vendedor</label>
+                <select id="cmVendedor" onchange="_renderListaMetasVendedor()" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                    <option value="">Selecione um vendedor...</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1; margin-bottom:0;">
+                <label>Ano</label>
+                <select id="cmAno" onchange="_renderListaMetasVendedor()" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="cmListaMetas" style="margin-bottom:20px; min-height:50px;"></div>
+
+        <div style="background:#f7f5fb; border-radius:12px; padding:18px; border:1.5px solid #e0d9f5;">
+            <div style="font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.4px; margin-bottom:14px;">
+                <span id="cmFormTitulo">➕ Nova Meta</span>
+            </div>
+            <input type="hidden" id="cmEditId">
+
+            <div class="form-row" style="gap:12px;">
+                <div class="form-group" style="flex:1; margin-bottom:12px;">
+                    <label>Tipo</label>
+                    <select id="cmTipo" onchange="onChangeTipoMeta()" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                        <option value="VENDEDOR">Vendedor Direto</option>
+                        <option value="SDR">SDR (Pré Vendas)</option>
+                        <option value="SDR_TEAM">PRÉ VENDAS (Equipe)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1; margin-bottom:12px;">
+                    <label>Mês Início</label>
+                    <select id="cmMesInicio" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+                        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+                        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1; margin-bottom:12px;">
+                    <label>Mês Fim</label>
+                    <select id="cmMesFim" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+                        <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+                        <option value="10">Outubro</option><option value="11">Novembro</option><option value="12" selected>Dezembro</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" style="gap:12px;">
+                <div class="form-group" style="flex:1; margin-bottom:12px;">
+                    <label>Reuniões / mês</label>
+                    <input type="number" id="cmReuniaoMes" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;">
+                </div>
+                <div class="form-group" id="cmRowPropostas" style="flex:1; margin-bottom:12px;">
+                    <label>Propostas / mês</label>
+                    <input type="number" id="cmPropostasMes" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;">
+                </div>
+            </div>
+
+            <div id="cmRowFaturamento">
+                <div style="font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.3px; margin-bottom:8px;">Faturamento / mês (R$)</div>
+                <div class="form-row" style="gap:12px;">
+                    <div class="form-group" style="flex:1; margin-bottom:12px;"><label>Trading</label><input type="number" id="cmTrading" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;"></div>
+                    <div class="form-group" style="flex:1; margin-bottom:12px;"><label>Armazém</label><input type="number" id="cmArmazem" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;"></div>
+                </div>
+                <div class="form-row" style="gap:12px;">
+                    <div class="form-group" style="flex:1; margin-bottom:4px;"><label>Transporte</label><input type="number" id="cmTransporte" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;"></div>
+                    <div class="form-group" style="flex:1; margin-bottom:4px;"><label>Analytics</label><input type="number" id="cmAnalytics" min="0" step="0.01" value="0" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px; box-sizing:border-box;"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+                <button type="button" id="cmBtnCancelarEdicao" class="btn-header" style="background:#f0f0f0; color:#555; display:none;" onclick="cmCancelarEdicao()">Cancelar Edição</button>
+                <button type="button" class="btn-header" style="background:#422c76; color:white;" onclick="salvarMetaAnual()">💾 Salvar Meta</button>
+            </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top:16px;">
+            <button type="button" class="btn-header" style="background:#f0f0f0;" onclick="fecharModal('modalConfigurarMeta')">Fechar</button>
+        </div>
     </div>
 </div>
 
@@ -2305,14 +2423,55 @@ function _atualizarBadge() {
         : `${ini} – ${fim} ${periodoAno}`;
 }
 
-// ── DICIONÁRIO DE METAS MENSAIS
-const METAS_MENSAIS = {
-    "ANDREA HEUCHLING":  { reuniao: 5,  propostas: 3, trading: 625000.00,    armazem: 600000.00, transporte: 145833.33, analytics: 0 },
-    "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0 },
-    "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0 },
-    "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0 },
-    "PRÉ VENDAS":        { reuniao: 215/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0 }
+// ── DICIONÁRIO DE METAS MENSAIS (fallback hardcoded; sobrescrito por _buildMetasMensais quando metas_anuais existir)
+let METAS_MENSAIS = {
+    "ANDREA HEUCHLING":  { reuniao: 5,  propostas: 3, trading: 625000.00,    armazem: 600000.00, transporte: 145833.33, analytics: 0, mes_inicio: 1, mes_fim: 12 },
+    "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
+    "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
+    "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0, mes_inicio: 1, mes_fim: 12 },
+    "PRÉ VENDAS":        { reuniao: 215/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0, mes_inicio: 1, mes_fim: 12 }
 };
+
+// ── FUNÇÕES DE METAS ANUAIS ──
+function _buildMetasMensais(ano) {
+    if (!baseMetasAnuais || baseMetasAnuais.length === 0) return;
+    const registros = baseMetasAnuais.filter(r => r.ano === ano);
+    if (registros.length === 0) return;
+
+    const novo = {};
+    registros.filter(r => r.tipo !== 'SDR').forEach(r => {
+        novo[r.vendedor] = {
+            reuniao:    parseFloat(r.reuniao_mes)    || 0,
+            propostas:  parseFloat(r.propostas_mes)  || 0,
+            trading:    parseFloat(r.trading_mes)    || 0,
+            armazem:    parseFloat(r.armazem_mes)    || 0,
+            transporte: parseFloat(r.transporte_mes) || 0,
+            analytics:  parseFloat(r.analytics_mes)  || 0,
+            mes_inicio: r.mes_inicio || 1,
+            mes_fim:    r.mes_fim    || 12
+        };
+    });
+    // SDRs: soma reuniao_mes no PRÉ VENDAS (SDR_TEAM)
+    const sdrs = registros.filter(r => r.tipo === 'SDR');
+    if (sdrs.length > 0) {
+        const team = novo['PRÉ VENDAS'] || { reuniao:0, propostas:0, trading:0, armazem:0, transporte:0, analytics:0, mes_inicio:1, mes_fim:12 };
+        team.reuniao += sdrs.reduce((s, r) => s + (parseFloat(r.reuniao_mes) || 0), 0);
+        novo['PRÉ VENDAS'] = team;
+    }
+
+    if (Object.keys(novo).length > 0) {
+        Object.keys(METAS_MENSAIS).forEach(k => { if (!novo[k]) delete METAS_MENSAIS[k]; });
+        Object.assign(METAS_MENSAIS, novo);
+    }
+}
+
+async function carregarMetasAnuais() {
+    try {
+        const { data, error } = await supabaseClient.from('metas_anuais').select('*');
+        if (error) { console.warn('metas_anuais indisponível, usando metas hardcoded:', error.message); return; }
+        baseMetasAnuais = data || [];
+    } catch(e) { console.warn('metas_anuais indisponível:', e); }
+}
 
 // NAVEGAÇÃO ENTRE TELAS
 function navegar(pagina) {
@@ -2574,6 +2733,8 @@ let base=[];
 let baseMetasMensais=[];
 let baseResMensais = [];
 let baseAtividades = [];
+let baseMetasAnuais = [];
+let _listaVendedores = [];
 let charts={};
 
 function abrirModal(id){ const m = document.getElementById(id); if(m) m.style.display = 'block'; }
@@ -2594,13 +2755,23 @@ function toggleMotivoPerda() {
 // ---- CADASTRO AUXILIARES ----
 document.getElementById('formVendedor').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const id = document.getElementById('vend_id').value;
+    const id   = document.getElementById('vend_id').value;
     const nome = document.getElementById('vend_nome').value.toUpperCase();
+    const tipo = document.getElementById('vend_tipo').value;
     let res;
     if(id) res = await supabaseClient.from('vendedores').update({ nome: nome }).eq('id', id);
-    else res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
-    if(res.error) { showToast("Erro ao salvar vendedor: " + res.error.message, "error"); }
-    else { showToast("Vendedor salvo com sucesso!", "success"); document.getElementById('formVendedor').reset(); document.getElementById('vend_id').value = ""; carregarAuxiliares(); }
+    else   res = await supabaseClient.from('vendedores').insert([{ nome: nome }]);
+    if(res.error) { showToast("Erro ao salvar vendedor: " + res.error.message, "error"); return; }
+    showToast("Vendedor salvo com sucesso!", "success");
+    document.getElementById('formVendedor').reset();
+    document.getElementById('vend_id').value = "";
+    await carregarAuxiliares();
+    if (!id) {
+        showConfirm(`Deseja configurar as metas de ${nome} agora?`, () => {
+            fecharModal('modalVendedor');
+            abrirModalConfigurarMeta(nome, tipo);
+        });
+    }
 });
 
 function deletarVendedor(id) {
@@ -2613,6 +2784,146 @@ function deletarVendedor(id) {
 function prepararEdicaoVendedor(id, nome) {
     document.getElementById('vend_id').value = id;
     document.getElementById('vend_nome').value = nome;
+}
+
+// ── MODAL CONFIGURAR METAS ──
+function abrirModalConfigurarMeta(vendedorPreselect, tipoPreselect) {
+    const cmV = document.getElementById('cmVendedor');
+    if (cmV) {
+        const nomes = [..._listaVendedores, 'PRÉ VENDAS'].sort();
+        cmV.innerHTML = '<option value="">Selecione um vendedor...</option>'
+            + nomes.map(n => `<option value="${n}">${n}</option>`).join('');
+        if (vendedorPreselect) cmV.value = vendedorPreselect;
+    }
+    document.getElementById('cmAno').value = String(periodoAno);
+    if (tipoPreselect) document.getElementById('cmTipo').value = tipoPreselect;
+    cmCancelarEdicao();
+    _renderListaMetasVendedor();
+    abrirModal('modalConfigurarMeta');
+}
+
+function onChangeTipoMeta() {
+    const tipo = document.getElementById('cmTipo').value;
+    const rowFat  = document.getElementById('cmRowFaturamento');
+    const rowProp = document.getElementById('cmRowPropostas');
+    if (tipo === 'SDR' || tipo === 'SDR_TEAM') {
+        if (rowFat)  rowFat.style.display  = 'none';
+        if (rowProp) rowProp.style.display = 'none';
+    } else {
+        if (rowFat)  rowFat.style.display  = '';
+        if (rowProp) rowProp.style.display = '';
+    }
+}
+
+function cmCancelarEdicao() {
+    document.getElementById('cmEditId').value = '';
+    document.getElementById('cmFormTitulo').innerText = '➕ Nova Meta';
+    document.getElementById('cmBtnCancelarEdicao').style.display = 'none';
+    document.getElementById('cmTipo').value = 'VENDEDOR';
+    document.getElementById('cmMesInicio').value = '1';
+    document.getElementById('cmMesFim').value = '12';
+    document.getElementById('cmReuniaoMes').value = '0';
+    document.getElementById('cmPropostasMes').value = '0';
+    document.getElementById('cmTrading').value = '0';
+    document.getElementById('cmArmazem').value = '0';
+    document.getElementById('cmTransporte').value = '0';
+    document.getElementById('cmAnalytics').value = '0';
+    onChangeTipoMeta();
+}
+
+function editarMetaAnual(id) {
+    const r = baseMetasAnuais.find(x => String(x.id) === String(id));
+    if (!r) return;
+    document.getElementById('cmEditId').value = r.id;
+    document.getElementById('cmFormTitulo').innerText = '✏️ Editando Meta';
+    document.getElementById('cmBtnCancelarEdicao').style.display = 'inline-flex';
+    document.getElementById('cmTipo').value         = r.tipo || 'VENDEDOR';
+    document.getElementById('cmMesInicio').value    = String(r.mes_inicio || 1);
+    document.getElementById('cmMesFim').value       = String(r.mes_fim    || 12);
+    document.getElementById('cmReuniaoMes').value   = r.reuniao_mes    || 0;
+    document.getElementById('cmPropostasMes').value = r.propostas_mes  || 0;
+    document.getElementById('cmTrading').value      = r.trading_mes    || 0;
+    document.getElementById('cmArmazem').value      = r.armazem_mes    || 0;
+    document.getElementById('cmTransporte').value   = r.transporte_mes || 0;
+    document.getElementById('cmAnalytics').value    = r.analytics_mes  || 0;
+    onChangeTipoMeta();
+}
+
+async function salvarMetaAnual() {
+    const vendedor = document.getElementById('cmVendedor').value;
+    const ano      = parseInt(document.getElementById('cmAno').value);
+    const editId   = document.getElementById('cmEditId').value;
+    if (!vendedor) { showToast('Selecione um vendedor.', 'error'); return; }
+    const payload = {
+        vendedor,
+        ano,
+        tipo:          document.getElementById('cmTipo').value,
+        mes_inicio:    parseInt(document.getElementById('cmMesInicio').value),
+        mes_fim:       parseInt(document.getElementById('cmMesFim').value),
+        reuniao_mes:   parseFloat(document.getElementById('cmReuniaoMes').value)   || 0,
+        propostas_mes: parseFloat(document.getElementById('cmPropostasMes').value)  || 0,
+        trading_mes:   parseFloat(document.getElementById('cmTrading').value)       || 0,
+        armazem_mes:   parseFloat(document.getElementById('cmArmazem').value)       || 0,
+        transporte_mes:parseFloat(document.getElementById('cmTransporte').value)    || 0,
+        analytics_mes: parseFloat(document.getElementById('cmAnalytics').value)     || 0
+    };
+    let res;
+    if (editId) res = await supabaseClient.from('metas_anuais').update(payload).eq('id', editId);
+    else        res = await supabaseClient.from('metas_anuais').insert([payload]);
+    if (res.error) { showToast('Erro ao salvar meta: ' + res.error.message, 'error'); return; }
+    showToast(editId ? 'Meta atualizada!' : 'Meta salva!', 'success');
+    await carregarMetasAnuais();
+    cmCancelarEdicao();
+    _renderListaMetasVendedor();
+    renderizarMetas();
+}
+
+async function deletarMetaAnual(id) {
+    showConfirm('Excluir esta meta?', async () => {
+        const { error } = await supabaseClient.from('metas_anuais').delete().eq('id', id);
+        if (error) { showToast('Erro ao excluir: ' + error.message, 'error'); return; }
+        showToast('Meta excluída.', 'info');
+        await carregarMetasAnuais();
+        _renderListaMetasVendedor();
+        renderizarMetas();
+    });
+}
+
+function _renderListaMetasVendedor() {
+    const vendedor = document.getElementById('cmVendedor').value;
+    const ano      = parseInt(document.getElementById('cmAno').value);
+    const el       = document.getElementById('cmListaMetas');
+    if (!el) return;
+    if (!vendedor) {
+        el.innerHTML = '<p style="color:#bbb; font-size:13px; text-align:center; padding:10px 0;">Selecione um vendedor para ver as metas configuradas.</p>';
+        return;
+    }
+    const registros = baseMetasAnuais.filter(r => r.vendedor === vendedor && r.ano === ano);
+    if (registros.length === 0) {
+        el.innerHTML = '<p style="color:#bbb; font-size:13px; text-align:center; padding:10px 0;">Nenhuma meta configurada para este vendedor/ano.</p>';
+        return;
+    }
+    const NM = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    el.innerHTML = registros.map(r => {
+        const tCls   = r.tipo === 'SDR' ? 'sdr' : r.tipo === 'SDR_TEAM' ? 'sdr-team' : 'vendedor';
+        const tLabel = r.tipo === 'SDR' ? 'SDR'  : r.tipo === 'SDR_TEAM' ? 'PRÉ VENDAS' : 'Vendedor';
+        const per    = `${NM[(r.mes_inicio||1)-1]} → ${NM[(r.mes_fim||12)-1]} ${r.ano}`;
+        const fat    = (parseFloat(r.trading_mes)||0)+(parseFloat(r.armazem_mes)||0)+(parseFloat(r.transporte_mes)||0)+(parseFloat(r.analytics_mes)||0);
+        const _fmtM  = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(Math.round(v));
+        return `<div class="meta-lista-item">
+            <div>
+                <span class="meta-tag ${tCls}">${tLabel}</span>
+                <span style="font-size:12px; font-weight:700; color:#333;">${per}</span>
+                <span style="font-size:11px; color:#888; margin-left:10px;">
+                    ${Math.round(r.reuniao_mes||0)} reun/mês${fat > 0 ? ' · R$ '+_fmtM(fat)+'/mês' : ''}
+                </span>
+            </div>
+            <div style="display:flex; gap:6px;">
+                <button type="button" class="btn-mini btn-edit-mini" onclick="editarMetaAnual('${r.id}')">EDITAR</button>
+                <button type="button" class="btn-mini btn-del-mini" onclick="deletarMetaAnual('${r.id}')">EXCLUIR</button>
+            </div>
+        </div>`;
+    }).join('');
 }
 
 document.getElementById('formArea').addEventListener('submit', async (e) => {
@@ -2949,6 +3260,9 @@ document.getElementById('formMetasInput').addEventListener('submit', async (e) =
 });
 
 function renderizarMetas() {
+    // Rebuild METAS_MENSAIS do banco (se disponível)
+    _buildMetasMensais(periodoAno);
+
     // No modo comparativo, atualiza o comparativo (período pode ter mudado) e sai
     if (_modoComparativo) { renderizarComparativo(); return; }
 
@@ -2987,9 +3301,21 @@ function renderizarMetas() {
 
     const metaFaturamentoMensal = metaMensal.trading + metaMensal.armazem + metaMensal.transporte + metaMensal.analytics;
 
+    // ── Meta de reuniões do período respeitando mes_inicio por vendedor ──
+    let _reuniaoMetaPeriodo = 0;
+    for (let _m = periodoMesInicio; _m <= periodoMesFim; _m++) {
+        if (fV) {
+            const vm = METAS_MENSAIS[fV] || {};
+            if (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) _reuniaoMetaPeriodo += (vm.reuniao||0);
+        } else {
+            _reuniaoMetaPeriodo += Object.values(METAS_MENSAIS).reduce((s, vm) =>
+                (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) ? s + (vm.reuniao||0) : s, 0);
+        }
+    }
+
     // ── Meta do período e meta anual (para os gráficos contextuais) ──
     const metaPeriodo = {
-        reuniao:    metaMensal.reuniao    * numMeses,
+        reuniao:    _reuniaoMetaPeriodo,
         propostas:  metaMensal.propostas  * numMeses,
         trading:    metaMensal.trading    * numMeses,
         armazem:    metaMensal.armazem    * numMeses,
@@ -3241,14 +3567,21 @@ function renderizarMetas() {
 
     for (let m = periodoMesInicio; m <= periodoMesFim; m++) {
         labelsGraf3.push(NOMES_MESES_SHORT[m - 1]);
-        arrayMetaReuniao.push(Math.round(metaMensal.reuniao));
+
+        let metaMes;
+        if (fV) {
+            const vm = METAS_MENSAIS[fV] || {};
+            metaMes = (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? Math.round(vm.reuniao||0) : 0;
+        } else {
+            metaMes = Math.round(Object.values(METAS_MENSAIS).reduce((s, vm) =>
+                (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? s + (vm.reuniao||0) : s, 0));
+        }
+        arrayMetaReuniao.push(metaMes);
 
         // Híbrido: histórico até Abr/2026, atividades a partir de Mai/2026
         const realizado = _realReuniao(fV || null, periodoAno, m);
         arrayRealReuniao.push(realizado);
-        arrayAcingPct.push(
-            metaMensal.reuniao > 0 ? +((realizado / metaMensal.reuniao) * 100).toFixed(1) : 0
-        );
+        arrayAcingPct.push(metaMes > 0 ? +((realizado / metaMes) * 100).toFixed(1) : 0);
     }
 
     // Cores das barras: verde se bateu, vermelho se ficou abaixo, cinza se não lançado
@@ -3257,8 +3590,8 @@ function renderizarMetas() {
         return v >= arrayMetaReuniao[i] ? '#27ae60' : '#ff2f69';
     });
 
-    // Totais do período para o badge
-    const totalMetaReunPeriodo = Math.round(metaPeriodo.reuniao);
+    // Totais do período para o badge (usa arrayMetaReuniao para refletir mes_inicio por vendedor)
+    const totalMetaReunPeriodo = arrayMetaReuniao.reduce((a, b) => a + b, 0);
     const totalRealReunPeriodo = arrayRealReuniao.reduce((a, b) => a + b, 0);
     const percAtingReun = totalMetaReunPeriodo > 0
         ? ((totalRealReunPeriodo / totalMetaReunPeriodo) * 100).toFixed(1) : 0;
@@ -3467,11 +3800,14 @@ function renderizarComparativo() {
             return p.mes >= periodoMesInicio && p.mes <= periodoMesFim;
         });
 
-        const meta = METAS_MENSAIS[v] || { reuniao:0, propostas:0, trading:0, armazem:0, transporte:0, analytics:0 };
+        const meta = METAS_MENSAIS[v] || { reuniao:0, propostas:0, trading:0, armazem:0, transporte:0, analytics:0, mes_inicio:1, mes_fim:12 };
+        const efI = Math.max(periodoMesInicio, meta.mes_inicio || 1);
+        const efF = Math.min(periodoMesFim,    meta.mes_fim    || 12);
+        const activeMeses = Math.max(0, efF - efI + 1);
         const metaP = {
-            reuniao:    meta.reuniao    * numMeses,
-            propostas:  meta.propostas  * numMeses,
-            faturamento:(meta.trading + meta.armazem + meta.transporte + meta.analytics) * numMeses
+            reuniao:    Math.round(meta.reuniao    * activeMeses),
+            propostas:  Math.round(meta.propostas  * activeMeses),
+            faturamento:(meta.trading + meta.armazem + meta.transporte + meta.analytics) * activeMeses
         };
 
         let real = { reuniao:0, propostas:0, faturamento:0 };
@@ -4144,8 +4480,16 @@ async function carregarAuxiliares(){
     fill('op_vendedor', v || [], "Selecione...");
     fill('op_area', a || [], "Selecione...");
     fill('meta_input_vendedor', v || [], "Vendedor...");
-    fill('ativ_vendedor', v || [], "Selecione..."); 
-    
+    fill('ativ_vendedor', v || [], "Selecione...");
+
+    _listaVendedores = (v || []).map(x => x.nome);
+    const cmV = document.getElementById('cmVendedor');
+    if (cmV) {
+        const nomes = [..._listaVendedores, 'PRÉ VENDAS'].sort();
+        cmV.innerHTML = '<option value="">Selecione um vendedor...</option>'
+            + nomes.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
+
     const listV = document.getElementById('listaVendedoresGerenciamento');
     if(listV) {
         if(v && v.length > 0) listV.innerHTML = v.map(i => `<div class="item-auxiliar"><span>${i.nome}</span><div><button type="button" class="btn-mini btn-edit-mini" onclick="prepararEdicaoVendedor('${i.id}', '${i.nome}')">EDITAR</button><button type="button" class="btn-mini btn-del-mini" onclick="deletarVendedor('${i.id}')">EXCLUIR</button></div></div>`).join('');
@@ -4173,6 +4517,9 @@ async function carregarDados(){
 
     const { data: ativs } = await supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false });
     baseAtividades = ativs || [];
+
+    await carregarMetasAnuais();
+
     // Pré-seleciona o mês atual no filtro do radar
     const _rFM = document.getElementById('rFiltroMes');
     if (_rFM && !_rFM.value) _rFM.value = String(new Date().getMonth() + 1);
