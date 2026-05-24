@@ -275,8 +275,10 @@ header {
 .radar-filtros { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
 .radar-filtros select { padding:7px 12px; border-radius:20px; border:1.5px solid #e0e0e0; font-size:12px; font-weight:600; color:#555; background:white; cursor:pointer; }
 .radar-lista { display:flex; flex-direction:column; gap:8px; }
-.radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
-.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
+.radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
+.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
+.radar-del-btn { background:none; border:none; cursor:pointer; color:#ccc; font-size:16px; padding:4px; border-radius:6px; transition:color .2s, background .2s; line-height:1; }
+.radar-del-btn:hover { color:#c0392b; background:#fce4ec; }
 .radar-item:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); }
 .radar-badge { display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.5px; white-space:nowrap; }
 .radar-badge.reuniao  { background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9; }
@@ -1225,6 +1227,7 @@ header {
                         <span>CNPJ</span>
                         <span>Contato / Cargo</span>
                         <span>Vendedor</span>
+                        <span></span>
                     </div>
 
                     <!-- Lista -->
@@ -4469,6 +4472,16 @@ async function salvarAtividade(e) {
     showToast('Atividade registrada com sucesso!', 'success');
 }
 
+async function deletarAtividade(id) {
+    showConfirm('Deseja realmente excluir esta atividade?', async () => {
+        const { error } = await supabaseClient.from('atividades').delete().eq('id', id);
+        if (error) { showToast('Erro ao excluir: ' + error.message, 'error'); return; }
+        baseAtividades = baseAtividades.filter(a => String(a.id) !== String(id));
+        renderizarRadar();
+        showToast('Atividade excluída.', 'info');
+    });
+}
+
 function renderizarRadar() {
     const mesAtual = new Date().getMonth() + 1;
     const anoAtual = new Date().getFullYear();
@@ -4531,6 +4544,9 @@ function renderizarRadar() {
             </div>
             <div>
                 <div style="font-size:12px; font-weight:600; color:#422c76;">👤 ${a.vendedor||'—'}</div>
+            </div>
+            <div>
+                <button type="button" class="radar-del-btn" onclick="deletarAtividade('${a.id}')" title="Excluir">🗑</button>
             </div>
         </div>`).join('');
 }
