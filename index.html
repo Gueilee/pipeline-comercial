@@ -275,7 +275,8 @@ header {
 .radar-filtros { display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
 .radar-filtros select { padding:7px 12px; border-radius:20px; border:1.5px solid #e0e0e0; font-size:12px; font-weight:600; color:#555; background:white; cursor:pointer; }
 .radar-lista { display:flex; flex-direction:column; gap:8px; }
-.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:90px 1fr 1fr 120px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
+.radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
+.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
 .radar-item:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); }
 .radar-badge { display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.5px; white-space:nowrap; }
 .radar-badge.reuniao  { background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9; }
@@ -1055,57 +1056,6 @@ header {
                 </div>
             </div>
 
-            <!-- SEÇÃO 06: Radar de Leads -->
-            <div class="home-section" id="secRadarLeads">
-                <div class="home-section-header">
-                    <div class="home-section-badge" style="background:#1565c0;">06</div>
-                    <div class="hsh-text">
-                        <h3>Radar de Leads</h3>
-                        <p>Atividades de prospecção — reuniões e propostas registradas pelo time</p>
-                    </div>
-                </div>
-
-                <!-- KPIs -->
-                <div class="radar-kpis">
-                    <div class="radar-kpi" style="border-left-color:#1565c0;">
-                        <span class="radar-kpi-val" id="rKpiReunioes">—</span>
-                        <span class="radar-kpi-label">Reuniões este mês</span>
-                    </div>
-                    <div class="radar-kpi" style="border-left-color:#c62828;">
-                        <span class="radar-kpi-val" id="rKpiPropostas">—</span>
-                        <span class="radar-kpi-label">Propostas este mês</span>
-                    </div>
-                    <div class="radar-kpi" style="border-left-color:#422c76;">
-                        <span class="radar-kpi-val" id="rKpiEmpresas">—</span>
-                        <span class="radar-kpi-label">Empresas contactadas este mês</span>
-                    </div>
-                </div>
-
-                <!-- Filtros -->
-                <div class="radar-filtros">
-                    <select id="rFiltroMes" onchange="renderizarRadar()">
-                        <option value="">Todos os meses</option>
-                        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
-                        <option value="3">Março</option><option value="4">Abril</option>
-                        <option value="5">Maio</option><option value="6">Junho</option>
-                        <option value="7">Julho</option><option value="8">Agosto</option>
-                        <option value="9">Setembro</option><option value="10">Outubro</option>
-                        <option value="11">Novembro</option><option value="12">Dezembro</option>
-                    </select>
-                    <select id="rFiltroTipo" onchange="renderizarRadar()">
-                        <option value="">Todos os tipos</option>
-                        <option value="REUNIÃO">Reuniões</option>
-                        <option value="PROPOSTA">Propostas</option>
-                    </select>
-                    <select id="rFiltroVend" onchange="renderizarRadar()">
-                        <option value="">Todos os vendedores</option>
-                    </select>
-                </div>
-
-                <!-- Lista -->
-                <div class="radar-lista" id="radarLista"></div>
-            </div>
-
         </div>
 
         <div id="page-kanban">
@@ -1219,6 +1169,66 @@ header {
                         <span id="badgeChartPeriodo" style="font-size:11px; color:#888; font-weight:600;"></span>
                     </div>
                     <canvas id="chartMetaVsReal"></canvas>
+                </div>
+
+                <!-- RADAR DE LEADS -->
+                <div style="margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div>
+                            <h3 style="margin:0; color:var(--lilas); font-size:16px; font-weight:700;">Radar de Leads</h3>
+                            <p style="margin:4px 0 0 0; font-size:12px; color:#999;">Reuniões e propostas de prospecção registradas pelo time</p>
+                        </div>
+                    </div>
+
+                    <!-- KPIs -->
+                    <div class="radar-kpis" style="margin-bottom:20px;">
+                        <div class="radar-kpi" style="border-left-color:#1565c0;">
+                            <span class="radar-kpi-val" id="rKpiReunioes">—</span>
+                            <span class="radar-kpi-label">Reuniões este mês</span>
+                        </div>
+                        <div class="radar-kpi" style="border-left-color:#c62828;">
+                            <span class="radar-kpi-val" id="rKpiPropostas">—</span>
+                            <span class="radar-kpi-label">Propostas este mês</span>
+                        </div>
+                        <div class="radar-kpi" style="border-left-color:#422c76;">
+                            <span class="radar-kpi-val" id="rKpiEmpresas">—</span>
+                            <span class="radar-kpi-label">Empresas contactadas este mês</span>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="radar-filtros" style="margin-bottom:12px;">
+                        <select id="rFiltroMes" onchange="renderizarRadar()">
+                            <option value="">Todos os meses</option>
+                            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                            <option value="3">Março</option><option value="4">Abril</option>
+                            <option value="5">Maio</option><option value="6">Junho</option>
+                            <option value="7">Julho</option><option value="8">Agosto</option>
+                            <option value="9">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                        <select id="rFiltroTipo" onchange="renderizarRadar()">
+                            <option value="">Todos os tipos</option>
+                            <option value="REUNIÃO">Reuniões</option>
+                            <option value="PROPOSTA">Propostas</option>
+                        </select>
+                        <select id="rFiltroVend" onchange="renderizarRadar()">
+                            <option value="">Todos os vendedores</option>
+                        </select>
+                    </div>
+
+                    <!-- Cabeçalho da tabela -->
+                    <div class="radar-table-header">
+                        <span>Tipo</span>
+                        <span>Data</span>
+                        <span>Empresa</span>
+                        <span>CNPJ</span>
+                        <span>Contato / Cargo</span>
+                        <span>Vendedor</span>
+                    </div>
+
+                    <!-- Lista -->
+                    <div class="radar-lista" id="radarLista"></div>
                 </div>
             </div>
         </div>
@@ -2331,6 +2341,7 @@ function navegar(pagina) {
         document.getElementById('page-metas').classList.add('active-page');
         document.getElementById('nav-metas').classList.add('active');
         renderizarMetas();
+        renderizarRadar();
     } else if (pagina === 'financeiro') {
         document.getElementById('page-financeiro').classList.add('active-page');
         document.getElementById('nav-financeiro').classList.add('active');
@@ -4506,18 +4517,20 @@ function renderizarRadar() {
         <div class="radar-item">
             <div>
                 <span class="radar-badge ${a.tipo==='REUNIÃO'?'reuniao':'proposta'}">${a.tipo}</span>
-                <div style="margin-top:6px; font-size:11px; color:#888;">${fmtData(a.data_atividade)}</div>
             </div>
+            <div style="font-size:12px; font-weight:600; color:#555;">${fmtData(a.data_atividade)}</div>
             <div>
                 <div class="radar-cliente">${a.cliente}</div>
-                <div class="radar-cnpj">${a.cnpj||'CNPJ não informado'}</div>
+            </div>
+            <div>
+                <div class="radar-cnpj" style="font-size:12px; color:#666;">${a.cnpj||'—'}</div>
             </div>
             <div>
                 <div class="radar-contato">${a.nome_contato||'—'}</div>
                 <div class="radar-cargo">${a.cargo_contato||''}</div>
             </div>
-            <div class="radar-meta">
-                <div class="radar-vend">👤 ${a.vendedor}</div>
+            <div>
+                <div style="font-size:12px; font-weight:600; color:#422c76;">👤 ${a.vendedor||'—'}</div>
             </div>
         </div>`).join('');
 }
