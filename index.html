@@ -4469,6 +4469,7 @@ async function salvarAtividade(e) {
     baseAtividades.unshift(ins);
     fecharModal('modalAtividade');
     renderizarRadar();
+    renderizarMetas();
     showToast('Atividade registrada com sucesso!', 'success');
 }
 
@@ -4478,6 +4479,7 @@ async function deletarAtividade(id) {
         if (error) { showToast('Erro ao excluir: ' + error.message, 'error'); return; }
         baseAtividades = baseAtividades.filter(a => String(a.id) !== String(id));
         renderizarRadar();
+        renderizarMetas();
         showToast('Atividade excluída.', 'info');
     });
 }
