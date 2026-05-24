@@ -2917,10 +2917,9 @@ function _renderListaMetasVendedor() {
                     <span style="font-size:11px; color:#888; margin-left:10px;">
                         ${Math.round(fb.reuniao||0)} reun/mês${fat > 0 ? ' · R$ '+_fmtM(fat)+'/mês' : ''}
                     </span>
-                    <span style="font-size:10px; color:#e67e22; margin-left:8px; font-style:italic;">Meta padrão — clique em Salvar no Banco para personalizar</span>
                 </div>
                 <div>
-                    <button type="button" class="btn-mini btn-edit-mini" onclick="cmPreencherFallback('${vendedor}', ${ano}, '${tipo}')">SALVAR NO BANCO</button>
+                    <button type="button" class="btn-mini btn-edit-mini" onclick="cmPreencherFallback('${vendedor}', ${ano}, '${tipo}')">EDITAR</button>
                 </div>
             </div>`;
         } else {
