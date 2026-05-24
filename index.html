@@ -2311,7 +2311,7 @@ const METAS_MENSAIS = {
     "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0 },
     "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0 },
     "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0 },
-    "PRÉ VENDAS":        { reuniao: 15, propostas: 0, trading: 0,            armazem: 0,         transporte: 0,         analytics: 0 }
+    "PRÉ VENDAS":        { reuniao: 215/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0 }
 };
 
 // NAVEGAÇÃO ENTRE TELAS
@@ -3089,7 +3089,7 @@ function renderizarMetas() {
     document.getElementById('metaPercAtingimento').style.color = percAting >= 100 ? '#27ae60' : (percAting > 80 ? '#f39c12' : '#c0392b');
 
     document.getElementById('metaRealizadoTotal').innerText = `R$ ${realPeriodo.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-    document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${metaPeriodo.reuniao}`;
+    document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${Math.round(metaPeriodo.reuniao)}`;
     document.getElementById('metaPropostasYTD').innerText   = `${realPeriodo.propostas} / ${metaPeriodo.propostas}`;
 
     // ── Per-vendedor: arrays mensais de faturado e pedidos ──
@@ -3241,7 +3241,7 @@ function renderizarMetas() {
 
     for (let m = periodoMesInicio; m <= periodoMesFim; m++) {
         labelsGraf3.push(NOMES_MESES_SHORT[m - 1]);
-        arrayMetaReuniao.push(metaMensal.reuniao);
+        arrayMetaReuniao.push(Math.round(metaMensal.reuniao));
 
         // Híbrido: histórico até Abr/2026, atividades a partir de Mai/2026
         const realizado = _realReuniao(fV || null, periodoAno, m);
@@ -3258,7 +3258,7 @@ function renderizarMetas() {
     });
 
     // Totais do período para o badge
-    const totalMetaReunPeriodo = metaMensal.reuniao * numMeses;
+    const totalMetaReunPeriodo = Math.round(metaPeriodo.reuniao);
     const totalRealReunPeriodo = arrayRealReuniao.reduce((a, b) => a + b, 0);
     const percAtingReun = totalMetaReunPeriodo > 0
         ? ((totalRealReunPeriodo / totalMetaReunPeriodo) * 100).toFixed(1) : 0;
@@ -3514,7 +3514,7 @@ function renderizarComparativo() {
             <div class="comp-mini-stat">
                 <span class="comp-mini-stat-label">Reuniões</span>
                 <div class="comp-mini-track"><div class="comp-mini-fill" style="width:${fillReun}%;background:${d.cor}"></div></div>
-                <span class="comp-mini-val">${d.real.reuniao}/${d.meta.reuniao}</span>
+                <span class="comp-mini-val">${d.real.reuniao}/${Math.round(d.meta.reuniao)}</span>
             </div>` : ''}
             ${fillProp !== null ? `
             <div class="comp-mini-stat">
