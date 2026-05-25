@@ -1305,9 +1305,17 @@ header {
                 <select id="filtroFinTipo" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white;">
                     <option value="">Todos os Tipos</option>
                     <option value="CLIENTES NOMINADOS">Nominados</option>
-                    <option value="NOVOS CLIENTES">Não Nominados / Novos</option>
-                    <option value="CLIENTES NOVOS">Clientes Novos (TRP/ARM)</option>
-                    <option value="ANALYTICS">Analytics</option>
+                    <option value="CLIENTES NÃO NOMINADOS">Não Nominados</option>
+                    <option value="CLIENTES < 12 MESES">&lt; 12 Meses</option>
+                    <option value="CLIENTES NOVOS">Novos (ARM/TRP)</option>
+                </select>
+
+                <select id="filtroFinQuatroPL" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white;">
+                    <option value="">Todos 4PL</option>
+                    <option value="OUTROS">Sem 4PL</option>
+                    <option value="1 BU">1 BU</option>
+                    <option value="2 BU">2 BU</option>
+                    <option value="3 BU">3 BU</option>
                 </select>
 
                 <select id="filtroFinStatus" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white;">
@@ -5205,7 +5213,8 @@ function toggleChipCompFin(valor, idx) {
 function _agregarFinPorChave(chave) {
     const field = _dimCompFin === 'bu' ? 'bu' : 'categoria';
     const currentMonthIndex = new Date().getMonth();
-    const fTipo = document.getElementById('filtroFinTipo')?.value.toUpperCase() || '';
+    const fTipo     = document.getElementById('filtroFinTipo')?.value.toUpperCase() || '';
+    const fQuatroPL = (document.getElementById('filtroFinQuatroPL')?.value || '').toUpperCase();
     let planoAnual=0, realAnual=0, planoYTD=0, realYTD=0;
     const mensal = new Array(12).fill(0);
     const mensalPlano = new Array(12).fill(0);
@@ -5213,8 +5222,10 @@ function _agregarFinPorChave(chave) {
     baseResMensais.forEach(r => {
         const val = r[field] ? r[field].toUpperCase().replace(/\s+/g,' ').trim() : null;
         if (val !== chave) return;
-        const tipo = r.tipo ? r.tipo.toUpperCase().replace(/\s+/g,' ').trim() : '';
-        if (fTipo && tipo !== fTipo) return;
+        const tipo  = r.tipo ? r.tipo.toUpperCase().replace(/\s+/g,' ').trim() : '';
+        const q4pl  = r.quatro_pl ? r.quatro_pl.toUpperCase().trim() : 'OUTROS';
+        if (fTipo     && tipo !== fTipo)       return;
+        if (fQuatroPL && q4pl !== fQuatroPL)   return;
         const mesIdx = (r.mes_numero || 1) - 1;
         const plan = parseFloat(r.valor_planejado) || 0;
         const real = parseFloat(r.valor_realizado) || 0;
@@ -6444,9 +6455,10 @@ function renderizarFinanceiro() {
     let faturamentoPorBU = {};
     let hierarquia = {};
 
-    const fFinCli    = document.getElementById('filtroFinCliente').value.toLowerCase();
-    const fFinTipo   = document.getElementById('filtroFinTipo').value.toUpperCase();
-    const fFinStatus = document.getElementById('filtroFinStatus').value.toUpperCase();
+    const fFinCli      = document.getElementById('filtroFinCliente').value.toLowerCase();
+    const fFinTipo     = document.getElementById('filtroFinTipo').value.toUpperCase();
+    const fFinQuatroPL = (document.getElementById('filtroFinQuatroPL')?.value || '').toUpperCase();
+    const fFinStatus   = document.getElementById('filtroFinStatus').value.toUpperCase();
     const buFiltroAtivo  = _allFinBUs.length  > 0 && _finBUsSelecionadas.size  < _allFinBUs.length;
     const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
     const currentMonthIndex = new Date().getMonth(); // 0=Jan … 11=Dez
@@ -6457,12 +6469,14 @@ function renderizarFinanceiro() {
         const cliName= rm.cliente  || 'Sem Nome';
         const status = _statusEfetivo(rm);
         const tipo   = rm.tipo     ? rm.tipo.toUpperCase().replace(/\s+/g,' ').trim()     : '';
+        const q4pl   = rm.quatro_pl ? rm.quatro_pl.toUpperCase().trim() : 'OUTROS';
 
-        if (fFinCli    && !cliName.toLowerCase().includes(fFinCli)) return;
-        if (buFiltroAtivo  && !_finBUsSelecionadas.has(bu))         return;
-        if (catFiltroAtivo && !_finCatsSelecionadas.has(categoria))  return;
-        if (fFinTipo   && tipo   !== fFinTipo)   return;
-        if (fFinStatus && status !== fFinStatus) return;
+        if (fFinCli      && !cliName.toLowerCase().includes(fFinCli)) return;
+        if (buFiltroAtivo  && !_finBUsSelecionadas.has(bu))           return;
+        if (catFiltroAtivo && !_finCatsSelecionadas.has(categoria))    return;
+        if (fFinTipo     && tipo  !== fFinTipo)     return;
+        if (fFinQuatroPL && q4pl  !== fFinQuatroPL) return;
+        if (fFinStatus   && status !== fFinStatus)  return;
 
         const mesIdx  = (rm.mes_numero || 1) - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
