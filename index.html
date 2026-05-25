@@ -1484,25 +1484,73 @@ header {
     </div>
 </div>
 
-<!-- Modal: Confirmar registro no Financeiro ao fechar negócio -->
+<!-- Modal: Registrar cliente fechado no Financeiro -->
 <div id="modalRegistrarFechado" class="modal">
-    <div class="modal-content" style="width:480px;">
-        <h3>🎉 Negócio Fechado!</h3>
-        <p style="font-size:13px; color:#666; margin-top:-8px;">Deseja registrar este cliente no <strong>Financeiro</strong> com 12 meses (plano zero)?</p>
-        <div style="background:#f8f9fa; border-radius:10px; padding:14px 16px; margin-bottom:16px; border-left:4px solid #27ae60;">
-            <div style="font-size:13px; color:#555; margin-bottom:4px;">Cliente</div>
-            <div id="rfClienteNome" style="font-size:15px; font-weight:700; color:var(--lilas);"></div>
-            <div id="rfBUNome" style="font-size:12px; color:#888; margin-top:2px;"></div>
+    <div class="modal-content" style="width:520px; max-height:90vh; overflow-y:auto;">
+        <div class="chk-header">
+            <div class="chk-badge" style="background:linear-gradient(135deg,#27ae60,#1e8449); font-size:22px;">🎉</div>
+            <div>
+                <h3 style="margin:0; font-size:17px;">Negócio Fechado!</h3>
+                <p style="margin:3px 0 0; color:#666; font-size:13px;">Configure como este cliente vai aparecer no <strong>Financeiro</strong></p>
+            </div>
         </div>
-        <div class="form-group">
-            <label>CATEGORIA <span style="color:#aaa; font-weight:400;">(opcional — pode preencher depois)</span></label>
-            <select id="rfCategoria" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; color:#555; background:#fff;">
-                <option value="">-- Deixar em branco --</option>
-            </select>
+
+        <div style="background:#f0fff6; border-radius:10px; padding:12px 16px; margin:14px 0 18px; border-left:4px solid #27ae60;">
+            <div style="font-size:10px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:.6px;">Cliente</div>
+            <div id="rfClienteNome" style="font-size:16px; font-weight:800; color:var(--lilas); margin-top:3px;"></div>
+            <div id="rfVendedorNome" style="font-size:12px; color:#666; margin-top:3px;"></div>
         </div>
-        <div class="modal-footer" style="margin-top:16px;">
-            <button type="button" class="btn-header" style="background:#f0f0f0;" onclick="fecharModal('modalRegistrarFechado')">Não agora</button>
-            <button type="button" class="btn-header btn-novo-meta" onclick="confirmarRegistroFechado()">✅ Sim, registrar no Financeiro</button>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Unidade de Negócio (BU)</label>
+                <select id="rfBU" style="padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; background:#fff; width:100%;">
+                    <option value="VCI">VCI — Trading</option>
+                    <option value="ARM - NVG">ARM - NVG — Navegantes</option>
+                    <option value="ARM - ITV">ARM - ITV — Itajaí</option>
+                    <option value="ARM - GRV">ARM - GRV — Gravataí</option>
+                    <option value="TRP">TRP — Transporte</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Categoria</label>
+                <select id="rfCategoria" style="padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; background:#fff; width:100%;">
+                    <option value="CLIENTES NOVOS">CLIENTES NOVOS</option>
+                    <option value="CLIENTES NÃO NOMINADOS">CLIENTES NÃO NOMINADOS</option>
+                    <option value="CLIENTES < 12 MESES">CLIENTES &lt; 12 MESES</option>
+                    <option value="CLIENTES NOMINADOS">CLIENTES NOMINADOS</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:12px;">
+            <div class="form-group" style="margin-bottom:0;">
+                <label>4PL</label>
+                <select id="rfQuatroPL" style="padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; background:#fff; width:100%;">
+                    <option value="OUTROS">Sem 4PL</option>
+                    <option value="1 BU">1 BU</option>
+                    <option value="2 BU">2 BU</option>
+                    <option value="3 BU">3 BU</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Valor Mensal Estimado</label>
+                <input type="number" id="rfValorMensal" placeholder="0" min="0" step="1000"
+                    style="padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; width:100%; box-sizing:border-box;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+                <label>Mês de Início</label>
+                <select id="rfMesInicio" style="padding:10px; border:1px solid #ddd; border-radius:8px; font-size:13px; background:#fff; width:100%;"></select>
+            </div>
+        </div>
+
+        <p style="font-size:11px; color:#999; margin:10px 0 0; line-height:1.5;">
+            Registros criados do mês escolhido até Dezembro, com o valor acima como <em>Pedidos em Casa</em> (plano = zero). Sem duplicação se o cliente já existir.
+        </p>
+
+        <div class="modal-footer" style="margin-top:18px;">
+            <button type="button" class="btn-header" style="background:#f0f0f0; color:#555;" onclick="fecharModal('modalRegistrarFechado')">Não agora</button>
+            <button type="button" class="btn-header btn-novo-meta" onclick="confirmarRegistroFechado()">✅ Registrar no Financeiro</button>
         </div>
     </div>
 </div>
@@ -3235,7 +3283,12 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 
     // Se mudou para FECHADO, oferece registro no Financeiro
     if (novo_status === 'FECHADO' && statusAnterior !== 'FECHADO') {
-        abrirModalRegistrarFechado({ cliente: novo_cliente, area: nova_area });
+        abrirModalRegistrarFechado({
+            cliente:      novo_cliente,
+            area:         nova_area,
+            vendedor:     novo_vend,
+            valor_mensal: parseFloat(document.getElementById('op_valor_mensal_recorrente')?.value) || 0
+        });
     }
 };
 // ---- MÓDULO DE METAS ----
@@ -4702,7 +4755,7 @@ async function drop(ev, novoStatus) {
         // Fechamento via EM FECHAMENTO → FECHADO é tratado pelo chkfConfirmar()
         // Outros caminhos diretos para FECHADO (ex: PERDIDO→FECHADO) também abrem o modal
         if (novoStatus === 'FECHADO' && statusAntigo !== 'FECHADO' && statusAntigo !== 'EM FECHAMENTO') {
-            abrirModalRegistrarFechado({ cliente: item.cliente, area: item.area });
+            abrirModalRegistrarFechado({ cliente: item.cliente, area: item.area, vendedor: item.vendedor, valor_mensal: item.valor_mensal_recorrente || 0 });
         }
     }
 }
@@ -5834,7 +5887,7 @@ async function chkfConfirmar() {
         Object.assign(item, payload);
         showToast('Negócio FECHADO com sucesso! 🎉', 'success');
         if (novoStatus === 'FECHADO' && statusAntigo !== 'FECHADO') {
-            abrirModalRegistrarFechado({ cliente: item.cliente, area: item.area });
+            abrirModalRegistrarFechado({ cliente: item.cliente, area: item.area, vendedor: item.vendedor, valor_mensal: item.valor_mensal_recorrente || 0 });
         }
     }
     renderizar();
@@ -6368,22 +6421,38 @@ function _histBuildTimeline(historico) {
 }
 // ── FIM HISTÓRICO ─────────────────────────────────────────────────────────────
 
+function _rfGuessBU(area) {
+    const a = (area || '').toUpperCase();
+    if (a.includes('NVG') || a.includes('NAVEGANTES')) return 'ARM - NVG';
+    if (a.includes('ITV') || a.includes('ITAJA'))       return 'ARM - ITV';
+    if (a.includes('GRV') || a.includes('GRAVAT'))      return 'ARM - GRV';
+    if (a.includes('TRP') || a.includes('TRANSPORT'))   return 'TRP';
+    return 'VCI';
+}
+
 function abrirModalRegistrarFechado(oportunidade) {
     _rfOportunidade = oportunidade;
 
-    document.getElementById('rfClienteNome').innerText = oportunidade.cliente || '';
-    document.getElementById('rfBUNome').innerText      = 'BU: ' + (oportunidade.area || '—');
+    document.getElementById('rfClienteNome').innerText  = oportunidade.cliente  || '';
+    document.getElementById('rfVendedorNome').innerText = oportunidade.vendedor
+        ? '👤 ' + oportunidade.vendedor : '';
 
-    // Popula categorias a partir dos dados já existentes no financeiro
-    const cats = [...new Set(
-        (baseResMensais || [])
-            .map(r => (r.categoria || '').trim())
-            .filter(c => c.length > 0)
-    )].sort();
+    // Pre-seleciona BU baseado na área da oportunidade
+    const buGuess = _rfGuessBU(oportunidade.area || '');
+    const buSel = document.getElementById('rfBU');
+    [...buSel.options].forEach(o => { o.selected = (o.value === buGuess); });
 
-    const sel = document.getElementById('rfCategoria');
-    sel.innerHTML = '<option value="">-- Deixar em branco --</option>'
-        + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    // Pre-preenche valor mensal estimado
+    const valMensal = parseFloat(oportunidade.valor_mensal) || 0;
+    document.getElementById('rfValorMensal').value = valMensal > 0 ? Math.round(valMensal) : '';
+
+    // Popula mês de início a partir do mês atual
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const mesAtual = new Date().getMonth() + 1; // 1-based
+    const mesSel = document.getElementById('rfMesInicio');
+    mesSel.innerHTML = MESES.slice(mesAtual - 1)
+        .map((n, i) => `<option value="${mesAtual + i}">${n}</option>`).join('');
 
     abrirModal('modalRegistrarFechado');
 }
@@ -6391,40 +6460,50 @@ function abrirModalRegistrarFechado(oportunidade) {
 async function confirmarRegistroFechado() {
     if (!_rfOportunidade) { fecharModal('modalRegistrarFechado'); return; }
 
-    const cliente  = (_rfOportunidade.cliente || '').trim();
-    const bu       = (_rfOportunidade.area    || '').toUpperCase().trim();
-    const categoria= document.getElementById('rfCategoria').value || null;
-    const anoAtual = new Date().getFullYear();
+    const cliente    = (_rfOportunidade.cliente  || '').trim();
+    const vendedor   = (_rfOportunidade.vendedor || '').toUpperCase().trim();
+    const bu         = document.getElementById('rfBU').value;
+    const categoria  = document.getElementById('rfCategoria').value;
+    const quatro_pl  = document.getElementById('rfQuatroPL').value;
+    const valorMensal= parseFloat(document.getElementById('rfValorMensal').value) || 0;
+    const mesInicio  = parseInt(document.getElementById('rfMesInicio').value) || (new Date().getMonth() + 1);
+    const anoAtual   = new Date().getFullYear();
+    const tipo       = categoria; // 1:1 — tipo = categoria para novos negócios fechados
 
     fecharModal('modalRegistrarFechado');
 
-    // Verifica se já existe registro para evitar duplicação
+    // Verifica duplicação (mesmo cliente + bu + mês de início + ano)
     const { data: existente } = await supabaseClient
         .from('resultados_mensais')
         .select('id')
         .eq('cliente', cliente)
         .eq('bu', bu)
         .eq('ano', anoAtual)
-        .eq('tipo', 'NOVOS CLIENTES')
+        .eq('mes_numero', mesInicio)
         .limit(1);
 
     if (existente && existente.length > 0) {
-        showToast(`"${cliente}" já está registrado no Financeiro para ${anoAtual}.`, 'info');
+        showToast(`"${cliente}" já tem registro no Financeiro para este BU em ${anoAtual}.`, 'info');
         return;
     }
 
-    // Cria 12 linhas — uma por mês
-    const linhas = Array.from({ length: 12 }, (_, i) => ({
-        mes_numero:      i + 1,
-        cliente:         cliente,
-        bu:              bu,
-        categoria:       categoria,
-        ano:             anoAtual,
-        valor_planejado: 0,
-        valor_realizado: 0,
-        tipo:            'NOVOS CLIENTES',
-        status:          null
-    }));
+    // Cria uma linha por mês — do mês de início até Dezembro
+    const linhas = [];
+    for (let m = mesInicio; m <= 12; m++) {
+        linhas.push({
+            mes_numero:      m,
+            cliente:         cliente,
+            bu:              bu,
+            categoria:       categoria,
+            tipo:            tipo,
+            ano:             anoAtual,
+            valor_planejado: 0,
+            valor_realizado: valorMensal,
+            status:          'PEDIDOS EM CASA',
+            vendedor:        vendedor || null,
+            quatro_pl:       quatro_pl
+        });
+    }
 
     const { error } = await supabaseClient.from('resultados_mensais').insert(linhas);
 
@@ -6432,11 +6511,13 @@ async function confirmarRegistroFechado() {
         showToast('Erro ao registrar no Financeiro: ' + error.message, 'error');
         console.error('ERRO registrarFechado:', error);
     } else {
-        showToast(`✅ "${cliente}" adicionado ao Financeiro com 12 meses!`, 'success');
+        const nMeses = 12 - mesInicio + 1;
+        showToast(`✅ "${cliente}" registrado no Financeiro — ${nMeses} meses como Pedidos em Casa!`, 'success');
         await carregarDadosFinanceiros();
         if (document.getElementById('page-financeiro').classList.contains('active-page')) {
             renderizarFinanceiro();
         }
+        renderizarHome();
     }
 
     _rfOportunidade = null;
