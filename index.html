@@ -1397,9 +1397,11 @@ header {
                     </div>
                 </div>
 
-                <div class="charts-grid-metas">
+                <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:25px;margin-bottom:25px;">
                     <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
-                    <div class="chart-card"><h4>Share por BU (Realizado YTD)</h4><canvas id="chartFinBU"></canvas></div>
+                    <div class="chart-card" style="height:auto;padding:20px;" id="cardComparativoSemanal">
+                        <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#bbb;font-size:13px;">Carregando comparativo...</div>
+                    </div>
                 </div>
 
                 <div class="chart-card" style="height: auto; margin-bottom: 24px;">
@@ -2787,6 +2789,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 let base=[];
 let baseMetasMensais=[];
 let baseResMensais = [];
+let baseSnapshotSemanal = null;
 let baseAtividades = [];
 let baseMetasAnuais = [];
 let _listaVendedores = [];
@@ -4683,7 +4686,10 @@ async function carregarDados(){
 }
 
 async function carregarDadosFinanceiros() {
-    const { data: res } = await supabaseClient.from('resultados_mensais').select('*');
+    const [{ data: res }] = await Promise.all([
+        supabaseClient.from('resultados_mensais').select('*'),
+        carregarSnapshotSemanal()
+    ]);
     baseResMensais = res || [];
     populateMultiSelectFin();
 
@@ -4693,7 +4699,163 @@ async function carregarDadosFinanceiros() {
     if(dlFin) dlFin.innerHTML = clientesFin.map(c => `<option value="${c}">`).join('');
 }
 
-// ---- KANBAN DRAG & DROP BLINDADO (NOVO) ----
+// ── Snapshot Semanal ──────────────────────────────────────────────────────
+
+async function carregarSnapshotSemanal() {
+    try {
+        const { data } = await supabaseClient
+            .from('snapshots_semanais')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+        if (!data || data.length === 0) { baseSnapshotSemanal = null; return; }
+        const latestRef = data[0].semana_ref;
+        const latestRows = data.filter(r => r.semana_ref === latestRef);
+        baseSnapshotSemanal = { semana_ref: latestRef, semana_label: data[0].semana_label, rows: latestRows };
+    } catch(e) { baseSnapshotSemanal = null; }
+}
+
+function _calcBUTotaisAtual() {
+    const currentMonthIndex = new Date().getMonth();
+    const buTotals = {};
+    baseResMensais.forEach(rm => {
+        const bu = rm.bu ? rm.bu.toUpperCase().replace(/\s+/g,' ').trim() : 'OUTROS';
+        const status = _statusEfetivo(rm);
+        const mesIdx = (rm.mes_numero || 1) - 1;
+        const valPlan = parseFloat(rm.valor_planejado) || 0;
+        const valReal = parseFloat(rm.valor_realizado) || 0;
+        const isFat = status === 'FATURADO';
+        const isPed = status === 'PEDIDOS EM CASA';
+        if (!buTotals[bu]) buTotals[bu] = { faturado_ytd: 0, pedidos_total: 0, plano_ytd: 0 };
+        if (mesIdx <= currentMonthIndex) {
+            buTotals[bu].plano_ytd += valPlan;
+            if (isFat) buTotals[bu].faturado_ytd += valReal;
+        }
+        if (isPed) buTotals[bu].pedidos_total += valReal;
+    });
+    return buTotals;
+}
+
+async function salvarSnapshotSemanal() {
+    const btn = event?.target;
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+    try {
+        const hoje = new Date();
+        const semanaRef = hoje.toISOString().split('T')[0];
+        const semanaLabel = `Semana de ${hoje.toLocaleDateString('pt-BR')}`;
+        const buTotals = _calcBUTotaisAtual();
+        await supabaseClient.from('snapshots_semanais').delete().eq('semana_ref', semanaRef);
+        const rows = Object.entries(buTotals).map(([bu, t]) => ({
+            semana_ref: semanaRef, semana_label: semanaLabel, bu,
+            faturado_ytd: Math.round(t.faturado_ytd * 100) / 100,
+            pedidos_total: Math.round(t.pedidos_total * 100) / 100,
+            plano_ytd: Math.round(t.plano_ytd * 100) / 100,
+            ano: 2026
+        }));
+        const { error } = await supabaseClient.from('snapshots_semanais').insert(rows);
+        if (error) throw error;
+        baseSnapshotSemanal = { semana_ref: semanaRef, semana_label: semanaLabel, rows };
+        renderizarComparativoSemanal();
+    } catch(e) {
+        alert('Erro ao salvar snapshot: ' + (e.message || e));
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '📸 Salvar snapshot'; }
+    }
+}
+
+function renderizarComparativoSemanal() {
+    const container = document.getElementById('cardComparativoSemanal');
+    if (!container) return;
+
+    const atualPorBU = _calcBUTotaisAtual();
+    const BU_ORDER = ['VCI', 'ARM - NVG', 'ARM - ITV', 'ARM - GRV', 'TRP'];
+    const buKeys = [...new Set([...BU_ORDER, ...Object.keys(atualPorBU)])].filter(k => atualPorBU[k]);
+
+    const hasSnapshot = !!baseSnapshotSemanal;
+    const semanaLabel = hasSnapshot ? baseSnapshotSemanal.semana_label : null;
+
+    const fmtVal = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+    const BU_COLORS = { 'VCI':'#422c76','ARM - NVG':'#00c97a','ARM - ITV':'#ff2f69','ARM - GRV':'#17a2b8','TRP':'#f39c12' };
+
+    let totalAtual = 0, totalPrev = 0, hasPrev = false;
+
+    const tableRows = buKeys.map(bu => {
+        const a = atualPorBU[bu];
+        const atualFat = a.faturado_ytd;
+        totalAtual += atualFat;
+        const prevRow = hasSnapshot ? baseSnapshotSemanal.rows.find(r => r.bu === bu) : null;
+        const prevFat = prevRow ? prevRow.faturado_ytd : null;
+        if (prevFat !== null) { hasPrev = true; totalPrev += prevFat; }
+        const delta = prevFat !== null ? atualFat - prevFat : null;
+        const color = BU_COLORS[bu] || '#666';
+
+        let deltaHtml = '<span style="color:#ccc;font-size:11px;">—</span>';
+        if (delta !== null) {
+            const sign = delta >= 0 ? '+' : '';
+            const dc = delta >= 0 ? '#27ae60' : '#e74c3c';
+            const db = delta >= 0 ? '#e8f8f0' : '#fef0f0';
+            deltaHtml = `<span style="background:${db};color:${dc};font-weight:700;padding:2px 7px;border-radius:10px;font-size:11px;">${sign}${fmtVal(delta)}</span>`;
+        }
+
+        return `<tr style="border-bottom:1px solid #f2eeff;">
+            <td style="padding:9px 6px;font-weight:600;font-size:12px;color:${color};">
+                <span style="display:inline-block;width:7px;height:7px;background:${color};border-radius:50%;margin-right:5px;vertical-align:middle;"></span>${bu}
+            </td>
+            <td style="padding:9px 6px;text-align:right;font-size:11px;color:#999;">${prevFat !== null ? fmtVal(prevFat) : '<span style="color:#ddd;">—</span>'}</td>
+            <td style="padding:9px 6px;text-align:right;font-size:12px;font-weight:700;color:#2d1b69;">${fmtVal(atualFat)}</td>
+            <td style="padding:9px 6px;text-align:right;">${deltaHtml}</td>
+        </tr>`;
+    }).join('');
+
+    const totalDelta = hasPrev ? totalAtual - totalPrev : null;
+    let totalDeltaHtml = '<span style="color:#ccc;">—</span>';
+    if (totalDelta !== null) {
+        const sign = totalDelta >= 0 ? '+' : '';
+        const dc = totalDelta >= 0 ? '#27ae60' : '#e74c3c';
+        const db = totalDelta >= 0 ? '#d4edda' : '#f8d7da';
+        totalDeltaHtml = `<span style="background:${db};color:${dc};font-weight:700;padding:3px 8px;border-radius:10px;font-size:12px;">${sign}${fmtVal(totalDelta)}</span>`;
+    }
+
+    const totalRow = `<tr style="border-top:2px solid #e0d9f5;background:#f9f5ff;">
+        <td style="padding:10px 6px;font-weight:700;font-size:13px;color:#2d1b69;">TOTAL</td>
+        <td style="padding:10px 6px;text-align:right;font-size:12px;color:#888;font-weight:600;">${hasPrev ? fmtVal(totalPrev) : '<span style="color:#ddd;">—</span>'}</td>
+        <td style="padding:10px 6px;text-align:right;font-size:13px;font-weight:700;color:#2d1b69;">${fmtVal(totalAtual)}</td>
+        <td style="padding:10px 6px;text-align:right;">${totalDeltaHtml}</td>
+    </tr>`;
+
+    const refLabel = hasSnapshot
+        ? `<span style="color:#7c5cbf;font-size:10px;background:#f0e8ff;padding:2px 8px;border-radius:10px;">ref. ${semanaLabel}</span>`
+        : `<span style="color:#bbb;font-size:10px;">Nenhum snapshot salvo ainda</span>`;
+
+    container.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+            <div>
+                <h4 style="margin:0 0 4px 0;font-size:14px;color:#2d1b69;font-weight:700;">📊 Comparativo Semanal</h4>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="font-size:11px;color:#999;">Faturado YTD por BU</span>
+                    ${refLabel}
+                </div>
+            </div>
+            <button onclick="salvarSnapshotSemanal()"
+                style="padding:7px 14px;background:linear-gradient(135deg,#422c76,#6b4aa0);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;white-space:nowrap;box-shadow:0 2px 6px rgba(66,44,118,0.3);">
+                📸 Salvar snapshot
+            </button>
+        </div>
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f5f0ff;border-bottom:2px solid #e0d9f5;">
+                    <th style="padding:8px 6px;text-align:left;font-size:11px;color:#7c5cbf;font-weight:700;">BU</th>
+                    <th style="padding:8px 6px;text-align:right;font-size:11px;color:#7c5cbf;font-weight:700;">Anterior</th>
+                    <th style="padding:8px 6px;text-align:right;font-size:11px;color:#7c5cbf;font-weight:700;">Atual</th>
+                    <th style="padding:8px 6px;text-align:right;font-size:11px;color:#7c5cbf;font-weight:700;">Δ Semana</th>
+                </tr>
+            </thead>
+            <tbody>${tableRows}${totalRow}</tbody>
+        </table>
+    `;
+}
+
+// ── KANBAN DRAG & DROP BLINDADO (NOVO) ──────────────────────────────────────
 function allowDrop(ev) { ev.preventDefault(); ev.currentTarget.classList.add('column-over'); }
 function leaveDrop(ev) { ev.currentTarget.classList.remove('column-over'); }
 
@@ -6533,7 +6695,6 @@ function renderizarFinanceiro() {
     let arrayPlanoMensal    = new Array(12).fill(0);
     let arrayFaturadoMensal = new Array(12).fill(0);
     let arrayPedidosMensal  = new Array(12).fill(0);
-    let faturamentoPorBU = {};
     let hierarquia = {};
 
     const fFinCli      = document.getElementById('filtroFinCliente').value.toLowerCase();
@@ -6581,9 +6742,6 @@ function renderizarFinanceiro() {
             if (isFat) arrayFaturadoMensal[mesIdx] += valReal;
             if (isPed) arrayPedidosMensal[mesIdx]  += valReal;
         }
-
-        // Para BU share: usa apenas FATURADO
-        if (isFat) faturamentoPorBU[bu] = (faturamentoPorBU[bu] || 0) + valReal;
 
         // ── Hierarquia BU → Categoria → Cliente ──
         const _hInit = (obj, key, extra) => { if (!obj[key]) obj[key] = { planoAnual:0, planoYTD:0, faturado:0, pedidos:0, ...extra }; };
@@ -6702,56 +6860,7 @@ function renderizarFinanceiro() {
         }
     });
 
-    const buLabels = Object.keys(faturamentoPorBU);
-    const buData = buLabels.map(k => faturamentoPorBU[k]);
-    const isAllZero = buData.every(v => v === 0);
-    
-    if(charts.finBu) charts.finBu.destroy();
-    charts.finBu = new Chart(document.getElementById('chartFinBU'), {
-        type: 'doughnut',
-        data: {
-            labels: isAllZero ? ['Sem Faturamento'] : buLabels,
-            datasets: [{ 
-                data: isAllZero ? [1] : buData, 
-                backgroundColor: isAllZero ? ['#e0e0e0'] : ['#422c76', '#01E18E', '#ff2f69', '#17a2b8', '#f39c12', '#8e44ad']
-            }]
-        },
-        options: { 
-            maintainAspectRatio: false, 
-            cutout: '60%', // Diminui o buraco da rosca (antes era 75%), deixando as fatias mais grossas
-            layout: { padding: 20 }, // Margem limpa e igual de todos os lados para centralizar perfeitamente
-            plugins: { 
-                datalabels: { 
-                    display: !isAllZero,
-                    color: '#ffffff', // Rótulo na cor branca
-                    anchor: 'center', // Puxa o rótulo para o centro da fatia
-                    align: 'center', // Centraliza o rótulo para não vazar
-                    font: { weight: 'bold', size: 12 },
-                    formatter: (val, ctx) => {
-                        let total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                        if(total === 0 || val === 0) return '';
-                        
-                        let percentual = Math.round((val / total) * 100);
-                        // Opcional: Se uma fatia for menor que 3%, oculta o rótulo para não espremer o texto
-                        return percentual >= 3 ? percentual + '%' : '';
-                    }
-                }, 
-                legend: { 
-                    position: 'top',
-                    labels: { padding: 15, boxWidth: 12, font: { size: 11 } }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            if (isAllZero) return ' R$ 0,00';
-                            return ' R$ ' + context.raw.toLocaleString('pt-BR', {minimumFractionDigits:2});
-                        }
-                    }
-                }
-            } 
-        },
-        plugins: [pluginCentroRosca]
-    });
+    renderizarComparativoSemanal();
 
     // ── Tabela Hierárquica de Clientes ──
     window._hierarquiaFin = hierarquia;
