@@ -6702,7 +6702,8 @@ function renderTbClientesFin() {
     const fmt  = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:0});
     const fmtK = v => { const a=Math.abs(v); if(a>=1e6) return (v/1e6).toFixed(1).replace('.',',')+'M'; if(a>=1e3) return (v/1e3).toFixed(0)+'k'; return String(Math.round(v)); };
     const pill = pct => { const c=pct>=100?'#27ae60':pct>=70?'#17a2b8':'#c0392b'; return `<span style="background:${c};color:#fff;border-radius:12px;padding:2px 7px;font-size:10px;font-weight:700;">${pct.toFixed(0)}%</span>`; };
-    const gapSpan = v => `<span style="font-weight:700;color:${v>=0?'#27ae60':'#c0392b'}">${v>=0?'+':''}${fmtK(v)}</span>`;
+    const gapSpan   = v => `<span style="font-weight:700;color:${v>=0?'#27ae60':'#c0392b'}">${v>=0?'+':''}${fmtK(v)}</span>`;
+    const gapSpanBU = v => `<span style="font-weight:700;color:${v>=0?'#a8ffcc':'#ffd0d0'}">${v>=0?'+':''}${fmtK(v)}</span>`;
     const sortVal = o => sortKey==='total'?(o.faturado+o.pedidos) : (o[sortKey]||0);
     const buName  = k => k.includes('TRADING')||k.includes('VCI') ? '🏭 VCI' : k.includes('ARMAZEM')||k.includes('ARM') ? '🏢 Armazém' : k.includes('TRANSPORTE')||k.includes('TRP') ? '🚛 Transporte' : k;
     const fmtVend = v => v ? v.split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ') : '';
@@ -6872,7 +6873,7 @@ function renderTbClientesFin() {
   <td style="text-align:right;padding:13px 10px;font-size:13px;">${fmt(buObj.planoYTD)}</td>
   <td style="text-align:right;padding:13px 10px;font-size:13px;color:#ffb3cb;font-weight:800;">${fmt(buObj.faturado)}</td>
   <td style="text-align:right;padding:13px 10px;font-size:13px;color:#ffd080;font-weight:800;">${fmt(buObj.pedidos)}</td>
-  <td style="text-align:right;padding:13px 10px;">${gapSpan(devB)}</td>
+  <td style="text-align:right;padding:13px 10px;">${gapSpanBU(devB)}</td>
   <td style="text-align:center;padding:13px 10px;">${pill(pctB)}</td>
 </tr>` + catHtml;
     });
