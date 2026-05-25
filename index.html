@@ -1304,8 +1304,9 @@ header {
 
                 <select id="filtroFinTipo" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white;">
                     <option value="">Todos os Tipos</option>
-                    <option value="NOVOS CLIENTES NOMINADOS">Nominados</option>
-                    <option value="NOVOS CLIENTES">Novos Clientes</option>
+                    <option value="CLIENTES NOMINADOS">Nominados</option>
+                    <option value="NOVOS CLIENTES">Não Nominados / Novos</option>
+                    <option value="CLIENTES NOVOS">Clientes Novos (TRP/ARM)</option>
                     <option value="ANALYTICS">Analytics</option>
                 </select>
 
@@ -6717,7 +6718,7 @@ function renderTbClientesFin() {
             const cliEntries = Object.entries(catObj.clientes).sort((a,b)=>sortVal(b[1])-sortVal(a[1]));
 
             cliEntries.forEach(([cliKey, cliObj]) => {
-                if (busca && !cliKey.toLowerCase().includes(busca) && !catObj.displayLabel.toLowerCase().includes(busca) && !buName(buKey).toLowerCase().includes(busca)) return;
+                if (busca && !cliKey.toLowerCase().includes(busca) && !catObj.displayLabel.toLowerCase().includes(busca) && !(buObj.displayLabel||buKey).toLowerCase().includes(busca)) return;
                 // Filtro por vendedor: verifica o cliente ou qualquer nominado
                 if (filtroVend) {
                     const cliVend = (cliObj._vendedor || '').toUpperCase();
@@ -6849,7 +6850,7 @@ function renderTbClientesFin() {
             const bVal = _finEditMeta[mKey] !== undefined ? _finEditMeta[mKey] : (buObj.displayLabel||buKey);
             buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;">${editInp(mKey, bVal, 'BU', '140px')}</td>`;
         } else {
-            buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buName(buKey)}</td>`;
+            buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buObj.displayLabel || buKey}</td>`;
         }
         html += `<tr class="fin-bu" style="background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;cursor:${em?'default':'pointer'};font-weight:700;" ${em?'':'onclick="_finToggle(\''+bid+'\',event)"'}>
   ${buNameCell}
