@@ -637,9 +637,9 @@ header {
 .card-vend { display:block; color:#888; font-size:10px; margin-top:1px; }
 .card-mini { display:flex; justify-content:space-between; align-items:stretch; margin-top:7px; padding-top:6px; border-top:1px solid #efefef; gap:0; }
 .fin-arrow { display:inline-block; width:14px; font-size:10px; color:#888; user-select:none; cursor:pointer; transition:transform .15s; }
-.fin-bu:hover td { opacity:.9; }
-.fin-cat:hover { background:#dde3ff !important; }
-.fin-cli:hover { background:#f5f7ff !important; }
+.fin-bu:hover td { filter:brightness(1.08); }
+.fin-cat:hover { background:#ede5ff !important; }
+.fin-cli:hover { background:#faf5ff !important; }
 .card-mini-item { display:flex; flex-direction:column; align-items:center; flex:1; padding:0 2px; }
 .card-mini-item:not(:last-child) { border-right:1px solid #efefef; }
 .cmi-label { font-size:8.5px; color:#bbb; text-transform:uppercase; font-weight:700; letter-spacing:.4px; white-space:nowrap; }
@@ -6759,11 +6759,11 @@ function renderTbClientesFin() {
                 } else {
                     cliNameCell = `<td style="padding:7px 8px 7px 44px;font-size:12px;white-space:nowrap;">${hasNom?`<span class="fin-arrow" id="arr-${nid}" onclick="_finToggle('${nid}',event)">▶</span> `:''}<span style="color:#333;">${cliKey}</span>${vendChip(cliObj._vendedor)}</td>`;
                 }
-                cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:${em?'#f8f9ff':'#fff'};">
+                cliHtml += `<tr class="fin-cli fin-ch-${cid}" style="display:none;background:${em?'#f8f9ff':'#fff'};border-left:3px solid #e8deff;border-bottom:1px solid #f4f0ff;">
   ${cliNameCell}
-  <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoAnual)}</td>
-  <td style="text-align:right;font-size:12px;padding:7px 8px;">${fmt(cliObj.planoYTD)}</td>
-  <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:7px 8px;">${fmt(cliObj.faturado)}</td>
+  <td style="text-align:right;font-size:12px;padding:8px 10px;color:#555;">${fmt(cliObj.planoAnual)}</td>
+  <td style="text-align:right;font-size:12px;padding:8px 10px;color:#555;">${fmt(cliObj.planoYTD)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:600;color:#d63060;padding:8px 10px;">${fmt(cliObj.faturado)}</td>
   <td style="text-align:right;font-size:12px;font-weight:600;color:#f39c12;padding:7px 8px;">${fmt(cliObj.pedidos)}</td>
   <td style="text-align:right;font-size:12px;padding:7px 8px;">${gapSpan(dev)}</td>
   <td style="text-align:center;padding:7px 8px;">${pill(pct)}</td>
@@ -6821,8 +6821,8 @@ function renderTbClientesFin() {
                     nomKeys.sort().forEach(nomKey => {
                         const n = cliObj.nominados[nomKey];
                         if (filtroVend && (n._vendedor||'').toUpperCase() !== filtroVend) return;
-                        cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fafafa;">
-  <td style="padding:5px 8px 5px 64px;font-size:11px;color:#777;white-space:nowrap;">↳ ${nomKey}${vendChip(n._vendedor)}</td>
+                        cliHtml += `<tr class="fin-nom fin-ch-${nid}" style="display:none;background:#fdf9ff;border-bottom:1px solid #f0e8ff;">
+  <td style="padding:5px 8px 5px 68px;font-size:11px;color:#8b7aac;white-space:nowrap;">↳ ${nomKey}${vendChip(n._vendedor)}</td>
   <td></td><td></td>
   <td style="text-align:right;font-size:11px;color:#ff2f69;padding:5px 8px;">${fmt(n.faturado||0)}</td>
   <td style="text-align:right;font-size:11px;color:#f39c12;padding:5px 8px;">${fmt(n.pedidos||0)}</td>
@@ -6842,16 +6842,16 @@ function renderTbClientesFin() {
                 const cVal = _finEditMeta[mKey] !== undefined ? _finEditMeta[mKey] : (catObj.displayLabel||catKey);
                 catNameCell = `<td style="padding:8px 8px 8px 24px;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;">${editInp(mKey, cVal, 'Categoria', '200px')}</td>`;
             } else {
-                catNameCell = `<td style="padding:8px 8px 8px 24px;font-weight:600;font-size:12px;white-space:nowrap;border-left:3px solid #7c8cf8;"><span class="fin-arrow" id="arr-${cid}">▶</span> ${catObj.displayLabel||catKey}</td>`;
+                catNameCell = `<td style="padding:9px 10px 9px 26px;font-weight:700;font-size:12px;white-space:nowrap;border-left:3px solid #7c5cbf;color:#2d1b69;"><span class="fin-arrow" id="arr-${cid}" style="color:#7c5cbf;">▶</span> ${catObj.displayLabel||catKey}</td>`;
             }
-            catHtml += `<tr class="fin-cat fin-ch-${bid}" style="display:none;background:#eef2ff;cursor:${em?'default':'pointer'};" ${em?'':'onclick="_finToggle(\''+cid+'\',event)"'}>
+            catHtml += `<tr class="fin-cat fin-ch-${bid}" style="display:none;background:#f5f0ff;cursor:${em?'default':'pointer'};" ${em?'':'onclick="_finToggle(\''+cid+'\',event)"'}>
   ${catNameCell}
-  <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoAnual)}</td>
-  <td style="text-align:right;font-size:12px;padding:8px;">${fmt(catObj.planoYTD)}</td>
-  <td style="text-align:right;font-size:12px;font-weight:600;color:#ff2f69;padding:8px;">${fmt(catObj.faturado)}</td>
-  <td style="text-align:right;font-size:12px;font-weight:600;color:#f39c12;padding:8px;">${fmt(catObj.pedidos)}</td>
-  <td style="text-align:right;font-size:12px;padding:8px;">${gapSpan(devC)}</td>
-  <td style="text-align:center;padding:8px;">${pill(pctC)}</td>
+  <td style="text-align:right;font-size:12px;padding:9px 10px;color:#3d2272;">${fmt(catObj.planoAnual)}</td>
+  <td style="text-align:right;font-size:12px;padding:9px 10px;color:#3d2272;">${fmt(catObj.planoYTD)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:700;color:#d63060;padding:9px 10px;">${fmt(catObj.faturado)}</td>
+  <td style="text-align:right;font-size:12px;font-weight:700;color:#d97706;padding:9px 10px;">${fmt(catObj.pedidos)}</td>
+  <td style="text-align:right;font-size:12px;padding:9px 10px;">${gapSpan(devC)}</td>
+  <td style="text-align:center;padding:9px 10px;">${pill(pctC)}</td>
 </tr>` + cliHtml;
         });
 
@@ -6864,16 +6864,16 @@ function renderTbClientesFin() {
             const bVal = _finEditMeta[mKey] !== undefined ? _finEditMeta[mKey] : (buObj.displayLabel||buKey);
             buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;">${editInp(mKey, bVal, 'BU', '140px')}</td>`;
         } else {
-            buNameCell = `<td style="padding:11px 12px;white-space:nowrap;font-size:13px;letter-spacing:.3px;"><span class="fin-arrow" id="arr-${bid}" style="color:#9999cc">▶</span> ${buObj.displayLabel || buKey}</td>`;
+            buNameCell = `<td style="padding:13px 14px;white-space:nowrap;font-size:13px;letter-spacing:.4px;font-weight:800;"><span class="fin-arrow" id="arr-${bid}" style="color:rgba(255,255,255,0.65)">▶</span> ${buObj.displayLabel || buKey}</td>`;
         }
-        html += `<tr class="fin-bu" style="background:linear-gradient(135deg,#1e1e30,#2d2d4e);color:#fff;cursor:${em?'default':'pointer'};font-weight:700;" ${em?'':'onclick="_finToggle(\''+bid+'\',event)"'}>
+        html += `<tr class="fin-bu" style="background:linear-gradient(90deg,#422c76 0%,#6b4aa0 100%);color:#fff;cursor:${em?'default':'pointer'};font-weight:700;border-bottom:2px solid rgba(255,255,255,0.08);" ${em?'':'onclick="_finToggle(\''+bid+'\',event)"'}>
   ${buNameCell}
-  <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoAnual)}</td>
-  <td style="text-align:right;padding:11px 8px;">${fmt(buObj.planoYTD)}</td>
-  <td style="text-align:right;padding:11px 8px;color:#ff7fa5;font-weight:700;">${fmt(buObj.faturado)}</td>
-  <td style="text-align:right;padding:11px 8px;color:#ffd080;font-weight:700;">${fmt(buObj.pedidos)}</td>
-  <td style="text-align:right;padding:11px 8px;">${gapSpan(devB)}</td>
-  <td style="text-align:center;padding:11px 8px;">${pill(pctB)}</td>
+  <td style="text-align:right;padding:13px 10px;font-size:13px;">${fmt(buObj.planoAnual)}</td>
+  <td style="text-align:right;padding:13px 10px;font-size:13px;">${fmt(buObj.planoYTD)}</td>
+  <td style="text-align:right;padding:13px 10px;font-size:13px;color:#ffb3cb;font-weight:800;">${fmt(buObj.faturado)}</td>
+  <td style="text-align:right;padding:13px 10px;font-size:13px;color:#ffd080;font-weight:800;">${fmt(buObj.pedidos)}</td>
+  <td style="text-align:right;padding:13px 10px;">${gapSpan(devB)}</td>
+  <td style="text-align:center;padding:13px 10px;">${pill(pctB)}</td>
 </tr>` + catHtml;
     });
 
