@@ -4002,9 +4002,9 @@ function renderizarComparativo() {
 function _getBUGroup(area) {
     if (!area) return 'OUTROS';
     const a = area.toUpperCase();
-    if (a.includes('TRADING') || a.includes('VCI')) return 'TRADING';
+    if (a.includes('TRADING') || a === 'VCI') return 'TRADING';
     if (a.includes('ARMAZEM') || a.includes('ARM')) return 'ARMAZEM';
-    if (a.includes('TRANSPORT')) return 'TRANSPORTE';
+    if (a.includes('TRANSPORT') || a === 'TRP') return 'TRANSPORTE';
     return 'OUTROS';
 }
 
