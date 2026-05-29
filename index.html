@@ -6891,17 +6891,21 @@ function renderizarFinanceiro() {
                     datalabels: {
                         display: (ctx) => ctx.dataIndex === 11 && lastFatIdx >= 0,
                         anchor: 'end',
-                        align: 'top',
-                        offset: 6,
+                        align: 'left',
+                        offset: 14,
+                        clamp: true,
                         color: _corTend,
                         font: { size: 11, weight: 'bold' },
                         backgroundColor: _corTendBg,
                         borderRadius: 6,
-                        padding: { left: 8, right: 8, top: 4, bottom: 4 },
+                        borderWidth: 1,
+                        borderColor: _corTend,
+                        padding: { left: 9, right: 9, top: 5, bottom: 5 },
+                        textAlign: 'center',
                         formatter: () => {
                             const pct = planoTotalAnual > 0 ? Math.round((projecaoFaturadoAnual/planoTotalAnual)*100) : 0;
                             const icon = _atingeMeta ? '✓' : '⚠';
-                            return `${icon} Projeção Dez: ${(projecaoFaturadoAnual/1e6).toFixed(1)}M\n(${pct}% do plano anual)`;
+                            return `${icon} Projeção Dez\n${(projecaoFaturadoAnual/1e6).toFixed(1)}M · ${pct}% do plano`;
                         }
                     }
                 }
