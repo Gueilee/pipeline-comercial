@@ -6792,8 +6792,36 @@ function renderizarFinanceiro() {
     document.getElementById('finPercYTD').innerText       = percAtingYTD + "%";
     document.getElementById('finPercYTD').style.color     = percAtingYTD >= 100 ? '#27ae60' : '#f39c12';
 
-    // ── Gráfico Evolução — Plano + Faturado (vermelho) + Pedidos em Casa (âmbar) ──
-    // Cor das barras: Faturado = #ff2f69 (red), Pedidos em Casa = #f39c12 (amber)
+    // ── Linha de Tendência — regressão linear sobre os meses faturados ──
+    let lastFatIdx = -1;
+    for (let i = 0; i < 12; i++) { if (arrayFaturadoMensal[i] > 0) lastFatIdx = i; }
+
+    const arrayTendencia = new Array(12).fill(null);
+    let projecaoFaturadoAnual = arrayFaturadoMensal.reduce((a, b) => a + b, 0);
+
+    if (lastFatIdx >= 0) {
+        const xV = [], yV = [];
+        for (let i = 0; i <= lastFatIdx; i++) {
+            if (arrayFaturadoMensal[i] > 0) { xV.push(i); yV.push(arrayFaturadoMensal[i]); }
+        }
+        let slope = 0, intercept = yV.length > 0 ? yV[0] : 0;
+        if (xV.length >= 2) {
+            const n = xV.length;
+            const sx = xV.reduce((a,b)=>a+b,0), sy = yV.reduce((a,b)=>a+b,0);
+            const sxy = xV.reduce((s,x,i)=>s+x*yV[i],0), sx2 = xV.reduce((s,x)=>s+x*x,0);
+            const d = n*sx2 - sx*sx;
+            if (d !== 0) { slope = (n*sxy-sx*sy)/d; intercept = (sy-slope*sx)/n; }
+        }
+        for (let i = 0; i < 12; i++) { arrayTendencia[i] = Math.max(0, Math.round(slope*i + intercept)); }
+        projecaoFaturadoAnual = arrayFaturadoMensal.slice(0, lastFatIdx+1).reduce((a,b)=>a+b,0)
+                              + arrayTendencia.slice(lastFatIdx+1).reduce((a,b)=>a+(b||0),0);
+    }
+
+    const _atingeMeta = projecaoFaturadoAnual >= planoTotalAnual;
+    const _corTend    = _atingeMeta ? '#27ae60' : '#e74c3c';
+    const _corTendBg  = _atingeMeta ? '#e8f8f0' : '#fef0f0';
+
+    // ── Gráfico Evolução — Plano + Faturado + Pedidos + Tendência ──
     if(charts.finEvolucao) charts.finEvolucao.destroy();
     charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
         type: 'bar',
@@ -6829,7 +6857,6 @@ function renderizarFinanceiro() {
                     backgroundColor: '#f39c12',
                     borderRadius: 4,
                     stack: 'real',
-                    // Rótulo do total (faturado + pedidos) acima da barra
                     datalabels: {
                         anchor: 'end', align: 'top',
                         color: '#444', font: { size: 10, weight: 'bold' },
@@ -6842,12 +6869,47 @@ function renderizarFinanceiro() {
                             return (tot/1000).toFixed(0) + "k";
                         }
                     }
+                },
+                {
+                    type: 'line',
+                    label: 'Tendência / Projeção',
+                    data: arrayTendencia,
+                    borderColor: _corTend,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2.5,
+                    tension: 0.3,
+                    pointRadius: (ctx) => ctx.dataIndex === 11 ? 7 : (ctx.dataIndex > lastFatIdx ? 4 : 3),
+                    pointBackgroundColor: (ctx) => ctx.dataIndex > lastFatIdx ? _corTend : 'rgba(120,120,120,0.45)',
+                    pointBorderColor: _corTend,
+                    pointBorderWidth: 2,
+                    fill: false,
+                    order: 0,
+                    segment: {
+                        borderDash: (ctx) => ctx.p0DataIndex >= lastFatIdx ? [7, 4] : undefined,
+                        borderColor: (ctx) => ctx.p0DataIndex >= lastFatIdx ? _corTend : 'rgba(150,150,150,0.5)'
+                    },
+                    datalabels: {
+                        display: (ctx) => ctx.dataIndex === 11 && lastFatIdx >= 0,
+                        anchor: 'end',
+                        align: 'top',
+                        offset: 6,
+                        color: _corTend,
+                        font: { size: 11, weight: 'bold' },
+                        backgroundColor: _corTendBg,
+                        borderRadius: 6,
+                        padding: { left: 8, right: 8, top: 4, bottom: 4 },
+                        formatter: () => {
+                            const pct = planoTotalAnual > 0 ? Math.round((projecaoFaturadoAnual/planoTotalAnual)*100) : 0;
+                            const icon = _atingeMeta ? '✓' : '⚠';
+                            return `${icon} Projeção Dez: ${(projecaoFaturadoAnual/1e6).toFixed(1)}M\n(${pct}% do plano anual)`;
+                        }
+                    }
                 }
             ]
         },
         options: {
             maintainAspectRatio: false,
-            layout: { padding: { top: 32 } },
+            layout: { padding: { top: 60 } },
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
