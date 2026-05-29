@@ -1398,7 +1398,15 @@ header {
                 </div>
 
                 <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:25px;margin-bottom:25px;">
-                    <div class="chart-card"><h4>Evolução (Previsto x Realizado)</h4><canvas id="chartFinEvolucao"></canvas></div>
+                    <div class="chart-card" style="position:relative;">
+                        <h4>Evolução (Previsto x Realizado)</h4>
+                        <div id="cardProjecaoTendencia" style="display:none;position:absolute;top:14px;right:16px;background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,0.12);border-left:4px solid #ccc;min-width:150px;text-align:right;z-index:10;">
+                            <div style="font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Projeção Dez/2026</div>
+                            <div id="cardProjValor" style="font-size:18px;font-weight:800;color:#333;">—</div>
+                            <div id="cardProjPct" style="font-size:11px;font-weight:600;margin-top:2px;">—</div>
+                        </div>
+                        <canvas id="chartFinEvolucao"></canvas>
+                    </div>
                     <div class="chart-card" style="height:auto;padding:20px;" id="cardComparativoSemanal">
                         <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#bbb;font-size:13px;">Carregando comparativo...</div>
                     </div>
@@ -6888,31 +6896,13 @@ function renderizarFinanceiro() {
                         borderDash: (ctx) => ctx.p0DataIndex >= lastFatIdx ? [7, 4] : undefined,
                         borderColor: (ctx) => ctx.p0DataIndex >= lastFatIdx ? _corTend : 'rgba(150,150,150,0.5)'
                     },
-                    datalabels: {
-                        display: (ctx) => ctx.dataIndex === 11 && lastFatIdx >= 0,
-                        anchor: 'end',
-                        align: 'top',
-                        offset: 8,
-                        color: _corTend,
-                        font: { size: 10, weight: 'bold' },
-                        backgroundColor: _corTendBg,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                        borderColor: _corTend,
-                        padding: { left: 8, right: 8, top: 4, bottom: 4 },
-                        textAlign: 'center',
-                        formatter: () => {
-                            const pct = planoTotalAnual > 0 ? Math.round((projecaoFaturadoAnual/planoTotalAnual)*100) : 0;
-                            const icon = _atingeMeta ? '✓' : '⚠';
-                            return `${icon} Proj. Dez\n${(projecaoFaturadoAnual/1e6).toFixed(1)}M (${pct}% plano)`;
-                        }
-                    }
+                    datalabels: { display: false }
                 }
             ]
         },
         options: {
             maintainAspectRatio: false,
-            layout: { padding: { top: 28, right: 120 } },
+            layout: { padding: { top: 28 } },
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
@@ -6924,6 +6914,25 @@ function renderizarFinanceiro() {
             }
         }
     });
+
+    // ── Card Projeção de Tendência (canto superior direito do gráfico) ──
+    const cardProj = document.getElementById('cardProjecaoTendencia');
+    if (cardProj && lastFatIdx >= 0) {
+        const pct = planoTotalAnual > 0 ? Math.round((projecaoFaturadoAnual / planoTotalAnual) * 100) : 0;
+        const icon = _atingeMeta ? '✓' : '⚠';
+        const corBorda = _atingeMeta ? '#27ae60' : '#e74c3c';
+        const corValor = _atingeMeta ? '#27ae60' : '#e74c3c';
+        const corPct   = _atingeMeta ? '#27ae60' : '#e74c3c';
+        const bgCard   = _atingeMeta ? '#f0faf4' : '#fff5f5';
+        document.getElementById('cardProjValor').textContent = (projecaoFaturadoAnual / 1e6).toFixed(1) + 'M';
+        document.getElementById('cardProjValor').style.color = corValor;
+        document.getElementById('cardProjPct').innerHTML = `<span style="color:${corPct}">${icon} ${pct}% do plano anual</span>`;
+        cardProj.style.display = 'block';
+        cardProj.style.borderLeftColor = corBorda;
+        cardProj.style.background = bgCard;
+    } else if (cardProj) {
+        cardProj.style.display = 'none';
+    }
 
     renderizarComparativoSemanal();
 
