@@ -71,7 +71,7 @@ body { margin:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; ba
 .msg-error { color: #c0392b; }
 
 /* CONTROLE DE EXIBIÇÃO DAS TELAS */
-#main-system, #page-dashboard, #page-kanban, #page-metas, #page-financeiro, #page-historico { display: none; }
+#main-system, #page-dashboard, #page-kanban, #page-metas, #page-financeiro, #page-historico, #page-licenciamento { display: none; }
 .active-page { display: block !important; }
 
 /* CABEÇALHO */
@@ -783,6 +783,7 @@ header {
                 <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
                 <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
                 <button type="button" id="nav-historico" class="btn-header" onclick="navegar('historico')"><span>📂</span> Histórico</button>
+                <button type="button" id="nav-licenciamento" class="btn-header" onclick="navegar('licenciamento')" style="display:none;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;font-weight:700;"><span>🏪</span> Licenciamento</button>
             </div>
             
 <button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
@@ -1486,6 +1487,57 @@ header {
                     <div class="hist-empty">
                         <div class="hist-empty-icon">📂</div>
                         <p>Selecione um processo na lista para ver o histórico completo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TELA LICENCIAMENTO ── -->
+        <div id="page-licenciamento">
+            <div style="padding:40px 32px;">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;">
+                    <div style="width:52px;height:52px;background:linear-gradient(135deg,#0d47a1,#1976d2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(13,71,161,0.3);">🏪</div>
+                    <div>
+                        <h2 style="margin:0;font-size:22px;color:#0d47a1;font-weight:800;">Rede de Licenciamento</h2>
+                        <p style="margin:4px 0 0;color:#888;font-size:13px;">Gestão de armazéns licenciados — Vendemmia 4PL</p>
+                    </div>
+                    <div style="margin-left:auto;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:8px 18px;font-size:12px;font-weight:700;color:#856404;display:flex;align-items:center;gap:8px;">
+                        🔧 Em desenvolvimento · Acesso restrito
+                    </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:32px;">
+                    <div style="background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid #1976d2;opacity:.55;">
+                        <div style="font-size:28px;margin-bottom:10px;">📍</div>
+                        <h4 style="margin:0 0 6px;color:#1976d2;">Mapa de Armazéns</h4>
+                        <p style="margin:0;font-size:13px;color:#888;">Visualização geográfica dos armazéns licenciados ativos e em prospecção.</p>
+                        <div style="margin-top:14px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Em breve</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid #1976d2;opacity:.55;">
+                        <div style="font-size:28px;margin-bottom:10px;">📋</div>
+                        <h4 style="margin:0 0 6px;color:#1976d2;">Gestão de Contratos</h4>
+                        <p style="margin:0;font-size:13px;color:#888;">Controle de contratos, vigências, royalties e performance por licenciado.</p>
+                        <div style="margin-top:14px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Em breve</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid #1976d2;opacity:.55;">
+                        <div style="font-size:28px;margin-bottom:10px;">📊</div>
+                        <h4 style="margin:0 0 6px;color:#1976d2;">Performance da Rede</h4>
+                        <p style="margin:0;font-size:13px;color:#888;">Dashboard consolidado de volume, receita e indicadores por parceiro licenciado.</p>
+                        <div style="margin-top:14px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Em breve</div>
+                    </div>
+                    <div style="background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-top:4px solid #1976d2;opacity:.55;">
+                        <div style="font-size:28px;margin-bottom:10px;">🤝</div>
+                        <h4 style="margin:0 0 6px;color:#1976d2;">Pipeline de Novos Parceiros</h4>
+                        <p style="margin:0;font-size:13px;color:#888;">Gestão do funil de prospecção e onboarding de novos licenciados da rede.</p>
+                        <div style="margin-top:14px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.5px;">Em breve</div>
+                    </div>
+                </div>
+
+                <div style="background:#e8f0fe;border-radius:12px;padding:20px 24px;border-left:4px solid #1976d2;display:flex;align-items:center;gap:16px;">
+                    <span style="font-size:24px;">💡</span>
+                    <div>
+                        <div style="font-weight:700;color:#0d47a1;font-size:14px;margin-bottom:4px;">Área em construção</div>
+                        <div style="font-size:13px;color:#1565c0;">Esta tela está sendo desenvolvida. Apenas você e os validadores autorizados têm acesso. Assim que as funcionalidades forem aprovadas, a área será liberada para os demais perfis.</div>
                     </div>
                 </div>
             </div>
@@ -2540,17 +2592,22 @@ async function carregarMetasAnuais() {
 
 // NAVEGAÇÃO ENTRE TELAS
 function navegar(pagina) {
+    // Proteção: bloqueia acesso a Licenciamento se não estiver na whitelist
+    if (pagina === 'licenciamento' && !LICENCIAMENTO_WHITELIST.includes(EMAIL_USUARIO_LOGADO)) return;
+
     document.getElementById('page-dashboard').classList.remove('active-page');
     document.getElementById('page-kanban').classList.remove('active-page');
     document.getElementById('page-metas').classList.remove('active-page');
     document.getElementById('page-financeiro').classList.remove('active-page');
     document.getElementById('page-historico').classList.remove('active-page');
+    document.getElementById('page-licenciamento').classList.remove('active-page');
 
     document.getElementById('nav-dash').classList.remove('active');
     document.getElementById('nav-kanban').classList.remove('active');
     document.getElementById('nav-metas').classList.remove('active');
     document.getElementById('nav-financeiro').classList.remove('active');
     document.getElementById('nav-historico').classList.remove('active');
+    document.getElementById('nav-licenciamento').classList.remove('active');
 
     const barraFiltros = document.getElementById('barraFiltros');
     if (barraFiltros) {
@@ -2577,11 +2634,17 @@ function navegar(pagina) {
         document.getElementById('page-historico').classList.add('active-page');
         document.getElementById('nav-historico').classList.add('active');
         renderizarHistorico();
+    } else if (pagina === 'licenciamento') {
+        document.getElementById('page-licenciamento').classList.add('active-page');
+        document.getElementById('nav-licenciamento').classList.add('active');
     }
 }
 
 let USUARIO_LOGADO = "";
+let EMAIL_USUARIO_LOGADO = "";
 let PERFIL_USUARIO = "viewer"; // padrão seguro: só leitura
+
+const LICENCIAMENTO_WHITELIST = ['gppereira@vendemmia.com.br', 'jprado@vendemmia.com.br'];
 
 // ── PERMISSÕES ────────────────────────────────────────────────────────────────
 const PERMISSOES = {
@@ -2605,12 +2668,13 @@ function aplicarPermissoes() {
         if (el) el.style.display = visivel ? '' : 'none';
     };
 
-    mostrar('btn-nova-op',     p.novaOp);
-    mostrar('btn-vendedores',  p.gerenciar);
-    mostrar('btn-areas',       p.gerenciar);
-    mostrar('btn-lancar-meta', p.metaLancar);
-    mostrar('btn-lancar-fin',  p.finLancar);
-    mostrar('btn-atividade',   p.metaLancar); // visível para quem pode lançar metas (vendedores e diretores)
+    mostrar('btn-nova-op',        p.novaOp);
+    mostrar('btn-vendedores',     p.gerenciar);
+    mostrar('btn-areas',          p.gerenciar);
+    mostrar('btn-lancar-meta',    p.metaLancar);
+    mostrar('btn-lancar-fin',     p.finLancar);
+    mostrar('btn-atividade',      p.metaLancar);
+    mostrar('nav-licenciamento',  LICENCIAMENTO_WHITELIST.includes(EMAIL_USUARIO_LOGADO));
 
     // Kanban: desabilita drag e clique nos cards se não tiver permissão
     window._kanbanEditavel = p.kanban;
@@ -2655,6 +2719,7 @@ async function autenticarSupabase() {
         msgDiv.style.display = 'block';
     } else {
         USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+        EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
         await carregarPerfil(data.user.email);
         iniciarSistema();
     }
@@ -7800,6 +7865,7 @@ async function salvarNovaSenha() {
         
         if(data && data.user) {
             USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+            EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
             await carregarPerfil(data.user.email);
         }
 
