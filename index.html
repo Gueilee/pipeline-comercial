@@ -825,6 +825,19 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 @keyframes lic-pulse-map { 0%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 var(--pc,rgba(22,163,74,.5))}70%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 18px transparent}100%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 transparent} }
 .lic-map-pulse { animation:lic-pulse-map 2.2s ease-out infinite!important; }
 
+/* Upload de anexos */
+.lic-upload-zone{border:2px dashed #d4b8f5;border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:#faf8ff;transition:all .15s;position:relative;}
+.lic-upload-zone:hover,.lic-upload-zone.dragover{border-color:#6941c6;background:#f0ebff;}
+.lic-file-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f5f3ff;border:1.5px solid #e8e0f5;border-radius:10px;margin-top:8px;}
+.lic-file-icon{font-size:20px;flex-shrink:0;}
+.lic-file-name{flex:1;font-size:12px;color:#2d1b69;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lic-file-size{font-size:10px;color:#9b8cc0;white-space:nowrap;font-family:'Courier New',monospace;}
+.lic-file-del{font-size:13px;cursor:pointer;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;padding:3px 8px;border-radius:6px;line-height:1;flex-shrink:0;}
+.lic-file-del:hover{background:#fee2e2;}
+.lic-file-link{font-size:11px;color:#6941c6;text-decoration:none;font-weight:600;}
+.lic-file-link:hover{text-decoration:underline;}
+.lic-upload-uploading{opacity:.6;pointer-events:none;}
+
 /* ── BADGE DE PERFIL ── */
 .perfil-badge {
     display: flex; align-items: center; gap: 5px;
@@ -1824,6 +1837,21 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <label class="lic-chip-opt"><input type="checkbox" value="E-commerce">E-commerce</label>
                                         <label class="lic-chip-opt"><input type="checkbox" value="Refrigerado">Refrigerado</label>
                                     </div>
+                                    <!-- Upload: Contrato Social -->
+                                    <div style="margin-top:20px;padding:0 2px;">
+                                        <div class="lic-field-label" style="margin-bottom:10px;">CONTRATO SOCIAL</div>
+                                        <div class="lic-upload-zone" id="lic-uz-contrato"
+                                            onclick="document.getElementById('lic-fi-contrato').click()"
+                                            ondragover="licUzDragOver(event,'lic-uz-contrato')"
+                                            ondragleave="licUzDragLeave('lic-uz-contrato')"
+                                            ondrop="licUzDrop(event,'contrato_social','lic-uz-contrato')">
+                                            <div style="font-size:30px;margin-bottom:8px;">📄</div>
+                                            <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:4px;">Arraste ou clique para anexar</div>
+                                            <div style="font-size:11px;color:#9b8cc0;">PDF, JPG, PNG, DOC — máx. 10 MB</div>
+                                            <input type="file" id="lic-fi-contrato" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple style="display:none;" onchange="licFilesSelected('contrato_social',this.files)">
+                                        </div>
+                                        <div id="lic-fl-contrato_social"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1928,6 +1956,21 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <div style="padding:14px 16px;background:#f5f0ff;border-right:1px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Área total</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-area">—</div></div>
                                         <div style="padding:14px 16px;background:#f5f0ff;border-right:1px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Total de docas</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-docas">—</div></div>
                                         <div style="padding:14px 16px;background:#f5f0ff;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Ocupação média</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-ocup">—</div></div>
+                                    </div>
+                                    <!-- Upload: Fotos dos armazéns -->
+                                    <div style="margin-top:16px;padding:0 14px 14px;">
+                                        <div class="lic-field-label" style="margin-bottom:10px;">FOTOS DOS ARMAZÉNS</div>
+                                        <div class="lic-upload-zone" id="lic-uz-armazem"
+                                            onclick="document.getElementById('lic-fi-armazem').click()"
+                                            ondragover="licUzDragOver(event,'lic-uz-armazem')"
+                                            ondragleave="licUzDragLeave('lic-uz-armazem')"
+                                            ondrop="licUzDrop(event,'foto_armazem','lic-uz-armazem')">
+                                            <div style="font-size:30px;margin-bottom:8px;">🏗️</div>
+                                            <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:4px;">Fotos dos armazéns (múltiplas)</div>
+                                            <div style="font-size:11px;color:#9b8cc0;">JPG, PNG, HEIC — máx. 10 MB cada</div>
+                                            <input type="file" id="lic-fi-armazem" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;" onchange="licFilesSelected('foto_armazem',this.files)">
+                                        </div>
+                                        <div id="lic-fl-foto_armazem"></div>
                                     </div>
                                 </div>
                             </div>
@@ -2066,6 +2109,21 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                             <label class="lic-field-label">Acuracidade de inventário (%)</label>
                                             <input class="lic-in" id="lf-acuracidade_pct" type="number" min="0" max="100" placeholder="Ex.: 99">
                                         </div>
+                                    </div>
+                                    <!-- Upload: Certificados -->
+                                    <div style="margin-top:16px;padding:0 2px;">
+                                        <div class="lic-field-label" style="margin-bottom:10px;">DOCUMENTOS DE CERTIFICAÇÃO</div>
+                                        <div class="lic-upload-zone" id="lic-uz-cert"
+                                            onclick="document.getElementById('lic-fi-cert').click()"
+                                            ondragover="licUzDragOver(event,'lic-uz-cert')"
+                                            ondragleave="licUzDragLeave('lic-uz-cert')"
+                                            ondrop="licUzDrop(event,'certificado','lic-uz-cert')">
+                                            <div style="font-size:30px;margin-bottom:8px;">🏆</div>
+                                            <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:4px;">Anexe os certificados ativos</div>
+                                            <div style="font-size:11px;color:#9b8cc0;">PDF, JPG, PNG — máx. 10 MB por arquivo</div>
+                                            <input type="file" id="lic-fi-cert" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none;" onchange="licFilesSelected('certificado',this.files)">
+                                        </div>
+                                        <div id="lic-fl-certificado"></div>
                                     </div>
                                 </div>
                             </div>
@@ -8889,6 +8947,7 @@ function _licLimparForm() {
     _licWhCount = 0;
     licAddWarehouse();
     _licUpdateSummary();
+    _licResetAnexos();
 }
 
 function _licPreencherForm(lead) {
@@ -8933,6 +8992,7 @@ function _licPreencherForm(lead) {
     }
     licUpdateImplant();
     _licUpdateProgress();
+    if (lead.id) licCarregarAnexos(lead.id);
 }
 
 function _licGetFormData() {
@@ -8991,13 +9051,17 @@ async function salvarLicLead() {
 
     try {
         let error;
+        let savedLeadId = _licEditId;
         if (_licEditId) {
             ({ error } = await supabaseClient.from('lic_leads').update(data).eq('id', _licEditId));
         } else {
             data.created_at = new Date().toISOString();
-            ({ error } = await supabaseClient.from('lic_leads').insert([data]));
+            const { data: inserted, error: insertErr } = await supabaseClient.from('lic_leads').insert([data]).select('id').single();
+            error = insertErr;
+            if (inserted) savedLeadId = inserted.id;
         }
         if (error) throw error;
+        if (savedLeadId) await licSalvarTodosAnexos(savedLeadId);
         showToast(_licEditId ? `Lead "${data.razao_social}" atualizado!` : `Lead "${data.razao_social}" cadastrado!`, 'success');
         await carregarLicLeads();
         fecharFormLead();
@@ -9105,6 +9169,159 @@ function licUpdateImplant() {
 function licToggleWms(show) {
     const b = document.getElementById('lic-wms-block');
     if (b) b.style.display = show ? '' : 'none';
+}
+
+// ── Anexos de Licenciamento ───────────────────────────────────────
+
+let _licPendingFiles = { contrato_social: [], foto_armazem: [], certificado: [] };
+let _licExistingAnexos = []; // carregados ao editar
+
+const _LIC_TIPOS_LABEL = { contrato_social: 'Contrato Social', foto_armazem: 'Foto de Armazém', certificado: 'Certificado' };
+
+function licFilesSelected(tipo, files) {
+    if (!files || files.length === 0) return;
+    const MAX = 10 * 1024 * 1024; // 10 MB
+    [...files].forEach(f => {
+        if (f.size > MAX) { showToast(`"${f.name}" excede 10 MB e foi ignorado.`, 'error'); return; }
+        _licPendingFiles[tipo].push(f);
+    });
+    _licRenderFileList(tipo);
+}
+
+function licUzDragOver(event, uzId) {
+    event.preventDefault();
+    document.getElementById(uzId)?.classList.add('dragover');
+}
+function licUzDragLeave(uzId) {
+    document.getElementById(uzId)?.classList.remove('dragover');
+}
+function licUzDrop(event, tipo, uzId) {
+    event.preventDefault();
+    document.getElementById(uzId)?.classList.remove('dragover');
+    licFilesSelected(tipo, event.dataTransfer.files);
+}
+
+function _licFileIcon(nome) {
+    const ext = (nome.split('.').pop() || '').toLowerCase();
+    if (['jpg','jpeg','png','heic','webp'].includes(ext)) return '🖼️';
+    if (ext === 'pdf') return '📄';
+    if (['doc','docx'].includes(ext)) return '📝';
+    return '📎';
+}
+
+function _licFmtBytes(b) {
+    if (b >= 1e6) return (b/1e6).toFixed(1)+' MB';
+    if (b >= 1e3) return (b/1e3).toFixed(0)+' KB';
+    return b + ' B';
+}
+
+function _licRenderFileList(tipo) {
+    const container = document.getElementById('lic-fl-' + tipo);
+    if (!container) return;
+
+    const pending   = _licPendingFiles[tipo] || [];
+    const existing  = _licExistingAnexos.filter(a => a.tipo === tipo);
+
+    let html = '';
+
+    // Arquivos já salvos no banco
+    existing.forEach(a => {
+        html += `<div class="lic-file-item">
+            <span class="lic-file-icon">${_licFileIcon(a.nome_arquivo)}</span>
+            <span class="lic-file-name">
+                <a href="${a.url}" target="_blank" class="lic-file-link" title="Abrir arquivo">${a.nome_arquivo}</a>
+            </span>
+            <span class="lic-file-size">${_licFmtBytes(a.tamanho_bytes||0)}</span>
+            <button class="lic-file-del" onclick="licDeletarAnexo(${a.id},'${tipo}')" title="Excluir">✕</button>
+        </div>`;
+    });
+
+    // Arquivos pendentes (ainda não enviados)
+    pending.forEach((f, i) => {
+        html += `<div class="lic-file-item" id="lic-fp-${tipo}-${i}">
+            <span class="lic-file-icon">${_licFileIcon(f.name)}</span>
+            <span class="lic-file-name">${f.name}</span>
+            <span class="lic-file-size">${_licFmtBytes(f.size)} · <em style="color:#6941c6;font-style:normal;">pendente</em></span>
+            <button class="lic-file-del" onclick="licRemoverPendente('${tipo}',${i})" title="Remover">✕</button>
+        </div>`;
+    });
+
+    if (!html) {
+        html = '<div style="font-size:11px;color:#c4b5e8;text-align:center;padding:8px 0;">Nenhum arquivo anexado</div>';
+    }
+
+    container.innerHTML = html;
+}
+
+function licRemoverPendente(tipo, idx) {
+    _licPendingFiles[tipo].splice(idx, 1);
+    _licRenderFileList(tipo);
+}
+
+async function licDeletarAnexo(id, tipo) {
+    const anexo = _licExistingAnexos.find(a => a.id === id);
+    if (!anexo) return;
+
+    // Remove do Storage
+    if (anexo.storage_path) {
+        await supabaseClient.storage.from('lic-anexos').remove([anexo.storage_path]);
+    }
+
+    // Remove da tabela
+    await supabaseClient.from('lic_anexos').delete().eq('id', id);
+
+    // Atualiza local
+    _licExistingAnexos = _licExistingAnexos.filter(a => a.id !== id);
+    _licRenderFileList(tipo);
+    showToast('Arquivo removido.', 'info');
+}
+
+async function _licUploadFile(file, tipo, leadId) {
+    const ext  = file.name.split('.').pop() || 'bin';
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `leads/${leadId}/${tipo}/${Date.now()}_${safe}`;
+
+    const { error } = await supabaseClient.storage.from('lic-anexos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) throw error;
+
+    const { data: urlData } = supabaseClient.storage.from('lic-anexos').getPublicUrl(path);
+    return { path, url: urlData.publicUrl, nome: file.name, tamanho: file.size };
+}
+
+async function licSalvarTodosAnexos(leadId) {
+    const tipos = Object.keys(_licPendingFiles);
+    let count = 0;
+    for (const tipo of tipos) {
+        const files = _licPendingFiles[tipo];
+        if (!files.length) continue;
+        for (const file of files) {
+            try {
+                const { path, url, nome, tamanho } = await _licUploadFile(file, tipo, leadId);
+                await supabaseClient.from('lic_anexos').insert([{
+                    lead_id: leadId, tipo, nome_arquivo: nome, url,
+                    storage_path: path, tamanho_bytes: tamanho,
+                    criado_por: EMAIL_USUARIO_LOGADO
+                }]);
+                count++;
+            } catch(e) {
+                showToast(`Erro ao enviar "${file.name}": ${e.message}`, 'error');
+            }
+        }
+        _licPendingFiles[tipo] = []; // limpa após salvar
+    }
+    if (count > 0) showToast(`${count} arquivo(s) anexado(s) com sucesso!`, 'success');
+}
+
+async function licCarregarAnexos(leadId) {
+    const { data } = await supabaseClient.from('lic_anexos').select('*').eq('lead_id', leadId).order('created_at');
+    _licExistingAnexos = data || [];
+    ['contrato_social','foto_armazem','certificado'].forEach(t => _licRenderFileList(t));
+}
+
+function _licResetAnexos() {
+    _licPendingFiles = { contrato_social: [], foto_armazem: [], certificado: [] };
+    _licExistingAnexos = [];
+    ['contrato_social','foto_armazem','certificado'].forEach(t => _licRenderFileList(t));
 }
 
 // ── Kanban de Licenciamento ──────────────────────────────────────
