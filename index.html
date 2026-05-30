@@ -8,6 +8,8 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
@@ -2332,6 +2334,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <div id="lic-form-footer">
                     <div style="font-size:12px;color:#9b8cc0;font-weight:500;" id="lic-footer-label">Dados da empresa &bull; Etapa 1 de 11</div>
                     <div style="display:flex;gap:10px;">
+                        <button onclick="gerarLicPDF(_licEditId)" id="lic-btn-pdf" style="display:none;padding:8px 16px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:13px;font-weight:600;color:#6941c6;cursor:pointer;">📄 Gerar PDF</button>
                         <button onclick="prevLicSec()" class="lic-btn-nav lic-btn-prev">← Anterior</button>
                         <button id="lic-btn-proximo" onclick="nextLicSec()" class="lic-btn-nav lic-btn-next">Próximo →</button>
                     </div>
@@ -8772,6 +8775,7 @@ function renderizarLicenciamento() {
             <td style="padding:10px 8px;color:#6b7280;font-size:12px;">${l.responsavel || '—'}</td>
             <td style="padding:10px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${statusStyle[l.status]||''}">${l.status || '—'}</span></td>
             <td style="padding:10px 8px;text-align:center;" onclick="event.stopPropagation()">
+                <button onclick="gerarLicPDF('${l.id}')" style="padding:3px 9px;border:1px solid #e0d9f5;border-radius:4px;background:#faf8ff;color:#6941c6;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar PDF">📄</button>
                 <button onclick="abrirFormLead('${l.id}')" style="padding:3px 9px;border:1px solid #dde5ff;border-radius:4px;background:#f0f4ff;color:#1e40af;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;">✏️</button>
                 <button onclick="deletarLicLead('${l.id}')" style="padding:3px 9px;border:1px solid #fca5a5;border-radius:4px;background:#fef2f2;color:#991b1b;font-size:11px;cursor:pointer;font-family:inherit;">🗑️</button>
             </td>
@@ -8874,6 +8878,9 @@ function _licGoSec(idx) {
             btnProx.style.borderColor = '';
         }
     }
+    // Mostrar botão PDF só se for edição de lead existente
+    const btnPdf = document.getElementById('lic-btn-pdf');
+    if (btnPdf) btnPdf.style.display = _licEditId ? '' : 'none';
 }
 
 function nextLicSec() { if (_licSection < LIC_SECS.length - 1) _licGoSec(_licSection + 1); }
@@ -9356,6 +9363,315 @@ function abrirLicKanban() {
 function fecharLicKanban() {
     document.getElementById('lic-view-kanban').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
+}
+
+// ── Geração de PDF do Lead ───────────────────────────────────────
+
+async function gerarLicPDF(leadId) {
+    if (!leadId) { showToast('Salve o lead antes de gerar o PDF.', 'error'); return; }
+
+    const lead = baseLicLeads.find(l => String(l.id) === String(leadId));
+    if (!lead) { showToast('Lead não encontrado.', 'error'); return; }
+
+    const btn = event?.target;
+    const origText = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Gerando...'; }
+
+    try {
+        showToast('Gerando PDF, aguarde…', 'info');
+
+        // Carrega logo como base64
+        let logoB64 = '';
+        try {
+            const resp = await fetch('Pipeline.png');
+            const blob = await resp.blob();
+            logoB64 = await new Promise(res => {
+                const r = new FileReader();
+                r.onloadend = () => res(r.result);
+                r.readAsDataURL(blob);
+            });
+        } catch(e) {}
+
+        // Carrega anexos existentes
+        const { data: anexos } = await supabaseClient.from('lic_anexos').select('*').eq('lead_id', leadId).order('created_at');
+        const anexosList = anexos || [];
+
+        // Monta HTML do template
+        const tmpl = document.getElementById('lic-pdf-template');
+        tmpl.innerHTML = _licBuildPDFHtml(lead, anexosList, logoB64);
+
+        // Aguarda imagens carregarem
+        await new Promise(r => setTimeout(r, 500));
+
+        // Captura com html2canvas
+        const canvas = await html2canvas(tmpl, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: 794,
+            windowWidth: 794,
+        });
+
+        // Cria PDF com jsPDF
+        const { jsPDF } = window.jspdf;
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfW = 210; // A4 mm
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+
+        const doc = new jsPDF({ orientation: pdfH > 297 ? 'portrait' : 'portrait', unit: 'mm', format: 'a4' });
+
+        if (pdfH <= 297) {
+            doc.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+        } else {
+            // Múltiplas páginas
+            let remaining = canvas.height;
+            let srcY = 0;
+            const sliceH = Math.round(canvas.width * (297 / pdfW));
+            let page = 0;
+            while (remaining > 0) {
+                const h = Math.min(sliceH, remaining);
+                const sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvas.width;
+                sliceCanvas.height = h;
+                sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, h, 0, 0, canvas.width, h);
+                const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+                if (page > 0) doc.addPage();
+                doc.addImage(sliceData, 'JPEG', 0, 0, pdfW, (h * pdfW) / canvas.width);
+                srcY += h;
+                remaining -= h;
+                page++;
+            }
+        }
+
+        // Converte PDF para blob
+        const pdfBlob = doc.output('blob');
+
+        // Salva no Supabase Storage
+        const hoje = new Date();
+        const dataStr = hoje.toISOString().split('T')[0];
+        const nomeArq = `lead_${leadId}_${dataStr}.pdf`;
+        const path = `leads/${leadId}/pdf_lead/${Date.now()}_${nomeArq}`;
+
+        const { error: upErr } = await supabaseClient.storage.from('lic-anexos').upload(path, pdfBlob, { contentType:'application/pdf', upsert: false });
+
+        if (!upErr) {
+            const { data: urlData } = supabaseClient.storage.from('lic-anexos').getPublicUrl(path);
+            await supabaseClient.from('lic_anexos').insert([{
+                lead_id: leadId,
+                tipo: 'pdf_lead',
+                nome_arquivo: nomeArq,
+                url: urlData.publicUrl,
+                storage_path: path,
+                tamanho_bytes: pdfBlob.size,
+                criado_por: EMAIL_USUARIO_LOGADO,
+            }]);
+            showToast('PDF salvo no histórico do lead!', 'success');
+        }
+
+        // Abre o PDF para download/visualização
+        doc.save(nomeArq);
+
+    } catch(e) {
+        console.error('Erro ao gerar PDF:', e);
+        showToast('Erro ao gerar PDF: ' + (e.message || e), 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+        const tmpl = document.getElementById('lic-pdf-template');
+        if (tmpl) tmpl.innerHTML = '';
+    }
+}
+
+function _licBuildPDFHtml(lead, anexos, logoB64) {
+    const hoje = new Date().toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const fee = parseFloat(lead.fee_mensal) || 0;
+    const m2  = parseFloat(lead.area_total_m2) || 0;
+    const armazens = Array.isArray(lead.armazens) ? lead.armazens.filter(w => w.area_m2 > 0 || w.nome) : [];
+    const pdfAnexos = anexos.filter(a => a.tipo !== 'pdf_lead');
+
+    const row = (label, val) => val ? `<tr><td style="padding:5px 8px;color:#6b7280;font-size:11px;width:38%;vertical-align:top;font-weight:600;">${label}</td><td style="padding:5px 8px;font-size:11px;color:#2d1b69;font-weight:500;">${val}</td></tr>` : '';
+    const section = (icon, title, content) => `
+        <div style="background:#fff;border-radius:10px;border:1px solid #ede8f8;overflow:hidden;margin-bottom:14px;">
+            <div style="background:linear-gradient(90deg,#2d1b69,#6941c6);padding:9px 14px;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:14px;">${icon}</span>
+                <span style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;">${title}</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">${content}</table>
+        </div>`;
+
+    const statusStyle = lead.status === 'Convertido' ? 'background:#f0fdf4;color:#166534;border:1px solid #86efac;' :
+                        lead.status === 'Perdido'    ? 'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;' :
+                                                       'background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;';
+    const planBg = {Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const planCol = {Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+
+    const logoHtml = logoB64 ? `<img src="${logoB64}" style="height:32px;object-fit:contain;">` : `<div style="font-size:16px;font-weight:900;color:#fff;letter-spacing:.04em;">PIPELINE</div>`;
+
+    return `
+    <div style="width:794px;background:#fff;font-family:Arial,Helvetica,sans-serif;">
+
+        <!-- HEADER -->
+        <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:28px 32px 24px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);"></div>
+            <div style="position:absolute;bottom:-30px;right:80px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.03);"></div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;position:relative;">
+                <div>${logoHtml}</div>
+                <div style="text-align:right;">
+                    <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;">Lead Report · Rede de Licenciamento</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;">Gerado em ${hoje}</div>
+                </div>
+            </div>
+            <div style="margin-top:18px;position:relative;">
+                <div style="font-size:24px;font-weight:900;color:#fff;letter-spacing:-.5px;line-height:1.1;">${lead.razao_social || '—'}</div>
+                ${lead.cnpj ? `<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:3px;">CNPJ: ${lead.cnpj}</div>` : ''}
+                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                    ${lead.uf ? `<span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">${lead.uf}${lead.polo_logistico?' · '+lead.polo_logistico:''}</span>` : ''}
+                    ${lead.plano ? `<span style="background:${planBg[lead.plano]||'rgba(255,255,255,.15)'};color:${planCol[lead.plano]||'#fff'};padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">${lead.plano}</span>` : ''}
+                    ${lead.etapa ? `<span style="background:rgba(255,255,255,.15);color:#fff;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">${lead.etapa}</span>` : ''}
+                    <span style="${statusStyle}padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">${lead.status || 'Ativo'}</span>
+                    ${fee > 0 ? `<span style="background:rgba(22,163,74,.25);color:#a7f3d0;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">R$ ${fee.toLocaleString('pt-BR')}/mês</span>` : ''}
+                    ${m2 > 0 ? `<span style="background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;">${m2.toLocaleString('pt-BR')} m²</span>` : ''}
+                </div>
+            </div>
+        </div>
+
+        <!-- BODY -->
+        <div style="padding:24px 28px;">
+
+            <!-- Grid 2 colunas -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0;">
+                <div>
+                    ${section('🏢', 'Dados da empresa',
+                        row('Razão social', lead.razao_social) +
+                        row('CNPJ', lead.cnpj) +
+                        row('Website', lead.website) +
+                        row('Ano fundação', lead.ano_fundacao) +
+                        row('Faturamento anual', lead.faturamento_faixa) +
+                        row('Segmentos', lead.segmentos)
+                    )}
+                </div>
+                <div>
+                    ${section('👤', 'Contato principal',
+                        row('Nome', lead.contato_nome) +
+                        row('Cargo', lead.contato_cargo) +
+                        row('E-mail', lead.contato_email) +
+                        row('Telefone', lead.contato_telefone) +
+                        row('Decisor', lead.decisor === 'Este contato' ? 'Este contato' : lead.decisor_info || lead.decisor)
+                    )}
+                </div>
+                <div>
+                    ${section('📍', 'Localização',
+                        row('UF', lead.uf) +
+                        row('Polo logístico', lead.polo_logistico) +
+                        row('Exclusividade', lead.regiao_exclusividade) +
+                        row('Outras UFs', lead.outras_ufs)
+                    )}
+                </div>
+                <div>
+                    ${section('💼', 'Plano comercial',
+                        row('Plano', lead.plano) +
+                        row('Fee mensal', fee > 0 ? 'R$ '+fee.toLocaleString('pt-BR') : '—') +
+                        row('Implantação WMS', lead.implantacao_wms) +
+                        row('Opção WMS', lead.wms_opcao) +
+                        row('Status', lead.status) +
+                        row('Motivo perda', lead.motivo_perda)
+                    )}
+                </div>
+            </div>
+
+            <!-- Capacidade instalada (full width se houver armazéns) -->
+            ${armazens.length > 0 ? `
+            <div style="margin-bottom:14px;">
+                <div style="background:linear-gradient(90deg,#2d1b69,#6941c6);border-radius:10px 10px 0 0;padding:9px 14px;display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:14px;">🏗️</span>
+                    <span style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;">Capacidade instalada</span>
+                    <span style="background:rgba(255,255,255,.2);color:#fff;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-left:auto;">${armazens.length} armazém${armazens.length>1?'s':''}</span>
+                </div>
+                <div style="border:1px solid #ede8f8;border-top:none;border-radius:0 0 10px 10px;overflow:hidden;">
+                    ${armazens.map((w,i) => `
+                    <div style="padding:10px 14px;${i<armazens.length-1?'border-bottom:1px solid #f5f3ff;':''}background:${i%2===0?'#fff':'#faf8ff'};">
+                        <div style="font-size:11px;font-weight:800;color:#6941c6;margin-bottom:5px;">Armazém ${i+1}${w.nome?' — '+w.nome:''}</div>
+                        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+                            ${w.uf?`<span style="font-size:11px;color:#6b7280;"><b>UF:</b> ${w.uf}${w.cidade?' / '+w.cidade:''}</span>`:''}
+                            ${w.area_m2>0?`<span style="font-size:11px;color:#6b7280;"><b>Área:</b> ${Number(w.area_m2).toLocaleString('pt-BR')} m²</span>`:''}
+                            ${w.docas>0?`<span style="font-size:11px;color:#6b7280;"><b>Docas:</b> ${w.docas}</span>`:''}
+                            ${w.ocupacao>0?`<span style="font-size:11px;color:#6b7280;"><b>Ocupação:</b> ${w.ocupacao}%</span>`:''}
+                            ${w.paletes?`<span style="font-size:11px;color:#6b7280;"><b>Páletes:</b> ${Number(w.paletes).toLocaleString('pt-BR')}</span>`:''}
+                            ${w.pe_direito?`<span style="font-size:11px;color:#6b7280;"><b>Pé-dir.:</b> ${w.pe_direito}m</span>`:''}
+                        </div>
+                    </div>`).join('')}
+                </div>
+            </div>` : ''}
+
+            <!-- Grid 2 colunas — Tecnologia + Certificações -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div>
+                    ${section('💻', 'Maturidade tecnológica',
+                        row('WMS', lead.wms_atual) +
+                        row('ERP', lead.erp_atual) +
+                        row('Sistemas integrados', lead.sistemas_integrados) +
+                        row('Nível maturidade', lead.nivel_maturidade)
+                    )}
+                </div>
+                <div>
+                    ${section('🏆', 'Certificações e qualidade',
+                        row('Certificações', lead.certificacoes) +
+                        row('OTIF médio', lead.otif_pct ? lead.otif_pct+'%' : null) +
+                        row('Acuracidade inv.', lead.acuracidade_pct ? lead.acuracidade_pct+'%' : null)
+                    )}
+                </div>
+            </div>
+
+            <!-- Acompanhamento (full width) -->
+            ${section('📋', 'Acompanhamento comercial',
+                `<tr>
+                    <td style="padding:5px 8px;color:#6b7280;font-size:11px;width:22%;vertical-align:top;font-weight:600;">Origem</td>
+                    <td style="padding:5px 8px;font-size:11px;color:#2d1b69;">${lead.origem || '—'}</td>
+                    <td style="padding:5px 8px;color:#6b7280;font-size:11px;width:22%;vertical-align:top;font-weight:600;">Responsável</td>
+                    <td style="padding:5px 8px;font-size:11px;color:#2d1b69;">${lead.responsavel || '—'}</td>
+                </tr>
+                <tr>
+                    <td style="padding:5px 8px;color:#6b7280;font-size:11px;font-weight:600;">1º contato</td>
+                    <td style="padding:5px 8px;font-size:11px;color:#2d1b69;">${lead.data_primeiro_contato ? new Date(lead.data_primeiro_contato+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                    <td style="padding:5px 8px;color:#6b7280;font-size:11px;font-weight:600;">Próxima ação</td>
+                    <td style="padding:5px 8px;font-size:11px;color:#2d1b69;">${lead.data_proxima_acao ? new Date(lead.data_proxima_acao+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
+                </tr>
+                ${lead.proxima_acao ? `<tr><td style="padding:5px 8px;color:#6b7280;font-size:11px;font-weight:600;">Ação prevista</td><td colspan="3" style="padding:5px 8px;font-size:11px;color:#2d1b69;">${lead.proxima_acao}</td></tr>` : ''}
+                ${lead.observacoes ? `<tr><td style="padding:5px 8px;color:#6b7280;font-size:11px;font-weight:600;vertical-align:top;">Observações</td><td colspan="3" style="padding:5px 8px;font-size:11px;color:#2d1b69;line-height:1.5;">${lead.observacoes}</td></tr>` : ''}`
+            )}
+
+            <!-- Anexos (se houver) -->
+            ${pdfAnexos.length > 0 ? `
+            <div style="background:#fff;border-radius:10px;border:1px solid #ede8f8;overflow:hidden;margin-bottom:14px;">
+                <div style="background:linear-gradient(90deg,#2d1b69,#6941c6);padding:9px 14px;display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:14px;">📎</span>
+                    <span style="font-size:11px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;">Documentos anexados</span>
+                    <span style="background:rgba(255,255,255,.2);color:#fff;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-left:auto;">${pdfAnexos.length} arquivo${pdfAnexos.length>1?'s':''}</span>
+                </div>
+                <div style="padding:10px 14px;">
+                    ${pdfAnexos.map(a => {
+                        const tipoLabel = a.tipo === 'contrato_social' ? 'Contrato Social' : a.tipo === 'certificado' ? 'Certificado' : a.tipo.startsWith('foto_armazem_') ? 'Foto Armazém '+(a.tipo.split('_')[2]||'') : a.tipo;
+                        const kb = a.tamanho_bytes ? Math.round(a.tamanho_bytes/1024)+'KB' : '';
+                        return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f9f7ff;">'
+                            + '<span style="font-size:14px;">'+(a.nome_arquivo?.endsWith('.pdf')?'📄':a.nome_arquivo?.match(/\\.(jpg|jpeg|png)$/i)?'🖼️':'📎')+'</span>'
+                            + '<span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;">'+(a.nome_arquivo || '—')+'</span>'
+                            + '<span style="font-size:10px;color:#9b8cc0;background:#f5f3ff;padding:2px 8px;border-radius:20px;">'+tipoLabel+'</span>'
+                            + (kb?'<span style="font-size:10px;color:#9b8cc0;">'+kb+'</span>':'')
+                            + '</div>';
+                    }).join('')}
+                </div>
+            </div>` : ''}
+
+        </div>
+
+        <!-- FOOTER -->
+        <div style="background:linear-gradient(90deg,#2d1b69,#422c76);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+            <span style="font-size:9px;color:rgba(255,255,255,.5);">pipelinevendemmia.com.br</span>
+            <span style="font-size:9px;color:rgba(255,255,255,.4);">Documento confidencial · Vendemmia Comércio Internacional Ltda.</span>
+            <span style="font-size:9px;color:rgba(255,255,255,.5);">${hoje}</span>
+        </div>
+
+    </div>`;
 }
 
 // ── Mapa de Licenciamento ─────────────────────────────────────────
@@ -10081,5 +10397,9 @@ async function salvarNovaSenha() {
     }
 }
 </script>
+
+<!-- Template para geração de PDF -->
+<div id="lic-pdf-template" style="position:fixed;left:-9999px;top:-9999px;width:794px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a2e;line-height:1.4;"></div>
+
 </body>
 </html>
