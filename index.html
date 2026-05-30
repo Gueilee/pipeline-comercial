@@ -1616,13 +1616,122 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
                         <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
-                        <button onclick="abrirLicDashboard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Dashboard</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
                     </div>
                 </div>
 
                 <!-- KPIs -->
                 <div id="lic-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+
+                <!-- ── GRÁFICOS INLINE ── -->
+                <div id="lic-graficos" style="margin-top:18px;">
+
+                    <!-- Linha 1: Evolução + Status -->
+                    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Evolução mensal</div>
+                                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Novos leads e conversões por mês</div>
+                                </div>
+                                <div style="display:flex;gap:10px;font-size:10px;">
+                                    <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(105,65,198,.3);display:inline-block;"></span>Novos</span>
+                                    <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:2px;background:#16a34a;display:inline-block;"></span>Convertidos</span>
+                                </div>
+                            </div>
+                            <div style="height:210px;"><canvas id="ld-chart-evolucao"></canvas></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Composição do pipeline</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Distribuição por status</div>
+                            </div>
+                            <div style="height:170px;"><canvas id="ld-chart-status"></canvas></div>
+                            <div id="ld-legend-status" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Linha 2: Funil + Origem -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Funil de conversão</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Leads por etapa do pipeline</div>
+                            </div>
+                            <div id="ld-funil-visual"></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Canal de origem</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Como os leads chegaram</div>
+                            </div>
+                            <div style="height:220px;"><canvas id="ld-chart-origem"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Linha 3: Planos + Perdidos por etapa -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Mix de planos comerciais</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Planos nos leads convertidos</div>
+                            </div>
+                            <div style="height:180px;"><canvas id="ld-chart-planos"></canvas></div>
+                            <div id="ld-legend-planos" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Perdas por etapa</div>
+                                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Onde o pipeline vaza</div>
+                                </div>
+                                <span id="ld-badge-perdidos" style="font-size:10px;padding:3px 10px;border-radius:20px;background:#fef2f2;color:#991b1b;font-weight:600;border:1px solid #fca5a5;">0 perdidos</span>
+                            </div>
+                            <div style="height:200px;"><canvas id="ld-chart-perdidos"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Linha 4: Motivos + m² por UF -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Ranking de motivos de perda</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Principais objeções encontradas</div>
+                            </div>
+                            <div id="ld-motivos-list"></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">m² convertidos por UF</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Cobertura geográfica da rede</div>
+                            </div>
+                            <div style="height:210px;"><canvas id="ld-chart-m2uf"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Linha 5: Receita full width -->
+                    <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:16px;">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+                            <div>
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Receita projetada acumulada</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Projeção de 60 meses baseada nos leads convertidos</div>
+                            </div>
+                            <div style="display:flex;gap:24px;">
+                                <div style="text-align:right;">
+                                    <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Receita total 5 anos</div>
+                                    <div id="ld-rec-total" style="font-size:18px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">—</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Taxa de implantação</div>
+                                    <div id="ld-adesao-total" style="font-size:18px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">—</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="height:190px;"><canvas id="ld-chart-receita"></canvas></div>
+                    </div>
+
+                </div>
+                <!-- ── FIM GRÁFICOS INLINE ── -->
 
                 <!-- Tabela -->
                 <div style="background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.07);overflow:hidden;">
@@ -2186,188 +2295,8 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
             </div><!-- /lic-view-form -->
 
-            <!-- ── VISÃO DASHBOARD ── -->
-<div id="lic-view-dashboard" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
 
-    <!-- Hero header escuro com KPIs -->
-    <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:24px 32px 28px;flex-shrink:0;position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;"></div>
-        <div style="position:absolute;bottom:-60px;right:100px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.025);pointer-events:none;"></div>
-        <div style="position:absolute;top:30px;left:50%;width:1px;height:1px;background:rgba(255,255,255,.06);box-shadow:0 0 80px 60px rgba(155,93,229,.12);pointer-events:none;"></div>
-
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin-bottom:22px;">
-            <div>
-                <button onclick="fecharLicDashboard()" style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:11px;font-weight:600;color:rgba(255,255,255,.75);cursor:pointer;margin-bottom:16px;backdrop-filter:blur(4px);">← Leads</button>
-                <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.2;">Rede de Licenciamento</div>
-                <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:4px;font-weight:500;">Dashboard · Pipeline de parceiros estratégicos</div>
-            </div>
-            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 18px;backdrop-filter:blur(8px);text-align:right;">
-                <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Período</div>
-                <div style="font-size:13px;color:#fff;font-weight:600;">2026 · Todos</div>
-            </div>
-        </div>
-
-        <!-- KPI cards dentro do hero -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;">
-            <div style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
-                <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Total de leads</div>
-                <div id="ld-kpi-total" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
-                <div id="ld-kpi-total-sub" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">cadastrados</div>
-            </div>
-            <div style="background:rgba(22,163,74,.18);border:1px solid rgba(22,163,74,.3);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
-                <div style="font-size:9px;color:rgba(134,239,172,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Convertidos</div>
-                <div id="ld-kpi-conv" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
-                <div id="ld-kpi-conv-sub" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">—</div>
-            </div>
-            <div style="background:rgba(105,65,198,.22);border:1px solid rgba(155,93,229,.3);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
-                <div style="font-size:9px;color:rgba(192,168,245,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">m² convertidos</div>
-                <div id="ld-kpi-m2" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">prontos para operar</div>
-            </div>
-            <div style="background:rgba(217,119,6,.18);border:1px solid rgba(245,158,11,.28);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
-                <div style="font-size:9px;color:rgba(253,230,138,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Fee/mês total</div>
-                <div id="ld-kpi-fee" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">leads convertidos</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Conteúdo scrollável -->
-    <div style="flex:1;overflow-y:auto;padding:22px 28px;">
-
-        <!-- Linha 1: Evolução + Status -->
-        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;">
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
-                    <div>
-                        <div style="font-size:13px;font-weight:700;color:#2d1b69;">Evolução mensal</div>
-                        <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Novos leads e conversões por mês</div>
-                    </div>
-                    <div style="display:flex;gap:10px;font-size:10px;">
-                        <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(105,65,198,.3);display:inline-block;"></span>Novos</span>
-                        <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:2px;background:#16a34a;display:inline-block;"></span>Convertidos</span>
-                    </div>
-                </div>
-                <div style="height:210px;"><canvas id="ld-chart-evolucao"></canvas></div>
-            </div>
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Composição do pipeline</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Distribuição por status</div>
-                </div>
-                <div style="height:170px;"><canvas id="ld-chart-status"></canvas></div>
-                <div id="ld-legend-status" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
-            </div>
-        </div>
-
-        <!-- Linha 2: Funil + Origem -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Funil de conversão</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Leads por etapa do pipeline</div>
-                </div>
-                <div id="ld-funil-visual"></div>
-            </div>
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Canal de origem</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Como os leads chegaram</div>
-                </div>
-                <div style="height:220px;"><canvas id="ld-chart-origem"></canvas></div>
-            </div>
-        </div>
-
-        <!-- Linha 3: Planos + Perdidos por etapa -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Mix de planos comerciais</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Planos nos leads convertidos</div>
-                </div>
-                <div style="height:180px;"><canvas id="ld-chart-planos"></canvas></div>
-                <div id="ld-legend-planos" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
-            </div>
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                    <div>
-                        <div style="font-size:13px;font-weight:700;color:#2d1b69;">Perdas por etapa</div>
-                        <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Onde o pipeline vaza</div>
-                    </div>
-                    <span id="ld-badge-perdidos" style="font-size:10px;padding:3px 10px;border-radius:20px;background:#fef2f2;color:#991b1b;font-weight:600;border:1px solid #fca5a5;">0 perdidos</span>
-                </div>
-                <div style="height:200px;"><canvas id="ld-chart-perdidos"></canvas></div>
-            </div>
-        </div>
-
-        <!-- Linha 4: Motivos de perda + m² por UF -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Ranking de motivos de perda</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Principais objeções encontradas</div>
-                </div>
-                <div id="ld-motivos-list"></div>
-            </div>
-            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
-                <div style="margin-bottom:16px;">
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">m² convertidos por UF</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Cobertura geográfica da rede</div>
-                </div>
-                <div style="height:210px;"><canvas id="ld-chart-m2uf"></canvas></div>
-            </div>
-        </div>
-
-        <!-- Linha 5: Receita projetada (full width) -->
-        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:16px;">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Receita projetada acumulada</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Projeção de 60 meses baseada nos leads convertidos</div>
-                </div>
-                <div style="display:flex;gap:24px;">
-                    <div style="text-align:right;">
-                        <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Receita total 5 anos</div>
-                        <div id="ld-rec-total" style="font-size:18px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">—</div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Taxa de implantação</div>
-                        <div id="ld-adesao-total" style="font-size:18px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">—</div>
-                    </div>
-                </div>
-            </div>
-            <div style="height:190px;"><canvas id="ld-chart-receita"></canvas></div>
-        </div>
-
-        <!-- Linha 6: Tabela resumida -->
-        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:8px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Todos os leads</div>
-                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Visão geral do pipeline (10 mais recentes)</div>
-                </div>
-                <button onclick="fecharLicDashboard()" style="padding:6px 16px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">Ver tabela completa →</button>
-            </div>
-            <table style="width:100%;border-collapse:collapse;font-size:12px;">
-                <thead>
-                    <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
-                        <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Empresa</th>
-                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">UF</th>
-                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Plano</th>
-                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Etapa</th>
-                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">m²</th>
-                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Fee/mês</th>
-                        <th style="padding:9px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="ld-leads-tbody"></tbody>
-            </table>
-        </div>
-
-    </div><!-- /scrollable -->
-</div><!-- /lic-view-dashboard -->
-
-<!-- ── VISÃO KANBAN ── -->
+            <!-- ── VISÃO KANBAN ── -->
 <div id="lic-view-kanban" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
 
     <!-- Header -->
@@ -8806,6 +8735,8 @@ function renderizarLicenciamento() {
     }).join('');
 
     document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="9" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
+
+    renderizarLicDashboard();
 }
 
 function abrirFormLead(id, returnTo) {
@@ -9690,18 +9621,6 @@ async function confirmarLicPerdido() {
 // ── Dashboard de Licenciamento ─────────────────────────────────────
 let _licDCharts = {};
 
-function abrirLicDashboard() {
-    document.getElementById('lic-view-tabela').style.display = 'none';
-    const dv = document.getElementById('lic-view-dashboard');
-    dv.style.display = 'flex';
-    renderizarLicDashboard();
-}
-
-function fecharLicDashboard() {
-    document.getElementById('lic-view-dashboard').style.display = 'none';
-    document.getElementById('lic-view-tabela').style.display = '';
-}
-
 function renderizarLicDashboard() {
     const leads   = baseLicLeads;
     const conv    = leads.filter(l => l.status === 'Convertido');
@@ -9714,14 +9633,6 @@ function renderizarLicDashboard() {
 
     const fmtBig = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : String(Math.round(n));
     const fmtMoney = n => n > 0 ? 'R$'+n.toLocaleString('pt-BR') : '—';
-
-    // KPIs
-    document.getElementById('ld-kpi-total').textContent = total || '0';
-    document.getElementById('ld-kpi-total-sub').textContent = taxaConv + '% taxa de conversão';
-    document.getElementById('ld-kpi-conv').textContent = conv.length || '0';
-    document.getElementById('ld-kpi-conv-sub').textContent = taxaConv + '% do total';
-    document.getElementById('ld-kpi-m2').textContent = m2Total > 0 ? fmtBig(m2Total) : '—';
-    document.getElementById('ld-kpi-fee').textContent = feeTotal > 0 ? fmtMoney(feeTotal) : '—';
 
     // Destroy old charts
     Object.values(_licDCharts).forEach(c => { try { c.destroy(); } catch(e){} });
@@ -9856,22 +9767,6 @@ function renderizarLicDashboard() {
     document.getElementById('ld-rec-total').textContent = feeTotal>0 ? 'R$'+(feeTotal*60).toLocaleString('pt-BR') : '—';
     document.getElementById('ld-adesao-total').textContent = adesao>0 ? 'R$'+adesao.toLocaleString('pt-BR') : '—';
 
-    // Tabela resumida
-    const sStyle={Ativo:'background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;',Convertido:'background:#f0fdf4;color:#166534;border:1px solid #86efac;',Perdido:'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;'};
-    const pBg={Starter:'#f1f5f9',Pro:'#f0ebff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
-    const pCol={Starter:'#475569',Pro:'#6941c6',Enterprise:'#166534',Custom:'#92400e'};
-    document.getElementById('ld-leads-tbody').innerHTML = leads.slice(0,10).map(l=>{
-        const m2=parseFloat(l.area_total_m2)||0; const fee=parseFloat(l.fee_mensal)||0;
-        return `<tr style="border-bottom:1px solid #f9f7ff;">
-            <td style="padding:9px 14px;font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</td>
-            <td style="padding:9px 8px;color:#6b7280;">${l.uf||'—'}</td>
-            <td style="padding:9px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${pBg[l.plano]||'#f3f4f6'};color:${pCol[l.plano]||'#374151'};">${l.plano||'—'}</span></td>
-            <td style="padding:9px 8px;font-size:12px;color:#6b7280;">${l.etapa||'—'}</td>
-            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${m2>0?m2.toLocaleString('pt-BR')+' m²':'—'}</td>
-            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${fee>0?'R$'+fee.toLocaleString('pt-BR'):'—'}</td>
-            <td style="padding:9px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${sStyle[l.status]||''}">${l.status||'—'}</span></td>
-        </tr>`;
-    }).join('')||'<tr><td colspan="7" style="text-align:center;padding:40px;color:#c4b5e8;font-size:13px;">Nenhum lead cadastrado ainda</td></tr>';
 }
 
 // Listener delegado para atualizar progresso ao preencher qualquer campo do formulário
