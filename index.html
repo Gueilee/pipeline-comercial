@@ -1957,21 +1957,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <div style="padding:14px 16px;background:#f5f0ff;border-right:1px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Total de docas</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-docas">—</div></div>
                                         <div style="padding:14px 16px;background:#f5f0ff;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Ocupação média</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-ocup">—</div></div>
                                     </div>
-                                    <!-- Upload: Fotos dos armazéns -->
-                                    <div style="margin-top:16px;padding:0 14px 14px;">
-                                        <div class="lic-field-label" style="margin-bottom:10px;">FOTOS DOS ARMAZÉNS</div>
-                                        <div class="lic-upload-zone" id="lic-uz-armazem"
-                                            onclick="document.getElementById('lic-fi-armazem').click()"
-                                            ondragover="licUzDragOver(event,'lic-uz-armazem')"
-                                            ondragleave="licUzDragLeave('lic-uz-armazem')"
-                                            ondrop="licUzDrop(event,'foto_armazem','lic-uz-armazem')">
-                                            <div style="font-size:30px;margin-bottom:8px;">🏗️</div>
-                                            <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:4px;">Fotos dos armazéns (múltiplas)</div>
-                                            <div style="font-size:11px;color:#9b8cc0;">JPG, PNG, HEIC — máx. 10 MB cada</div>
-                                            <input type="file" id="lic-fi-armazem" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;" onchange="licFilesSelected('foto_armazem',this.files)">
-                                        </div>
-                                        <div id="lic-fl-foto_armazem"></div>
-                                    </div>
+                                    <!-- Fotos por armazém são inseridas em cada bloco dinamicamente -->
                                 </div>
                             </div>
                         </div>
@@ -9116,9 +9102,23 @@ function licAddWarehouse(data) {
                 <div><label class="lic-field-label">Número de docas</label><input class="lic-in lic-wh-docas" type="number" placeholder="Ex.: 6" value="${d.docas||''}" oninput="_licUpdateSummary()"></div>
                 <div><label class="lic-field-label">Ocupação atual (%)</label><input class="lic-in lic-wh-ocup" type="number" min="0" max="100" placeholder="Ex.: 70" value="${d.ocupacao||''}" oninput="_licUpdateSummary()"></div>
             </div>
-            <div class="lic-field-row" style="margin-bottom:6px;">
+            <div class="lic-field-row" style="margin-bottom:16px;">
                 <div><label class="lic-field-label">Capacidade de páletes</label><input class="lic-in lic-wh-paletes" type="number" placeholder="Ex.: 3000" value="${d.paletes||''}"></div>
                 <div><label class="lic-field-label">Pé-direito (m)</label><input class="lic-in lic-wh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${d.pe_direito||''}"></div>
+            </div>
+            <div style="border-top:1px solid #f0ebff;padding-top:14px;">
+                <label class="lic-field-label" style="margin-bottom:8px;">FOTOS DESTE ARMAZÉM</label>
+                <div class="lic-upload-zone" id="lic-uz-wh${n}" style="padding:14px;"
+                    onclick="document.getElementById('lic-fi-wh${n}').click()"
+                    ondragover="licUzDragOver(event,'lic-uz-wh${n}')"
+                    ondragleave="licUzDragLeave('lic-uz-wh${n}')"
+                    ondrop="licUzDrop(event,'foto_armazem_${n}','lic-uz-wh${n}')">
+                    <div style="font-size:22px;margin-bottom:5px;">📷</div>
+                    <div style="font-size:12px;font-weight:700;color:#6941c6;margin-bottom:3px;">Fotos do Armazém ${n}</div>
+                    <div style="font-size:10px;color:#9b8cc0;">JPG, PNG, HEIC — máx. 10 MB cada</div>
+                    <input type="file" id="lic-fi-wh${n}" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;" onchange="licFilesSelected('foto_armazem_${n}',this.files)">
+                </div>
+                <div id="lic-fl-foto_armazem_${n}"></div>
             </div>
         </div>`;
     document.getElementById('lic-wh-container').appendChild(div);
@@ -9173,14 +9173,15 @@ function licToggleWms(show) {
 
 // ── Anexos de Licenciamento ───────────────────────────────────────
 
-let _licPendingFiles = { contrato_social: [], foto_armazem: [], certificado: [] };
+let _licPendingFiles = { contrato_social: [], certificado: [] }; // foto_armazem_N adicionados dinamicamente
 let _licExistingAnexos = []; // carregados ao editar
 
-const _LIC_TIPOS_LABEL = { contrato_social: 'Contrato Social', foto_armazem: 'Foto de Armazém', certificado: 'Certificado' };
+const _LIC_TIPOS_LABEL = { contrato_social: 'Contrato Social', certificado: 'Certificado' };
 
 function licFilesSelected(tipo, files) {
     if (!files || files.length === 0) return;
     const MAX = 10 * 1024 * 1024; // 10 MB
+    if (!_licPendingFiles[tipo]) _licPendingFiles[tipo] = []; // suporta chaves dinâmicas foto_armazem_N
     [...files].forEach(f => {
         if (f.size > MAX) { showToast(`"${f.name}" excede 10 MB e foi ignorado.`, 'error'); return; }
         _licPendingFiles[tipo].push(f);
@@ -9315,13 +9316,18 @@ async function licSalvarTodosAnexos(leadId) {
 async function licCarregarAnexos(leadId) {
     const { data } = await supabaseClient.from('lic_anexos').select('*').eq('lead_id', leadId).order('created_at');
     _licExistingAnexos = data || [];
-    ['contrato_social','foto_armazem','certificado'].forEach(t => _licRenderFileList(t));
+    // Tipos estáticos
+    ['contrato_social','certificado'].forEach(t => _licRenderFileList(t));
+    // Tipos dinâmicos: foto_armazem_1, foto_armazem_2, etc.
+    const tiposFoto = [...new Set(_licExistingAnexos.filter(a => a.tipo?.startsWith('foto_armazem_')).map(a => a.tipo))];
+    tiposFoto.forEach(t => _licRenderFileList(t));
 }
 
 function _licResetAnexos() {
-    _licPendingFiles = { contrato_social: [], foto_armazem: [], certificado: [] };
+    // Mantém apenas chaves estáticas; as dinâmicas (foto_armazem_N) são criadas por licAddWarehouse
+    _licPendingFiles = { contrato_social: [], certificado: [] };
     _licExistingAnexos = [];
-    ['contrato_social','foto_armazem','certificado'].forEach(t => _licRenderFileList(t));
+    ['contrato_social','certificado'].forEach(t => _licRenderFileList(t));
 }
 
 // ── Kanban de Licenciamento ──────────────────────────────────────
