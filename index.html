@@ -1588,6 +1588,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             <button onclick="setLicFiltro('Convertido',this)" class="lic-chip">✓ Convertido</button>
                             <button onclick="setLicFiltro('Perdido',this)" class="lic-chip">✕ Perdido</button>
                         </div>
+                        <button onclick="abrirLicDashboard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Dashboard</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
                     </div>
                 </div>
@@ -2156,6 +2157,187 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 </div>
 
             </div><!-- /lic-view-form -->
+
+            <!-- ── VISÃO DASHBOARD ── -->
+<div id="lic-view-dashboard" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Hero header escuro com KPIs -->
+    <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:24px 32px 28px;flex-shrink:0;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-60px;right:100px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.025);pointer-events:none;"></div>
+        <div style="position:absolute;top:30px;left:50%;width:1px;height:1px;background:rgba(255,255,255,.06);box-shadow:0 0 80px 60px rgba(155,93,229,.12);pointer-events:none;"></div>
+
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;position:relative;margin-bottom:22px;">
+            <div>
+                <button onclick="fecharLicDashboard()" style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:11px;font-weight:600;color:rgba(255,255,255,.75);cursor:pointer;margin-bottom:16px;backdrop-filter:blur(4px);">← Leads</button>
+                <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.4px;line-height:1.2;">Rede de Licenciamento</div>
+                <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:4px;font-weight:500;">Dashboard · Pipeline de parceiros estratégicos</div>
+            </div>
+            <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 18px;backdrop-filter:blur(8px);text-align:right;">
+                <div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;">Período</div>
+                <div style="font-size:13px;color:#fff;font-weight:600;">2026 · Todos</div>
+            </div>
+        </div>
+
+        <!-- KPI cards dentro do hero -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;">
+            <div style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Total de leads</div>
+                <div id="ld-kpi-total" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div id="ld-kpi-total-sub" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">cadastrados</div>
+            </div>
+            <div style="background:rgba(22,163,74,.18);border:1px solid rgba(22,163,74,.3);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(134,239,172,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Convertidos</div>
+                <div id="ld-kpi-conv" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div id="ld-kpi-conv-sub" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">—</div>
+            </div>
+            <div style="background:rgba(105,65,198,.22);border:1px solid rgba(155,93,229,.3);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(192,168,245,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">m² convertidos</div>
+                <div id="ld-kpi-m2" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">prontos para operar</div>
+            </div>
+            <div style="background:rgba(217,119,6,.18);border:1px solid rgba(245,158,11,.28);border-radius:14px;padding:18px 20px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(253,230,138,.75);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Fee/mês total</div>
+                <div id="ld-kpi-fee" style="font-size:36px;font-weight:800;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:11px;color:rgba(255,255,255,.45);margin-top:7px;">leads convertidos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo scrollável -->
+    <div style="flex:1;overflow-y:auto;padding:22px 28px;">
+
+        <!-- Linha 1: Evolução + Status -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#2d1b69;">Evolução mensal</div>
+                        <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Novos leads e conversões por mês</div>
+                    </div>
+                    <div style="display:flex;gap:10px;font-size:10px;">
+                        <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:10px;border-radius:3px;background:rgba(105,65,198,.3);display:inline-block;"></span>Novos</span>
+                        <span style="display:flex;align-items:center;gap:4px;color:#6b7280;"><span style="width:10px;height:2px;background:#16a34a;display:inline-block;"></span>Convertidos</span>
+                    </div>
+                </div>
+                <div style="height:210px;"><canvas id="ld-chart-evolucao"></canvas></div>
+            </div>
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Composição do pipeline</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Distribuição por status</div>
+                </div>
+                <div style="height:170px;"><canvas id="ld-chart-status"></canvas></div>
+                <div id="ld-legend-status" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
+            </div>
+        </div>
+
+        <!-- Linha 2: Funil + Origem -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Funil de conversão</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Leads por etapa do pipeline</div>
+                </div>
+                <div id="ld-funil-visual"></div>
+            </div>
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Canal de origem</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Como os leads chegaram</div>
+                </div>
+                <div style="height:220px;"><canvas id="ld-chart-origem"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Linha 3: Planos + Perdidos por etapa -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Mix de planos comerciais</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Planos nos leads convertidos</div>
+                </div>
+                <div style="height:180px;"><canvas id="ld-chart-planos"></canvas></div>
+                <div id="ld-legend-planos" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:#6b7280;justify-content:center;"></div>
+            </div>
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#2d1b69;">Perdas por etapa</div>
+                        <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Onde o pipeline vaza</div>
+                    </div>
+                    <span id="ld-badge-perdidos" style="font-size:10px;padding:3px 10px;border-radius:20px;background:#fef2f2;color:#991b1b;font-weight:600;border:1px solid #fca5a5;">0 perdidos</span>
+                </div>
+                <div style="height:200px;"><canvas id="ld-chart-perdidos"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Linha 4: Motivos de perda + m² por UF -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Ranking de motivos de perda</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Principais objeções encontradas</div>
+                </div>
+                <div id="ld-motivos-list"></div>
+            </div>
+            <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">m² convertidos por UF</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Cobertura geográfica da rede</div>
+                </div>
+                <div style="height:210px;"><canvas id="ld-chart-m2uf"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Linha 5: Receita projetada (full width) -->
+        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:16px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Receita projetada acumulada</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Projeção de 60 meses baseada nos leads convertidos</div>
+                </div>
+                <div style="display:flex;gap:24px;">
+                    <div style="text-align:right;">
+                        <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Receita total 5 anos</div>
+                        <div id="ld-rec-total" style="font-size:18px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">—</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Taxa de implantação</div>
+                        <div id="ld-adesao-total" style="font-size:18px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">—</div>
+                    </div>
+                </div>
+            </div>
+            <div style="height:190px;"><canvas id="ld-chart-receita"></canvas></div>
+        </div>
+
+        <!-- Linha 6: Tabela resumida -->
+        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:8px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;">Todos os leads</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Visão geral do pipeline (10 mais recentes)</div>
+                </div>
+                <button onclick="fecharLicDashboard()" style="padding:6px 16px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">Ver tabela completa →</button>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                        <th style="padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Empresa</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">UF</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Plano</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Etapa</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">m²</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Fee/mês</th>
+                        <th style="padding:9px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="ld-leads-tbody"></tbody>
+            </table>
+        </div>
+
+    </div><!-- /scrollable -->
+</div><!-- /lic-view-dashboard -->
 
         </div><!-- /page-licenciamento -->
 
@@ -8862,6 +9044,193 @@ function licUpdateImplant() {
 function licToggleWms(show) {
     const b = document.getElementById('lic-wms-block');
     if (b) b.style.display = show ? '' : 'none';
+}
+
+// ── Dashboard de Licenciamento ─────────────────────────────────────
+let _licDCharts = {};
+
+function abrirLicDashboard() {
+    document.getElementById('lic-view-tabela').style.display = 'none';
+    const dv = document.getElementById('lic-view-dashboard');
+    dv.style.display = 'flex';
+    renderizarLicDashboard();
+}
+
+function fecharLicDashboard() {
+    document.getElementById('lic-view-dashboard').style.display = 'none';
+    document.getElementById('lic-view-tabela').style.display = '';
+}
+
+function renderizarLicDashboard() {
+    const leads   = baseLicLeads;
+    const conv    = leads.filter(l => l.status === 'Convertido');
+    const ativos  = leads.filter(l => l.status === 'Ativo');
+    const perdidos= leads.filter(l => l.status === 'Perdido');
+    const total   = leads.length;
+    const m2Total = conv.reduce((s,l) => s + (parseFloat(l.area_total_m2)||0), 0);
+    const feeTotal= conv.reduce((s,l) => s + (parseFloat(l.fee_mensal)||0), 0);
+    const taxaConv= total > 0 ? ((conv.length/total)*100).toFixed(1) : 0;
+
+    const fmtBig = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1e3 ? (n/1e3).toFixed(0)+'K' : String(Math.round(n));
+    const fmtMoney = n => n > 0 ? 'R$'+n.toLocaleString('pt-BR') : '—';
+
+    // KPIs
+    document.getElementById('ld-kpi-total').textContent = total || '0';
+    document.getElementById('ld-kpi-total-sub').textContent = taxaConv + '% taxa de conversão';
+    document.getElementById('ld-kpi-conv').textContent = conv.length || '0';
+    document.getElementById('ld-kpi-conv-sub').textContent = taxaConv + '% do total';
+    document.getElementById('ld-kpi-m2').textContent = m2Total > 0 ? fmtBig(m2Total) : '—';
+    document.getElementById('ld-kpi-fee').textContent = feeTotal > 0 ? fmtMoney(feeTotal) : '—';
+
+    // Destroy old charts
+    Object.values(_licDCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+    _licDCharts = {};
+
+    const gc = 'rgba(105,65,198,.06)';
+    const tc = '#9b8cc0';
+    const commonOpts = { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, datalabels:{display:false} } };
+
+    // Chart 1: Evolução mensal
+    const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const mesAtual = new Date().getMonth();
+    const mLabels = MESES.slice(0, mesAtual+1);
+    const newPM = new Array(mesAtual+1).fill(0);
+    const convPM = new Array(mesAtual+1).fill(0);
+    leads.forEach(l => { if(l.created_at){ const m=new Date(l.created_at).getMonth(); if(m<=mesAtual) newPM[m]++; } });
+    conv.forEach(l => { if(l.created_at){ const m=new Date(l.created_at).getMonth(); if(m<=mesAtual) convPM[m]++; } });
+
+    _licDCharts.evolucao = new Chart(document.getElementById('ld-chart-evolucao'), {
+        type:'bar',
+        data:{ labels:mLabels, datasets:[
+            { label:'Novos leads', data:newPM, backgroundColor:'rgba(105,65,198,.18)', borderColor:'#6941c6', borderWidth:1.5, borderRadius:8 },
+            { type:'line', label:'Convertidos', data:convPM, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#16a34a', borderWidth:2.5 }
+        ]},
+        options:{ ...commonOpts, scales:{ x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}, y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v)},beginAtZero:true} } }
+    });
+
+    // Chart 2: Status donut
+    const sData = [conv.length, ativos.length, perdidos.length];
+    const sCores = ['#16a34a','#6941c6','#dc2626'];
+    const sLabels = ['Convertido','Ativo','Perdido'];
+    _licDCharts.status = new Chart(document.getElementById('ld-chart-status'), {
+        type:'doughnut',
+        data:{ labels:sLabels, datasets:[{ data:sData, backgroundColor:sCores.map(c=>c+'cc'), borderColor:'#f5f3ff', borderWidth:3 }] },
+        options:{ ...commonOpts, cutout:'68%' }
+    });
+    document.getElementById('ld-legend-status').innerHTML = sLabels.map((l,i)=>`<div style="display:flex;align-items:center;gap:5px;"><div style="width:9px;height:9px;border-radius:2px;background:${sCores[i]};"></div>${l} (${sData[i]})</div>`).join('');
+
+    // Funil visual
+    const ETAPAS = ['Prospecção','Reunião executiva','Due diligence','MOU','Contrato','Onboarding'];
+    const ECORES  = ['#6941c6','#7c3aed','#9b5de5','#d97706','#2563eb','#16a34a'];
+    const eCounts = ETAPAS.map(e => leads.filter(l=>l.etapa===e).length);
+    const maxE = Math.max(...eCounts, 1);
+    document.getElementById('ld-funil-visual').innerHTML = ETAPAS.map((label,i)=>{
+        const n=eCounts[i]; const pct=Math.round((n/maxE)*100);
+        const nextN=i<ETAPAS.length-1?eCounts[i+1]:n; const taxa=n>0?Math.round((nextN/n)*100):0;
+        return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+            <div style="font-size:10px;color:#6b7280;width:120px;flex-shrink:0;text-align:right;line-height:1.2;">${label}</div>
+            <div style="flex:1;height:26px;background:#f5f3ff;border-radius:6px;overflow:hidden;position:relative;">
+                <div style="height:100%;width:${pct}%;background:${ECORES[i]};opacity:.85;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding-left:10px;">
+                    <span style="font-size:11px;font-weight:700;color:#fff;${pct<15?'display:none;':''};">${n}</span>
+                </div>
+                ${pct<15?`<span style="position:absolute;left:${pct+2}%;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:${ECORES[i]};">${n}</span>`:''}
+                <span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:#9b8cc0;">${i<ETAPAS.length-1?taxa+'% → próx.':'✓ fim'}</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Chart 3: Origem (horizontal bar)
+    const origMap={};
+    leads.forEach(l=>{ const o=l.origem||'Não informado'; origMap[o]=(origMap[o]||0)+1; });
+    const origL=Object.keys(origMap).sort((a,b)=>origMap[b]-origMap[a]);
+    const origD=origL.map(k=>origMap[k]);
+    const origCores=['#6941c6','#2563eb','#16a34a','#d97706','#dc2626','#9b5de5','#0891b2'].slice(0,origL.length);
+    _licDCharts.origem = new Chart(document.getElementById('ld-chart-origem'), {
+        type:'bar', data:{ labels:origL, datasets:[{ label:'Leads', data:origD, backgroundColor:origCores.map(c=>c+'22'), borderColor:origCores, borderWidth:2, borderRadius:6 }] },
+        options:{ ...commonOpts, indexAxis:'y', scales:{ x:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v)},beginAtZero:true}, y:{grid:{display:false},ticks:{color:tc,font:{size:10}}} } }
+    });
+
+    // Chart 4: Planos (donut)
+    const PLANOS=['Starter','Pro','Enterprise','Custom'];
+    const pCores={Starter:'#6b7280',Pro:'#6941c6',Enterprise:'#16a34a',Custom:'#d97706'};
+    const pCounts=PLANOS.map(p=>conv.filter(l=>l.plano===p).length);
+    _licDCharts.planos = new Chart(document.getElementById('ld-chart-planos'), {
+        type:'doughnut', data:{ labels:PLANOS, datasets:[{ data:pCounts, backgroundColor:PLANOS.map(p=>pCores[p]+'cc'), borderColor:'#f5f3ff', borderWidth:3 }] },
+        options:{ ...commonOpts, cutout:'65%' }
+    });
+    document.getElementById('ld-legend-planos').innerHTML = PLANOS.map((p,i)=>`<div style="display:flex;align-items:center;gap:5px;"><div style="width:9px;height:9px;border-radius:2px;background:${pCores[p]};"></div>${p} (${pCounts[i]})</div>`).join('');
+
+    // Chart 5: Perdidos por etapa
+    const pEtapa=ETAPAS.map(e=>perdidos.filter(l=>l.etapa===e).length);
+    _licDCharts.perdidos = new Chart(document.getElementById('ld-chart-perdidos'), {
+        type:'bar', data:{ labels:ETAPAS.map(e=>e.length>10?e.substr(0,10)+'…':e), datasets:[{ label:'Perdidos', data:pEtapa, backgroundColor:'rgba(220,38,38,.1)', borderColor:'#dc2626', borderWidth:1.5, borderRadius:6 }] },
+        options:{ ...commonOpts, scales:{ x:{grid:{display:false},ticks:{color:tc,font:{size:9},maxRotation:30}}, y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v)},beginAtZero:true} } }
+    });
+    document.getElementById('ld-badge-perdidos').textContent = perdidos.length + ' perdido(s)';
+
+    // Motivos de perda
+    const motivoMap={};
+    perdidos.forEach(l=>{ const m=l.motivo_perda||'Não informado'; motivoMap[m]=(motivoMap[m]||0)+1; });
+    const mSorted=Object.entries(motivoMap).sort((a,b)=>b[1]-a[1]);
+    const maxM=mSorted.length>0?mSorted[0][1]:1;
+    document.getElementById('ld-motivos-list').innerHTML = mSorted.length===0
+        ? '<div style="color:#c4b5e8;font-size:13px;padding:24px 0;text-align:center;">Nenhum lead perdido ainda 🎉</div>'
+        : mSorted.map(([label,n],i)=>{
+            const pct=Math.round((n/perdidos.length)*100); const barPct=Math.round((n/maxM)*100);
+            return `<div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="width:18px;height:18px;border-radius:50%;background:#fef2f2;border:1.5px solid #fca5a5;font-size:9px;font-weight:700;color:#dc2626;display:flex;align-items:center;justify-content:center;">${i+1}</div>
+                        <span style="font-size:12px;color:#2d1b69;font-weight:500;">${label}</span>
+                    </div>
+                    <span style="font-size:11px;color:#9b8cc0;font-family:'Courier New',monospace;">${n} · ${pct}%</span>
+                </div>
+                <div style="height:5px;background:#f5f3ff;border-radius:3px;overflow:hidden;">
+                    <div style="height:100%;width:${barPct}%;background:linear-gradient(90deg,#dc2626,#f87171);border-radius:3px;transition:width .6s;"></div>
+                </div>
+            </div>`;
+        }).join('');
+
+    // Chart 6: m² por UF
+    const ufMap={};
+    conv.forEach(l=>{ if(l.uf) ufMap[l.uf]=(ufMap[l.uf]||0)+(parseFloat(l.area_total_m2)||0); });
+    const ufL=Object.keys(ufMap).sort((a,b)=>ufMap[b]-ufMap[a]);
+    const ufD=ufL.map(u=>ufMap[u]);
+    _licDCharts.m2uf = new Chart(document.getElementById('ld-chart-m2uf'), {
+        type:'bar', data:{ labels:ufL, datasets:[{ label:'m²', data:ufD, backgroundColor:'rgba(105,65,198,.15)', borderColor:'#6941c6', borderWidth:1.5, borderRadius:8 }] },
+        options:{ ...commonOpts, plugins:{ ...commonOpts.plugins, tooltip:{callbacks:{label:ctx=>' '+ctx.raw.toLocaleString('pt-BR')+' m²'}} },
+            scales:{ x:{grid:{display:false},ticks:{color:tc,font:{size:11}}}, y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v},beginAtZero:true} } }
+    });
+
+    // Chart 7: Receita projetada acumulada
+    const acum=Array.from({length:60},(_,i)=>Math.round(feeTotal*(i+1)));
+    const acumL=Array.from({length:60},(_,i)=>`M${i+1}`).filter((_,i)=>(i+1)%6===0||i===0||i===59);
+    const acumD=acum.filter((_,i)=>(i+1)%6===0||i===0||i===59);
+    _licDCharts.receita = new Chart(document.getElementById('ld-chart-receita'), {
+        type:'line', data:{ labels:acumL, datasets:[{ label:'Receita acumulada', data:acumD, borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.08)', fill:true, tension:0.4, pointRadius:3, pointBackgroundColor:'#16a34a', borderWidth:2.5 }] },
+        options:{ ...commonOpts, plugins:{ ...commonOpts.plugins, tooltip:{callbacks:{label:ctx=>' R$'+ctx.raw.toLocaleString('pt-BR')}} },
+            scales:{ x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}}, y:{grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>v>=1e6?'R$'+(v/1e6).toFixed(1)+'M':v>=1e3?'R$'+(v/1e3).toFixed(0)+'K':v},beginAtZero:true} } }
+    });
+    const adesao=conv.reduce((s,l)=>s+({Starter:20000,Pro:30000,Enterprise:50000,Custom:80000}[l.plano]||0),0);
+    document.getElementById('ld-rec-total').textContent = feeTotal>0 ? 'R$'+(feeTotal*60).toLocaleString('pt-BR') : '—';
+    document.getElementById('ld-adesao-total').textContent = adesao>0 ? 'R$'+adesao.toLocaleString('pt-BR') : '—';
+
+    // Tabela resumida
+    const sStyle={Ativo:'background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;',Convertido:'background:#f0fdf4;color:#166534;border:1px solid #86efac;',Perdido:'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;'};
+    const pBg={Starter:'#f1f5f9',Pro:'#f0ebff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol={Starter:'#475569',Pro:'#6941c6',Enterprise:'#166534',Custom:'#92400e'};
+    document.getElementById('ld-leads-tbody').innerHTML = leads.slice(0,10).map(l=>{
+        const m2=parseFloat(l.area_total_m2)||0; const fee=parseFloat(l.fee_mensal)||0;
+        return `<tr style="border-bottom:1px solid #f9f7ff;">
+            <td style="padding:9px 14px;font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</td>
+            <td style="padding:9px 8px;color:#6b7280;">${l.uf||'—'}</td>
+            <td style="padding:9px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${pBg[l.plano]||'#f3f4f6'};color:${pCol[l.plano]||'#374151'};">${l.plano||'—'}</span></td>
+            <td style="padding:9px 8px;font-size:12px;color:#6b7280;">${l.etapa||'—'}</td>
+            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${m2>0?m2.toLocaleString('pt-BR')+' m²':'—'}</td>
+            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${fee>0?'R$'+fee.toLocaleString('pt-BR'):'—'}</td>
+            <td style="padding:9px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${sStyle[l.status]||''}">${l.status||'—'}</span></td>
+        </tr>`;
+    }).join('')||'<tr><td colspan="7" style="text-align:center;padding:40px;color:#c4b5e8;font-size:13px;">Nenhum lead cadastrado ainda</td></tr>';
 }
 
 // Listener delegado para atualizar progresso ao preencher qualquer campo do formulário
