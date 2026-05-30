@@ -725,46 +725,79 @@ header {
 
 /* BADGE DE PERFIL */
 /* ── LICENCIAMENTO ── */
-.lic-chip{padding:4px 12px;border:1px solid #dde5ff;border-radius:20px;background:#f0f4ff;font-size:11px;color:#1e40af;cursor:pointer;font-family:inherit;transition:all .12s;}
-.lic-chip-on,.lic-chip:hover{background:#1976d2;border-color:#1976d2;color:#fff;}
-.lic-fc{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:18px;}
-.lic-fc-head{display:flex;align-items:center;gap:8px;background:#1a3c6e;padding:11px 16px;font-size:12px;font-weight:600;color:#fff;letter-spacing:.03em;text-transform:uppercase;}
-.lic-badge-req{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:rgba(191,219,254,.2);color:#bfdbfe;border:1px solid rgba(191,219,254,.3);margin-left:auto;}
-.lic-fr{display:grid;grid-template-columns:200px 1fr;border-bottom:1px solid #f3f4f6;}
-.lic-fr:last-child{border-bottom:none;}
-.lic-fr2{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #f3f4f6;}
-.lic-fr2:last-child{border-bottom:none;}
-.lic-gc{display:flex;flex-direction:column;border-right:1px solid #f3f4f6;}
-.lic-gc:last-child{border-right:none;}
-.lic-gc .lic-fl{border-right:none;border-bottom:1px solid #f3f4f6;}
-.lic-gc .lic-fv{flex:1;}
-.lic-fl{background:#f9fafb;padding:9px 14px;font-size:11px;font-weight:600;color:#6b7280;display:flex;align-items:center;border-right:1px solid #f3f4f6;}
-.lic-fv{padding:7px 14px;background:#fff;display:flex;align-items:center;}
-.lic-in{width:100%;border:none;border-bottom:1px solid #e5e7eb;background:transparent;font-family:inherit;font-size:12px;color:#111827;outline:none;padding:3px 0;transition:border-color .15s;}
-.lic-in:focus{border-bottom-color:#2563eb;}
-.lic-in[type=number]{font-family:'Courier New',monospace;}
-.lic-in select,.lic-in textarea{width:100%;border:none;background:transparent;font-family:inherit;font-size:12px;color:#111827;outline:none;}
-textarea.lic-in{border:1px solid #e5e7eb;border-radius:4px;padding:7px 10px;resize:vertical;}
-.lic-sub-label{background:#f9fafb;padding:7px 14px;font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f3f4f6;border-top:1px solid #f3f4f6;}
-.lic-opts{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px;background:#fff;}
-.lic-opt{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid #e5e7eb;border-radius:20px;cursor:pointer;font-size:11px;color:#6b7280;background:#f9fafb;user-select:none;transition:all .12s;}
-.lic-opt:has(input[type=checkbox]:checked){background:#f0fdf4;border-color:#86efac;color:#166534;font-weight:500;}
-.lic-opt:has(input[type=radio]:checked){background:#eff6ff;border-color:#bfdbfe;color:#1e40af;font-weight:500;}
-.lic-opt input{display:none;}
-.lic-plan-card{border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;overflow:hidden;background:#f9fafb;transition:all .15s;user-select:none;}
-.lic-plan-card:has(input:checked){border:2px solid #2563eb;background:#eff6ff;}
+/* chips de status — compatibilidade tabela */
+.lic-chip{padding:4px 12px;border:1px solid #d4b8f5;border-radius:20px;background:#f0ebff;font-size:11px;color:#6941c6;cursor:pointer;font-family:inherit;transition:all .12s;}
+.lic-chip-on,.lic-chip:hover{background:#6941c6;border-color:#6941c6;color:#fff;}
+.lic-kpi-card{background:#fff;border:1px solid #e8e0f5;border-radius:10px;padding:14px 16px;}
+
+/* FORM NOVO — paleta roxa */
+.lic-field-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin-bottom:8px;}
+.lic-in{width:100%;border:none;border-bottom:2px solid #e8e0f5;background:transparent;font-family:inherit;font-size:14px;color:#2d1b69;outline:none;padding:10px 0;transition:border-color .2s;box-sizing:border-box;}
+.lic-in:focus{border-bottom-color:#6941c6;}
+.lic-in::placeholder{color:#c4b5e8;font-size:13px;}
+textarea.lic-in{border:1.5px solid #e8e0f5;border-radius:10px;padding:12px 14px;resize:vertical;min-height:80px;}
+textarea.lic-in:focus{border-color:#6941c6;}
+select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237c5cbf' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;}
+.lic-sec-hero{background:linear-gradient(135deg,#2d1b69 0%,#6941c6 100%);border-radius:16px 16px 0 0;padding:26px 30px;position:relative;overflow:hidden;}
+.lic-sec-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06);}
+.lic-sec-body{background:#fff;border-radius:0 0 16px 16px;padding:30px;box-shadow:0 8px 24px rgba(105,65,198,.08);}
+.lic-sec-card{border-radius:16px;overflow:hidden;margin-bottom:24px;box-shadow:0 4px 20px rgba(105,65,198,.1);}
+.lic-field{margin-bottom:22px;}
+.lic-field-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px;}
+.lic-section-divider{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9b8cc0;margin:24px 0 12px;border-bottom:1px solid #f0ebff;padding-bottom:8px;}
+/* chip selectors */
+.lic-chip-sel{display:flex;flex-wrap:wrap;gap:8px;}
+.lic-chip-opt{display:inline-flex;align-items:center;padding:8px 16px;border:1.5px solid #e0d9f5;border-radius:24px;cursor:pointer;font-size:12px;color:#6941c6;background:#faf8ff;user-select:none;transition:all .15s;font-weight:500;}
+.lic-chip-opt:has(input:checked){background:#6941c6;border-color:#6941c6;color:#fff;}
+.lic-chip-opt input{display:none;}
+/* radio cards */
+.lic-radio-card{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1.5px solid #e8e0f5;border-radius:12px;cursor:pointer;background:#faf8ff;transition:all .15s;margin-bottom:8px;}
+.lic-radio-card:has(input:checked){border-color:#6941c6;background:#f0ebff;}
+.lic-radio-card input{display:none;}
+.lic-radio-dot{width:18px;height:18px;border-radius:50%;border:2px solid #d0c4f0;flex-shrink:0;margin-top:2px;transition:all .15s;background:#fff;}
+.lic-radio-card:has(input:checked) .lic-radio-dot{border-color:#6941c6;background:#6941c6;box-shadow:0 0 0 3px rgba(105,65,198,.15);}
+/* plan cards */
+.lic-plan-card{border:1.5px solid #e0d9f5;border-radius:12px;overflow:hidden;cursor:pointer;transition:all .2s;background:#faf8ff;user-select:none;}
+.lic-plan-card:has(input:checked){border-color:#6941c6;background:#f5f0ff;box-shadow:0 4px 20px rgba(105,65,198,.2);transform:translateY(-2px);}
 .lic-plan-card input{display:none;}
-.lic-nav-item{display:flex;align-items:center;gap:10px;padding:7px 18px;cursor:pointer;border-left:2px solid transparent;text-decoration:none;transition:background .12s;}
-.lic-nav-item:hover{background:rgba(255,255,255,.05);}
-.lic-nav-item.active{background:rgba(37,99,235,.2);border-left-color:#2563eb;}
-.lic-nav-item .lic-ni-icon{font-size:14px;flex-shrink:0;}
-.lic-nav-item .lic-ni-text{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;flex:1;}
-.lic-nav-item.active .lic-ni-text{color:#eff6ff;}
-.lic-nav-item .lic-ni-num{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);background:rgba(255,255,255,.08);width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.lic-nav-item.active .lic-ni-num{background:rgba(37,99,235,.4);color:#bfdbfe;}
-.lic-wh-block{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.lic-wh-head{display:flex;align-items:center;gap:10px;padding:9px 14px;background:#1a3c6e;cursor:pointer;}
-.lic-kpi-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;}
+/* warehouse block */
+.lic-wh-block{border:1.5px solid #e8e0f5;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.lic-wh-head{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,#f0ebff,#e8dff8);cursor:pointer;}
+/* nav item — mantém compatibilidade (oculto visualmente) */
+.lic-nav-item{display:none;}
+/* stepper header */
+#lic-form-header{background:#fff;border-bottom:1px solid #ede8f5;padding:14px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0;position:relative;z-index:2;}
+#lic-stepper{display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;}
+#lic-progress-bar-wrap{height:3px;background:#f0ebff;overflow:hidden;}
+#lic-progress-bar{height:100%;background:linear-gradient(90deg,#2d1b69,#6941c6);transition:width .4s ease;}
+#lic-form-footer{background:#fff;border-top:1px solid #ede8f5;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.lic-btn-nav{padding:8px 20px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.lic-btn-prev{background:#f5f0ff;color:#6941c6;border:1.5px solid #e0d9f5;}
+.lic-btn-prev:hover{background:#ece5ff;border-color:#c4b5e8;}
+.lic-btn-next{background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;box-shadow:0 2px 8px rgba(105,65,198,.3);}
+.lic-btn-next:hover{box-shadow:0 4px 16px rgba(105,65,198,.45);}
+.lic-btn-save{background:linear-gradient(135deg,#166534,#16a34a);color:#fff;border:none;padding:8px 22px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.25);}
+.lic-btn-save:hover{box-shadow:0 4px 16px rgba(22,163,74,.35);}
+/* legacy classes still referenced in warehouse JS */
+.lic-fr2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.lic-gc{display:flex;flex-direction:column;}
+.lic-fl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin-bottom:6px;}
+.lic-fv{display:flex;align-items:center;}
+/* funil timeline */
+.lic-funnel-item{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid #f0ebff;cursor:pointer;transition:background .15s;}
+.lic-funnel-item:last-child{border-bottom:none;}
+.lic-funnel-item:has(input:checked){background:#f5f0ff;}
+.lic-funnel-item input{display:none;}
+.lic-funnel-dot{width:28px;height:28px;border-radius:50%;border:2px solid #d0c4f0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9b8cc0;flex-shrink:0;background:#fff;transition:all .2s;}
+.lic-funnel-item:has(input:checked) .lic-funnel-dot{background:#6941c6;border-color:#6941c6;color:#fff;box-shadow:0 0 0 4px rgba(105,65,198,.15);}
+/* wms options */
+.lic-wms-option-wrap{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #f0ebff;gap:0;}
+.lic-wms-opt-col{padding:20px 24px;}
+.lic-wms-opt-col:first-child{border-right:1px solid #f0ebff;}
+.lic-wms-opt-head{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:14px;}
+.lic-wms-price-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#faf8ff;border-radius:8px;font-size:12px;margin-bottom:8px;}
+.lic-wms-price-row span:first-child{color:#9b8cc0;}
+.lic-wms-price-row span:last-child{font-weight:700;color:#2d1b69;}
 
 /* ── BADGE DE PERFIL ── */
 .perfil-badge {
@@ -1586,296 +1619,542 @@ textarea.lic-in{border:1px solid #e5e7eb;border-radius:4px;padding:7px 10px;resi
             </div>
 
             <!-- ── VISÃO FORMULÁRIO ── -->
-            <div id="lic-view-form" style="display:none;position:absolute;inset:0;flex-direction:row;background:#f0efe9;">
+            <div id="lic-view-form" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;">
 
-                <!-- Sidebar -->
-                <div style="width:240px;background:#111827;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;height:100%;">
-                    <div style="padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);">
-                        <div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:.04em;">VENDEMMIA</div>
-                        <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;">Rede de Licenciamento</div>
-                    </div>
-                    <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.08);">
-                        <div style="font-size:9px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Preenchimento</span><span id="lic-sp-pct">0%</span></div>
-                        <div style="height:3px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;"><div id="lic-sp-fill" style="height:100%;background:#fde68a;border-radius:2px;width:0%;transition:width .4s;"></div></div>
-                    </div>
-                    <div id="lic-sec-nav" style="flex:1;overflow-y:auto;padding:8px 0;"></div>
-                    <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);">
-                        <button onclick="fecharFormLead()" style="width:100%;padding:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:5px;color:rgba(255,255,255,.55);font-family:inherit;font-size:12px;cursor:pointer;transition:background .12s;">← Voltar aos leads</button>
+                <!-- HEADER com stepper -->
+                <div id="lic-form-header">
+                    <button onclick="fecharFormLead()" style="padding:6px 14px;background:#f5f0ff;border:1.5px solid #e0d9f5;border-radius:8px;color:#6941c6;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">← Leads</button>
+                    <div id="lic-stepper" style="display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;padding:0 12px;"></div>
+                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                        <span id="lic-form-status-pill" style="font-size:11px;padding:4px 12px;border-radius:20px;font-weight:600;background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;">Em preenchimento</span>
+                        <button onclick="salvarLicLead()" class="lic-btn-save">Salvar lead</button>
                     </div>
                 </div>
+                <!-- Barra de progresso -->
+                <div id="lic-progress-bar-wrap"><div id="lic-progress-bar" style="width:0%;"></div></div>
+                <!-- Hidden nav container (mantém compatibilidade JS) -->
+                <div id="lic-sec-nav" style="display:none;"></div>
 
-                <!-- Área principal do formulário -->
-                <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;height:100%;">
-                    <!-- Topbar do form -->
-                    <div style="background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 28px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-                        <div style="font-size:14px;font-weight:600;color:#111827;" id="lic-form-title">Dados da empresa</div>
-                        <div style="display:flex;gap:8px;align-items:center;">
-                            <span id="lic-form-status-pill" style="font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500;background:#fffbeb;color:#92400e;border:1px solid #fde68a;">Em preenchimento</span>
-                            <button onclick="prevLicSec()" style="padding:5px 12px;border:1px solid #e5e7eb;border-radius:5px;background:#fff;font-size:12px;cursor:pointer;color:#6b7280;font-family:inherit;">← Anterior</button>
-                            <button onclick="nextLicSec()" style="padding:5px 14px;border:1px solid #2563eb;border-radius:5px;background:#2563eb;font-size:12px;cursor:pointer;color:#fff;font-weight:500;font-family:inherit;">Próximo →</button>
-                            <button onclick="salvarLicLead()" style="padding:5px 18px;border:none;border-radius:5px;background:#16a34a;font-size:12px;cursor:pointer;color:#fff;font-weight:700;font-family:inherit;">💾 Salvar lead</button>
-                        </div>
-                    </div>
-                    <!-- Conteúdo das seções -->
-                    <div style="flex:1;overflow-y:auto;padding:24px 28px;" id="lic-form-content">
+                <!-- Área de conteúdo scrollável -->
+                <div style="flex:1;overflow-y:auto;padding:28px 32px;" id="lic-form-scroll">
+                    <div style="max-width:780px;margin:0 auto;" id="lic-form-content">
 
                         <!-- 1. EMPRESA -->
                         <div class="lic-sec" id="lic-sec-empresa">
-                            <div class="lic-fc"><div class="lic-fc-head">🏢 Dados da empresa <span class="lic-badge-req">Obrigatório</span></div>
-                            <div class="lic-fr"><div class="lic-fl">Razão social *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-razao_social" placeholder="Ex.: Logística ABC Ltda."></div></div>
-                            <div class="lic-fr"><div class="lic-fl">CNPJ *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-cnpj" placeholder="00.000.000/0001-00"></div></div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">Website</div><div class="lic-fv"><input class="lic-in" id="lf-website" placeholder="www.empresa.com.br"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">Ano de fundação</div><div class="lic-fv"><input class="lic-in" id="lf-ano_fundacao" type="number" placeholder="Ex.: 2005"></div></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">01</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;" id="lic-form-title">Dados da empresa</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Informações básicas do parceiro licenciado</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Razão social *</label>
+                                        <input class="lic-in lic-tracked" id="lf-razao_social" placeholder="Ex.: Logística ABC Ltda.">
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">CNPJ *</label>
+                                            <input class="lic-in lic-tracked" id="lf-cnpj" placeholder="00.000.000/0001-00">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Website</label>
+                                            <input class="lic-in" id="lf-website" placeholder="www.empresa.com.br">
+                                        </div>
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">Faturamento anual *</label>
+                                            <select class="lic-in lic-tracked" id="lf-faturamento_faixa"><option value="">Selecione</option><option>Até R$ 5 milhões</option><option>R$ 5M – R$ 20M</option><option>R$ 20M – R$ 50M</option><option>R$ 50M – R$ 100M</option><option>Acima de R$ 100M</option></select>
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Ano de fundação</label>
+                                            <input class="lic-in" id="lf-ano_fundacao" type="number" placeholder="Ex.: 2005">
+                                        </div>
+                                    </div>
+                                    <div class="lic-section-divider">Segmentos atendidos</div>
+                                    <div class="lic-chip-sel" id="lf-segmentos">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Armazenagem">Armazenagem</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Transporte">Transporte</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Distribuição">Distribuição</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Comex / importação">Comex / importação</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Cross-docking">Cross-docking</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="E-commerce">E-commerce</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Refrigerado">Refrigerado</label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="lic-fr"><div class="lic-fl">Faturamento anual *</div><div class="lic-fv"><select class="lic-in lic-tracked" id="lf-faturamento_faixa"><option value="">Selecione</option><option>Até R$ 5 milhões</option><option>R$ 5M – R$ 20M</option><option>R$ 20M – R$ 50M</option><option>R$ 50M – R$ 100M</option><option>Acima de R$ 100M</option></select></div></div>
-                            <div class="lic-sub-label">Segmentos atendidos</div>
-                            <div class="lic-opts" id="lf-segmentos">
-                                <label class="lic-opt"><input type="checkbox" value="Armazenagem"><span>Armazenagem</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Transporte"><span>Transporte</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Distribuição"><span>Distribuição</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Comex / importação"><span>Comex / importação</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Cross-docking"><span>Cross-docking</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="E-commerce"><span>E-commerce</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Refrigerado"><span>Refrigerado</span></label>
-                            </div></div>
                         </div>
 
                         <!-- 2. CONTATO -->
                         <div class="lic-sec" id="lic-sec-contato" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">👤 Contato principal <span class="lic-badge-req">Obrigatório</span></div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">Nome completo *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-contato_nome" placeholder="Ex.: João Silva"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">Cargo *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-contato_cargo" placeholder="Ex.: Diretor de Operações"></div></div>
-                            </div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">E-mail *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-contato_email" type="email" placeholder="joao@empresa.com.br"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">WhatsApp / telefone *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-contato_telefone" placeholder="(11) 99999-9999"></div></div>
-                            </div>
-                            <div class="lic-sub-label">Decisor final</div>
-                            <div class="lic-opts">
-                                <label class="lic-opt"><input type="radio" name="lf-decisor" value="Este contato" id="lf-decisor-este"><span>Este contato</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-decisor" value="Outro"><span>Outro — informar abaixo</span></label>
-                            </div>
-                            <div class="lic-fr"><div class="lic-fl">Nome e cargo do decisor</div><div class="lic-fv"><input class="lic-in" id="lf-decisor_info" placeholder="Se diferente do contato acima"></div></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">02</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Contato principal</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Responsável pelo relacionamento com a Vendemmia</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">Nome completo *</label>
+                                            <input class="lic-in lic-tracked" id="lf-contato_nome" placeholder="Ex.: João Silva">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Cargo *</label>
+                                            <input class="lic-in lic-tracked" id="lf-contato_cargo" placeholder="Ex.: Diretor de Operações">
+                                        </div>
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">E-mail *</label>
+                                            <input class="lic-in lic-tracked" id="lf-contato_email" type="email" placeholder="joao@empresa.com.br">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">WhatsApp / telefone *</label>
+                                            <input class="lic-in lic-tracked" id="lf-contato_telefone" placeholder="(11) 99999-9999">
+                                        </div>
+                                    </div>
+                                    <div class="lic-section-divider">Decisor final</div>
+                                    <div class="lic-chip-sel" style="margin-bottom:20px;">
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-decisor" value="Este contato" id="lf-decisor-este">Este contato</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-decisor" value="Outro">Outro — informar abaixo</label>
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Nome e cargo do decisor</label>
+                                        <input class="lic-in" id="lf-decisor_info" placeholder="Se diferente do contato acima">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 3. LOCALIZAÇÃO -->
                         <div class="lic-sec" id="lic-sec-localizacao" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">📍 Localização e exclusividade</div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">UF principal *</div><div class="lic-fv"><select class="lic-in lic-tracked" id="lf-uf"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div></div>
-                                <div class="lic-gc"><div class="lic-fl">Polo logístico / cidade *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-polo_logistico" placeholder="Ex.: Campinas, Guarulhos"></div></div>
-                            </div>
-                            <div class="lic-fr"><div class="lic-fl">Região de exclusividade</div><div class="lic-fv"><input class="lic-in" id="lf-regiao_exclusividade" placeholder="Ex.: Grande São Paulo, Baixada Santista"></div></div>
-                            <div class="lic-fr"><div class="lic-fl">Outras UFs de atuação</div><div class="lic-fv"><input class="lic-in" id="lf-outras_ufs" placeholder="Se sim, informar quais"></div></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">03</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Localização e exclusividade</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Área de atuação e cobertura territorial</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">UF principal *</label>
+                                            <select class="lic-in lic-tracked" id="lf-uf"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select>
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Polo logístico / cidade *</label>
+                                            <input class="lic-in lic-tracked" id="lf-polo_logistico" placeholder="Ex.: Campinas, Guarulhos">
+                                        </div>
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Região de exclusividade</label>
+                                        <input class="lic-in" id="lf-regiao_exclusividade" placeholder="Ex.: Grande São Paulo, Baixada Santista">
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Outras UFs de atuação</label>
+                                        <input class="lic-in" id="lf-outras_ufs" placeholder="Se sim, informar quais">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 4. CAPACIDADE -->
                         <div class="lic-sec" id="lic-sec-capacidade" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">🏗️ Capacidade instalada — armazéns</div>
-                            <div style="padding:14px;">
-                                <div id="lic-wh-container"></div>
-                                <button onclick="licAddWarehouse()" style="width:100%;padding:9px;border:1.5px dashed #d1d5db;border-radius:6px;background:transparent;color:#6b7280;font-family:inherit;font-size:12px;cursor:pointer;margin-bottom:12px;">+ Adicionar armazém</button>
-                                <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid #2563eb;border-radius:0 0 6px 6px;overflow:hidden;">
-                                    <div style="padding:10px 14px;background:#eff6ff;border-right:1px solid #bfdbfe;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1e40af;margin-bottom:4px;">Área total</div><div style="font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#1a3c6e;" id="lic-sum-area">—</div></div>
-                                    <div style="padding:10px 14px;background:#eff6ff;border-right:1px solid #bfdbfe;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1e40af;margin-bottom:4px;">Total de docas</div><div style="font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#1a3c6e;" id="lic-sum-docas">—</div></div>
-                                    <div style="padding:10px 14px;background:#eff6ff;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1e40af;margin-bottom:4px;">Ocupação média</div><div style="font-size:16px;font-weight:700;font-family:'Courier New',monospace;color:#1a3c6e;" id="lic-sum-ocup">—</div></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">04</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Capacidade instalada</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Armazéns, docas e infraestrutura disponível</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div></div>
+                                <div class="lic-sec-body">
+                                    <div id="lic-wh-container"></div>
+                                    <button onclick="licAddWarehouse()" style="width:100%;padding:11px;border:2px dashed #d4b8f5;border-radius:10px;background:transparent;color:#7c5cbf;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:18px;transition:border-color .15s;" onmouseover="this.style.borderColor='#6941c6'" onmouseout="this.style.borderColor='#d4b8f5'">+ Adicionar armazém</button>
+                                    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-radius:12px;overflow:hidden;border:1.5px solid #e0d9f5;">
+                                        <div style="padding:14px 16px;background:#f5f0ff;border-right:1px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Área total</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-area">—</div></div>
+                                        <div style="padding:14px 16px;background:#f5f0ff;border-right:1px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Total de docas</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-docas">—</div></div>
+                                        <div style="padding:14px 16px;background:#f5f0ff;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:6px;">Ocupação média</div><div style="font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#2d1b69;" id="lic-sum-ocup">—</div></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 5. CARGA -->
                         <div class="lic-sec" id="lic-sec-carga" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">📦 Tipos de carga habilitados</div>
-                            <div class="lic-sub-label">Carga geral</div>
-                            <div class="lic-opts" id="lf-cargas_geral">
-                                <label class="lic-opt"><input type="checkbox" value="Paletizado seco"><span>Paletizado seco</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Granel sólido"><span>Granel sólido</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Carga fracionada"><span>Carga fracionada</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="E-commerce / encomendas"><span>E-commerce / encomendas</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Alto valor"><span>Alto valor</span></label>
-                            </div>
-                            <div class="lic-sub-label">Carga perigosa (IMDG / ANTT)</div>
-                            <div class="lic-opts" id="lf-cargas_perigosas">
-                                <label class="lic-opt"><input type="checkbox" value="Líquidos inflamáveis (Cl.3)"><span>Líquidos inflamáveis (Cl. 3)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Gases (Cl.2)"><span>Gases (Cl. 2)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Oxidantes (Cl.5)"><span>Oxidantes (Cl. 5)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Tóxicos (Cl.6)"><span>Tóxicos / infectantes (Cl. 6)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Corrosivos (Cl.8)"><span>Corrosivos (Cl. 8)</span></label>
-                            </div>
-                            <div class="lic-sub-label">Temperatura controlada / especial</div>
-                            <div class="lic-opts" id="lf-cargas_especiais">
-                                <label class="lic-opt"><input type="checkbox" value="Resfriado (2°C–8°C)"><span>Resfriado (2°C–8°C)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Congelado (–18°C)"><span>Congelado (–18°C)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Farmacêutico / GDP"><span>Farmacêutico / GDP</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Agroquímicos"><span>Agroquímicos</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Eletrônicos de alto valor"><span>Eletrônicos de alto valor</span></label>
-                            </div>
-                            <div class="lic-sub-label">Licenças ativas</div>
-                            <div class="lic-opts" id="lf-licencas">
-                                <label class="lic-opt"><input type="checkbox" value="ANTT"><span>ANTT — perigosos</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="ANVISA"><span>ANVISA</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="IBAMA"><span>IBAMA</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="AVCB"><span>AVCB (Bombeiros)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Licença ambiental"><span>Licença ambiental</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="OEA"><span>OEA — Receita Federal</span></label>
-                            </div>
-                            <div class="lic-sub-label">Observações sobre cargas especiais</div>
-                            <div style="padding:10px 14px;"><textarea class="lic-in" id="lf-obs_cargas" rows="3" style="width:100%;resize:vertical;" placeholder="Restrições, volumes máximos, condições específicas…"></textarea></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">05</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Tipos de carga</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Habilitações operacionais e licenças ativas</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-section-divider">Carga geral</div>
+                                    <div class="lic-chip-sel" id="lf-cargas_geral" style="margin-bottom:16px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Paletizado seco">Paletizado seco</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Granel sólido">Granel sólido</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Carga fracionada">Carga fracionada</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="E-commerce / encomendas">E-commerce / encomendas</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Alto valor">Alto valor</label>
+                                    </div>
+                                    <div class="lic-section-divider">Carga perigosa (IMDG / ANTT)</div>
+                                    <div class="lic-chip-sel" id="lf-cargas_perigosas" style="margin-bottom:16px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Líquidos inflamáveis (Cl.3)">Líquidos inflamáveis (Cl. 3)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Gases (Cl.2)">Gases (Cl. 2)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Oxidantes (Cl.5)">Oxidantes (Cl. 5)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Tóxicos (Cl.6)">Tóxicos / infectantes (Cl. 6)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Corrosivos (Cl.8)">Corrosivos (Cl. 8)</label>
+                                    </div>
+                                    <div class="lic-section-divider">Temperatura controlada / especial</div>
+                                    <div class="lic-chip-sel" id="lf-cargas_especiais" style="margin-bottom:16px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Resfriado (2°C–8°C)">Resfriado (2°C–8°C)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Congelado (–18°C)">Congelado (–18°C)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Farmacêutico / GDP">Farmacêutico / GDP</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Agroquímicos">Agroquímicos</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Eletrônicos de alto valor">Eletrônicos de alto valor</label>
+                                    </div>
+                                    <div class="lic-section-divider">Licenças ativas</div>
+                                    <div class="lic-chip-sel" id="lf-licencas" style="margin-bottom:20px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="ANTT">ANTT — perigosos</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="ANVISA">ANVISA</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="IBAMA">IBAMA</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="AVCB">AVCB (Bombeiros)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Licença ambiental">Licença ambiental</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="OEA">OEA — Receita Federal</label>
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Observações sobre cargas especiais</label>
+                                        <textarea class="lic-in" id="lf-obs_cargas" placeholder="Restrições, volumes máximos, condições específicas…"></textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 6. TECNOLOGIA -->
                         <div class="lic-sec" id="lic-sec-tecnologia" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">💻 Maturidade tecnológica</div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">WMS utilizado</div><div class="lic-fv"><input class="lic-in" id="lf-wms_atual" placeholder="Ex.: TOTVS WMS, SAP EWM, próprio…"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">ERP utilizado</div><div class="lic-fv"><input class="lic-in" id="lf-erp_atual" placeholder="Ex.: SAP B1, TOTVS Protheus…"></div></div>
-                            </div>
-                            <div class="lic-sub-label">Sistemas integrados</div>
-                            <div class="lic-opts" id="lf-sistemas_integrados">
-                                <label class="lic-opt"><input type="checkbox" value="TMS"><span>TMS</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="BI / dashboard"><span>BI / dashboard</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="API REST / JSON"><span>API REST / JSON</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="EDI"><span>EDI</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="E-commerce / marketplace"><span>E-commerce / marketplace</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Portal do cliente"><span>Portal do cliente</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Rastreamento"><span>Rastreamento</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="NF-e / SPED fiscal"><span>NF-e / SPED fiscal</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="CRM"><span>CRM</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Nenhum"><span>Nenhum</span></label>
-                            </div>
-                            <div class="lic-sub-label">Nível de maturidade geral</div>
-                            <div style="display:flex;flex-direction:column;gap:6px;padding:10px 14px;" id="lf-nivel_maturidade">
-                                <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;background:#f3f4f6;transition:all .12s;"><input type="radio" name="lf-maturidade" value="Básico" style="margin-top:3px;"><div><div style="font-size:12px;font-weight:600;">Básico</div><div style="font-size:11px;color:#6b7280;">Operação manual, planilhas, sem integração</div></div></label>
-                                <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;background:#f3f4f6;transition:all .12s;"><input type="radio" name="lf-maturidade" value="Em desenvolvimento" style="margin-top:3px;"><div><div style="font-size:12px;font-weight:600;">Em desenvolvimento</div><div style="font-size:11px;color:#6b7280;">Sistemas isolados, integrações pontuais</div></div></label>
-                                <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;background:#f3f4f6;transition:all .12s;"><input type="radio" name="lf-maturidade" value="Intermediário" style="margin-top:3px;"><div><div style="font-size:12px;font-weight:600;">Intermediário</div><div style="font-size:11px;color:#6b7280;">ERP e WMS ativos com alguma integração</div></div></label>
-                                <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;background:#f3f4f6;transition:all .12s;"><input type="radio" name="lf-maturidade" value="Avançado" style="margin-top:3px;"><div><div style="font-size:12px;font-weight:600;">Avançado</div><div style="font-size:11px;color:#6b7280;">Sistemas integrados via API, visibilidade em tempo real</div></div></label>
-                            </div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">06</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Maturidade tecnológica</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Sistemas em uso e nível de integração digital</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">WMS utilizado</label>
+                                            <input class="lic-in" id="lf-wms_atual" placeholder="Ex.: TOTVS WMS, SAP EWM, próprio…">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">ERP utilizado</label>
+                                            <input class="lic-in" id="lf-erp_atual" placeholder="Ex.: SAP B1, TOTVS Protheus…">
+                                        </div>
+                                    </div>
+                                    <div class="lic-section-divider">Sistemas integrados</div>
+                                    <div class="lic-chip-sel" id="lf-sistemas_integrados" style="margin-bottom:20px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="TMS">TMS</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="BI / dashboard">BI / dashboard</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="API REST / JSON">API REST / JSON</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="EDI">EDI</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="E-commerce / marketplace">E-commerce / marketplace</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Portal do cliente">Portal do cliente</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Rastreamento">Rastreamento</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="NF-e / SPED fiscal">NF-e / SPED fiscal</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="CRM">CRM</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Nenhum">Nenhum</label>
+                                    </div>
+                                    <div class="lic-section-divider">Nível de maturidade geral</div>
+                                    <div id="lf-nivel_maturidade">
+                                        <label class="lic-radio-card"><input type="radio" name="lf-maturidade" value="Básico"><div class="lic-radio-dot"></div><div><div style="font-size:13px;font-weight:600;color:#2d1b69;">Básico</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Operação manual, planilhas, sem integração</div></div></label>
+                                        <label class="lic-radio-card"><input type="radio" name="lf-maturidade" value="Em desenvolvimento"><div class="lic-radio-dot"></div><div><div style="font-size:13px;font-weight:600;color:#2d1b69;">Em desenvolvimento</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Sistemas isolados, integrações pontuais</div></div></label>
+                                        <label class="lic-radio-card"><input type="radio" name="lf-maturidade" value="Intermediário"><div class="lic-radio-dot"></div><div><div style="font-size:13px;font-weight:600;color:#2d1b69;">Intermediário</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">ERP e WMS ativos com alguma integração</div></div></label>
+                                        <label class="lic-radio-card"><input type="radio" name="lf-maturidade" value="Avançado"><div class="lic-radio-dot"></div><div><div style="font-size:13px;font-weight:600;color:#2d1b69;">Avançado</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Sistemas integrados via API, visibilidade em tempo real</div></div></label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 7. CERTIFICAÇÕES -->
                         <div class="lic-sec" id="lic-sec-certificacoes" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">🏆 Certificações e qualidade</div>
-                            <div class="lic-sub-label">Certificações ativas</div>
-                            <div class="lic-opts" id="lf-certificacoes">
-                                <label class="lic-opt"><input type="checkbox" value="ISO 9001"><span>ISO 9001</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="ISO 14001"><span>ISO 14001</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="OEA"><span>OEA (Operador Econômico Autorizado)</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="ANVISA"><span>ANVISA</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="INMETRO"><span>INMETRO</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Balanço auditado"><span>Balanço auditado</span></label>
-                                <label class="lic-opt"><input type="checkbox" value="Nenhuma"><span>Nenhuma</span></label>
-                            </div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">OTIF médio atual (%)</div><div class="lic-fv"><input class="lic-in" id="lf-otif_pct" type="number" min="0" max="100" placeholder="Ex.: 96"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">Acuracidade de inventário (%)</div><div class="lic-fv"><input class="lic-in" id="lf-acuracidade_pct" type="number" min="0" max="100" placeholder="Ex.: 99"></div></div>
-                            </div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">07</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Certificações e qualidade</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Selos, normas e indicadores de desempenho</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-section-divider">Certificações ativas</div>
+                                    <div class="lic-chip-sel" id="lf-certificacoes" style="margin-bottom:24px;">
+                                        <label class="lic-chip-opt"><input type="checkbox" value="ISO 9001">ISO 9001</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="ISO 14001">ISO 14001</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="OEA">OEA (Operador Econômico Autorizado)</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="ANVISA">ANVISA</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="INMETRO">INMETRO</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Balanço auditado">Balanço auditado</label>
+                                        <label class="lic-chip-opt"><input type="checkbox" value="Nenhuma">Nenhuma</label>
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">OTIF médio atual (%)</label>
+                                            <input class="lic-in" id="lf-otif_pct" type="number" min="0" max="100" placeholder="Ex.: 96">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Acuracidade de inventário (%)</label>
+                                            <input class="lic-in" id="lf-acuracidade_pct" type="number" min="0" max="100" placeholder="Ex.: 99">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 8. PLANOS -->
                         <div class="lic-sec" id="lic-sec-planos" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">💼 Planos comerciais <span class="lic-badge-req">Selecione um</span></div>
-                            <div style="padding:16px;">
-                                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
-                                    <label class="lic-plan-card"><input type="radio" name="lf-plano" value="Starter" class="lic-tracked" onchange="licUpdateImplant()"><div style="text-align:center;padding:10px 12px 8px;"><span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Starter</span></div><div style="font-size:14px;font-weight:700;text-align:center;padding:0 12px 10px;">Starter</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280;">Até 1.000 NF/mês</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">R$500 / 1.000 NF</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Mensalidade: R$0–500</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Analytics: R$3.500</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:11px;font-weight:600;color:#0d47a1;">Implant.: R$20.000</div></label>
-                                    <label class="lic-plan-card"><input type="radio" name="lf-plano" value="Pro" class="lic-tracked" onchange="licUpdateImplant()"><div style="text-align:center;padding:10px 12px 8px;"><span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;">Pro</span></div><div style="font-size:14px;font-weight:700;text-align:center;padding:0 12px 10px;">Pro</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280;">1.001–5.000 NF/mês</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">R$450 / 1.000 NF</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Mensalidade: R$450–2.250</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Analytics: R$3.800</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:11px;font-weight:600;color:#0d47a1;">Implant.: R$30.000</div></label>
-                                    <label class="lic-plan-card"><input type="radio" name="lf-plano" value="Enterprise" class="lic-tracked" onchange="licUpdateImplant()"><div style="text-align:center;padding:10px 12px 8px;"><span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#f0fdf4;color:#166534;border:1px solid #86efac;">Enterprise</span></div><div style="font-size:14px;font-weight:700;text-align:center;padding:0 12px 10px;">Enterprise</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280;">5.001–10.000 NF/mês</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">R$400 / 1.000 NF</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Mensalidade: R$2.000–4.000</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Analytics: R$4.000</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:11px;font-weight:600;color:#0d47a1;">Implant.: R$50.000</div></label>
-                                    <label class="lic-plan-card"><input type="radio" name="lf-plano" value="Custom" class="lic-tracked" onchange="licUpdateImplant()"><div style="text-align:center;padding:10px 12px 8px;"><span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#fffbeb;color:#92400e;border:1px solid #fde68a;">Custom</span></div><div style="font-size:14px;font-weight:700;text-align:center;padding:0 12px 10px;">Custom</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:10px;color:#6b7280;">Acima de 10.000 NF</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">A consultar</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Mensalidade: A consultar</div><div style="padding:6px 12px;font-size:10px;color:#6b7280;">Analytics: R$4.000</div><div style="padding:6px 12px;border-top:1px solid #e5e7eb;font-size:11px;font-weight:600;color:#6b7280;">Implant.: A consultar</div></label>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">08</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Planos comerciais</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Selecione o modelo de licenciamento aplicável</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;padding:4px 0 10px;border-bottom:1px solid #e5e7eb;margin-bottom:14px;">Taxa de implantação selecionada</div>
-                                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;" id="lic-implant-strip">
-                                    <div id="lic-ic-starter" style="background:#f3f4f6;border-radius:6px;padding:10px 12px;border:1px solid transparent;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3px;">Starter</div><div style="font-size:14px;font-weight:700;color:#111827;">R$ 20.000</div></div>
-                                    <div id="lic-ic-pro" style="background:#f3f4f6;border-radius:6px;padding:10px 12px;border:1px solid transparent;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3px;">Pro</div><div style="font-size:14px;font-weight:700;color:#111827;">R$ 30.000</div></div>
-                                    <div id="lic-ic-enterprise" style="background:#f3f4f6;border-radius:6px;padding:10px 12px;border:1px solid transparent;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3px;">Enterprise</div><div style="font-size:14px;font-weight:700;color:#111827;">R$ 50.000</div></div>
-                                    <div id="lic-ic-custom" style="background:#f3f4f6;border-radius:6px;padding:10px 12px;border:1px solid transparent;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3px;">Custom</div><div style="font-size:14px;font-weight:400;color:#9ca3af;">A consultar</div></div>
+                                <div class="lic-sec-body">
+                                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+                                        <label class="lic-plan-card">
+                                            <input type="radio" name="lf-plano" value="Starter" class="lic-tracked" onchange="licUpdateImplant()">
+                                            <div style="padding:14px 12px 10px;border-bottom:1px solid #f0ebff;">
+                                                <span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">Starter</span>
+                                                <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-top:10px;">R$ 0</div>
+                                                <div style="font-size:10px;color:#9b8cc0;">mensalidade base</div>
+                                            </div>
+                                            <div style="padding:10px 12px;font-size:11px;color:#7c5cbf;line-height:1.7;">
+                                                <div>Até 1.000 NF/mês</div>
+                                                <div>R$ 500 / 1.000 NF</div>
+                                                <div>Analytics: R$ 3.500</div>
+                                                <div style="margin-top:6px;font-weight:700;color:#2d1b69;">Implant.: R$ 20.000</div>
+                                            </div>
+                                        </label>
+                                        <label class="lic-plan-card">
+                                            <input type="radio" name="lf-plano" value="Pro" class="lic-tracked" onchange="licUpdateImplant()">
+                                            <div style="padding:14px 12px 10px;border-bottom:1px solid #f0ebff;">
+                                                <span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;">Pro</span>
+                                                <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-top:10px;">R$ 450</div>
+                                                <div style="font-size:10px;color:#9b8cc0;">mensalidade base</div>
+                                            </div>
+                                            <div style="padding:10px 12px;font-size:11px;color:#7c5cbf;line-height:1.7;">
+                                                <div>1.001–5.000 NF/mês</div>
+                                                <div>R$ 450 / 1.000 NF</div>
+                                                <div>Analytics: R$ 3.800</div>
+                                                <div style="margin-top:6px;font-weight:700;color:#2d1b69;">Implant.: R$ 30.000</div>
+                                            </div>
+                                        </label>
+                                        <label class="lic-plan-card">
+                                            <input type="radio" name="lf-plano" value="Enterprise" class="lic-tracked" onchange="licUpdateImplant()">
+                                            <div style="padding:14px 12px 10px;border-bottom:1px solid #f0ebff;">
+                                                <span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#f0fdf4;color:#166534;border:1px solid #86efac;">Enterprise</span>
+                                                <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-top:10px;">R$ 2.000</div>
+                                                <div style="font-size:10px;color:#9b8cc0;">mensalidade base</div>
+                                            </div>
+                                            <div style="padding:10px 12px;font-size:11px;color:#7c5cbf;line-height:1.7;">
+                                                <div>5.001–10.000 NF/mês</div>
+                                                <div>R$ 400 / 1.000 NF</div>
+                                                <div>Analytics: R$ 4.000</div>
+                                                <div style="margin-top:6px;font-weight:700;color:#2d1b69;">Implant.: R$ 50.000</div>
+                                            </div>
+                                        </label>
+                                        <label class="lic-plan-card">
+                                            <input type="radio" name="lf-plano" value="Custom" class="lic-tracked" onchange="licUpdateImplant()">
+                                            <div style="padding:14px 12px 10px;border-bottom:1px solid #f0ebff;">
+                                                <span style="font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;background:#fffbeb;color:#92400e;border:1px solid #fde68a;">Custom</span>
+                                                <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-top:10px;">A consultar</div>
+                                                <div style="font-size:10px;color:#9b8cc0;">mensalidade base</div>
+                                            </div>
+                                            <div style="padding:10px 12px;font-size:11px;color:#7c5cbf;line-height:1.7;">
+                                                <div>Acima de 10.000 NF</div>
+                                                <div>Sob medida</div>
+                                                <div>Analytics: R$ 4.000</div>
+                                                <div style="margin-top:6px;font-weight:700;color:#9b8cc0;">Implant.: A consultar</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <!-- Strip de implantação -->
+                                    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9b8cc0;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0ebff;">Taxa de implantação selecionada</div>
+                                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;" id="lic-implant-strip">
+                                        <div id="lic-ic-starter" style="background:#faf8ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:4px;">Starter</div><div style="font-size:15px;font-weight:700;color:#2d1b69;">R$ 20.000</div></div>
+                                        <div id="lic-ic-pro" style="background:#faf8ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:4px;">Pro</div><div style="font-size:15px;font-weight:700;color:#2d1b69;">R$ 30.000</div></div>
+                                        <div id="lic-ic-enterprise" style="background:#faf8ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:4px;">Enterprise</div><div style="font-size:15px;font-weight:700;color:#2d1b69;">R$ 50.000</div></div>
+                                        <div id="lic-ic-custom" style="background:#faf8ff;border-radius:10px;padding:12px 14px;border:1.5px solid #e0d9f5;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:4px;">Custom</div><div style="font-size:15px;font-weight:400;color:#9b8cc0;">A consultar</div></div>
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">Fee mensal estimado (R$)</label>
+                                            <input class="lic-in lic-tracked" id="lf-fee_mensal" type="number" placeholder="Ex.: 4500">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Status do lead</label>
+                                            <select class="lic-in lic-tracked" id="lf-status"><option value="Ativo">Ativo</option><option value="Convertido">Convertido</option><option value="Perdido">Perdido</option></select>
+                                        </div>
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Motivo da perda</label>
+                                        <input class="lic-in" id="lf-motivo_perda" placeholder="Preencher se status = Perdido">
+                                    </div>
                                 </div>
-                                <div class="lic-fr2" style="margin-top:16px;">
-                                    <div class="lic-gc"><div class="lic-fl">Fee mensal estimado (R$)</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-fee_mensal" type="number" placeholder="Ex.: 4500"></div></div>
-                                    <div class="lic-gc"><div class="lic-fl">Status do lead</div><div class="lic-fv"><select class="lic-in lic-tracked" id="lf-status"><option value="Ativo">Ativo</option><option value="Convertido">Convertido</option><option value="Perdido">Perdido</option></select></div></div>
-                                </div>
-                                <div class="lic-fr"><div class="lic-fl">Motivo da perda</div><div class="lic-fv"><input class="lic-in" id="lf-motivo_perda" placeholder="Preencher se perdido"></div></div>
-                            </div>
                             </div>
                         </div>
 
                         <!-- 9. WMS -->
                         <div class="lic-sec" id="lic-sec-wms" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">⚙️ Implantação WMS</div>
-                            <div style="padding:12px 14px;display:flex;align-items:center;gap:12px;">
-                                <span style="font-size:13px;font-weight:600;color:#111827;">Haverá implantação de WMS?</span>
-                                <div class="lic-opts" style="padding:0;margin-left:8px;">
-                                    <label class="lic-opt"><input type="radio" name="lf-wms-yn" value="Sim" id="lf-wms-sim" onchange="licToggleWms(true)"><span>Sim</span></label>
-                                    <label class="lic-opt"><input type="radio" name="lf-wms-yn" value="Não" id="lf-wms-nao" onchange="licToggleWms(false)"><span>Não</span></label>
-                                </div>
-                            </div>
-                            <div id="lic-wms-block" style="display:none;border-top:1px solid #e5e7eb;">
-                                <div style="display:grid;grid-template-columns:1fr 1fr;">
-                                    <div style="border-right:1px solid #e5e7eb;">
-                                        <div style="padding:9px 14px;background:#1a3c6e;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Opção 1 — WMS Senior</div>
-                                        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:7px;">
-                                            <div style="display:flex;justify-content:space-between;padding:7px 10px;background:#f3f4f6;border-radius:5px;font-size:12px;"><span style="color:#6b7280;">Implantação</span><span style="font-weight:700;">R$ 40.782,72</span></div>
-                                            <div style="display:flex;justify-content:space-between;padding:7px 10px;background:#f3f4f6;border-radius:5px;font-size:12px;"><span style="color:#6b7280;">Mensalidade</span><span style="font-weight:700;">R$ 14.366,64</span></div>
-                                        </div>
-                                        <div style="padding:8px 14px;"><div class="lic-opts" style="padding:0;"><label class="lic-opt"><input type="radio" name="lf-wms-opcao" value="Senior"><span>Selecionar esta opção</span></label></div></div>
-                                    </div>
-                                    <div>
-                                        <div style="padding:9px 14px;background:#1a3c6e;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.04em;">Opção 2 — WMS via API</div>
-                                        <div style="display:flex;flex-direction:column;">
-                                            <label style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;"><input type="radio" name="lf-wms-opcao" value="API Pronta R$3.500"><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Pronta (nativa)</div><div style="font-size:10px;color:#9ca3af;">Senior WMS SILT</div></div><span style="font-size:12px;font-weight:700;">R$ 3.500</span></label>
-                                            <label style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;"><input type="radio" name="lf-wms-opcao" value="API Semi-pronta R$8.000"><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Semi-pronta</div><div style="font-size:10px;color:#9ca3af;">Senior WMS ALCYS</div></div><span style="font-size:12px;font-weight:700;">R$ 8.000</span></label>
-                                            <label style="display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;"><input type="radio" name="lf-wms-opcao" value="API Nova (custom) R$15.000"><div style="flex:1;"><div style="font-size:12px;font-weight:600;">Nova (custom)</div><div style="font-size:10px;color:#9ca3af;">Desenvolvimento sob medida</div></div><span style="font-size:12px;font-weight:700;">R$ 15.000</span></label>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">09</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Implantação WMS</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Sistema de Gestão de Armazém — modalidade e custo</div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                                <div class="lic-sec-body">
+                                    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+                                        <span style="font-size:14px;font-weight:600;color:#2d1b69;">Haverá implantação de WMS?</span>
+                                        <div class="lic-chip-sel">
+                                            <label class="lic-chip-opt"><input type="radio" name="lf-wms-yn" value="Sim" id="lf-wms-sim" onchange="licToggleWms(true)">Sim</label>
+                                            <label class="lic-chip-opt"><input type="radio" name="lf-wms-yn" value="Não" id="lf-wms-nao" onchange="licToggleWms(false)">Não</label>
+                                        </div>
+                                    </div>
+                                    <div id="lic-wms-block" style="display:none;">
+                                        <div class="lic-wms-option-wrap" style="border:1.5px solid #e0d9f5;border-radius:12px;overflow:hidden;">
+                                            <div class="lic-wms-opt-col">
+                                                <div class="lic-wms-opt-head">Opção 1 — WMS Senior</div>
+                                                <div class="lic-wms-price-row"><span>Implantação</span><span>R$ 40.782,72</span></div>
+                                                <div class="lic-wms-price-row"><span>Mensalidade</span><span>R$ 14.366,64</span></div>
+                                                <div style="margin-top:14px;">
+                                                    <label class="lic-chip-opt"><input type="radio" name="lf-wms-opcao" value="Senior">Selecionar esta opção</label>
+                                                </div>
+                                            </div>
+                                            <div class="lic-wms-opt-col">
+                                                <div class="lic-wms-opt-head">Opção 2 — WMS via API</div>
+                                                <label class="lic-radio-card" style="margin-bottom:8px;"><input type="radio" name="lf-wms-opcao" value="API Pronta R$3.500"><div class="lic-radio-dot"></div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#2d1b69;">Pronta (nativa)</div><div style="font-size:11px;color:#9b8cc0;">Senior WMS SILT</div></div><span style="font-size:13px;font-weight:700;color:#2d1b69;">R$ 3.500</span></label>
+                                                <label class="lic-radio-card" style="margin-bottom:8px;"><input type="radio" name="lf-wms-opcao" value="API Semi-pronta R$8.000"><div class="lic-radio-dot"></div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#2d1b69;">Semi-pronta</div><div style="font-size:11px;color:#9b8cc0;">Senior WMS ALCYS</div></div><span style="font-size:13px;font-weight:700;color:#2d1b69;">R$ 8.000</span></label>
+                                                <label class="lic-radio-card"><input type="radio" name="lf-wms-opcao" value="API Nova (custom) R$15.000"><div class="lic-radio-dot"></div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#2d1b69;">Nova (custom)</div><div style="font-size:11px;color:#9b8cc0;">Desenvolvimento sob medida</div></div><span style="font-size:13px;font-weight:700;color:#2d1b69;">R$ 15.000</span></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 10. FUNIL -->
                         <div class="lic-sec" id="lic-sec-funil" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">🔻 Funil de etapas <span class="lic-badge-req">Selecione a etapa atual</span></div>
-                            <div style="display:flex;flex-direction:column;">
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="Prospecção" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:500;">Prospecção</div><div style="font-size:10px;color:#9ca3af;">Proposta enviada</div></div></label>
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="Reunião executiva" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:500;">Reunião executiva</div><div style="font-size:10px;color:#9ca3af;">90–120 min agendados</div></div></label>
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="Due diligence" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:500;">Due diligence</div><div style="font-size:10px;color:#9ca3af;">NDA + DD cruzada</div></div></label>
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="MOU" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:500;">MOU</div><div style="font-size:10px;color:#9ca3af;">Memorando assinado</div></div></label>
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #e5e7eb;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="Contrato" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:500;">Contrato</div><div style="font-size:10px;color:#9ca3af;">Assinatura definitiva</div></div></label>
-                                <label style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;transition:background .12s;"><input type="radio" name="lf-etapa" value="Onboarding" class="lic-tracked"><div style="width:24px;height:24px;border-radius:50%;border:1.5px solid #e5e7eb;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#6b7280;flex-shrink:0;">6</div><div><div style="font-size:13px;font-weight:500;">Onboarding</div><div style="font-size:10px;color:#9ca3af;">Go-live em 90–120 dias</div></div></label>
-                            </div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">10</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Funil de etapas</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Selecione a etapa atual da negociação</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body" style="padding:0;">
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Prospecção" class="lic-tracked"><div class="lic-funnel-dot">1</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Prospecção</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Proposta enviada</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Reunião executiva" class="lic-tracked"><div class="lic-funnel-dot">2</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Reunião executiva</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">90–120 min agendados</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Due diligence" class="lic-tracked"><div class="lic-funnel-dot">3</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Due diligence</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">NDA + DD cruzada</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="MOU" class="lic-tracked"><div class="lic-funnel-dot">4</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">MOU</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Memorando assinado</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Contrato" class="lic-tracked"><div class="lic-funnel-dot">5</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Contrato</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Assinatura definitiva</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Onboarding" class="lic-tracked"><div class="lic-funnel-dot">6</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Onboarding</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Go-live em 90–120 dias</div></div></label>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 11. ACOMPANHAMENTO -->
                         <div class="lic-sec" id="lic-sec-acompanhamento" style="display:none;">
-                            <div class="lic-fc"><div class="lic-fc-head">📋 Acompanhamento comercial <span class="lic-badge-req">Obrigatório</span></div>
-                            <div class="lic-sub-label">Origem do lead</div>
-                            <div class="lic-opts">
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="Prospecção ativa" class="lic-tracked"><span>Prospecção ativa</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="Indicação de parceiro" class="lic-tracked"><span>Indicação de parceiro</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="Evento / feira" class="lic-tracked"><span>Evento / feira</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="LinkedIn / redes sociais" class="lic-tracked"><span>LinkedIn / redes sociais</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="Site / inbound" class="lic-tracked"><span>Site / inbound</span></label>
-                                <label class="lic-opt"><input type="radio" name="lf-origem" value="Outro" class="lic-tracked"><span>Outro</span></label>
-                            </div>
-                            <div class="lic-fr2">
-                                <div class="lic-gc"><div class="lic-fl">Data de 1º contato *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-data_primeiro_contato" type="date"></div></div>
-                                <div class="lic-gc"><div class="lic-fl">Data da próxima ação</div><div class="lic-fv"><input class="lic-in" id="lf-data_proxima_acao" type="date"></div></div>
-                            </div>
-                            <div class="lic-fr"><div class="lic-fl">Próxima ação prevista</div><div class="lic-fv"><input class="lic-in" id="lf-proxima_acao" placeholder="Ex.: Enviar NDA para due diligence"></div></div>
-                            <div class="lic-fr"><div class="lic-fl">Responsável comercial *</div><div class="lic-fv"><input class="lic-in lic-tracked" id="lf-responsavel" placeholder="Nome do vendedor responsável"></div></div>
-                            <div class="lic-sub-label">Observações / contexto da negociação</div>
-                            <div style="padding:10px 14px;"><textarea class="lic-in" id="lf-observacoes" rows="4" style="width:100%;resize:vertical;" placeholder="Contexto, objeções, oportunidades, pontos de atenção…"></textarea></div>
+                            <div class="lic-sec-card">
+                                <div class="lic-sec-hero">
+                                    <div style="display:flex;align-items:center;gap:16px;">
+                                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;">11</div>
+                                        <div>
+                                            <div style="font-size:18px;font-weight:700;color:#fff;line-height:1.2;">Acompanhamento comercial</div>
+                                            <div style="font-size:12px;color:rgba(255,255,255,.65);margin-top:3px;">Origem, responsável e próximos passos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="lic-sec-body">
+                                    <div class="lic-section-divider">Origem do lead</div>
+                                    <div class="lic-chip-sel" style="margin-bottom:24px;">
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="Prospecção ativa" class="lic-tracked">Prospecção ativa</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="Indicação de parceiro" class="lic-tracked">Indicação de parceiro</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="Evento / feira" class="lic-tracked">Evento / feira</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="LinkedIn / redes sociais" class="lic-tracked">LinkedIn / redes sociais</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="Site / inbound" class="lic-tracked">Site / inbound</label>
+                                        <label class="lic-chip-opt"><input type="radio" name="lf-origem" value="Outro" class="lic-tracked">Outro</label>
+                                    </div>
+                                    <div class="lic-field-row">
+                                        <div>
+                                            <label class="lic-field-label">Data de 1º contato *</label>
+                                            <input class="lic-in lic-tracked" id="lf-data_primeiro_contato" type="date">
+                                        </div>
+                                        <div>
+                                            <label class="lic-field-label">Data da próxima ação</label>
+                                            <input class="lic-in" id="lf-data_proxima_acao" type="date">
+                                        </div>
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Próxima ação prevista</label>
+                                        <input class="lic-in" id="lf-proxima_acao" placeholder="Ex.: Enviar NDA para due diligence">
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Responsável comercial *</label>
+                                        <input class="lic-in lic-tracked" id="lf-responsavel" placeholder="Nome do vendedor responsável">
+                                    </div>
+                                    <div class="lic-field">
+                                        <label class="lic-field-label">Observações / contexto da negociação</label>
+                                        <textarea class="lic-in" id="lf-observacoes" style="min-height:110px;" placeholder="Contexto, objeções, oportunidades, pontos de atenção…"></textarea>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                    </div><!-- /lic-form-content -->
-                </div><!-- /form main -->
+                    </div><!-- /lic-form-content inner -->
+                </div><!-- /lic-form-scroll -->
+
+                <!-- FOOTER com navegação -->
+                <div id="lic-form-footer">
+                    <div style="font-size:12px;color:#9b8cc0;font-weight:500;" id="lic-footer-label">Dados da empresa &bull; Etapa 1 de 11</div>
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="prevLicSec()" class="lic-btn-nav lic-btn-prev">← Anterior</button>
+                        <button onclick="nextLicSec()" class="lic-btn-nav lic-btn-next">Próximo →</button>
+                    </div>
+                </div>
+
             </div><!-- /lic-view-form -->
 
         </div><!-- /page-licenciamento -->
@@ -8244,7 +8523,7 @@ function abrirFormLead(id) {
     _licEditId  = id || null;
     _licSection = 0;
     _licLimparForm();
-    _licBuildNav();
+    _licBuildStepper();
     _licGoSec(0);
 
     if (id) {
@@ -8263,15 +8542,23 @@ function fecharFormLead() {
     document.getElementById('lic-view-tabela').style.display = '';
 }
 
-function _licBuildNav() {
-    const nav = document.getElementById('lic-sec-nav');
-    nav.innerHTML = LIC_SECS.map((s, i) => `
-        <div class="lic-nav-item${i===0?' active':''}" id="lic-nav-${i}" onclick="licNavTo(${i})">
-            <span class="lic-ni-icon">${s.icon}</span>
-            <span class="lic-ni-text">${s.label}</span>
-            <span class="lic-ni-num">${i+1}</span>
-        </div>`).join('');
+function _licBuildStepper() {
+    const el = document.getElementById('lic-stepper');
+    if (!el) return;
+    el.innerHTML = LIC_SECS.map((s, i) => {
+        const done   = i < _licSection;
+        const active = i === _licSection;
+        const bg  = done ? '#16a34a' : (active ? '#6941c6' : '#e8e0f5');
+        const col = (done || active) ? '#fff' : '#a78bda';
+        const glow = active ? 'box-shadow:0 0 0 4px rgba(105,65,198,.2);' : '';
+        const content = done ? '&#10003;' : (i + 1);
+        const line = i > 0 ? `<div style="flex:1;height:2px;background:${i <= _licSection ? (i < _licSection ? '#16a34a' : '#6941c6') : '#e8e0f5'};margin:0 3px;transition:background .3s;min-width:4px;"></div>` : '';
+        return `${line}<div onclick="licNavTo(${i})" title="${s.label}" style="width:26px;height:26px;border-radius:50%;background:${bg};color:${col};font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .25s;${glow}">${content}</div>`;
+    }).join('');
 }
+
+/* Mantido para compatibilidade — redireciona para _licBuildStepper */
+function _licBuildNav() { _licBuildStepper(); }
 
 function licNavTo(idx) {
     _licGoSec(idx);
@@ -8285,7 +8572,20 @@ function _licGoSec(idx) {
         const nav = document.getElementById('lic-nav-' + i);
         if (nav) nav.classList.toggle('active', i === idx);
     });
-    document.getElementById('lic-form-title').textContent = LIC_SECS[idx].icon + ' ' + LIC_SECS[idx].label;
+    /* Atualiza título interno da seção */
+    const titleEl = document.getElementById('lic-form-title');
+    if (titleEl) titleEl.textContent = LIC_SECS[idx].label;
+    /* Progress bar horizontal */
+    const pb = document.getElementById('lic-progress-bar');
+    if (pb) pb.style.width = ((idx / (LIC_SECS.length - 1)) * 100) + '%';
+    /* Rótulo do footer */
+    const fl = document.getElementById('lic-footer-label');
+    if (fl) fl.innerHTML = LIC_SECS[idx].label + ' &bull; Etapa ' + (idx + 1) + ' de ' + LIC_SECS.length;
+    /* Stepper */
+    _licBuildStepper();
+    /* Scroll ao topo */
+    const scroll = document.getElementById('lic-form-scroll');
+    if (scroll) scroll.scrollTop = 0;
     _licUpdateProgress();
 }
 
@@ -8304,12 +8604,24 @@ function _licUpdateProgress() {
     const textFilled = [...document.querySelectorAll('#lic-form-content .lic-tracked:not([type=radio]):not([type=checkbox])')].filter(el => el.value.trim()).length;
     const textTotal  = document.querySelectorAll('#lic-form-content .lic-tracked:not([type=radio]):not([type=checkbox])').length;
     const pct = Math.round(((uniqueRadios.size + textFilled) / Math.max(1, totalRadioGroups + textTotal)) * 100);
-    document.getElementById('lic-sp-fill').style.width = pct + '%';
-    document.getElementById('lic-sp-pct').textContent  = pct + '%';
+    /* Sidebar legacy elements — podem não existir mais, mas seguros com ?. */
+    const spFill = document.getElementById('lic-sp-fill');
+    if (spFill) spFill.style.width = pct + '%';
+    const spPct = document.getElementById('lic-sp-pct');
+    if (spPct) spPct.textContent = pct + '%';
+    /* Pill de status */
     const pill = document.getElementById('lic-form-status-pill');
-    if (pct >= 100) { pill.textContent='Completo'; pill.style.cssText='font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500;background:#f0fdf4;color:#166534;border:1px solid #86efac;'; }
-    else if (pct > 0){ pill.textContent=pct+'% preenchido'; pill.style.cssText='font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500;background:#fffbeb;color:#92400e;border:1px solid #fde68a;'; }
-    else { pill.textContent='Em preenchimento'; pill.style.cssText='font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500;background:#fffbeb;color:#92400e;border:1px solid #fde68a;'; }
+    if (!pill) return;
+    if (pct >= 100) {
+        pill.textContent = '&#10003; Completo';
+        pill.style.background = '#f0fdf4'; pill.style.color = '#16a34a'; pill.style.borderColor = '#86efac';
+    } else if (pct > 0) {
+        pill.textContent = pct + '% preenchido';
+        pill.style.background = '#f0ebff'; pill.style.color = '#6941c6'; pill.style.borderColor = '#d4b8f5';
+    } else {
+        pill.textContent = 'Em preenchimento';
+        pill.style.background = '#f0ebff'; pill.style.color = '#6941c6'; pill.style.borderColor = '#d4b8f5';
+    }
 }
 
 function _licGetChecks(containerId) {
@@ -8478,28 +8790,28 @@ function licAddWarehouse(data) {
     div.id = id;
     div.innerHTML = `
         <div class="lic-wh-head" onclick="licToggleWh('${id}')">
-            <div style="width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${n}</div>
-            <div style="font-size:12px;font-weight:600;color:#fff;flex:1;" id="${id}-title">Armazém ${n}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.45);font-family:'Courier New',monospace;" id="${id}-meta">—</div>
-            ${n>1?`<button onclick="event.stopPropagation();licRemoveWh('${id}')" style="font-size:10px;padding:2px 8px;background:rgba(252,165,165,.15);border:1px solid rgba(252,165,165,.3);border-radius:3px;color:#fca5a5;cursor:pointer;font-family:inherit;">Remover</button>`:''}
-            <span style="color:rgba(255,255,255,.4);margin-left:6px;font-size:14px;" id="${id}-tog">▾</span>
+            <div style="width:24px;height:24px;border-radius:50%;background:#6941c6;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${n}</div>
+            <div style="font-size:13px;font-weight:700;color:#2d1b69;flex:1;" id="${id}-title">Armazém ${n}</div>
+            <div style="font-size:11px;color:#9b8cc0;font-family:'Courier New',monospace;" id="${id}-meta">—</div>
+            ${n>1?`<button onclick="event.stopPropagation();licRemoveWh('${id}')" style="font-size:10px;padding:3px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;color:#991b1b;cursor:pointer;font-family:inherit;font-weight:600;">Remover</button>`:''}
+            <span style="color:#9b8cc0;margin-left:8px;font-size:16px;" id="${id}-tog">▾</span>
         </div>
-        <div id="${id}-body" style="border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
-            <div class="lic-fr2">
-                <div class="lic-gc"><div class="lic-fl">Nome / apelido</div><div class="lic-fv"><input class="lic-in lic-wh-nome" placeholder="Ex.: CD Campinas" value="${d.nome||''}" oninput="licWhMeta('${id}',this.value)"></div></div>
-                <div class="lic-gc"><div class="lic-fl">UF</div><div class="lic-fv"><select class="lic-in lic-wh-uf" onchange="licWhMeta('${id}','')"><option value="">Selecione</option>${ufOpts}</select></div></div>
+        <div id="${id}-body" style="padding:20px 20px 14px;background:#fff;">
+            <div class="lic-field-row" style="margin-bottom:16px;">
+                <div><label class="lic-field-label">Nome / apelido</label><input class="lic-in lic-wh-nome" placeholder="Ex.: CD Campinas" value="${d.nome||''}" oninput="licWhMeta('${id}',this.value)"></div>
+                <div><label class="lic-field-label">UF</label><select class="lic-in lic-wh-uf" onchange="licWhMeta('${id}','')"><option value="">Selecione</option>${ufOpts}</select></div>
             </div>
-            <div class="lic-fr2">
-                <div class="lic-gc"><div class="lic-fl">Cidade</div><div class="lic-fv"><input class="lic-in lic-wh-cidade" placeholder="Ex.: Campinas" value="${d.cidade||''}"></div></div>
-                <div class="lic-gc"><div class="lic-fl">Área total (m²)</div><div class="lic-fv"><input class="lic-in lic-wh-area" type="number" placeholder="Ex.: 8000" value="${d.area_m2||''}" oninput="_licUpdateSummary()"></div></div>
+            <div class="lic-field-row" style="margin-bottom:16px;">
+                <div><label class="lic-field-label">Cidade</label><input class="lic-in lic-wh-cidade" placeholder="Ex.: Campinas" value="${d.cidade||''}"></div>
+                <div><label class="lic-field-label">Área total (m²)</label><input class="lic-in lic-wh-area" type="number" placeholder="Ex.: 8000" value="${d.area_m2||''}" oninput="_licUpdateSummary()"></div>
             </div>
-            <div class="lic-fr2">
-                <div class="lic-gc"><div class="lic-fl">Número de docas</div><div class="lic-fv"><input class="lic-in lic-wh-docas" type="number" placeholder="Ex.: 6" value="${d.docas||''}" oninput="_licUpdateSummary()"></div></div>
-                <div class="lic-gc"><div class="lic-fl">Ocupação atual (%)</div><div class="lic-fv"><input class="lic-in lic-wh-ocup" type="number" min="0" max="100" placeholder="Ex.: 70" value="${d.ocupacao||''}" oninput="_licUpdateSummary()"></div></div>
+            <div class="lic-field-row" style="margin-bottom:16px;">
+                <div><label class="lic-field-label">Número de docas</label><input class="lic-in lic-wh-docas" type="number" placeholder="Ex.: 6" value="${d.docas||''}" oninput="_licUpdateSummary()"></div>
+                <div><label class="lic-field-label">Ocupação atual (%)</label><input class="lic-in lic-wh-ocup" type="number" min="0" max="100" placeholder="Ex.: 70" value="${d.ocupacao||''}" oninput="_licUpdateSummary()"></div>
             </div>
-            <div class="lic-fr2">
-                <div class="lic-gc"><div class="lic-fl">Capacidade de páletes</div><div class="lic-fv"><input class="lic-in lic-wh-paletes" type="number" placeholder="Ex.: 3000" value="${d.paletes||''}"></div></div>
-                <div class="lic-gc"><div class="lic-fl">Pé-direito (m)</div><div class="lic-fv"><input class="lic-in lic-wh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${d.pe_direito||''}"></div></div>
+            <div class="lic-field-row" style="margin-bottom:6px;">
+                <div><label class="lic-field-label">Capacidade de páletes</label><input class="lic-in lic-wh-paletes" type="number" placeholder="Ex.: 3000" value="${d.paletes||''}"></div>
+                <div><label class="lic-field-label">Pé-direito (m)</label><input class="lic-in lic-wh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${d.pe_direito||''}"></div>
             </div>
         </div>`;
     document.getElementById('lic-wh-container').appendChild(div);
