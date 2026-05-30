@@ -2289,7 +2289,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <div style="font-size:12px;color:#9b8cc0;font-weight:500;" id="lic-footer-label">Dados da empresa &bull; Etapa 1 de 11</div>
                     <div style="display:flex;gap:10px;">
                         <button onclick="prevLicSec()" class="lic-btn-nav lic-btn-prev">← Anterior</button>
-                        <button onclick="nextLicSec()" class="lic-btn-nav lic-btn-next">Próximo →</button>
+                        <button id="lic-btn-proximo" onclick="nextLicSec()" class="lic-btn-nav lic-btn-next">Próximo →</button>
                     </div>
                 </div>
 
@@ -8813,6 +8813,23 @@ function _licGoSec(idx) {
     const scroll = document.getElementById('lic-form-scroll');
     if (scroll) scroll.scrollTop = 0;
     _licUpdateProgress();
+
+    // Botão Próximo → vira "Salvar lead" na última etapa
+    const btnProx = document.getElementById('lic-btn-proximo');
+    if (btnProx) {
+        const isLast = idx === LIC_SECS.length - 1;
+        if (isLast) {
+            btnProx.textContent  = '✅ Salvar lead';
+            btnProx.onclick      = salvarLicLead;
+            btnProx.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
+            btnProx.style.borderColor = '#16a34a';
+        } else {
+            btnProx.textContent  = 'Próximo →';
+            btnProx.onclick      = nextLicSec;
+            btnProx.style.background = '';
+            btnProx.style.borderColor = '';
+        }
+    }
 }
 
 function nextLicSec() { if (_licSection < LIC_SECS.length - 1) _licGoSec(_licSection + 1); }
