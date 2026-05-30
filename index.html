@@ -6,6 +6,9 @@
 
 <link rel="icon" type="image/png" href="Logo_azul.png">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -810,6 +813,18 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 .lic-wms-price-row span:first-child{color:#9b8cc0;}
 .lic-wms-price-row span:last-child{font-weight:700;color:#2d1b69;}
 
+/* Mapa */
+#lic-mapa-container { z-index:1; }
+.lic-map-popup .leaflet-popup-content-wrapper { border-radius:16px!important; box-shadow:0 8px 40px rgba(45,27,105,.18)!important; padding:0!important; border:1px solid #ede8f8!important; }
+.lic-map-popup .leaflet-popup-content { margin:0!important; padding:16px!important; }
+.lic-map-popup .leaflet-popup-tip { background:#fff!important; }
+.lic-map-popup .leaflet-popup-close-button { color:#9b8cc0!important; font-size:18px!important; top:8px!important; right:10px!important; }
+.lic-map-tooltip { background:rgba(45,27,105,.88)!important; border:none!important; border-radius:8px!important; color:#fff!important; font-size:12px!important; font-weight:600!important; padding:6px 10px!important; box-shadow:0 4px 12px rgba(0,0,0,.2)!important; }
+.lic-map-tooltip::before { display:none!important; }
+.lic-map-marker:hover { transform:scale(1.12)!important; }
+@keyframes lic-pulse-map { 0%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 var(--pc,rgba(22,163,74,.5))}70%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 18px transparent}100%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 transparent} }
+.lic-map-pulse { animation:lic-pulse-map 2.2s ease-out infinite!important; }
+
 /* ── BADGE DE PERFIL ── */
 .perfil-badge {
     display: flex; align-items: center; gap: 5px;
@@ -1599,6 +1614,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             <button onclick="setLicFiltro('Convertido',this)" class="lic-chip">✓ Convertido</button>
                             <button onclick="setLicFiltro('Perdido',this)" class="lic-chip">✕ Perdido</button>
                         </div>
+                        <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
                         <button onclick="abrirLicDashboard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Dashboard</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
@@ -2393,6 +2409,40 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             <button onclick="cancelarLicPerdido()" style="padding:10px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
             <button onclick="confirmarLicPerdido()" style="padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#dc2626,#b91c1c);font-family:inherit;font-size:13px;color:#fff;cursor:pointer;font-weight:700;box-shadow:0 4px 14px rgba(220,38,38,.3);">Confirmar perda</button>
         </div>
+    </div>
+</div>
+
+<!-- ── VISÃO MAPA ── -->
+<div id="lic-view-mapa" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button onclick="fecharLicMapa()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">← Leads</button>
+            <div>
+                <div style="font-size:15px;font-weight:800;color:#2d1b69;">🗺 Mapa da Rede · Licenciamento</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Distribuição geográfica de armazéns licenciados</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">⊕ Ver todo Brasil</button>
+            <button onclick="abrirFormLead(null,'tabela')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
+        </div>
+    </div>
+
+    <!-- Body: painel + mapa -->
+    <div style="flex:1;display:flex;overflow:hidden;">
+
+        <!-- Painel lateral esquerdo -->
+        <div style="width:280px;flex-shrink:0;background:#fff;border-right:1px solid #ede8f8;overflow-y:auto;padding:18px;">
+            <div id="lic-mapa-panel">
+                <div style="text-align:center;padding:40px 0;color:#c4b5e8;font-size:13px;">Carregando...</div>
+            </div>
+        </div>
+
+        <!-- Mapa Leaflet -->
+        <div id="lic-mapa-container" style="flex:1;background:#e8e4f8;"></div>
+
     </div>
 </div>
 
@@ -9135,6 +9185,359 @@ function abrirLicKanban() {
 function fecharLicKanban() {
     document.getElementById('lic-view-kanban').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
+}
+
+// ── Mapa de Licenciamento ─────────────────────────────────────────
+
+const _LIC_UF_COORDS = {
+    AC:[-9.975,-67.825],AL:[-9.666,-35.735],AP:[0.902,-52.003],AM:[-3.119,-60.022],
+    BA:[-12.971,-38.501],CE:[-3.717,-38.543],DF:[-15.780,-47.929],ES:[-20.316,-40.313],
+    GO:[-16.686,-49.264],MA:[-2.530,-44.303],MT:[-15.599,-56.095],MS:[-20.443,-54.646],
+    MG:[-19.919,-43.939],PA:[-1.456,-48.504],PB:[-7.115,-34.864],PR:[-25.428,-49.273],
+    PE:[-8.048,-34.877],PI:[-5.092,-42.804],RJ:[-22.907,-43.173],RN:[-5.795,-35.211],
+    RS:[-30.035,-51.218],RO:[-8.761,-63.900],RR:[2.824,-60.676],SC:[-27.595,-48.548],
+    SP:[-23.551,-46.633],SE:[-10.909,-37.068],TO:[-10.169,-48.332],
+};
+
+const _LIC_POLO_COORDS = {
+    'São Paulo':[-23.551,-46.633],'Campinas':[-22.906,-47.061],'Guarulhos':[-23.454,-46.534],
+    'Cajamar':[-23.354,-46.878],'Jundiaí':[-23.186,-46.899],'Sorocaba':[-23.502,-47.453],
+    'São Bernardo do Campo':[-23.694,-46.565],'Barueri':[-23.511,-46.876],'Santos':[-23.961,-46.333],
+    'Osasco':[-23.533,-46.792],'Ribeirão Preto':[-21.178,-47.821],'Americana':[-22.737,-47.332],
+    'Rio de Janeiro':[-22.907,-43.173],'Duque de Caxias':[-22.786,-43.317],'Nova Iguaçu':[-22.759,-43.451],
+    'Belo Horizonte':[-19.919,-43.939],'Contagem':[-19.932,-44.054],'Betim':[-19.967,-44.199],
+    'Uberlândia':[-18.911,-48.276],'Pouso Alegre':[-22.230,-45.936],
+    'Curitiba':[-25.428,-49.273],'Maringá':[-23.427,-51.938],'Londrina':[-23.305,-51.170],
+    'Paranaguá':[-25.517,-48.525],'Araucária':[-25.593,-49.401],'São José dos Pinhais':[-25.534,-49.208],
+    'Joinville':[-26.305,-48.849],'Blumenau':[-26.920,-49.066],'Florianópolis':[-27.595,-48.548],
+    'Itajaí':[-26.908,-48.667],'Navegantes':[-26.899,-48.655],'Jaraguá do Sul':[-26.486,-49.071],
+    'Porto Alegre':[-30.035,-51.218],'Caxias do Sul':[-29.168,-51.179],'Canoas':[-29.918,-51.184],
+    'Novo Hamburgo':[-29.678,-51.131],'Gravataí':[-29.944,-50.992],'Cachoeirinha':[-29.948,-51.092],
+    'Pelotas':[-31.771,-52.342],'Santa Maria':[-29.690,-53.807],
+    'Goiânia':[-16.686,-49.264],'Anápolis':[-16.328,-48.954],'Aparecida de Goiânia':[-16.823,-49.244],
+    'Campo Grande':[-20.443,-54.646],'Dourados':[-22.223,-54.813],
+    'Cuiabá':[-15.599,-56.095],'Rondonópolis':[-16.472,-54.637],'Várzea Grande':[-15.647,-56.133],
+    'Salvador':[-12.971,-38.501],'Camaçari':[-12.698,-38.325],'Feira de Santana':[-12.266,-38.966],
+    'Lauro de Freitas':[-12.898,-38.330],
+    'Recife':[-8.048,-34.877],'Suape':[-8.356,-35.016],'Caruaru':[-8.276,-35.976],
+    'Jaboatão dos Guararapes':[-8.113,-35.002],
+    'Fortaleza':[-3.717,-38.543],'Caucaia':[-3.735,-38.653],'Maracanaú':[-3.873,-38.625],
+    'Belém':[-1.456,-48.504],'Marabá':[-5.369,-49.118],'Ananindeua':[-1.364,-48.372],
+    'Manaus':[-3.119,-60.022],'Manacapuru':[-3.305,-60.620],
+    'Vitória':[-20.316,-40.313],'Serra':[-20.129,-40.308],'Vila Velha':[-20.330,-40.292],
+    'Cariacica':[-20.263,-40.417],
+    'Brasília':[-15.780,-47.929],'Taguatinga':[-15.835,-48.058],'Gama':[-16.018,-48.059],
+    'São Luís':[-2.530,-44.303],'Imperatriz':[-5.527,-47.478],
+    'Natal':[-5.795,-35.211],'Mossoró':[-5.187,-37.345],
+    'João Pessoa':[-7.115,-34.864],'Campina Grande':[-7.231,-35.881],
+    'Maceió':[-9.666,-35.735],'Arapiraca':[-9.752,-36.661],
+    'Aracaju':[-10.909,-37.068],'Lagarto':[-10.916,-37.641],
+    'Teresina':[-5.092,-42.804],'Parnaíba':[-2.905,-41.777],
+    'Porto Velho':[-8.761,-63.900],'Ji-Paraná':[-10.879,-61.944],
+    'Rio Branco':[-9.975,-67.825],'Cruzeiro do Sul':[-7.631,-72.672],
+    'Boa Vista':[2.824,-60.676],'Macapá':[0.902,-52.003],'Palmas':[-10.169,-48.332],
+};
+
+const _LIC_REGIONS = {
+    Sul:          ['PR','SC','RS'],
+    Sudeste:      ['SP','RJ','MG','ES'],
+    'Centro-Oeste':['MT','MS','GO','DF'],
+    Nordeste:     ['MA','PI','CE','RN','PB','PE','AL','SE','BA'],
+    Norte:        ['AM','RR','AP','PA','TO','RO','AC'],
+};
+
+const _LIC_REGION_COLORS = {
+    Sul:'#6941c6', Sudeste:'#2563eb', 'Centro-Oeste':'#d97706', Nordeste:'#16a34a', Norte:'#0891b2'
+};
+
+let _licMap = null;
+let _licMapMarkers = [];
+let _licGeoJsonLayer = null;
+let _licGeoJsonData = null;
+let _licMapFiltro = 'todos';
+
+function _licGetCoords(lead) {
+    const polo = (lead.polo_logistico || '').trim();
+    if (polo) {
+        const exact = _LIC_POLO_COORDS[polo];
+        if (exact) return [exact[0]+(Math.random()-.5)*.04, exact[1]+(Math.random()-.5)*.04];
+        const key = Object.keys(_LIC_POLO_COORDS).find(k =>
+            polo.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(polo.toLowerCase())
+        );
+        if (key) return [_LIC_POLO_COORDS[key][0]+(Math.random()-.5)*.04, _LIC_POLO_COORDS[key][1]+(Math.random()-.5)*.04];
+    }
+    if (lead.uf && _LIC_UF_COORDS[lead.uf]) {
+        const c = _LIC_UF_COORDS[lead.uf];
+        return [c[0]+(Math.random()-.5)*.35, c[1]+(Math.random()-.5)*.35];
+    }
+    return null;
+}
+
+function _licLeadsFiltrados() {
+    if (_licMapFiltro === 'convertidos') return baseLicLeads.filter(l => l.status === 'Convertido');
+    if (_licMapFiltro === 'ativos')      return baseLicLeads.filter(l => l.status === 'Ativo');
+    if (_licMapFiltro === 'perdidos')    return baseLicLeads.filter(l => l.status === 'Perdido');
+    return baseLicLeads;
+}
+
+function abrirLicMapa() {
+    document.getElementById('lic-view-tabela').style.display = 'none';
+    document.getElementById('lic-view-mapa').style.display = 'flex';
+    renderizarLicMapaPanel();
+    setTimeout(() => { _licInicializarMapa(); }, 120);
+}
+
+function fecharLicMapa() {
+    document.getElementById('lic-view-mapa').style.display = 'none';
+    document.getElementById('lic-view-tabela').style.display = '';
+    if (_licMap) { _licMap.remove(); _licMap = null; }
+}
+
+function _licInicializarMapa() {
+    if (_licMap) { _licMap.remove(); _licMap = null; }
+    _licMap = L.map('lic-mapa-container', {
+        center: [-15, -52], zoom: 4, zoomControl: false,
+        scrollWheelZoom: true, minZoom: 3, maxZoom: 14,
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>',
+        maxZoom: 19,
+    }).addTo(_licMap);
+    L.control.zoom({ position: 'bottomright' }).addTo(_licMap);
+
+    fetch('https://raw.githubusercontent.com/giuliano-macedo/geodata-br-states/main/geojson/br_states.json')
+        .then(r => r.json())
+        .then(data => { _licGeoJsonData = data; _licAtualizarChoropleth(); _licAtualizarMarkers(); })
+        .catch(() => { _licAtualizarMarkers(); });
+}
+
+function _licAtualizarChoropleth() {
+    if (!_licMap || !_licGeoJsonData) return;
+    if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer = null; }
+
+    const m2ByUF = {};
+    _licLeadsFiltrados().forEach(l => {
+        if (l.uf) m2ByUF[l.uf] = (m2ByUF[l.uf] || 0) + (parseFloat(l.area_total_m2) || 0);
+    });
+    const maxV = Math.max(...Object.values(m2ByUF), 1);
+
+    function getCor(uf) {
+        const v = m2ByUF[uf] || 0;
+        if (v === 0) return '#f0ebff';
+        const r = v / maxV;
+        if (r > .75) return '#2d1b69'; if (r > .5) return '#4c2a9e';
+        if (r > .25) return '#6941c6'; if (r > .08) return '#9b5de5';
+        return '#c4a8f0';
+    }
+
+    _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
+        style: f => ({ fillColor: getCor(f.properties.sigla), weight: 1.5, color: '#fff', fillOpacity: .5 }),
+        onEachFeature: (feature, layer) => {
+            const uf = feature.properties.sigla; const v = m2ByUF[uf] || 0;
+            if (v > 0) layer.bindTooltip(
+                `<b>${feature.properties.name} (${uf})</b><br>${v.toLocaleString('pt-BR')} m² disponíveis`,
+                { className: 'lic-map-tooltip', sticky: true }
+            );
+            layer.on('mouseover', e => { e.target.setStyle({ fillOpacity: .75, weight: 2.5 }); e.target.bringToFront(); });
+            layer.on('mouseout', e => { _licGeoJsonLayer.resetStyle(e.target); });
+            layer.on('click', e => { if (v > 0) _licMap.fitBounds(e.target.getBounds(), { padding: [40,40] }); });
+        }
+    }).addTo(_licMap);
+}
+
+function _licAtualizarMarkers() {
+    if (!_licMap) return;
+    _licMapMarkers.forEach(m => _licMap.removeLayer(m));
+    _licMapMarkers = [];
+
+    const leads = _licLeadsFiltrados().filter(l => l.uf || l.polo_logistico);
+    const bounds = [];
+    const pBg  = {Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol = {Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+
+    leads.forEach(lead => {
+        const coords = _licGetCoords(lead);
+        if (!coords) return;
+
+        const area = parseFloat(lead.area_total_m2) || 0;
+        const isPulse = lead.status === 'Convertido';
+        const cor = lead.status === 'Convertido' ? '#16a34a' : lead.status === 'Perdido' ? '#dc2626' : '#6941c6';
+        const glow = lead.status === 'Convertido' ? 'rgba(22,163,74,.4)' : lead.status === 'Perdido' ? 'rgba(220,38,38,.25)' : 'rgba(105,65,198,.35)';
+        const size = area > 0 ? Math.max(38, Math.min(72, 38 + Math.log10(area + 1) * 10)) : 36;
+        const lbl  = area >= 1e6 ? (area/1e6).toFixed(1)+'M' : area >= 1e3 ? (area/1e3).toFixed(0)+'K' : area > 0 ? String(area) : '?';
+        const fee  = parseFloat(lead.fee_mensal) || 0;
+
+        const icon = L.divIcon({
+            className: '',
+            html: `<div class="lic-map-marker${isPulse?' lic-map-pulse':''}" style="
+                width:${size}px;height:${size}px;
+                background:linear-gradient(135deg,${cor}dd,${cor});
+                border-radius:50%;border:3px solid rgba(255,255,255,.92);
+                box-shadow:0 4px 16px ${glow};
+                display:flex;flex-direction:column;align-items:center;justify-content:center;
+                cursor:pointer;font-family:'Courier New',monospace;color:#fff;
+                transition:transform .15s ease;--pc:${glow};">
+                <div style="font-size:${size<46?8:10}px;font-weight:900;line-height:1.1;">${lbl}</div>
+                <div style="font-size:7px;opacity:.75;font-weight:600;">m²</div>
+            </div>`,
+            iconSize:[size,size], iconAnchor:[size/2,size/2],
+        });
+
+        const popup = `<div style="font-family:DM Sans,sans-serif;min-width:230px;max-width:280px;">
+            <div style="font-size:14px;font-weight:800;color:#2d1b69;margin-bottom:8px;line-height:1.2;">${lead.razao_social||'—'}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                ${lead.uf?`<span style="font-size:10px;background:#f5f3ff;color:#6941c6;padding:2px 8px;border-radius:20px;font-weight:600;border:1px solid #e0d9f5;">${lead.uf}</span>`:''}
+                ${lead.polo_logistico?`<span style="font-size:11px;color:#6b7280;">${lead.polo_logistico}</span>`:''}
+            </div>
+            <div style="background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+                <div style="font-size:9px;color:#7c5cbf;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Área na rede</div>
+                <div style="font-size:26px;font-weight:900;color:#2d1b69;font-family:'Courier New',monospace;line-height:1;">
+                    ${area>0?area.toLocaleString('pt-BR'):'—'} <span style="font-size:12px;font-weight:400;color:#9b8cc0;">m²</span>
+                </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                ${lead.plano?`<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};">${lead.plano}</span>`:''}
+                <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f5f3ff'};color:${cor};">${lead.status||'Ativo'}</span>
+                <span style="font-size:10px;color:#9b8cc0;">${lead.etapa||'—'}</span>
+            </div>
+            ${fee>0?`<div style="font-size:13px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;margin-bottom:6px;">R$${fee.toLocaleString('pt-BR')}<span style="font-size:10px;font-weight:400;color:#9b8cc0;">/mês</span></div>`:''}
+            ${lead.responsavel?`<div style="font-size:11px;color:#9b8cc0;margin-bottom:10px;">👤 ${lead.responsavel}</div>`:''}
+            <button onclick="abrirFormLead('${lead.id}','tabela');_licMap&&_licMap.closePopup()" style="width:100%;padding:8px;background:linear-gradient(135deg,#2d1b69,#6941c6);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Ver / Editar lead →</button>
+        </div>`;
+
+        const m = L.marker(coords, { icon });
+        m.bindPopup(L.popup({ maxWidth:300, className:'lic-map-popup', closeButton:true }).setContent(popup));
+        m.addTo(_licMap);
+        _licMapMarkers.push(m);
+        bounds.push(coords);
+    });
+
+    if (bounds.length > 0) {
+        try { _licMap.fitBounds(bounds, { padding:[40,40], maxZoom:8 }); } catch(e) {}
+    }
+}
+
+function _licMapFitAll() {
+    if (!_licMap) return;
+    _licMap.setView([-15, -52], 4, { animate: true });
+}
+
+function setLicMapFiltro(filtro) {
+    _licMapFiltro = filtro;
+    renderizarLicMapaPanel();
+    _licAtualizarChoropleth();
+    _licAtualizarMarkers();
+}
+
+function renderizarLicMapaPanel() {
+    const leads   = baseLicLeads;
+    const filt    = _licLeadsFiltrados();
+    const conv    = leads.filter(l => l.status === 'Convertido');
+    const m2Total = leads.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const m2Conv  = conv.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const fmt = n => n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+
+    const m2Region = {};
+    Object.keys(_LIC_REGIONS).forEach(r => {
+        m2Region[r] = leads.filter(l=>_LIC_REGIONS[r].includes(l.uf)).reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    });
+    const maxR = Math.max(...Object.values(m2Region),1);
+
+    const m2UF = {};
+    leads.forEach(l=>{if(l.uf)m2UF[l.uf]=(m2UF[l.uf]||0)+(parseFloat(l.area_total_m2)||0);});
+    const ufRank = Object.entries(m2UF).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const maxUF  = ufRank.length>0?ufRank[0][1]:1;
+
+    const FILTERS = [
+        ['todos','Todos',leads.length,'#6941c6'],
+        ['ativos','Ativos',leads.filter(l=>l.status==='Ativo').length,'#d97706'],
+        ['convertidos','Convertidos',conv.length,'#16a34a'],
+        ['perdidos','Perdidos',leads.filter(l=>l.status==='Perdido').length,'#dc2626'],
+    ];
+
+    document.getElementById('lic-mapa-panel').innerHTML = `
+        <!-- Hero total -->
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);border-radius:14px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Total da rede</div>
+            <div style="font-size:26px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">${fmt(m2Total)} <span style="font-size:12px;font-weight:400;opacity:.65;">m²</span></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:3px;">${leads.length} parceiros em ${Object.keys(m2UF).length} estados</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+                <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;">
+                    <div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">m² convertidos</div>
+                    <div style="font-size:14px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${fmt(m2Conv)}</div>
+                </div>
+                <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;">
+                    <div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Parceiros</div>
+                    <div style="font-size:14px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${conv.length} conv.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div style="margin-bottom:16px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Filtrar mapa</div>
+            <div style="display:flex;flex-direction:column;gap:5px;">
+                ${FILTERS.map(([val,label,count,cor])=>`
+                <button onclick="setLicMapFiltro('${val}')"
+                    style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border:1.5px solid ${_licMapFiltro===val?cor+'66':'#e8e0f5'};border-radius:8px;background:${_licMapFiltro===val?cor+'10':'#faf8ff'};cursor:pointer;font-family:inherit;transition:all .15s;">
+                    <div style="display:flex;align-items:center;gap:7px;">
+                        <div style="width:8px;height:8px;border-radius:50%;background:${cor};"></div>
+                        <span style="font-size:12px;font-weight:600;color:${_licMapFiltro===val?cor:'#6b7280'};">${label}</span>
+                    </div>
+                    <span style="font-size:11px;font-weight:700;font-family:'Courier New',monospace;color:${_licMapFiltro===val?cor:'#9b8cc0'};">${count}</span>
+                </button>`).join('')}
+            </div>
+        </div>
+
+        <!-- Por região -->
+        <div style="margin-bottom:16px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">m² por região</div>
+            ${Object.entries(_LIC_REGION_COLORS).map(([reg,cor])=>{
+                const v=m2Region[reg]||0; const pct=Math.round((v/maxR)*100);
+                return `<div style="margin-bottom:9px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                        <span style="font-size:11px;font-weight:600;color:#2d1b69;">${reg}</span>
+                        <span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${v>0?fmt(v)+' m²':'—'}</span>
+                    </div>
+                    <div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;transition:width .6s;"></div>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+
+        <!-- Top estados -->
+        ${ufRank.length>0?`
+        <div style="margin-bottom:16px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Top estados por m²</div>
+            ${ufRank.map(([uf,v],i)=>`
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:#f0ebff;border:1.5px solid #e0d9f5;font-size:8px;font-weight:700;color:#6941c6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
+                        <span style="font-size:11px;font-weight:700;color:#2d1b69;">${uf}</span>
+                        <span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${fmt(v)}</span>
+                    </div>
+                    <div style="height:4px;background:#f0ebff;border-radius:2px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.round((v/maxUF)*100)}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;"></div>
+                    </div>
+                </div>
+            </div>`).join('')}
+        </div>` : ''}
+
+        <!-- Legenda -->
+        <div style="border-top:1px solid #ede8f8;padding-top:12px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#6b7280;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#16a34a;border:2px solid #fff;box-shadow:0 2px 8px rgba(22,163,74,.4);flex-shrink:0;"></div>Convertido (pulse)</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#6941c6;border:2px solid #fff;box-shadow:0 2px 8px rgba(105,65,198,.4);flex-shrink:0;"></div>Ativo</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #fff;box-shadow:0 2px 8px rgba(220,38,38,.3);flex-shrink:0;"></div>Perdido</div>
+                <div style="font-size:10px;color:#c4b5e8;margin-top:4px;">⊙ Tamanho ∝ m²</div>
+                <div style="font-size:10px;color:#c4b5e8;">🎨 Intensidade estado = m² total</div>
+            </div>
+        </div>
+    `;
 }
 
 function renderizarLicKanban() {
