@@ -54,9 +54,13 @@ body{font-family:'DM Sans',sans-serif;background:#f5f3ff;color:#1a1a2e;font-size
 .welcome-inner>*:nth-child(6){animation-delay:.55s;}
 .welcome-inner>*:nth-child(7){animation-delay:.65s;}
 
-.welcome-logo{height:42px;margin-bottom:36px;filter:brightness(0) invert(1);drop-shadow(0 0 20px rgba(155,93,229,.5));}
-.portal-logo-text{font-size:22px;font-weight:900;color:#fff;letter-spacing:.04em;margin-bottom:36px;text-shadow:0 0 30px rgba(155,93,229,.6);}
-.portal-logo-text span{font-size:11px;font-weight:400;opacity:.5;display:block;margin-top:2px;letter-spacing:.08em;text-transform:uppercase;}
+/* Logo desenhado — sempre visível */
+.portal-logo-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:5px;margin-bottom:36px;}
+.portal-logo-card{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:16px;padding:12px 22px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(105,65,198,.25);}
+.portal-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#9b5de5,#6941c6);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 12px rgba(105,65,198,.5);}
+.portal-logo-pipe{display:flex;flex-direction:column;align-items:flex-start;}
+.portal-logo-name{font-size:19px;font-weight:900;color:#fff;letter-spacing:.08em;line-height:1;text-shadow:0 0 20px rgba(155,93,229,.5);}
+.portal-logo-sub{font-size:9px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:2px;}
 .welcome-eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(105,65,198,.25);border:1px solid rgba(155,93,229,.4);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;backdrop-filter:blur(8px);}
 .welcome-company{font-size:20px;font-weight:800;color:#fde68a;margin-bottom:6px;text-shadow:0 0 20px rgba(253,230,138,.4);}
 .welcome-title{font-size:36px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:14px;letter-spacing:-.8px;text-shadow:0 2px 20px rgba(0,0,0,.3);}
@@ -200,7 +204,7 @@ textarea.p-input:focus{border-color:#6941c6;}
         <div style="font-size:48px;margin-bottom:16px;">🔗</div>
         <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-bottom:8px;">Link inválido ou expirado</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.6;">Este link não existe ou foi desativado. Entre em contato com o responsável comercial da Vendemmia para solicitar um novo link.</div>
-        <div style="margin-top:24px;"><img src="https://pipelinevendemmia.com.br/Pipeline.png" style="height:28px;" onerror="this.outerHTML='<div style=font-size:14px;font-weight:900;color:#2d1b69;>PIPELINE</div>'"></div>
+        <div style="margin-top:24px;font-size:13px;font-weight:900;color:#2d1b69;letter-spacing:.06em;">PIPELINE <span style="font-size:10px;font-weight:500;color:#9ca3af;">by vendemmia</span></div>
     </div>
 </div>
 
@@ -228,9 +232,23 @@ textarea.p-input:focus{border-color:#6941c6;}
         <div class="vignette"></div>
     </div>
     <div class="welcome-inner">
-        <!-- Logo -->
-        <img src="https://pipelinevendemmia.com.br/Pipeline.png" class="welcome-logo"
-             onerror="this.outerHTML='<div class=\'portal-logo-text\'>PIPELINE<span>by vendemmia</span></div>'">
+        <!-- Logo — CSS puro, sempre visível -->
+        <div class="portal-logo-wrap">
+            <div class="portal-logo-card">
+                <div class="portal-logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <rect x="2" y="7" width="6" height="10" rx="1.5" fill="rgba(255,255,255,.9)"/>
+                        <rect x="9" y="4" width="6" height="13" rx="1.5" fill="rgba(255,255,255,.7)"/>
+                        <rect x="16" y="2" width="6" height="15" rx="1.5" fill="rgba(255,255,255,.5)"/>
+                        <line x1="5" y1="18" x2="19" y2="18" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="portal-logo-pipe">
+                    <div class="portal-logo-name">PIPELINE</div>
+                    <div class="portal-logo-sub">by vendemmia</div>
+                </div>
+            </div>
+        </div>
         <!-- Eyebrow -->
         <div class="welcome-eyebrow"><span>🤝</span> Rede de Licenciamento Vendemmia</div>
         <!-- Company name (preenchido via JS) -->
@@ -258,7 +276,13 @@ textarea.p-input:focus{border-color:#6941c6;}
 <!-- FORMULÁRIO -->
 <div id="screen-form" class="screen">
     <div class="form-topbar">
-        <img src="https://pipelinevendemmia.com.br/Pipeline.png" class="form-logo" onerror="this.style.display='none'">
+        <div style="display:inline-flex;align-items:center;gap:9px;">
+            <div style="width:26px;height:26px;background:linear-gradient(135deg,#9b5de5,#6941c6);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="6" height="10" rx="1.5" fill="rgba(255,255,255,.9)"/><rect x="9" y="4" width="6" height="13" rx="1.5" fill="rgba(255,255,255,.7)"/><rect x="16" y="2" width="6" height="15" rx="1.5" fill="rgba(255,255,255,.5)"/></svg>
+            </div>
+            <span style="font-size:14px;font-weight:900;color:#2d1b69;letter-spacing:.06em;">PIPELINE</span>
+            <span style="font-size:9px;font-weight:600;color:#9b8cc0;letter-spacing:.08em;text-transform:uppercase;">by vendemmia</span>
+        </div>
         <div id="form-step-info" class="form-step-info">Etapa 1 de 7</div>
     </div>
     <div class="form-progress-wrap">
@@ -575,7 +599,7 @@ textarea.p-input:focus{border-color:#6941c6;}
         <div class="thanks-title">Formulário enviado!</div>
         <div class="thanks-sub" id="thanks-msg">Suas informações foram recebidas pela equipe Vendemmia. Em breve entraremos em contato para dar continuidade ao processo de parceria.</div>
         <div class="thanks-badge"><span>🤝</span> Aguarde o contato da nossa equipe</div>
-        <div style="margin-top:28px;"><img src="https://pipelinevendemmia.com.br/Pipeline.png" style="height:24px;opacity:.6;" onerror="this.outerHTML='<div style=font-size:12px;font-weight:900;color:#9ca3af;>PIPELINE</div>'"></div>
+        <div style="margin-top:28px;font-size:13px;font-weight:900;color:#9ca3af;letter-spacing:.06em;opacity:.7;">PIPELINE <span style="font-size:10px;font-weight:500;">by vendemmia</span></div>
         <div style="margin-top:8px;font-size:11px;color:#9ca3af;">Vendemmia Comércio Internacional Ltda.</div>
     </div>
 </div>
