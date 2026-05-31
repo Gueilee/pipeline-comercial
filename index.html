@@ -12843,10 +12843,8 @@ function _licMapAbrirFullView(lead) {
     const fee  = parseFloat(lead.fee_mensal)||0;
     const armazens = Array.isArray(lead.armazens)?lead.armazens.filter(w=>w.area_m2>0||w.nome):[];
 
-    // ── Galeria de fotos ──
+    // ── Galeria de fotos (cache de fotos já carregado) ──
     _lfvPhotos = (_licMapAllAnexos||[]).filter(a=>a.lead_id===lead.id&&a.tipo?.startsWith('foto_armazem_')).map(a=>a.url);
-    const allAnexos = (_licMapAllAnexos||[]).filter(a=>a.lead_id===lead.id);
-    const docs     = allAnexos.filter(a=>!a.tipo?.startsWith('foto_armazem_')&&a.tipo!=='pdf_lead');
     _lfvRenderGaleria();
 
     // ── Endereço completo ──
@@ -12934,6 +12932,15 @@ function _licMapAbrirFullView(lead) {
         <div class="lfv-section-title">📋 Observações</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.6;background:#f9f7ff;border-radius:10px;padding:12px 14px;border-left:3px solid #6941c6;">${lead.observacoes}</div>
         `:''}
+
+        <!-- Documentos e Anexos — carregados de forma assíncrona -->
+        <div class="lfv-section-title" style="margin-top:28px;">📎 Documentos e Anexos</div>
+        <div id="lfv-docs-section" style="min-height:60px;">
+            <div style="display:flex;align-items:center;gap:8px;color:#c4b5e8;font-size:13px;padding:16px 0;">
+                <div style="width:16px;height:16px;border-radius:50%;border:2px solid #c4b5e8;border-top-color:#6941c6;animation:spin .7s linear infinite;flex-shrink:0;"></div>
+                Carregando documentos...
+            </div>
+        </div>
     `;
 
     // ── COLUNA DIREITA ──
@@ -12978,16 +12985,8 @@ function _licMapAbrirFullView(lead) {
             ${aud.certificado_validade?`<div style="font-size:10px;color:#16a34a;margin-top:2px;">Válido até ${new Date(aud.certificado_validade+'T00:00:00').toLocaleDateString('pt-BR')}</div>`:''}
         </div>`:''}
 
-        <!-- Documentos -->
-        ${docs.length>0?`
-        <div style="margin-bottom:18px;">
-            <div class="lfv-section-title" style="margin-top:0;">📎 Documentos (${docs.length})</div>
-            ${docs.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f3ff;">
-                <span style="font-size:16px;">${a.nome_arquivo?.endsWith('.pdf')?'📄':a.nome_arquivo?.match(/\.(jpg|jpeg|png)/i)?'🖼️':'📎'}</span>
-                <span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</span>
-                <a href="${a.url}" target="_blank" style="font-size:10px;color:#6941c6;font-weight:700;text-decoration:none;background:#f0ebff;padding:2px 7px;border-radius:6px;white-space:nowrap;flex-shrink:0;">⬇</a>
-            </div>`).join('')}
-        </div>`:''}
+        <!-- Documentos carregados de forma assíncrona -->
+        <div id="lfv-sidebar-docs" style="margin-bottom:18px;"></div>
 
         <!-- Botões ação -->
         <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
@@ -13011,6 +13010,97 @@ function _licMapAbrirFullView(lead) {
     const fv = document.getElementById('lic-map-fullview');
     fv.style.display = 'block';
     fv.scrollTop = 0;
+
+    // Carrega todos os anexos do lead de forma assíncrona
+    _lfvCarregarAnexos(lead.id);
+}
+
+async function _lfvCarregarAnexos(leadId) {
+    try {
+        const { data } = await supabaseClient
+            .from('lic_anexos')
+            .select('*')
+            .eq('lead_id', leadId)
+            .order('created_at');
+        const anexos = data || [];
+
+        const _tipoLabel = tipo => ({
+            contrato_social: 'Contrato Social',
+            certificado: 'Certificado',
+            pdf_lead: 'Board Report (PDF)',
+            relatorio_visita: 'Relatório de Visita Técnica',
+        }[tipo] || (tipo?.startsWith('foto_armazem_') ? 'Foto — Armazém '+(tipo.split('_')[2]||'') : tipo||'Documento'));
+
+        const _tipoIcon = a => {
+            if (a.tipo === 'pdf_lead') return '📊';
+            if (a.tipo === 'contrato_social') return '📜';
+            if (a.tipo === 'certificado') return '🏆';
+            if (a.tipo === 'relatorio_visita') return '🔍';
+            if (a.tipo?.startsWith('foto_armazem_')) return '🖼️';
+            if (a.nome_arquivo?.endsWith('.pdf')) return '📄';
+            if (a.nome_arquivo?.match(/\.(jpg|jpeg|png|heic)/i)) return '🖼️';
+            return '📎';
+        };
+
+        const _fmtBytes = b => !b ? '' : b >= 1e6 ? (b/1e6).toFixed(1)+' MB' : Math.round(b/1024)+' KB';
+
+        // Separar por tipo
+        const grupos = {};
+        anexos.forEach(a => {
+            const label = _tipoLabel(a.tipo);
+            if (!grupos[label]) grupos[label] = [];
+            grupos[label].push(a);
+        });
+
+        // Renderizar na coluna esquerda
+        const docsEl = document.getElementById('lfv-docs-section');
+        const sideEl = document.getElementById('lfv-sidebar-docs');
+
+        if (anexos.length === 0) {
+            if (docsEl) docsEl.innerHTML = '<div style="font-size:13px;color:#c4b5e8;padding:16px 0;">Nenhum documento anexado a este lead.</div>';
+            if (sideEl) sideEl.innerHTML = '';
+            return;
+        }
+
+        // Coluna esquerda: cards de documentos agrupados por tipo
+        if (docsEl) {
+            docsEl.innerHTML = Object.entries(grupos).map(([label, items]) => `
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:11px;font-weight:700;color:#7c5cbf;margin-bottom:8px;">${label}</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        ${items.map(a => `
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1.5px solid #e8e0f5;border-radius:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='#6941c6'" onmouseout="this.style.borderColor='#e8e0f5'">
+                            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f5f3ff,#ede8f8);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${_tipoIcon(a)}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'Arquivo'}</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">${_fmtBytes(a.tamanho_bytes)}</div>
+                            </div>
+                            <a href="${a.url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">⬇ Download</a>
+                        </div>`).join('')}
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        // Sidebar direita: lista compacta de documentos (excluindo fotos)
+        const docsCompactos = anexos.filter(a => !a.tipo?.startsWith('foto_armazem_'));
+        if (sideEl && docsCompactos.length > 0) {
+            sideEl.innerHTML = `
+                <div class="lfv-section-title" style="margin-top:0;">📎 Documentos (${docsCompactos.length})</div>
+                ${docsCompactos.map(a => `
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f3ff;">
+                    <span style="font-size:16px;flex-shrink:0;">${_tipoIcon(a)}</span>
+                    <span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</span>
+                    <a href="${a.url}" target="_blank" style="font-size:10px;color:#6941c6;font-weight:700;text-decoration:none;background:#f0ebff;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0;">⬇</a>
+                </div>`).join('')}
+            `;
+        }
+
+    } catch(e) {
+        const docsEl = document.getElementById('lfv-docs-section');
+        if (docsEl) docsEl.innerHTML = '<div style="font-size:12px;color:#9b8cc0;padding:12px 0;">Erro ao carregar documentos.</div>';
+        console.warn('_lfvCarregarAnexos error:', e);
+    }
 }
 
 function fecharLicMapFullView() {
