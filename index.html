@@ -2015,7 +2015,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                             <span style="font-size:18px;">📍</span>
                                             <div>
                                                 <div style="font-size:12px;font-weight:800;color:#2d1b69;">Localização exata no mapa</div>
-                                                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Digite o CEP para auto-preencher endereço e fixar o ponto no mapa</div>
+                                                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Digite o CEP para auto-preencher</div>
                                             </div>
                                         </div>
                                         <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;">
@@ -2034,10 +2034,14 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <div id="lic-cep-preview" style="display:none;padding:10px 12px;background:#fff;border-radius:10px;border-left:3px solid #16a34a;font-size:12px;color:#2d1b69;line-height:1.5;"></div>
                                         <!-- Campos de endereço preenchidos automaticamente -->
                                         <div id="lic-cep-fields" style="display:none;margin-top:14px;">
-                                            <div class="lic-field-row" style="margin-bottom:12px;">
+                                            <div style="display:grid;grid-template-columns:1fr 120px 1fr;gap:14px;margin-bottom:12px;">
                                                 <div>
                                                     <label class="lic-field-label" style="margin-bottom:6px;">LOGRADOURO</label>
                                                     <input class="lic-in" id="lf-endereco_logradouro" placeholder="Rua, Avenida, Rodovia...">
+                                                </div>
+                                                <div>
+                                                    <label class="lic-field-label" style="margin-bottom:6px;">NÚMERO</label>
+                                                    <input class="lic-in" id="lf-endereco_numero" placeholder="Ex.: 123">
                                                 </div>
                                                 <div>
                                                     <label class="lic-field-label" style="margin-bottom:6px;">BAIRRO</label>
@@ -2143,6 +2147,22 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <label class="lic-chip-opt"><input type="checkbox" value="Licença ambiental">Licença ambiental</label>
                                         <label class="lic-chip-opt"><input type="checkbox" value="OEA">OEA — Receita Federal</label>
                                     </div>
+                                    <!-- Upload: Documentos de Licenças ativas -->
+                                    <div style="margin-top:16px;padding:0 2px;">
+                                        <div class="lic-field-label" style="margin-bottom:10px;">DOCUMENTOS DAS LICENÇAS ATIVAS</div>
+                                        <div class="lic-upload-zone" id="lic-uz-licencas"
+                                            onclick="document.getElementById('lic-fi-licencas').click()"
+                                            ondragover="licUzDragOver(event,'lic-uz-licencas')"
+                                            ondragleave="licUzDragLeave('lic-uz-licencas')"
+                                            ondrop="licUzDrop(event,'licencas_doc','lic-uz-licencas')">
+                                            <div style="font-size:26px;margin-bottom:6px;">📋</div>
+                                            <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:3px;">Anexar documentos de licença</div>
+                                            <div style="font-size:11px;color:#9b8cc0;">PDF, JPG, PNG — ANTT, ANVISA, IBAMA, OEA, AVCB — máx. 10 MB</div>
+                                            <input type="file" id="lic-fi-licencas" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none;" onchange="licFilesSelected('licencas_doc',this.files)">
+                                        </div>
+                                        <div id="lic-fl-licencas_doc"></div>
+                                    </div>
+
                                     <div class="lic-field">
                                         <label class="lic-field-label">Observações sobre cargas especiais</label>
                                         <textarea class="lic-in" id="lf-obs_cargas" placeholder="Restrições, volumes máximos, condições específicas…"></textarea>
@@ -2339,10 +2359,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                             <select class="lic-in lic-tracked" id="lf-status"><option value="Ativo">Ativo</option><option value="Convertido">Convertido</option><option value="Perdido">Perdido</option></select>
                                         </div>
                                     </div>
-                                    <div class="lic-field">
-                                        <label class="lic-field-label">Motivo da perda</label>
-                                        <input class="lic-in" id="lf-motivo_perda" placeholder="Preencher se status = Perdido">
-                                    </div>
+                                    <!-- Campo "Motivo da perda" removido da seção 8 — gerenciado pelo Kanban -->
                                 </div>
                             </div>
                         </div>
@@ -9670,7 +9687,7 @@ function _licPreencherForm(lead) {
     set('lf-contato_email', lead.contato_email); set('lf-contato_telefone', lead.contato_telefone);
     set('lf-decisor_info', lead.decisor_info);
     set('lf-cep', lead.cep); set('lf-lat', lead.lat||''); set('lf-lng', lead.lng||'');
-    set('lf-endereco_logradouro', lead.endereco_logradouro); set('lf-endereco_bairro', lead.endereco_bairro);
+    set('lf-endereco_logradouro', lead.endereco_logradouro); set('lf-endereco_numero', lead.endereco_numero); set('lf-endereco_bairro', lead.endereco_bairro);
     set('lf-uf', lead.uf); set('lf-polo_logistico', lead.polo_logistico);
     set('lf-regiao_exclusividade', lead.regiao_exclusividade); set('lf-outras_ufs', lead.outras_ufs);
     // Mostra campos de endereço se CEP já estava preenchido
@@ -9747,7 +9764,7 @@ function _licGetFormData() {
         contato_email: g('lf-contato_email'), contato_telefone: g('lf-contato_telefone'),
         decisor: gr('lf-decisor'), decisor_info: g('lf-decisor_info'),
         cep: g('lf-cep'), lat: parseFloat(g('lf-lat')) || null, lng: parseFloat(g('lf-lng')) || null,
-        endereco_logradouro: g('lf-endereco_logradouro'), endereco_bairro: g('lf-endereco_bairro'),
+        endereco_logradouro: g('lf-endereco_logradouro'), endereco_numero: g('lf-endereco_numero'), endereco_bairro: g('lf-endereco_bairro'),
         uf: g('lf-uf'), polo_logistico: g('lf-polo_logistico'),
         regiao_exclusividade: g('lf-regiao_exclusividade'), outras_ufs: g('lf-outras_ufs'),
         armazens, area_total_m2: areaTotal,

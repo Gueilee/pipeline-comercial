@@ -374,8 +374,9 @@ textarea.p-input:focus{border-color:#6941c6;}
                         </div>
                         <div class="p-cep-preview" id="p-cep-preview"></div>
                         <div id="p-addr-fields" style="display:none;margin-top:14px;">
-                            <div class="p-row">
+                            <div style="display:grid;grid-template-columns:1fr 110px 1fr;gap:14px;">
                                 <div><label class="p-label" style="margin-bottom:8px;">LOGRADOURO</label><input class="p-input" id="p-endereco_logradouro" placeholder="Rua, Av., Rodovia..."></div>
+                                <div><label class="p-label" style="margin-bottom:8px;">NÚMERO</label><input class="p-input" id="p-endereco_numero" placeholder="Ex.: 123"></div>
                                 <div><label class="p-label" style="margin-bottom:8px;">BAIRRO</label><input class="p-input" id="p-endereco_bairro" placeholder="Bairro"></div>
                             </div>
                         </div>
@@ -646,7 +647,7 @@ function preencherForm(d) {
     set('p-contato_email', d.contato_email); set('p-contato_telefone', d.contato_telefone);
     setRad('p-decisor', d.decisor); set('p-decisor_info', d.decisor_info);
     set('p-cep', d.cep); set('p-lat', d.lat||''); set('p-lng', d.lng||'');
-    set('p-endereco_logradouro', d.endereco_logradouro); set('p-endereco_bairro', d.endereco_bairro);
+    set('p-endereco_logradouro', d.endereco_logradouro); set('p-endereco_numero', d.endereco_numero); set('p-endereco_bairro', d.endereco_bairro);
     set('p-uf', d.uf); set('p-polo_logistico', d.polo_logistico);
     set('p-regiao_exclusividade', d.regiao_exclusividade); set('p-outras_ufs', d.outras_ufs);
     if (d.cep) { document.getElementById('p-addr-fields').style.display=''; const pr=document.getElementById('p-cep-preview'); if(pr){pr.style.display='';pr.style.borderLeftColor='#6941c6';pr.innerHTML=`<span style="font-size:11px;color:#6941c6;font-weight:600;">📍 ${d.cep} · ${d.polo_logistico||''} ${d.uf?'— '+d.uf:''} ${d.lat?'· GPS ✓':''}</span>`;} }
@@ -760,7 +761,7 @@ function getFormData() {
         contato_email:g('p-contato_email'), contato_telefone:g('p-contato_telefone'),
         decisor:gr('p-decisor'), decisor_info:g('p-decisor_info'),
         cep:g('p-cep'), lat:parseFloat(g('p-lat'))||null, lng:parseFloat(g('p-lng'))||null,
-        endereco_logradouro:g('p-endereco_logradouro'), endereco_bairro:g('p-endereco_bairro'),
+        endereco_logradouro:g('p-endereco_logradouro'), endereco_numero:g('p-endereco_numero'), endereco_bairro:g('p-endereco_bairro'),
         uf:g('p-uf'), polo_logistico:g('p-polo_logistico'),
         regiao_exclusividade:g('p-regiao_exclusividade'), outras_ufs:g('p-outras_ufs'),
         armazens, area_total_m2: armazens.reduce((s,w)=>s+(w.area_m2||0),0),
