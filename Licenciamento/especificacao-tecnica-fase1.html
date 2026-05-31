@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificação Técnica — Fase 1 · Arquitetura e Banco de Dados · Pipeline Licenciamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0f172a;--accent:#0ea5e9;--accent-dark:#0284c7;--green:#16a34a;--amber:#d97706;--red:#dc2626;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--sidebar-w:290px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--gray-800);background:#fff;}
+@media print{.sidebar,.topbar,.print-btn,.no-print{display:none!important}.main{margin-left:0!important}body{font-size:11px}}
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#0c1a2e,#0f172a);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:300;box-shadow:0 2px 16px rgba(0,0,0,.4);}
+.topbar-logo{display:flex;align-items:center;gap:12px;}
+.topbar-logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.topbar-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:.04em;}
+.topbar-logo-sub{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;}
+.topbar-meta{display:flex;align-items:center;gap:10px;}
+.topbar-badge{font-size:10px;background:rgba(14,165,233,.2);color:rgba(14,165,233,.9);padding:3px 10px;border-radius:20px;border:1px solid rgba(14,165,233,.3);}
+.topbar-nav-btn{padding:5px 12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.06);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;text-decoration:none;}
+.print-btn{padding:6px 16px;border:1px solid rgba(14,165,233,.4);border-radius:8px;background:rgba(14,165,233,.15);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#38bdf8;cursor:pointer;}
+.sidebar{position:fixed;top:52px;left:0;width:var(--sidebar-w);height:calc(100vh - 52px);background:#f8fafc;border-right:1px solid var(--gray-200);overflow-y:auto;z-index:200;padding:16px 0;}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:10px 20px 5px;}
+.sidebar-item{display:block;padding:6px 20px;font-size:12px;color:var(--gray-600);text-decoration:none;border-left:2px solid transparent;transition:all .12s;}
+.sidebar-item:hover{background:rgba(14,165,233,.06);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item.active{background:rgba(14,165,233,.08);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+.sidebar-item.sub{padding-left:32px;font-size:11px;}
+.main{margin-left:var(--sidebar-w);padding-top:52px;}
+/* COVER */
+.cover{background:linear-gradient(145deg,#060d1a 0%,#0c1a2e 35%,#0f2d4a 70%,#0c3a5c 100%);padding:70px 60px 60px;position:relative;overflow:hidden;min-height:380px;}
+.cover::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;border-radius:50%;background:rgba(14,165,233,.06);}
+.cover::after{content:'';position:absolute;bottom:-80px;left:20%;width:350px;height:350px;border-radius:50%;background:rgba(14,165,233,.04);}
+.cover-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:24px;position:relative;font-family:'JetBrains Mono',monospace;}
+.cover-title{font-size:36px;font-weight:900;color:#fff;letter-spacing:-.8px;line-height:1.15;margin-bottom:10px;position:relative;}
+.cover-sub{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:36px;position:relative;}
+.cover-meta{display:flex;gap:14px;flex-wrap:wrap;position:relative;}
+.cover-meta-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:11px 16px;}
+.cover-meta-label{font-size:8px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.cover-meta-value{font-size:12px;font-weight:700;color:#fff;}
+/* CONTENT */
+.content{max-width:880px;margin:0 auto;padding:52px 48px 80px;}
+.section-divider{display:flex;align-items:center;gap:12px;margin:52px 0 22px;}
+.section-divider-bar{width:4px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:2px;flex-shrink:0;}
+.section-divider h2{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px;}
+.section-num{font-size:10px;font-weight:700;color:var(--accent);background:rgba(14,165,233,.08);padding:3px 10px;border-radius:20px;margin-left:4px;font-family:'JetBrains Mono',monospace;}
+h3{font-size:15px;font-weight:700;color:var(--primary);margin:26px 0 10px;}
+h4{font-size:13px;font-weight:700;color:var(--gray-800);margin:20px 0 8px;}
+p{margin-bottom:12px;color:var(--gray-600);line-height:1.75;}
+strong{color:var(--gray-800);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#0284c7;}
+pre{background:#0f172a;border-radius:12px;padding:18px 20px;margin:14px 0;overflow-x:auto;}
+pre code{background:none;padding:0;color:#e2e8f0;font-size:12px;line-height:1.6;}
+.hl-key{color:#7dd3fc;}
+.hl-str{color:#86efac;}
+.hl-cmt{color:#64748b;font-style:italic;}
+.hl-num{color:#fbbf24;}
+.hl-type{color:#c4b5fd;}
+/* callout */
+.callout{border-radius:10px;padding:13px 17px;margin:14px 0;display:flex;gap:12px;align-items:flex-start;}
+.callout.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.callout.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.callout.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.callout.tech{background:#f8fafc;border:1px solid #cbd5e1;color:#334155;}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.callout p{margin:0;font-size:12px;line-height:1.6;color:inherit;}
+/* tables */
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+thead tr{background:#f1f5f9;}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);border-bottom:2px solid #bfdbfe;}
+td{padding:9px 13px;border-bottom:1px solid #f1f5f9;color:var(--gray-600);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8fafc;}
+td strong{color:var(--gray-800);}
+td code{font-size:11px;}
+/* badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;}
+.badge-amber{background:#fffbeb;color:#b45309;border:1px solid #fcd34d;}
+.badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;}
+.badge-gray{background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;}
+.badge-sky{background:#f0f9ff;color:#0284c7;border:1px solid #7dd3fc;}
+/* arch diagram */
+.arch-box{border:1.5px solid var(--gray-200);border-radius:12px;padding:16px 18px;margin:10px 0;}
+.arch-box-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);margin-bottom:10px;font-family:'JetBrains Mono',monospace;}
+.arch-layer{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.arch-node{border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+.arch-node.frontend{background:#f0f9ff;border:1.5px solid #7dd3fc;color:#0284c7;}
+.arch-node.gateway{background:#f5f3ff;border:1.5px solid #c4b5fd;color:#7c3aed;}
+.arch-node.backend{background:#f0fdf4;border:1.5px solid #86efac;color:#16a34a;}
+.arch-node.db{background:#fffbeb;border:1.5px solid #fcd34d;color:#b45309;}
+.arch-node.storage{background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;}
+.arch-node.cdn{background:#f8fafc;border:1.5px solid #cbd5e1;color:#334155;}
+.arch-arrow{font-size:16px;color:var(--gray-400);display:flex;align-items:center;}
+/* DB field table */
+.db-table-card{border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;margin:18px 0;}
+.db-table-head{padding:13px 18px;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:space-between;}
+.db-table-name{font-size:14px;font-weight:800;font-family:'JetBrains Mono',monospace;color:#38bdf8;}
+.db-table-desc{font-size:11px;color:rgba(255,255,255,.4);}
+.db-field-head{display:grid;grid-template-columns:160px 100px 80px 1fr 70px;background:#f8fafc;border-bottom:1px solid var(--gray-200);}
+.db-field-head>div{padding:7px 12px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--gray-400);}
+.db-field-row{display:grid;grid-template-columns:160px 100px 80px 1fr 70px;border-bottom:1px solid #f8fafc;transition:background .1s;}
+.db-field-row:last-child{border-bottom:none;}
+.db-field-row:hover{background:#f8fafc;}
+.db-field-row>div{padding:8px 12px;font-size:11px;color:var(--gray-600);}
+.db-field-row>div:first-child{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--gray-800);}
+.pk-badge{font-size:8px;background:#fef9c3;color:#a16207;border:1px solid #fde047;border-radius:4px;padding:1px 5px;font-weight:700;margin-left:4px;}
+.fk-badge{font-size:8px;background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;border-radius:4px;padding:1px 5px;font-weight:700;margin-left:4px;}
+.idx-badge{font-size:8px;background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;border-radius:4px;padding:1px 5px;font-weight:700;margin-left:4px;}
+/* tech stack */
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0;}
+.tech-card{border:1px solid var(--gray-200);border-radius:12px;padding:16px 18px;}
+.tech-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.tech-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.tech-name{font-size:13px;font-weight:800;color:var(--primary);}
+.tech-ver{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--gray-400);}
+.tech-card ul{padding-left:15px;}
+.tech-card li{font-size:11px;color:var(--gray-600);margin-bottom:3px;}
+/* phase banner */
+.phase-banner{background:linear-gradient(135deg,#0c1a2e,#0c3a5c);border-radius:12px;padding:18px 22px;margin:26px 0;display:flex;align-items:center;justify-content:space-between;}
+.phase-banner-text{font-size:13px;font-weight:700;color:#fff;}
+.phase-banner-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+.phase-banner-badge{font-size:11px;background:rgba(14,165,233,.2);color:#38bdf8;border:1px solid rgba(14,165,233,.35);padding:4px 14px;border-radius:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:28px 16px}.tech-grid{grid-template-columns:1fr}.db-field-head,.db-field-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">⚙</div>
+    <div>
+      <div class="topbar-logo-text">PIPELINE by Vendemmia</div>
+      <div class="topbar-logo-sub">Especificação Técnica · Módulo Licenciamento</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="topbar-badge">ET-LIC-2026-001</span>
+    <span class="topbar-badge">Fase 1/3</span>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar no-print">
+  <div class="sidebar-section">Documento</div>
+  <a class="sidebar-item" href="#cover">Capa</a>
+  <a class="sidebar-item" href="#sumario">Sumário Executivo</a>
+
+  <div class="sidebar-section">Seção 1</div>
+  <a class="sidebar-item" href="#visao-tecnica">1. Visão Geral Técnica</a>
+  <a class="sidebar-item sub" href="#stack">1.1 Stack tecnológica</a>
+  <a class="sidebar-item sub" href="#arquitetura-geral">1.2 Arquitetura geral</a>
+  <a class="sidebar-item sub" href="#decisoes">1.3 Decisões arquiteturais</a>
+
+  <div class="sidebar-section">Seção 2</div>
+  <a class="sidebar-item" href="#arquitetura">2. Arquitetura do Sistema</a>
+  <a class="sidebar-item sub" href="#frontend">2.1 Frontend (SPA)</a>
+  <a class="sidebar-item sub" href="#backend">2.2 Backend (Supabase)</a>
+  <a class="sidebar-item sub" href="#storage">2.3 Storage e CDN</a>
+  <a class="sidebar-item sub" href="#auth">2.4 Autenticação</a>
+  <a class="sidebar-item sub" href="#comunicacao">2.5 Comunicação</a>
+
+  <div class="sidebar-section">Seção 3</div>
+  <a class="sidebar-item" href="#banco">3. Banco de Dados</a>
+  <a class="sidebar-item sub" href="#modelo">3.1 Modelo lógico</a>
+  <a class="sidebar-item sub" href="#lic-leads-tbl">3.2 lic_leads</a>
+  <a class="sidebar-item sub" href="#lic-auditoria-tbl">3.3 lic_auditoria</a>
+  <a class="sidebar-item sub" href="#lic-performance-tbl">3.4 lic_performance</a>
+  <a class="sidebar-item sub" href="#lic-historico-tbl">3.5 lic_historico</a>
+  <a class="sidebar-item sub" href="#lic-anexos-tbl">3.6 lic_anexos</a>
+  <a class="sidebar-item sub" href="#indices">3.7 Índices</a>
+  <a class="sidebar-item sub" href="#rls">3.8 Row Level Security</a>
+
+  <div class="sidebar-section" style="color:var(--accent);">Próximas Fases</div>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 2 · APIs e Segurança</a>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 3 · DevOps e Evolução</a>
+</nav>
+
+<div class="main">
+
+<!-- CAPA -->
+<div class="cover" id="cover">
+  <div class="cover-tag">⚙ ET-LIC-2026-001 · Fase 1 de 3</div>
+  <h1 class="cover-title">Especificação Técnica<br>Sistema Pipeline<br>Módulo de Licenciamento</h1>
+  <div class="cover-sub">Arquitetura, stack tecnológica e modelagem completa de banco de dados</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><div class="cover-meta-label">Documento</div><div class="cover-meta-value">ET-LIC-2026-001</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Fase</div><div class="cover-meta-value">1 de 3</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Frontend</div><div class="cover-meta-value">Vanilla JS SPA</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Backend</div><div class="cover-meta-value">Supabase (PostgreSQL)</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Cloud</div><div class="cover-meta-value">GitHub Pages + Supabase Cloud</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">Maio 2026</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- SUMÁRIO EXECUTIVO -->
+<div class="section-divider" id="sumario">
+  <div class="section-divider-bar"></div>
+  <h2>Sumário Executivo Técnico</h2>
+</div>
+
+<p>Este documento constitui a <strong>Especificação Técnica Completa</strong> do Módulo de Licenciamento integrado ao sistema Pipeline da Vendemmia. O documento abrange toda a arquitetura de software, modelagem de banco de dados, APIs, segurança, infraestrutura e estratégias de evolução técnica.</p>
+
+<div class="callout tech">
+  <div class="callout-icon">🏗</div>
+  <p><strong>Arquitetura atual:</strong> O sistema foi implementado como uma <strong>Single Page Application (SPA) em Vanilla JavaScript</strong> servida via GitHub Pages (CDN global), com backend 100% gerenciado pela plataforma <strong>Supabase</strong> (PostgreSQL + PostgREST + Auth + Storage). Esta escolha arquitetural prioriza velocidade de entrega, custo zero de infraestrutura e ausência de complexidade operacional — adequada para o estágio atual do produto.</p>
+</div>
+
+<div class="tech-grid">
+  <div class="tech-card">
+    <div class="tech-card-head"><div class="tech-icon" style="background:#f0f9ff;">⚡</div><div><div class="tech-name">Frontend</div><div class="tech-ver">Vanilla JS ES2022+</div></div></div>
+    <ul><li>SPA em HTML/CSS/JS puro</li><li>Chart.js 4.4.1 (visualizações)</li><li>Leaflet.js 1.9.4 (mapas)</li><li>jsPDF 2.5.1 + html2canvas 1.4.1</li><li>Tabler Icons 2.44 (ícones)</li><li>Google Fonts: Inter + JetBrains Mono</li></ul>
+  </div>
+  <div class="tech-card">
+    <div class="tech-card-head"><div class="tech-icon" style="background:#f0fdf4;">🗄</div><div><div class="tech-name">Backend / BaaS</div><div class="tech-ver">Supabase (PostgreSQL 17)</div></div></div>
+    <ul><li>PostgreSQL 17.6.1 (sa-east-1)</li><li>PostgREST — REST API automática</li><li>Supabase Auth (JWT)</li><li>Supabase Storage (S3-compatible)</li><li>Row Level Security (RLS)</li><li>SDK JS: @supabase/supabase-js@2</li></ul>
+  </div>
+  <div class="tech-card">
+    <div class="tech-card-head"><div class="tech-icon" style="background:#f5f3ff;">☁</div><div><div class="tech-name">Infraestrutura</div><div class="tech-ver">Serverless / PaaS</div></div></div>
+    <ul><li>GitHub Pages (CDN Akamai)</li><li>Supabase Cloud (AWS sa-east-1)</li><li>GitHub Actions (CI/CD)</li><li>BrasilAPI (CEP, geocodificação)</li><li>ViaCEP (fallback de CEP)</li><li>QR Server API (geração de QR Code)</li></ul>
+  </div>
+</div>
+
+<!-- SEÇÃO 1: VISÃO TÉCNICA -->
+<div class="section-divider" id="visao-tecnica">
+  <div class="section-divider-bar"></div>
+  <h2>1. Visão Geral Técnica <span class="section-num">Seção 1</span></h2>
+</div>
+
+<h3 id="stack">1.1 Stack Tecnológica Detalhada</h3>
+
+<table>
+  <thead><tr><th>Camada</th><th>Tecnologia</th><th>Versão</th><th>Propósito</th><th>CDN / Package</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Linguagem</strong></td><td>JavaScript (ES2022+)</td><td>—</td><td>Lógica de UI, manipulação DOM, state management</td><td>Nativo do browser</td></tr>
+    <tr><td><strong>Markup / Styling</strong></td><td>HTML5 + CSS3</td><td>—</td><td>Estrutura e estilização — single-file architecture</td><td>—</td></tr>
+    <tr><td><strong>Database client</strong></td><td>@supabase/supabase-js</td><td>2.x</td><td>Comunicação com Supabase (Auth, DB, Storage)</td><td>cdn.jsdelivr.net</td></tr>
+    <tr><td><strong>Gráficos</strong></td><td>Chart.js</td><td>4.4.1</td><td>Todos os gráficos do sistema (line, bar, doughnut)</td><td>cdnjs.cloudflare.com</td></tr>
+    <tr><td><strong>Mapas</strong></td><td>Leaflet.js</td><td>1.9.4</td><td>Mapa interativo do Brasil com marcadores e choropleth</td><td>unpkg.com</td></tr>
+    <tr><td><strong>PDF generation</strong></td><td>jsPDF</td><td>2.5.1</td><td>Geração de PDFs (Board Report + PDF individual do lead)</td><td>cdnjs.cloudflare.com</td></tr>
+    <tr><td><strong>Canvas capture</strong></td><td>html2canvas</td><td>1.4.1</td><td>Captura de HTML renderizado para conversão em PDF</td><td>cdnjs.cloudflare.com</td></tr>
+    <tr><td><strong>Ícones</strong></td><td>Tabler Icons (webfont)</td><td>2.44.0</td><td>Sistema de ícones SVG via CSS class</td><td>cdn.jsdelivr.net</td></tr>
+    <tr><td><strong>Tipografia</strong></td><td>Google Fonts</td><td>—</td><td>Inter (UI) + JetBrains Mono (code/dados)</td><td>fonts.googleapis.com</td></tr>
+    <tr><td><strong>Database</strong></td><td>PostgreSQL</td><td>17.6.1</td><td>Persistência de todos os dados do sistema</td><td>Supabase managed</td></tr>
+    <tr><td><strong>Auth</strong></td><td>Supabase Auth</td><td>—</td><td>JWT-based authentication com sessão persistente</td><td>Supabase managed</td></tr>
+    <tr><td><strong>Storage</strong></td><td>Supabase Storage</td><td>—</td><td>Armazenamento de arquivos (documentos, fotos, PDFs)</td><td>S3-compatible</td></tr>
+    <tr><td><strong>GeoJSON (BR)</strong></td><td>giuliano-macedo/geodata-br-states</td><td>—</td><td>Polígonos dos estados brasileiros para choropleth</td><td>raw.githubusercontent.com</td></tr>
+    <tr><td><strong>CEP lookup</strong></td><td>BrasilAPI</td><td>v2</td><td>Geocodificação por CEP (retorna lat/lng)</td><td>brasilapi.com.br</td></tr>
+    <tr><td><strong>CEP fallback</strong></td><td>ViaCEP</td><td>—</td><td>Fallback de CEP quando BrasilAPI falha</td><td>viacep.com.br</td></tr>
+    <tr><td><strong>QR Code</strong></td><td>QR Server API</td><td>—</td><td>Geração de QR Code para link do portal</td><td>api.qrserver.com</td></tr>
+    <tr><td><strong>Tile maps</strong></td><td>CartoDB Voyager</td><td>—</td><td>Tiles do mapa (estradas, parques, relevo)</td><td>basemaps.cartocdn.com</td></tr>
+    <tr><td><strong>Hosting</strong></td><td>GitHub Pages</td><td>—</td><td>Hospedagem estática com CDN Akamai global</td><td>pipelinevendemmia.com.br</td></tr>
+    <tr><td><strong>CI/CD</strong></td><td>GitHub Actions</td><td>—</td><td>Deploy automático via git push para branch main</td><td>github.com</td></tr>
+  </tbody>
+</table>
+
+<h3 id="arquitetura-geral">1.2 Arquitetura Geral do Sistema</h3>
+
+<p>O sistema adota uma arquitetura <strong>JAMstack (JavaScript + APIs + Markup)</strong> com backend como serviço (BaaS). Esta abordagem elimina a necessidade de servidores de aplicação próprios, reduz a superfície de ataque e minimiza custos operacionais.</p>
+
+<div class="arch-box">
+  <div class="arch-box-title">Camadas da Arquitetura</div>
+  <div class="arch-layer">
+    <div class="arch-node cdn">🌐 Akamai CDN (Global)</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node frontend">⚡ GitHub Pages (Static Hosting)</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node frontend">📄 index.html (SPA)</div>
+  </div>
+  <div style="margin:6px 0;font-size:11px;color:var(--gray-400);">↕ HTTPS REST (Supabase JS SDK v2)</div>
+  <div class="arch-layer">
+    <div class="arch-node gateway">🔐 Supabase Auth (JWT)</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node backend">📡 PostgREST (REST API)</div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node db">🗄 PostgreSQL 17</div>
+  </div>
+  <div class="arch-layer" style="margin-top:8px;">
+    <div class="arch-node storage">📦 Supabase Storage (S3)</div>
+    <div class="arch-arrow">←→</div>
+    <div class="arch-node backend">🛡 RLS Policies</div>
+    <div class="arch-arrow">←→</div>
+    <div class="arch-node db">📊 5 Tabelas Licenciamento</div>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--gray-400);">APIs Externas: BrasilAPI (CEP) · ViaCEP (fallback) · CartoDB (tiles) · QR Server · GitHub GeoJSON</div>
+</div>
+
+<h3 id="decisoes">1.3 Decisões Arquiteturais e Justificativas</h3>
+
+<table>
+  <thead><tr><th>Decisão</th><th>Alternativas consideradas</th><th>Escolha</th><th>Justificativa</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Single-file SPA</strong></td><td>React, Vue, Angular</td><td>Vanilla JS (index.html)</td><td>Zero dependências de build pipeline; deploy via git push; equipe sem expertise em frameworks; MVP rápido</td></tr>
+    <tr><td><strong>Backend como serviço</strong></td><td>Node.js + Express, .NET, FastAPI</td><td>Supabase (BaaS)</td><td>PostgreSQL gerenciado, Auth, Storage e API REST prontos; sem custo de servidor; SA-East-1 (baixa latência para o Brasil)</td></tr>
+    <tr><td><strong>Autenticação</strong></td><td>Auth0, Firebase Auth, JWT próprio</td><td>Supabase Auth</td><td>Integração nativa com o banco; RLS por usuário; sessão persistente; custo zero no tier atual</td></tr>
+    <tr><td><strong>Controle de acesso</strong></td><td>RBAC no backend, middleware</td><td>Whitelist de e-mail + RLS</td><td>Simplicidade para o estágio atual; RLS no PostgreSQL garante isolamento de dados; whitelist no frontend filtra acesso</td></tr>
+    <tr><td><strong>Storage</strong></td><td>AWS S3 direto, Cloudinary</td><td>Supabase Storage</td><td>Já incluído no Supabase; políticas RLS aplicáveis; SDK unificado; sem custo adicional</td></tr>
+    <tr><td><strong>Hospedagem</strong></td><td>Vercel, Netlify, AWS S3</td><td>GitHub Pages</td><td>Integrado ao repositório existente; CDN Akamai global; domínio customizado; custo zero</td></tr>
+    <tr><td><strong>Geração de PDF</strong></td><td>Puppeteer server-side, wkhtmltopdf</td><td>jsPDF + html2canvas (client-side)</td><td>Zero infraestrutura de servidor; funciona offline; menor latência percebida pelo usuário</td></tr>
+    <tr><td><strong>Mapas</strong></td><td>Google Maps, Mapbox, Deck.gl</td><td>Leaflet.js + CartoDB</td><td>Open source; sem API key; tiles CartoDB gratuitos com qualidade visual adequada; leve (≈150KB)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <div class="callout-icon">⚠</div>
+  <p><strong>Limitação conhecida — single-file architecture:</strong> A ausência de bundler (Webpack/Vite) e de gerenciamento de módulos ES significa que todo o código JS está em um único arquivo <code>index.html</code> com aproximadamente 11.000+ linhas. Esta abordagem funciona para o estágio atual mas representa débito técnico que deve ser endereçado na evolução para arquitetura modular (ver Seção 12 na Fase 3).</p>
+</div>
+
+<!-- SEÇÃO 2: ARQUITETURA -->
+<div class="section-divider" id="arquitetura">
+  <div class="section-divider-bar"></div>
+  <h2>2. Arquitetura do Sistema <span class="section-num">Seção 2</span></h2>
+</div>
+
+<h3 id="frontend">2.1 Frontend — Single Page Application (SPA)</h3>
+
+<p>O frontend é uma <strong>SPA implementada em um único arquivo HTML</strong> (<code>index.html</code>) servida via GitHub Pages no domínio <code>pipelinevendemmia.com.br</code>. Toda a lógica de UI, state management e comunicação com APIs está contida neste arquivo.</p>
+
+<h4>Estrutura lógica do frontend</h4>
+<pre><code><span class="hl-cmt">// Organização lógica do código em index.html (~11.000+ linhas)</span>
+<span class="hl-cmt">// ─────────────────────────────────────────────────────────</span>
+
+<span class="hl-cmt">// [1] HEAD: CDNs carregados em ordem de dependência</span>
+<span class="hl-key">Leaflet CSS</span> → <span class="hl-key">Tabler Icons CSS</span> → <span class="hl-key">jsPDF</span> → <span class="hl-key">html2canvas</span>
+→ <span class="hl-key">Leaflet JS</span> → <span class="hl-key">Chart.js</span> → <span class="hl-key">@supabase/supabase-js</span>
+
+<span class="hl-cmt">// [2] STYLE: CSS global (~700 linhas)</span>
+<span class="hl-str">- Variáveis CSS (design tokens)</span>
+<span class="hl-str">- Componentes reutilizáveis (cards, buttons, modals)</span>
+<span class="hl-str">- Módulos específicos (lic-*, fin-*, kb-*)</span>
+
+<span class="hl-cmt">// [3] HTML: Estrutura de telas (SPA)</span>
+<span class="hl-str">- #login-overlay      → tela de autenticação</span>
+<span class="hl-str">- #main-system        → container principal (hidden até login)</span>
+<span class="hl-str">  - header (nav global)</span>
+<span class="hl-str">  - #page-dashboard   → tela Home/Pipeline</span>
+<span class="hl-str">  - #page-kanban      → Kanban de oportunidades</span>
+<span class="hl-str">  - #page-financeiro  → Financeiro</span>
+<span class="hl-str">  - #page-licenciamento → Módulo Licenciamento</span>
+<span class="hl-str">    - #lic-view-tabela       → dashboard + tabela</span>
+<span class="hl-str">    - #lic-view-form         → formulário 11 seções</span>
+<span class="hl-str">    - #lic-view-mapa         → mapa interativo</span>
+<span class="hl-str">    - #lic-view-kanban       → kanban de leads</span>
+<span class="hl-str">    - #lic-view-scorecard    → scorecard KPIs</span>
+<span class="hl-str">    - #lic-view-auditoria    → pipeline auditoria</span>
+<span class="hl-str">    - #lic-view-capacidade   → painel capacidade</span>
+<span class="hl-str">    - #lic-view-disponibilidade → disponibilidade</span>
+<span class="hl-str">  - Modais globais (fixed position)</span>
+
+<span class="hl-cmt">// [4] SCRIPT: JavaScript (~9.000+ linhas)</span>
+<span class="hl-str">- Inicialização e autenticação</span>
+<span class="hl-str">- Módulos do sistema principal (Pipeline, Financeiro...)</span>
+<span class="hl-str">- Módulo Licenciamento (funções lic*, lc*, aud*, sc*...)</span>
+<span class="hl-str">  - State: baseLicLeads, _licPerfData, _audData, _licHistData</span>
+<span class="hl-str">  - Funções de renderização: renderizarLicenciamento()</span>
+<span class="hl-str">  - Funções de mapa: _licInicializarMapa(), _licAtualizarMarkers()</span>
+<span class="hl-str">  - Funções de scorecard: calcLicScore(), getLicTier()</span>
+<span class="hl-str">  - Funções de auditoria: audAvancarEtapa(), emitirCertificado()</span>
+<span class="hl-str">  - Funções de histórico: registrarLicHistorico()</span>
+<span class="hl-str">  - Funções de PDF: gerarLicPDF(), gerarBoardReport()</span>
+</code></pre>
+
+<h4>State Management</h4>
+<p>O sistema não utiliza biblioteca de state management. O estado é gerenciado via <strong>variáveis globais JavaScript</strong> com padrão de nomenclatura prefixada:</p>
+<table>
+  <thead><tr><th>Variável</th><th>Tipo</th><th>Propósito</th><th>Carga</th></tr></thead>
+  <tbody>
+    <tr><td><code>baseLicLeads</code></td><td><code>Array&lt;Object&gt;</code></td><td>Todos os leads de licenciamento</td><td>Supabase <code>lic_leads</code></td></tr>
+    <tr><td><code>_licPerfData</code></td><td><code>Object&lt;id, Array&gt;</code></td><td>KPIs por lead (indexado por lead_id)</td><td>Supabase <code>lic_performance</code></td></tr>
+    <tr><td><code>_audData</code></td><td><code>Object&lt;id, Object&gt;</code></td><td>Dados de auditoria por lead</td><td>Supabase <code>lic_auditoria</code></td></tr>
+    <tr><td><code>_licHistData</code></td><td><code>Object&lt;id, Array&gt;</code></td><td>Histórico de eventos por lead</td><td>Supabase <code>lic_historico</code></td></tr>
+    <tr><td><code>_licGeoJsonData</code></td><td><code>GeoJSON Object</code></td><td>Polígonos dos estados do Brasil</td><td>GitHub CDN (uma vez)</td></tr>
+    <tr><td><code>_licMapPhotoCache</code></td><td><code>Object&lt;id, URL&gt;</code></td><td>Cache de URLs de fotos por lead</td><td>Supabase <code>lic_anexos</code></td></tr>
+    <tr><td><code>_licDCharts</code></td><td><code>Object&lt;key, Chart&gt;</code></td><td>Instâncias Chart.js para destroy antes de recriar</td><td>Runtime</td></tr>
+    <tr><td><code>LIC_TIERS</code></td><td><code>Array&lt;Object&gt;</code></td><td>Configuração dos tiers (Platina/Ouro/Prata/Bronze)</td><td>Constante em memória</td></tr>
+    <tr><td><code>LIC_AUDIT_STAGES</code></td><td><code>Array&lt;Object&gt;</code></td><td>Configuração das 6 etapas de auditoria</td><td>Constante em memória</td></tr>
+    <tr><td><code>LIC_KPI_META</code></td><td><code>Object</code></td><td>Configuração dos 6 KPIs com thresholds</td><td>Constante em memória</td></tr>
+  </tbody>
+</table>
+
+<h3 id="backend">2.2 Backend — Supabase (BaaS)</h3>
+
+<p>O backend é inteiramente gerenciado pelo <strong>Supabase</strong> (projeto <code>geojgcncmtbjebftosor</code>, região <code>sa-east-1</code> — São Paulo). O Supabase expõe automaticamente uma API REST via <strong>PostgREST</strong> sobre o PostgreSQL, com autenticação via JWT e controle de acesso por Row Level Security (RLS).</p>
+
+<h4>Componentes Supabase em uso</h4>
+<table>
+  <thead><tr><th>Componente</th><th>Endpoint base</th><th>Função</th></tr></thead>
+  <tbody>
+    <tr><td><strong>PostgREST (REST API)</strong></td><td><code>https://geojgcncmtbjebftosor.supabase.co/rest/v1/</code></td><td>CRUD automático de todas as tabelas; filtros, ordenação e seleção de campos via query params</td></tr>
+    <tr><td><strong>Auth</strong></td><td><code>/auth/v1/</code></td><td>Login com e-mail/senha, geração de JWT, refresh token, sessão persistente no localStorage</td></tr>
+    <tr><td><strong>Storage</strong></td><td><code>/storage/v1/</code></td><td>Upload, download e listagem de arquivos; buckets com políticas RLS; URLs públicas</td></tr>
+    <tr><td><strong>Realtime</strong></td><td><code>wss://</code></td><td>Não utilizado atualmente — disponível para evolução futura (live updates)</td></tr>
+  </tbody>
+</table>
+
+<h4>Padrão de chamada à API</h4>
+<pre><code><span class="hl-cmt">// Inicialização do cliente Supabase (chamada única no carregamento)</span>
+<span class="hl-key">const</span> SUPABASE_URL = <span class="hl-str">"https://geojgcncmtbjebftosor.supabase.co"</span>;
+<span class="hl-key">const</span> SUPABASE_KEY = <span class="hl-str">"eyJ..."</span>; <span class="hl-cmt">// anon key (safe para expor no client)</span>
+<span class="hl-key">const</span> { createClient } = supabase;
+<span class="hl-key">const</span> supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+<span class="hl-cmt">// Padrão de leitura (SELECT)</span>
+<span class="hl-key">const</span> { data, error } = <span class="hl-key">await</span> supabaseClient
+  .from(<span class="hl-str">'lic_leads'</span>)
+  .select(<span class="hl-str">'*'</span>)
+  .eq(<span class="hl-str">'status'</span>, <span class="hl-str">'Convertido'</span>)
+  .order(<span class="hl-str">'created_at'</span>, { ascending: <span class="hl-key">false</span> });
+
+<span class="hl-cmt">// Padrão de escrita (INSERT)</span>
+<span class="hl-key">const</span> { data: novo, error } = <span class="hl-key">await</span> supabaseClient
+  .from(<span class="hl-str">'lic_leads'</span>)
+  .insert([{ razao_social: <span class="hl-str">'...'</span>, status: <span class="hl-str">'Ativo'</span> }])
+  .select(<span class="hl-str">'id'</span>)
+  .single();
+
+<span class="hl-cmt">// Padrão de atualização (UPDATE)</span>
+<span class="hl-key">await</span> supabaseClient
+  .from(<span class="hl-str">'lic_leads'</span>)
+  .update({ status: <span class="hl-str">'Convertido'</span>, updated_at: <span class="hl-key">new</span> Date().toISOString() })
+  .eq(<span class="hl-str">'id'</span>, leadId);
+
+<span class="hl-cmt">// Upload para Storage</span>
+<span class="hl-key">await</span> supabaseClient.storage
+  .from(<span class="hl-str">'lic-anexos'</span>)
+  .upload(path, file, { cacheControl: <span class="hl-str">'3600'</span>, upsert: <span class="hl-key">false</span> });
+</code></pre>
+
+<h3 id="storage">2.3 Storage e Estrutura de Arquivos</h3>
+
+<p>O Supabase Storage é usado para persistir todos os arquivos do módulo Licenciamento no bucket <code>lic-anexos</code>. A estrutura de paths garante isolamento por lead e rastreabilidade por tipo.</p>
+
+<h4>Estrutura de paths no bucket <code>lic-anexos</code></h4>
+<pre><code>lic-anexos/
+├── leads/
+│   └── {lead_id}/
+│       ├── contrato_social/
+│       │   └── {timestamp}_{nome_arquivo}     <span class="hl-cmt">← Contrato Social (PDF/DOC)</span>
+│       ├── foto_armazem_1/
+│       │   └── {timestamp}_{nome_arquivo}     <span class="hl-cmt">← Fotos do Armazém 1 (JPG/PNG)</span>
+│       ├── foto_armazem_2/
+│       │   └── {timestamp}_{nome_arquivo}     <span class="hl-cmt">← Fotos do Armazém 2</span>
+│       ├── certificado/
+│       │   └── {timestamp}_{nome_arquivo}     <span class="hl-cmt">← Certificações (PDF/JPG)</span>
+│       ├── relatorio_visita/
+│       │   └── {timestamp}_{nome_arquivo}     <span class="hl-cmt">← Relatório de visita técnica (PDF)</span>
+│       └── pdf_lead/
+│           └── {timestamp}_lead_{id}_AAAA-MM.pdf  <span class="hl-cmt">← PDF gerado do lead</span>
+</code></pre>
+
+<h4>Políticas de Storage (RLS em <code>storage.objects</code>)</h4>
+<table>
+  <thead><tr><th>Política</th><th>Operação</th><th>Usuários</th><th>Condição</th></tr></thead>
+  <tbody>
+    <tr><td>lic-anexos upload</td><td>INSERT</td><td>authenticated</td><td><code>bucket_id = 'lic-anexos'</code></td></tr>
+    <tr><td>lic-anexos anon upload</td><td>INSERT</td><td>anon (portal público)</td><td><code>bucket_id = 'lic-anexos'</code></td></tr>
+    <tr><td>lic-anexos leitura</td><td>SELECT</td><td>public</td><td><code>bucket_id = 'lic-anexos'</code></td></tr>
+    <tr><td>lic-anexos delete</td><td>DELETE</td><td>authenticated</td><td><code>bucket_id = 'lic-anexos'</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="auth">2.4 Autenticação e Sessão</h3>
+
+<h4>Fluxo de autenticação</h4>
+<pre><code><span class="hl-cmt">// 1. Login — Supabase Auth (e-mail + senha)</span>
+<span class="hl-key">const</span> { data, error } = <span class="hl-key">await</span> supabaseClient.auth
+  .signInWithPassword({ email, password });
+
+<span class="hl-cmt">// 2. JWT obtido → armazenado no localStorage pelo SDK</span>
+<span class="hl-cmt">//    Chave: 'sb-geojgcncmtbjebftosor-auth-token'</span>
+
+<span class="hl-cmt">// 3. Todas as chamadas subsequentes incluem automaticamente</span>
+<span class="hl-cmt">//    o header: Authorization: Bearer {jwt_token}</span>
+
+<span class="hl-cmt">// 4. Controle de acesso ao módulo Licenciamento</span>
+<span class="hl-key">const</span> LICENCIAMENTO_WHITELIST = [
+  <span class="hl-str">'gppereira@vendemmia.com.br'</span>,
+  <span class="hl-str">'jprado@vendemmia.com.br'</span>
+];
+<span class="hl-cmt">// Verificação via EMAIL_USUARIO_LOGADO após login</span>
+
+<span class="hl-cmt">// 5. Sessão persistente: SDK recupera sessão do localStorage</span>
+<span class="hl-cmt">//    automaticamente no reload da página</span>
+<span class="hl-cmt">//    JWT expira em ~3600s; SDK faz refresh automático</span>
+</code></pre>
+
+<h3 id="comunicacao">2.5 Comunicação entre Componentes</h3>
+
+<table>
+  <thead><tr><th>Origem</th><th>Destino</th><th>Protocolo</th><th>Formato</th></tr></thead>
+  <tbody>
+    <tr><td>Browser (SPA)</td><td>Supabase PostgREST</td><td>HTTPS REST</td><td>JSON (application/json)</td></tr>
+    <tr><td>Browser (SPA)</td><td>Supabase Storage</td><td>HTTPS multipart</td><td>FormData (files)</td></tr>
+    <tr><td>Browser (SPA)</td><td>Supabase Auth</td><td>HTTPS REST</td><td>JSON</td></tr>
+    <tr><td>Browser (SPA)</td><td>BrasilAPI</td><td>HTTPS REST</td><td>JSON (GeoJSON v2)</td></tr>
+    <tr><td>Browser (SPA)</td><td>CartoDB CDN</td><td>HTTPS</td><td>PNG (map tiles 256×256)</td></tr>
+    <tr><td>Browser (SPA)</td><td>GitHub CDN</td><td>HTTPS</td><td>JSON (GeoJSON estados BR)</td></tr>
+    <tr><td>Browser (SPA)</td><td>QR Server API</td><td>HTTPS</td><td>PNG (imagem do QR Code)</td></tr>
+    <tr><td>Portal (portal.html)</td><td>Supabase PostgREST</td><td>HTTPS REST</td><td>JSON</td></tr>
+    <tr><td>Portal (portal.html)</td><td>Supabase Storage</td><td>HTTPS multipart</td><td>FormData</td></tr>
+    <tr><td>GitHub Actions</td><td>GitHub Pages</td><td>Git (HTTPS)</td><td>Static files</td></tr>
+  </tbody>
+</table>
+
+<!-- SEÇÃO 3: BANCO DE DADOS -->
+<div class="section-divider" id="banco">
+  <div class="section-divider-bar"></div>
+  <h2>3. Banco de Dados — PostgreSQL 17 <span class="section-num">Seção 3</span></h2>
+</div>
+
+<h3 id="modelo">3.1 Modelo Lógico de Dados</h3>
+<p>O módulo Licenciamento utiliza <strong>5 tabelas próprias</strong> no banco Supabase, além de referenciar a tabela <code>auth.users</code> do Supabase Auth. Todas as tabelas têm Row Level Security (RLS) habilitado.</p>
+
+<div class="arch-box">
+  <div class="arch-box-title">Relacionamentos entre tabelas</div>
+  <pre style="background:transparent;padding:0;font-size:12px;color:var(--gray-600);font-family:'JetBrains Mono',monospace;">
+<span style="color:#0284c7;">lic_leads</span> (id PK)
+    │
+    ├──── <span style="color:#16a34a;">lic_auditoria</span> (lead_id FK UNIQUE) — 1:1 por lead
+    │
+    ├──── <span style="color:#7c3aed;">lic_performance</span> (lead_id FK) — 1:N por lead (múltiplos períodos)
+    │
+    ├──── <span style="color:#d97706;">lic_historico</span> (lead_id FK) — 1:N por lead (linha do tempo)
+    │
+    └──── <span style="color:#dc2626;">lic_anexos</span> (lead_id FK) — 1:N por lead (múltiplos arquivos)
+  </pre>
+</div>
+
+<h3 id="lic-leads-tbl">3.2 Tabela: <code>lic_leads</code></h3>
+<p>Tabela principal. Armazena todos os dados cadastrais de cada lead/licenciado da rede.</p>
+
+<div class="db-table-card">
+  <div class="db-table-head">
+    <div class="db-table-name">lic_leads</div>
+    <div class="db-table-desc">Leads e licenciados da rede · Criada: Fev 2026 · ~50 registros esperados inicialmente</div>
+  </div>
+  <div class="db-field-head"><div>Campo</div><div>Tipo</div><div>Nulo</div><div>Descrição</div><div>Chave</div></div>
+
+  <div class="db-field-row"><div>id</div><div><code>BIGSERIAL</code></div><div>NOT NULL</div><div>Identificador único autoincremental</div><div><span class="pk-badge">PK</span></div></div>
+  <div class="db-field-row"><div>razao_social</div><div><code>TEXT</code></div><div>NULL</div><div>Razão social completa da empresa</div><div>—</div></div>
+  <div class="db-field-row"><div>cnpj</div><div><code>TEXT</code></div><div>NULL</div><div>CNPJ formatado (00.000.000/0001-00)</div><div>—</div></div>
+  <div class="db-field-row"><div>website</div><div><code>TEXT</code></div><div>NULL</div><div>URL do site da empresa</div><div>—</div></div>
+  <div class="db-field-row"><div>ano_fundacao</div><div><code>INTEGER</code></div><div>NULL</div><div>Ano de fundação da empresa (1800–atual)</div><div>—</div></div>
+  <div class="db-field-row"><div>faturamento_faixa</div><div><code>TEXT</code></div><div>NULL</div><div>Faixa de faturamento anual (enum textual)</div><div>—</div></div>
+  <div class="db-field-row"><div>segmentos</div><div><code>TEXT</code></div><div>NULL</div><div>Segmentos atendidos (CSV: "Armazenagem, Transporte")</div><div>—</div></div>
+  <div class="db-field-row"><div>contato_nome</div><div><code>TEXT</code></div><div>NULL</div><div>Nome completo do contato principal</div><div>—</div></div>
+  <div class="db-field-row"><div>contato_cargo</div><div><code>TEXT</code></div><div>NULL</div><div>Cargo do contato</div><div>—</div></div>
+  <div class="db-field-row"><div>contato_email</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do contato principal</div><div>—</div></div>
+  <div class="db-field-row"><div>contato_telefone</div><div><code>TEXT</code></div><div>NULL</div><div>WhatsApp/telefone do contato</div><div>—</div></div>
+  <div class="db-field-row"><div>decisor</div><div><code>TEXT</code></div><div>NULL</div><div>"Este contato" ou "Outro"</div><div>—</div></div>
+  <div class="db-field-row"><div>decisor_info</div><div><code>TEXT</code></div><div>NULL</div><div>Nome e cargo do decisor (se diferente)</div><div>—</div></div>
+  <div class="db-field-row"><div>uf</div><div><code>TEXT</code></div><div>NULL</div><div>UF principal (sigla de 2 chars, ex: "SP")</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>polo_logistico</div><div><code>TEXT</code></div><div>NULL</div><div>Cidade/polo principal de operação</div><div>—</div></div>
+  <div class="db-field-row"><div>regiao_exclusividade</div><div><code>TEXT</code></div><div>NULL</div><div>Região pretendida para exclusividade territorial</div><div>—</div></div>
+  <div class="db-field-row"><div>outras_ufs</div><div><code>TEXT</code></div><div>NULL</div><div>Outras UFs de atuação (texto livre)</div><div>—</div></div>
+  <div class="db-field-row"><div>cep</div><div><code>TEXT</code></div><div>NULL</div><div>CEP principal (formato 00000-000)</div><div>—</div></div>
+  <div class="db-field-row"><div>lat</div><div><code>NUMERIC</code></div><div>NULL</div><div>Latitude GPS obtida via BrasilAPI CEP</div><div>—</div></div>
+  <div class="db-field-row"><div>lng</div><div><code>NUMERIC</code></div><div>NULL</div><div>Longitude GPS obtida via BrasilAPI CEP</div><div>—</div></div>
+  <div class="db-field-row"><div>endereco_logradouro</div><div><code>TEXT</code></div><div>NULL</div><div>Rua/Avenida (preenchido pelo CEP)</div><div>—</div></div>
+  <div class="db-field-row"><div>endereco_bairro</div><div><code>TEXT</code></div><div>NULL</div><div>Bairro (preenchido pelo CEP)</div><div>—</div></div>
+  <div class="db-field-row"><div>armazens</div><div><code>JSONB</code></div><div>DEFAULT '[]'</div><div>Array de armazéns [{nome, uf, cidade, area_m2, docas, ocupacao, paletes, pe_direito}]</div><div>—</div></div>
+  <div class="db-field-row"><div>area_total_m2</div><div><code>NUMERIC</code></div><div>DEFAULT 0</div><div>Soma de area_m2 de todos os armazéns (calculado no frontend)</div><div>—</div></div>
+  <div class="db-field-row"><div>cargas_geral</div><div><code>TEXT</code></div><div>NULL</div><div>Tipos de carga geral habilitados (CSV)</div><div>—</div></div>
+  <div class="db-field-row"><div>cargas_perigosas</div><div><code>TEXT</code></div><div>NULL</div><div>Classes IMDG habilitadas (CSV)</div><div>—</div></div>
+  <div class="db-field-row"><div>cargas_especiais</div><div><code>TEXT</code></div><div>NULL</div><div>Cargas de temperatura controlada (CSV)</div><div>—</div></div>
+  <div class="db-field-row"><div>licencas</div><div><code>TEXT</code></div><div>NULL</div><div>Licenças ativas (CSV: "ANTT, ANVISA")</div><div>—</div></div>
+  <div class="db-field-row"><div>obs_cargas</div><div><code>TEXT</code></div><div>NULL</div><div>Observações sobre restrições de carga</div><div>—</div></div>
+  <div class="db-field-row"><div>wms_atual</div><div><code>TEXT</code></div><div>NULL</div><div>Sistema WMS em uso</div><div>—</div></div>
+  <div class="db-field-row"><div>erp_atual</div><div><code>TEXT</code></div><div>NULL</div><div>Sistema ERP em uso</div><div>—</div></div>
+  <div class="db-field-row"><div>sistemas_integrados</div><div><code>TEXT</code></div><div>NULL</div><div>Sistemas integrados (CSV: "TMS, BI, API REST")</div><div>—</div></div>
+  <div class="db-field-row"><div>nivel_maturidade</div><div><code>TEXT</code></div><div>NULL</div><div>Maturidade tecnológica (Básico/Em desenvolvimento/Intermediário/Avançado)</div><div>—</div></div>
+  <div class="db-field-row"><div>certificacoes</div><div><code>TEXT</code></div><div>NULL</div><div>Certificações ativas (CSV: "ISO 9001, ANVISA")</div><div>—</div></div>
+  <div class="db-field-row"><div>otif_pct</div><div><code>NUMERIC</code></div><div>NULL</div><div>OTIF médio atual (%); espelhado de lic_performance</div><div>—</div></div>
+  <div class="db-field-row"><div>acuracidade_pct</div><div><code>NUMERIC</code></div><div>NULL</div><div>Acuracidade de inventário (%); espelhado de lic_performance</div><div>—</div></div>
+  <div class="db-field-row"><div>plano</div><div><code>TEXT</code></div><div>NULL</div><div>Plano selecionado (Starter/Pro/Enterprise/Custom)</div><div>—</div></div>
+  <div class="db-field-row"><div>implantacao_wms</div><div><code>TEXT</code></div><div>NULL</div><div>"Sim" ou "Não" — implantação de WMS prevista</div><div>—</div></div>
+  <div class="db-field-row"><div>wms_opcao</div><div><code>TEXT</code></div><div>NULL</div><div>Opção de WMS selecionada (Senior, API Pronta, etc.)</div><div>—</div></div>
+  <div class="db-field-row"><div>etapa</div><div><code>TEXT</code></div><div>DEFAULT 'Prospecção'</div><div>Etapa atual no kanban comercial</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>origem</div><div><code>TEXT</code></div><div>NULL</div><div>Canal de origem do lead</div><div>—</div></div>
+  <div class="db-field-row"><div>data_primeiro_contato</div><div><code>DATE</code></div><div>NULL</div><div>Data do primeiro contato com o candidato</div><div>—</div></div>
+  <div class="db-field-row"><div>data_proxima_acao</div><div><code>DATE</code></div><div>NULL</div><div>Data da próxima ação planejada</div><div>—</div></div>
+  <div class="db-field-row"><div>proxima_acao</div><div><code>TEXT</code></div><div>NULL</div><div>Descrição da próxima ação planejada</div><div>—</div></div>
+  <div class="db-field-row"><div>observacoes</div><div><code>TEXT</code></div><div>NULL</div><div>Observações livres da negociação</div><div>—</div></div>
+  <div class="db-field-row"><div>responsavel</div><div><code>TEXT</code></div><div>NULL</div><div>Nome do vendedor/comercial responsável</div><div>—</div></div>
+  <div class="db-field-row"><div>status</div><div><code>TEXT</code></div><div>DEFAULT 'Ativo'</div><div>Status do lead (Ativo/Convertido/Perdido)</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>motivo_perda</div><div><code>TEXT</code></div><div>NULL</div><div>Motivo da perda (obrigatório quando status=Perdido)</div><div>—</div></div>
+  <div class="db-field-row"><div>fee_mensal</div><div><code>NUMERIC</code></div><div>DEFAULT 0</div><div>Fee mensal estimado/contratado (R$)</div><div>—</div></div>
+  <div class="db-field-row"><div>form_token</div><div><code>TEXT</code></div><div>NULL</div><div>Token único de acesso ao portal público</div><div><span class="idx-badge">UNIQUE</span></div></div>
+  <div class="db-field-row"><div>form_status</div><div><code>TEXT</code></div><div>DEFAULT 'pendente'</div><div>Status do portal (pendente/preenchendo/concluido)</div><div>—</div></div>
+  <div class="db-field-row"><div>form_filled_at</div><div><code>TIMESTAMPTZ</code></div><div>NULL</div><div>Data/hora do submit final do portal</div><div>—</div></div>
+  <div class="db-field-row"><div>criado_por</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do usuário que criou o lead</div><div>—</div></div>
+  <div class="db-field-row"><div>created_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp de criação do registro</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>updated_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp da última atualização</div><div>—</div></div>
+</div>
+
+<h3 id="lic-auditoria-tbl">3.3 Tabela: <code>lic_auditoria</code></h3>
+
+<div class="db-table-card">
+  <div class="db-table-head">
+    <div class="db-table-name">lic_auditoria</div>
+    <div class="db-table-desc">Pipeline de homologação · Relação 1:1 com lic_leads (UNIQUE por lead_id)</div>
+  </div>
+  <div class="db-field-head"><div>Campo</div><div>Tipo</div><div>Nulo</div><div>Descrição</div><div>Chave</div></div>
+  <div class="db-field-row"><div>id</div><div><code>BIGSERIAL</code></div><div>NOT NULL</div><div>PK autoincremental</div><div><span class="pk-badge">PK</span></div></div>
+  <div class="db-field-row"><div>lead_id</div><div><code>BIGINT</code></div><div>NOT NULL</div><div>Referência ao lead (ON DELETE CASCADE)</div><div><span class="fk-badge">FK</span><span class="idx-badge">UNIQUE</span></div></div>
+  <div class="db-field-row"><div>estagio_atual</div><div><code>TEXT</code></div><div>DEFAULT 'prospectado'</div><div>Etapa atual (prospectado/formulario/documental/visita/aprovacao/ativo)</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>checklists</div><div><code>JSONB</code></div><div>DEFAULT '{}'</div><div>Estado dos checklists por etapa: {"prospectado": [true, false, true, true], ...}</div><div>—</div></div>
+  <div class="db-field-row"><div>prazos</div><div><code>JSONB</code></div><div>DEFAULT '{}'</div><div>Prazos por etapa: {"prospectado": "2026-06-01", ...}</div><div>—</div></div>
+  <div class="db-field-row"><div>historico</div><div><code>JSONB</code></div><div>DEFAULT '[]'</div><div>Registro de conclusões: [{estagio, iniciado_em, concluido_em}]</div><div>—</div></div>
+  <div class="db-field-row"><div>etapa_iniciada_em</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Quando o lead entrou na etapa atual (base do cálculo de SLA)</div><div>—</div></div>
+  <div class="db-field-row"><div>notas</div><div><code>TEXT</code></div><div>NULL</div><div>Observações da etapa atual (apagado ao avançar de etapa)</div><div>—</div></div>
+  <div class="db-field-row"><div>relatorio_visita_url</div><div><code>TEXT</code></div><div>NULL</div><div>URL pública do relatório de visita técnica no Storage</div><div>—</div></div>
+  <div class="db-field-row"><div>relatorio_visita_nome</div><div><code>TEXT</code></div><div>NULL</div><div>Nome original do arquivo do relatório</div><div>—</div></div>
+  <div class="db-field-row"><div>relatorio_visita_path</div><div><code>TEXT</code></div><div>NULL</div><div>Path no Storage (para operações de delete)</div><div>—</div></div>
+  <div class="db-field-row"><div>certificado_numero</div><div><code>TEXT</code></div><div>NULL</div><div>Número do certificado emitido (ex: VDM-2026-001)</div><div>—</div></div>
+  <div class="db-field-row"><div>certificado_emitido_em</div><div><code>DATE</code></div><div>NULL</div><div>Data de emissão do certificado</div><div>—</div></div>
+  <div class="db-field-row"><div>certificado_validade</div><div><code>DATE</code></div><div>NULL</div><div>Data de validade do certificado</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>auditor</div><div><code>TEXT</code></div><div>NULL</div><div>Nome do auditor responsável pelo processo</div><div>—</div></div>
+  <div class="db-field-row"><div>criado_por</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do usuário que iniciou a auditoria</div><div>—</div></div>
+  <div class="db-field-row"><div>created_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp de criação</div><div>—</div></div>
+  <div class="db-field-row"><div>updated_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp da última atualização</div><div>—</div></div>
+</div>
+
+<h3 id="lic-performance-tbl">3.4 Tabela: <code>lic_performance</code></h3>
+
+<div class="db-table-card">
+  <div class="db-table-head">
+    <div class="db-table-name">lic_performance</div>
+    <div class="db-table-desc">KPIs trimestrais por licenciado · Permite múltiplos registros por período (sem UNIQUE)</div>
+  </div>
+  <div class="db-field-head"><div>Campo</div><div>Tipo</div><div>Nulo</div><div>Descrição</div><div>Chave</div></div>
+  <div class="db-field-row"><div>id</div><div><code>BIGSERIAL</code></div><div>NOT NULL</div><div>PK autoincremental</div><div><span class="pk-badge">PK</span></div></div>
+  <div class="db-field-row"><div>lead_id</div><div><code>BIGINT</code></div><div>NOT NULL</div><div>Referência ao lead (ON DELETE CASCADE)</div><div><span class="fk-badge">FK</span><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>periodo</div><div><code>TEXT</code></div><div>NULL</div><div>Período textual (ex: "Q1 2026", "Q2 2026")</div><div>—</div></div>
+  <div class="db-field-row"><div>periodo_ref</div><div><code>DATE</code></div><div>NULL</div><div>Data de referência do período (1º dia do trimestre)</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>otif_pct</div><div><code>NUMERIC</code></div><div>NULL</div><div>OTIF — On-Time In-Full (%)</div><div>—</div></div>
+  <div class="db-field-row"><div>acuracidade_inventario</div><div><code>NUMERIC</code></div><div>NULL</div><div>Acuracidade de inventário (%)</div><div>—</div></div>
+  <div class="db-field-row"><div>dock_to_stock_hrs</div><div><code>NUMERIC</code></div><div>NULL</div><div>Dock-to-Stock Time (horas)</div><div>—</div></div>
+  <div class="db-field-row"><div>utilizacao_capacidade</div><div><code>NUMERIC</code></div><div>NULL</div><div>Utilização de capacidade (% de m² ocupado)</div><div>—</div></div>
+  <div class="db-field-row"><div>nps_score</div><div><code>NUMERIC</code></div><div>NULL</div><div>Net Promoter Score (-100 a +100)</div><div>—</div></div>
+  <div class="db-field-row"><div>tempo_onboarding_dias</div><div><code>NUMERIC</code></div><div>NULL</div><div>Tempo médio de onboarding de novos clientes (dias)</div><div>—</div></div>
+  <div class="db-field-row"><div>em_remediacao</div><div><code>BOOLEAN</code></div><div>DEFAULT FALSE</div><div>Flag indicando que este registro tem plano de remediação ativo</div><div>—</div></div>
+  <div class="db-field-row"><div>plano_remediacao</div><div><code>TEXT</code></div><div>NULL</div><div>Ações corretivas descritas no plano de remediação</div><div>—</div></div>
+  <div class="db-field-row"><div>data_inicio_remediacao</div><div><code>DATE</code></div><div>NULL</div><div>Data de início do plano de remediação</div><div>—</div></div>
+  <div class="db-field-row"><div>data_prevista_resolucao</div><div><code>DATE</code></div><div>NULL</div><div>Data prevista de conclusão do plano</div><div>—</div></div>
+  <div class="db-field-row"><div>criado_por</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do usuário que lançou os KPIs</div><div>—</div></div>
+  <div class="db-field-row"><div>created_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp de criação do registro</div><div><span class="idx-badge">IDX</span></div></div>
+</div>
+
+<h3 id="lic-historico-tbl">3.5 Tabela: <code>lic_historico</code></h3>
+
+<div class="db-table-card">
+  <div class="db-table-head">
+    <div class="db-table-name">lic_historico</div>
+    <div class="db-table-desc">Timeline de eventos CRM · Append-only (sem UPDATE, apenas INSERT e DELETE)</div>
+  </div>
+  <div class="db-field-head"><div>Campo</div><div>Tipo</div><div>Nulo</div><div>Descrição</div><div>Chave</div></div>
+  <div class="db-field-row"><div>id</div><div><code>BIGSERIAL</code></div><div>NOT NULL</div><div>PK autoincremental</div><div><span class="pk-badge">PK</span></div></div>
+  <div class="db-field-row"><div>lead_id</div><div><code>BIGINT</code></div><div>NOT NULL</div><div>Referência ao lead (ON DELETE CASCADE)</div><div><span class="fk-badge">FK</span><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>tipo</div><div><code>TEXT</code></div><div>NULL</div><div>Tipo do evento (ver tabela de tipos na Especificação Funcional Anexo B)</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>titulo</div><div><code>TEXT</code></div><div>NULL</div><div>Título descritivo do evento</div><div>—</div></div>
+  <div class="db-field-row"><div>descricao</div><div><code>TEXT</code></div><div>NULL</div><div>Detalhes adicionais do evento</div><div>—</div></div>
+  <div class="db-field-row"><div>etapa_anterior</div><div><code>TEXT</code></div><div>NULL</div><div>Etapa anterior (para eventos de mudança de etapa)</div><div>—</div></div>
+  <div class="db-field-row"><div>etapa_nova</div><div><code>TEXT</code></div><div>NULL</div><div>Nova etapa (para eventos de mudança de etapa)</div><div>—</div></div>
+  <div class="db-field-row"><div>autor</div><div><code>TEXT</code></div><div>NULL</div><div>Nome ou e-mail do responsável pelo evento</div><div>—</div></div>
+  <div class="db-field-row"><div>criado_por</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do usuário autenticado que criou o registro</div><div>—</div></div>
+  <div class="db-field-row"><div>created_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp do evento (usado para ordenação da timeline)</div><div><span class="idx-badge">IDX</span></div></div>
+</div>
+
+<h3 id="lic-anexos-tbl">3.6 Tabela: <code>lic_anexos</code></h3>
+
+<div class="db-table-card">
+  <div class="db-table-head">
+    <div class="db-table-name">lic_anexos</div>
+    <div class="db-table-desc">Metadados de arquivos · Armazenamento físico no bucket Supabase Storage 'lic-anexos'</div>
+  </div>
+  <div class="db-field-head"><div>Campo</div><div>Tipo</div><div>Nulo</div><div>Descrição</div><div>Chave</div></div>
+  <div class="db-field-row"><div>id</div><div><code>BIGSERIAL</code></div><div>NOT NULL</div><div>PK autoincremental</div><div><span class="pk-badge">PK</span></div></div>
+  <div class="db-field-row"><div>lead_id</div><div><code>BIGINT</code></div><div>NOT NULL</div><div>Referência ao lead (ON DELETE CASCADE)</div><div><span class="fk-badge">FK</span><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>tipo</div><div><code>TEXT</code></div><div>NULL</div><div>Tipo do arquivo (contrato_social/foto_armazem_N/certificado/relatorio_visita/pdf_lead)</div><div><span class="idx-badge">IDX</span></div></div>
+  <div class="db-field-row"><div>nome_arquivo</div><div><code>TEXT</code></div><div>NULL</div><div>Nome original do arquivo com extensão</div><div>—</div></div>
+  <div class="db-field-row"><div>url</div><div><code>TEXT</code></div><div>NULL</div><div>URL pública permanente para acesso/download</div><div>—</div></div>
+  <div class="db-field-row"><div>storage_path</div><div><code>TEXT</code></div><div>NULL</div><div>Path no bucket (para operações de delete no Storage)</div><div>—</div></div>
+  <div class="db-field-row"><div>tamanho_bytes</div><div><code>BIGINT</code></div><div>NULL</div><div>Tamanho do arquivo em bytes</div><div>—</div></div>
+  <div class="db-field-row"><div>criado_por</div><div><code>TEXT</code></div><div>NULL</div><div>E-mail do usuário ou "Portal" para uploads do portal público</div><div>—</div></div>
+  <div class="db-field-row"><div>created_at</div><div><code>TIMESTAMPTZ</code></div><div>DEFAULT NOW()</div><div>Timestamp de upload</div><div><span class="idx-badge">IDX</span></div></div>
+</div>
+
+<h3 id="indices">3.7 Índices Recomendados</h3>
+
+<pre><code><span class="hl-cmt">-- lic_leads: queries mais frequentes</span>
+<span class="hl-key">CREATE INDEX</span> idx_lic_leads_status <span class="hl-key">ON</span> lic_leads(status);
+<span class="hl-key">CREATE INDEX</span> idx_lic_leads_uf <span class="hl-key">ON</span> lic_leads(uf);
+<span class="hl-key">CREATE INDEX</span> idx_lic_leads_etapa <span class="hl-key">ON</span> lic_leads(etapa);
+<span class="hl-key">CREATE INDEX</span> idx_lic_leads_created_at <span class="hl-key">ON</span> lic_leads(created_at <span class="hl-key">DESC</span>);
+<span class="hl-key">CREATE UNIQUE INDEX</span> idx_lic_leads_form_token <span class="hl-key">ON</span> lic_leads(form_token)
+  <span class="hl-key">WHERE</span> form_token <span class="hl-key">IS NOT NULL</span>; <span class="hl-cmt">-- partial unique index</span>
+
+<span class="hl-cmt">-- lic_auditoria: lookup por lead</span>
+<span class="hl-key">CREATE UNIQUE INDEX</span> idx_lic_auditoria_lead <span class="hl-key">ON</span> lic_auditoria(lead_id);
+<span class="hl-key">CREATE INDEX</span> idx_lic_auditoria_estagio <span class="hl-key">ON</span> lic_auditoria(estagio_atual);
+<span class="hl-key">CREATE INDEX</span> idx_lic_auditoria_cert_val <span class="hl-key">ON</span> lic_auditoria(certificado_validade)
+  <span class="hl-key">WHERE</span> certificado_validade <span class="hl-key">IS NOT NULL</span>; <span class="hl-cmt">-- para alertas de renovação</span>
+
+<span class="hl-cmt">-- lic_performance: queries por lead + ordenação por período</span>
+<span class="hl-key">CREATE INDEX</span> idx_lic_perf_lead_periodo <span class="hl-key">ON</span> lic_performance(lead_id, periodo_ref <span class="hl-key">DESC</span>);
+
+<span class="hl-cmt">-- lic_historico: timeline ordenada por lead</span>
+<span class="hl-key">CREATE INDEX</span> idx_lic_hist_lead_created <span class="hl-key">ON</span> lic_historico(lead_id, created_at <span class="hl-key">DESC</span>);
+
+<span class="hl-cmt">-- lic_anexos: lookup por lead e tipo</span>
+<span class="hl-key">CREATE INDEX</span> idx_lic_anx_lead_tipo <span class="hl-key">ON</span> lic_anexos(lead_id, tipo);
+</code></pre>
+
+<h3 id="rls">3.8 Row Level Security (RLS)</h3>
+<p>Todas as tabelas do módulo Licenciamento têm RLS habilitado com política <strong>"Allow all"</strong> para usuários autenticados. O controle de acesso granular é feito na camada de aplicação (whitelist no frontend).</p>
+
+<pre><code><span class="hl-cmt">-- Padrão aplicado em todas as 5 tabelas</span>
+<span class="hl-key">ALTER TABLE</span> lic_leads <span class="hl-key">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="hl-key">CREATE POLICY</span> <span class="hl-str">"Allow all lic_leads"</span> <span class="hl-key">ON</span> lic_leads
+  <span class="hl-key">FOR ALL USING</span> (<span class="hl-num">true</span>) <span class="hl-key">WITH CHECK</span> (<span class="hl-num">true</span>);
+
+<span class="hl-cmt">-- Nota: política permissiva necessária pois o portal público</span>
+<span class="hl-cmt">-- (usuário anônimo) precisa ler/escrever dados de leads via token.</span>
+<span class="hl-cmt">-- Evolução: implementar RLS por token (ver Fase 3 - evolução técnica)</span>
+</code></pre>
+
+<div class="callout warning">
+  <div class="callout-icon">⚠</div>
+  <p><strong>Débito técnico — RLS permissivo:</strong> A política atual <code>USING (true) WITH CHECK (true)</code> permite que qualquer usuário autenticado (ou anônimo, no caso do portal) leia e escreva qualquer registro. Isso é adequado para o MVP mas deve ser endurecido na evolução: restringir acesso anônimo apenas a registros cujo <code>form_token</code> corresponda ao token na requisição, e restringir autenticados ao tenant Vendemmia.</p>
+</div>
+
+<!-- PHASE BANNER -->
+<div class="phase-banner">
+  <div>
+    <div class="phase-banner-text">⚙ Fase 1 concluída — Visão técnica, arquitetura e modelagem completa do banco de dados</div>
+    <div class="phase-banner-sub">Continue com a Fase 2: APIs e Endpoints, Segurança, Integrações e Infraestrutura</div>
+  </div>
+  <span class="phase-banner-badge">FASE 2 → APIs e Segurança</span>
+</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top:56px;padding-top:22px;border-top:2px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:13px;font-weight:800;color:var(--primary);">PIPELINE by Vendemmia</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;font-family:'JetBrains Mono',monospace;">ET-LIC-2026-001 · Versão 1.0 · Fase 1/3 · Arquitetura e Banco de Dados</div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-400);text-align:right;">
+    <div>Confidencial — Vendemmia Comércio Internacional Ltda.</div>
+    <div style="margin-top:2px;">pipelinevendemmia.com.br · Maio 2026</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const items=document.querySelectorAll('.sidebar-item[href^="#"]');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){items.forEach(i=>i.classList.remove('active'));const l=document.querySelector('.sidebar-item[href="#'+e.target.id+'"]');if(l)l.classList.add('active');}});},{rootMargin:'-15% 0px -70% 0px'});
+document.querySelectorAll('[id]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
