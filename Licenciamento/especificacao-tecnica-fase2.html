@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificação Técnica — Fase 2 · APIs, Segurança e Infraestrutura · Pipeline Licenciamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0f172a;--accent:#0ea5e9;--accent-dark:#0284c7;--green:#16a34a;--amber:#d97706;--red:#dc2626;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--sidebar-w:290px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--gray-800);background:#fff;}
+@media print{.sidebar,.topbar,.print-btn,.no-print{display:none!important}.main{margin-left:0!important}body{font-size:11px}}
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#0c1a2e,#0f172a);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:300;box-shadow:0 2px 16px rgba(0,0,0,.4);}
+.topbar-logo{display:flex;align-items:center;gap:12px;}
+.topbar-logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.topbar-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:.04em;}
+.topbar-logo-sub{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;}
+.topbar-meta{display:flex;align-items:center;gap:10px;}
+.topbar-badge{font-size:10px;background:rgba(14,165,233,.2);color:rgba(14,165,233,.9);padding:3px 10px;border-radius:20px;border:1px solid rgba(14,165,233,.3);}
+.topbar-nav-btn{padding:5px 12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.06);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;text-decoration:none;}
+.print-btn{padding:6px 16px;border:1px solid rgba(14,165,233,.4);border-radius:8px;background:rgba(14,165,233,.15);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#38bdf8;cursor:pointer;}
+.sidebar{position:fixed;top:52px;left:0;width:var(--sidebar-w);height:calc(100vh - 52px);background:#f8fafc;border-right:1px solid var(--gray-200);overflow-y:auto;z-index:200;padding:16px 0;}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:10px 20px 5px;}
+.sidebar-item{display:block;padding:6px 20px;font-size:12px;color:var(--gray-600);text-decoration:none;border-left:2px solid transparent;transition:all .12s;}
+.sidebar-item:hover{background:rgba(14,165,233,.06);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item.active{background:rgba(14,165,233,.08);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+.sidebar-item.sub{padding-left:32px;font-size:11px;}
+.main{margin-left:var(--sidebar-w);padding-top:52px;}
+.cover{background:linear-gradient(145deg,#060d1a 0%,#0c1a2e 35%,#0f2d4a 70%,#0c3a5c 100%);padding:60px 60px 56px;position:relative;overflow:hidden;min-height:320px;}
+.cover::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;border-radius:50%;background:rgba(14,165,233,.05);}
+.cover-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:20px;position:relative;font-family:'JetBrains Mono',monospace;}
+.cover-title{font-size:32px;font-weight:900;color:#fff;letter-spacing:-.7px;line-height:1.2;margin-bottom:8px;position:relative;}
+.cover-sub{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:30px;position:relative;}
+.cover-meta{display:flex;gap:12px;flex-wrap:wrap;position:relative;}
+.cover-meta-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 16px;}
+.cover-meta-label{font-size:8px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.cover-meta-value{font-size:12px;font-weight:700;color:#fff;}
+.content{max-width:880px;margin:0 auto;padding:48px 48px 80px;}
+.section-divider{display:flex;align-items:center;gap:12px;margin:48px 0 20px;}
+.section-divider-bar{width:4px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:2px;flex-shrink:0;}
+.section-divider h2{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px;}
+.section-num{font-size:10px;font-weight:700;color:var(--accent);background:rgba(14,165,233,.08);padding:3px 10px;border-radius:20px;margin-left:4px;font-family:'JetBrains Mono',monospace;}
+h3{font-size:15px;font-weight:700;color:var(--primary);margin:24px 0 10px;}
+h4{font-size:13px;font-weight:700;color:var(--gray-800);margin:18px 0 8px;}
+p{margin-bottom:12px;color:var(--gray-600);line-height:1.75;}
+strong{color:var(--gray-800);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#0284c7;}
+pre{background:#0f172a;border-radius:12px;padding:18px 20px;margin:14px 0;overflow-x:auto;}
+pre code{background:none;padding:0;color:#e2e8f0;font-size:12px;line-height:1.65;}
+.hl-key{color:#7dd3fc;} .hl-str{color:#86efac;} .hl-cmt{color:#64748b;font-style:italic;} .hl-num{color:#fbbf24;} .hl-type{color:#c4b5fd;} .hl-meth{color:#f472b6;} .hl-prop{color:#fb923c;}
+.callout{border-radius:10px;padding:13px 17px;margin:14px 0;display:flex;gap:12px;align-items:flex-start;}
+.callout.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.callout.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.callout.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.callout.danger{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.callout.tech{background:#f8fafc;border:1px solid #cbd5e1;color:#334155;}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.callout p{margin:0;font-size:12px;line-height:1.6;color:inherit;}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+thead tr{background:#f1f5f9;}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);border-bottom:2px solid #bfdbfe;}
+td{padding:9px 13px;border-bottom:1px solid #f1f5f9;color:var(--gray-600);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8fafc;}
+td strong{color:var(--gray-800);}
+td code{font-size:11px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;}
+.badge-amber{background:#fffbeb;color:#b45309;border:1px solid #fcd34d;}
+.badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;}
+.badge-gray{background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;}
+.badge-sky{background:#f0f9ff;color:#0284c7;border:1px solid #7dd3fc;}
+/* endpoint card */
+.ep-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:14px 0;}
+.ep-head{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border-bottom:1px solid var(--gray-200);}
+.ep-method{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:6px;}
+.ep-method.get{background:#dbeafe;color:#1d4ed8;}
+.ep-method.post{background:#d1fae5;color:#065f46;}
+.ep-method.patch{background:#fef3c7;color:#92400e;}
+.ep-method.delete{background:#fee2e2;color:#991b1b;}
+.ep-path{font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--gray-800);font-weight:600;}
+.ep-desc{font-size:11px;color:var(--gray-400);margin-left:auto;}
+.ep-body{padding:14px 16px;}
+.ep-body p,.ep-body li{font-size:12px;color:var(--gray-600);line-height:1.5;}
+.ep-body ul{padding-left:16px;margin:4px 0;}
+.ep-field{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin:10px 0 5px;}
+/* security card */
+.sec-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:14px 0;}
+.sec-head{padding:12px 18px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:10px;}
+.sec-icon{font-size:18px;}
+.sec-title{font-size:13px;font-weight:800;color:var(--primary);}
+.sec-body{padding:14px 18px;}
+.sec-body p,.sec-body li{font-size:12px;color:var(--gray-600);line-height:1.5;}
+.sec-body ul{padding-left:16px;margin:4px 0 10px;}
+/* infra */
+.infra-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.infra-card{border:1px solid var(--gray-200);border-radius:12px;padding:16px 18px;}
+.infra-card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.infra-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.infra-title{font-size:13px;font-weight:800;color:var(--primary);}
+.infra-sub{font-size:10px;color:var(--gray-400);font-family:'JetBrains Mono',monospace;}
+.infra-card ul{padding-left:15px;}
+.infra-card li{font-size:11px;color:var(--gray-600);margin-bottom:3px;}
+/* phase banner */
+.phase-banner{background:linear-gradient(135deg,#0c1a2e,#0c3a5c);border-radius:12px;padding:18px 22px;margin:26px 0;display:flex;align-items:center;justify-content:space-between;}
+.phase-banner-text{font-size:13px;font-weight:700;color:#fff;}
+.phase-banner-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+.phase-banner-badge{font-size:11px;background:rgba(14,165,233,.2);color:#38bdf8;border:1px solid rgba(14,165,233,.35);padding:4px 14px;border-radius:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:28px 16px}.infra-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">⚙</div>
+    <div>
+      <div class="topbar-logo-text">PIPELINE by Vendemmia</div>
+      <div class="topbar-logo-sub">Especificação Técnica · Fase 2 — APIs, Segurança e Infraestrutura</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <a class="topbar-nav-btn no-print" href="especificacao-tecnica-fase1.html">← Fase 1</a>
+    <span class="topbar-badge">ET-LIC-2026-001</span>
+    <span class="topbar-badge">Fase 2/3</span>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+</div>
+
+<nav class="sidebar no-print">
+  <div class="sidebar-section">Fases</div>
+  <a class="sidebar-item" href="especificacao-tecnica-fase1.html">← Fase 1 · Arquitetura e BD</a>
+
+  <div class="sidebar-section">Seção 4</div>
+  <a class="sidebar-item" href="#apis">4. APIs e Integrações</a>
+  <a class="sidebar-item sub" href="#api-postgrest">4.1 PostgREST (Supabase)</a>
+  <a class="sidebar-item sub" href="#api-auth">4.2 Supabase Auth API</a>
+  <a class="sidebar-item sub" href="#api-storage">4.3 Supabase Storage API</a>
+  <a class="sidebar-item sub" href="#api-externas">4.4 APIs externas</a>
+  <a class="sidebar-item sub" href="#api-erros">4.5 Tratamento de erros</a>
+
+  <div class="sidebar-section">Seção 5</div>
+  <a class="sidebar-item" href="#seguranca">5. Segurança</a>
+  <a class="sidebar-item sub" href="#sec-jwt">5.1 JWT e sessão</a>
+  <a class="sidebar-item sub" href="#sec-acesso">5.2 Controle de acesso</a>
+  <a class="sidebar-item sub" href="#sec-rls">5.3 Row Level Security</a>
+  <a class="sidebar-item sub" href="#sec-storage">5.4 Storage e uploads</a>
+  <a class="sidebar-item sub" href="#sec-lgpd">5.5 LGPD e privacidade</a>
+  <a class="sidebar-item sub" href="#sec-vulnerabilidades">5.6 Vulnerabilidades</a>
+  <a class="sidebar-item sub" href="#sec-auditoria">5.7 Logs e auditoria</a>
+
+  <div class="sidebar-section">Seção 6</div>
+  <a class="sidebar-item" href="#infraestrutura">6. Infraestrutura</a>
+  <a class="sidebar-item sub" href="#infra-hosting">6.1 Hosting e CDN</a>
+  <a class="sidebar-item sub" href="#infra-cicd">6.2 CI/CD Pipeline</a>
+  <a class="sidebar-item sub" href="#infra-ambientes">6.3 Ambientes</a>
+  <a class="sidebar-item sub" href="#infra-monitoramento">6.4 Monitoramento</a>
+  <a class="sidebar-item sub" href="#infra-backup">6.5 Backup e Recovery</a>
+
+  <div class="sidebar-section" style="color:var(--accent);">Próxima Fase</div>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 3 · Código, DevOps e Evolução</a>
+</nav>
+
+<div class="main">
+<div class="cover">
+  <div class="cover-tag">⚙ ET-LIC-2026-001 · Fase 2 de 3</div>
+  <h1 class="cover-title">APIs, Integrações,<br>Segurança e Infraestrutura</h1>
+  <div class="cover-sub">Módulo de Licenciamento · Sistema Pipeline · Vendemmia</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><div class="cover-meta-label">Documento</div><div class="cover-meta-value">ET-LIC-2026-001</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Fase</div><div class="cover-meta-value">2 de 3</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Seções</div><div class="cover-meta-value">4 · 5 · 6</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">API Base</div><div class="cover-meta-value">Supabase PostgREST</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">Maio 2026</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- SEÇÃO 4: APIs -->
+<div class="section-divider" id="apis">
+  <div class="section-divider-bar"></div>
+  <h2>4. APIs e Integrações <span class="section-num">Seção 4</span></h2>
+</div>
+
+<p>O sistema utiliza exclusivamente a <strong>API REST gerada automaticamente pelo PostgREST</strong> do Supabase, sem APIs customizadas próprias. Toda a comunicação segue o padrão <strong>HTTPS + JSON</strong> com autenticação via JWT Bearer token no header <code>Authorization</code>.</p>
+
+<div class="callout tech">
+  <div class="callout-icon">ℹ</div>
+  <p><strong>PostgREST — API automática:</strong> O Supabase expõe automaticamente uma REST API completa sobre cada tabela PostgreSQL. Os endpoints seguem o padrão <code>/rest/v1/{tabela}</code> com suporte a filtros (<code>eq</code>, <code>like</code>, <code>is</code>...), seleção de colunas (<code>select</code>), ordenação (<code>order</code>), paginação (<code>limit</code>/<code>offset</code>) e operações CRUD completas via métodos HTTP.</p>
+</div>
+
+<h3 id="api-postgrest">4.1 PostgREST — Endpoints do Módulo Licenciamento</h3>
+
+<h4>Base URL</h4>
+<pre><code><span class="hl-prop">Base URL:</span>  <span class="hl-str">https://geojgcncmtbjebftosor.supabase.co/rest/v1</span>
+
+<span class="hl-prop">Headers obrigatórios:</span>
+  <span class="hl-key">apikey:</span>        <span class="hl-str">{SUPABASE_ANON_KEY}</span>
+  <span class="hl-key">Authorization:</span> <span class="hl-str">Bearer {JWT_TOKEN}</span>
+  <span class="hl-key">Content-Type:</span>  <span class="hl-str">application/json</span>
+  <span class="hl-key">Prefer:</span>        <span class="hl-str">return=representation</span>  <span class="hl-cmt">// para receber o registro inserido/atualizado</span>
+</code></pre>
+
+<div class="ep-card">
+  <div class="ep-head"><span class="ep-method get">GET</span><span class="ep-path">/lic_leads</span><span class="ep-desc">Listar todos os leads</span></div>
+  <div class="ep-body">
+    <div class="ep-field">Query params mais usados</div>
+    <pre><code><span class="hl-cmt">// Buscar todos os leads ordenados por data</span>
+GET /lic_leads?order=created_at.desc
+
+<span class="hl-cmt">// Filtrar só convertidos</span>
+GET /lic_leads?status=eq.Convertido
+
+<span class="hl-cmt">// Buscar por token do portal</span>
+GET /lic_leads?form_token=eq.TOKEN&limit=1
+
+<span class="hl-cmt">// Selecionar campos específicos</span>
+GET /lic_leads?select=id,razao_social,status,uf,area_total_m2</code></pre>
+    <div class="ep-field">Response</div>
+    <pre><code>[
+  {
+    <span class="hl-prop">"id"</span>: <span class="hl-num">1</span>,
+    <span class="hl-prop">"razao_social"</span>: <span class="hl-str">"Logística ABC Ltda."</span>,
+    <span class="hl-prop">"status"</span>: <span class="hl-str">"Convertido"</span>,
+    <span class="hl-prop">"uf"</span>: <span class="hl-str">"SP"</span>,
+    <span class="hl-prop">"area_total_m2"</span>: <span class="hl-num">12000</span>,
+    <span class="hl-prop">"created_at"</span>: <span class="hl-str">"2026-03-15T10:30:00Z"</span>
+  }
+]</code></pre>
+    <div class="ep-field">Códigos de retorno</div>
+    <ul><li><span class="badge badge-green">200</span> Array de registros (vazio se nenhum resultado)</li><li><span class="badge badge-red">401</span> JWT inválido ou ausente</li><li><span class="badge badge-red">403</span> RLS bloqueou o acesso</li></ul>
+  </div>
+</div>
+
+<div class="ep-card">
+  <div class="ep-head"><span class="ep-method post">POST</span><span class="ep-path">/lic_leads</span><span class="ep-desc">Criar novo lead</span></div>
+  <div class="ep-body">
+    <div class="ep-field">Body (JSON)</div>
+    <pre><code>{
+  <span class="hl-prop">"razao_social"</span>: <span class="hl-str">"Logística ABC Ltda."</span>,
+  <span class="hl-prop">"status"</span>: <span class="hl-str">"Ativo"</span>,
+  <span class="hl-prop">"etapa"</span>: <span class="hl-str">"Prospecção"</span>,
+  <span class="hl-prop">"criado_por"</span>: <span class="hl-str">"gppereira@vendemmia.com.br"</span>,
+  <span class="hl-prop">"created_at"</span>: <span class="hl-str">"2026-05-30T14:00:00Z"</span>
+}</code></pre>
+    <div class="ep-field">Retorno com <code>Prefer: return=representation</code></div>
+    <pre><code><span class="hl-cmt">// Retorna o registro criado com id gerado</span>
+[{ <span class="hl-prop">"id"</span>: <span class="hl-num">42</span>, <span class="hl-prop">"razao_social"</span>: <span class="hl-str">"Logística ABC Ltda."</span>, ... }]</code></pre>
+    <div class="ep-field">Códigos de retorno</div>
+    <ul><li><span class="badge badge-green">201</span> Registro criado</li><li><span class="badge badge-red">409</span> Conflito (ex: form_token duplicado)</li><li><span class="badge badge-red">422</span> Violação de constraint NOT NULL</li></ul>
+  </div>
+</div>
+
+<div class="ep-card">
+  <div class="ep-head"><span class="ep-method patch">PATCH</span><span class="ep-path">/lic_leads?id=eq.{id}</span><span class="ep-desc">Atualizar campos de um lead</span></div>
+  <div class="ep-body">
+    <div class="ep-field">Body (JSON — apenas campos a atualizar)</div>
+    <pre><code>{
+  <span class="hl-prop">"status"</span>: <span class="hl-str">"Convertido"</span>,
+  <span class="hl-prop">"updated_at"</span>: <span class="hl-str">"2026-05-30T14:30:00Z"</span>
+}</code></pre>
+    <div class="ep-field">Códigos de retorno</div>
+    <ul><li><span class="badge badge-green">200</span> Atualizado (com Prefer: return=representation)</li><li><span class="badge badge-green">204</span> Atualizado sem body de resposta</li><li><span class="badge badge-red">404</span> Registro não encontrado (filtro não casou)</li></ul>
+  </div>
+</div>
+
+<div class="ep-card">
+  <div class="ep-head"><span class="ep-method delete">DELETE</span><span class="ep-path">/lic_leads?id=eq.{id}</span><span class="ep-desc">Excluir lead (cascata nas tabelas relacionadas)</span></div>
+  <div class="ep-body">
+    <p>A exclusão é cascata via <code>ON DELETE CASCADE</code> nas FKs de <code>lic_auditoria</code>, <code>lic_performance</code>, <code>lic_historico</code> e <code>lic_anexos</code>. Arquivos no Storage NÃO são removidos automaticamente.</p>
+    <div class="ep-field">Códigos de retorno</div>
+    <ul><li><span class="badge badge-green">204</span> Excluído com sucesso</li><li><span class="badge badge-red">404</span> Registro não encontrado</li></ul>
+  </div>
+</div>
+
+<h4>Endpoints das demais tabelas do módulo</h4>
+<table>
+  <thead><tr><th>Tabela</th><th>Métodos usados</th><th>Filtros principais</th><th>Observação</th></tr></thead>
+  <tbody>
+    <tr><td><code>lic_auditoria</code></td><td>GET, POST, PATCH</td><td><code>lead_id=eq.{id}</code></td><td>UNIQUE por lead_id — máx. 1 registro por lead</td></tr>
+    <tr><td><code>lic_performance</code></td><td>GET, POST</td><td><code>lead_id=eq.{id}&order=periodo_ref.asc</code></td><td>Múltiplos por lead (histórico trimestral)</td></tr>
+    <tr><td><code>lic_historico</code></td><td>GET, POST</td><td><code>lead_id=eq.{id}&order=created_at.desc</code></td><td>Append-only; sem UPDATE nem DELETE no uso normal</td></tr>
+    <tr><td><code>lic_anexos</code></td><td>GET, POST, DELETE</td><td><code>lead_id=eq.{id}</code> ou <code>tipo=like.foto_armazem%</code></td><td>DELETE também remove o arquivo do Storage</td></tr>
+  </tbody>
+</table>
+
+<h3 id="api-auth">4.2 Supabase Auth API</h3>
+
+<table>
+  <thead><tr><th>Endpoint</th><th>Método</th><th>Função</th><th>SDK call</th></tr></thead>
+  <tbody>
+    <tr><td><code>/auth/v1/token?grant_type=password</code></td><td>POST</td><td>Login com e-mail + senha → retorna JWT</td><td><code>supabaseClient.auth.signInWithPassword()</code></td></tr>
+    <tr><td><code>/auth/v1/logout</code></td><td>POST</td><td>Logout — invalida o refresh token</td><td><code>supabaseClient.auth.signOut()</code></td></tr>
+    <tr><td><code>/auth/v1/token?grant_type=refresh_token</code></td><td>POST</td><td>Refresh do JWT (automático pelo SDK)</td><td>Automático</td></tr>
+    <tr><td><code>/auth/v1/recover</code></td><td>POST</td><td>Envio de e-mail de reset de senha</td><td><code>supabaseClient.auth.resetPasswordForEmail()</code></td></tr>
+    <tr><td><code>/auth/v1/user</code></td><td>PUT</td><td>Atualização de senha (após reset)</td><td><code>supabaseClient.auth.updateUser()</code></td></tr>
+  </tbody>
+</table>
+
+<h4>Estrutura do JWT Token</h4>
+<pre><code><span class="hl-cmt">// Header</span>
+{ <span class="hl-prop">"alg"</span>: <span class="hl-str">"HS256"</span>, <span class="hl-prop">"typ"</span>: <span class="hl-str">"JWT"</span> }
+
+<span class="hl-cmt">// Payload (claims relevantes)</span>
+{
+  <span class="hl-prop">"iss"</span>: <span class="hl-str">"supabase"</span>,
+  <span class="hl-prop">"ref"</span>: <span class="hl-str">"geojgcncmtbjebftosor"</span>,
+  <span class="hl-prop">"role"</span>: <span class="hl-str">"authenticated"</span>,         <span class="hl-cmt">// ou "anon" para portal público</span>
+  <span class="hl-prop">"email"</span>: <span class="hl-str">"gppereira@vendemmia.com.br"</span>,
+  <span class="hl-prop">"sub"</span>: <span class="hl-str">"uuid-do-usuario"</span>,
+  <span class="hl-prop">"iat"</span>: <span class="hl-num">1748610000</span>,
+  <span class="hl-prop">"exp"</span>: <span class="hl-num">1748613600</span>              <span class="hl-cmt">// expira em 1h; SDK faz refresh automático</span>
+}</code></pre>
+
+<h3 id="api-storage">4.3 Supabase Storage API</h3>
+
+<table>
+  <thead><tr><th>Operação</th><th>Endpoint</th><th>Método</th><th>Autenticação</th></tr></thead>
+  <tbody>
+    <tr><td>Upload de arquivo</td><td><code>/storage/v1/object/lic-anexos/{path}</code></td><td>POST (multipart)</td><td>JWT (authenticated ou anon com policy)</td></tr>
+    <tr><td>Download público</td><td><code>/storage/v1/object/public/lic-anexos/{path}</code></td><td>GET</td><td>Nenhuma (bucket público)</td></tr>
+    <tr><td>Obter URL pública</td><td>SDK: <code>getPublicUrl(path)</code></td><td>—</td><td>Operação local (sem chamada de rede)</td></tr>
+    <tr><td>Deletar arquivo</td><td><code>/storage/v1/object/lic-anexos</code> (body: paths[])</td><td>DELETE</td><td>JWT authenticated</td></tr>
+    <tr><td>Listar arquivos</td><td><code>/storage/v1/object/list/lic-anexos</code></td><td>POST (body: prefix, limit)</td><td>JWT authenticated</td></tr>
+  </tbody>
+</table>
+
+<h4>Padrão de upload com tratamento de erros</h4>
+<pre><code><span class="hl-key">async function</span> <span class="hl-meth">uploadAnexo</span>(file, leadId, tipo) {
+  <span class="hl-key">const</span> safe = file.name.replace(<span class="hl-str">/[^a-zA-Z0-9._-]/g</span>, <span class="hl-str">'_'</span>);
+  <span class="hl-key">const</span> path = <span class="hl-str">`leads/${leadId}/${tipo}/${Date.now()}_${safe}`</span>;
+
+  <span class="hl-key">const</span> { error: upErr } = <span class="hl-key">await</span> supabaseClient.storage
+    .from(<span class="hl-str">'lic-anexos'</span>)
+    .upload(path, file, {
+      cacheControl: <span class="hl-str">'3600'</span>,
+      upsert: <span class="hl-num">false</span>  <span class="hl-cmt">// nunca sobrescrever — sempre gerar novo path</span>
+    });
+
+  <span class="hl-key">if</span> (upErr) <span class="hl-key">throw</span> upErr;  <span class="hl-cmt">// 409 = path já existe, 413 = arquivo muito grande</span>
+
+  <span class="hl-key">const</span> { data: urlData } = supabaseClient.storage
+    .from(<span class="hl-str">'lic-anexos'</span>)
+    .getPublicUrl(path);  <span class="hl-cmt">// operação local — URL determinística</span>
+
+  <span class="hl-key">return</span> { path, url: urlData.publicUrl };
+}</code></pre>
+
+<h3 id="api-externas">4.4 APIs Externas</h3>
+
+<table>
+  <thead><tr><th>API</th><th>Endpoint</th><th>Uso</th><th>Auth</th><th>Fallback</th></tr></thead>
+  <tbody>
+    <tr><td><strong>BrasilAPI v2</strong></td><td><code>https://brasilapi.com.br/api/cep/v2/{cep}</code></td><td>Geocodificação por CEP (lat/lng + endereço)</td><td>Nenhuma</td><td>ViaCEP</td></tr>
+    <tr><td><strong>ViaCEP</strong></td><td><code>https://viacep.com.br/ws/{cep}/json/</code></td><td>Endereço por CEP (sem coordenadas)</td><td>Nenhuma</td><td>Mensagem de erro</td></tr>
+    <tr><td><strong>CartoDB Voyager</strong></td><td><code>https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png</code></td><td>Tiles do mapa interativo</td><td>Nenhuma</td><td>Mapa em branco</td></tr>
+    <tr><td><strong>GitHub GeoJSON</strong></td><td><code>https://raw.githubusercontent.com/giuliano-macedo/geodata-br-states/main/geojson/br_states.json</code></td><td>Polígonos dos estados para choropleth</td><td>Nenhuma</td><td>Sem choropleth</td></tr>
+    <tr><td><strong>QR Server API</strong></td><td><code>https://api.qrserver.com/v1/create-qr-code/?size=280x280&data={url}</code></td><td>Geração de QR Code para link do portal</td><td>Nenhuma</td><td>Link apenas (sem QR)</td></tr>
+  </tbody>
+</table>
+
+<h4>BrasilAPI — Response da geocodificação por CEP</h4>
+<pre><code><span class="hl-cmt">// GET https://brasilapi.com.br/api/cep/v2/01310100</span>
+{
+  <span class="hl-prop">"cep"</span>: <span class="hl-str">"01310-100"</span>,
+  <span class="hl-prop">"state"</span>: <span class="hl-str">"SP"</span>,
+  <span class="hl-prop">"city"</span>: <span class="hl-str">"São Paulo"</span>,
+  <span class="hl-prop">"neighborhood"</span>: <span class="hl-str">"Bela Vista"</span>,
+  <span class="hl-prop">"street"</span>: <span class="hl-str">"Avenida Paulista"</span>,
+  <span class="hl-prop">"location"</span>: {
+    <span class="hl-prop">"type"</span>: <span class="hl-str">"Point"</span>,
+    <span class="hl-prop">"coordinates"</span>: {
+      <span class="hl-prop">"longitude"</span>: <span class="hl-str">"-46.6526056"</span>,
+      <span class="hl-prop">"latitude"</span>: <span class="hl-str">"-23.5640265"</span>
+    }
+  }
+}</code></pre>
+
+<h3 id="api-erros">4.5 Padrão de Tratamento de Erros</h3>
+
+<pre><code><span class="hl-cmt">// Padrão de chamada com tratamento completo</span>
+<span class="hl-key">async function</span> <span class="hl-meth">carregarLicLeads</span>() {
+  <span class="hl-key">try</span> {
+    <span class="hl-key">const</span> { data, error } = <span class="hl-key">await</span> supabaseClient
+      .from(<span class="hl-str">'lic_leads'</span>)
+      .select(<span class="hl-str">'*'</span>)
+      .order(<span class="hl-str">'created_at'</span>, { ascending: <span class="hl-num">false</span> });
+
+    <span class="hl-key">if</span> (error) <span class="hl-key">throw</span> error;   <span class="hl-cmt">// erro da API → capturado pelo catch</span>
+
+    baseLicLeads = data || [];
+
+  } <span class="hl-key">catch</span> (e) {
+    <span class="hl-cmt">// showToast = função global de notificação</span>
+    showToast(<span class="hl-str">'Erro ao carregar leads: '</span> + (e.message || e), <span class="hl-str">'error'</span>);
+    baseLicLeads = [];  <span class="hl-cmt">// estado seguro mesmo com erro</span>
+  }
+}
+
+<span class="hl-cmt">// Objeto de erro do Supabase</span>
+{
+  <span class="hl-prop">message</span>: <span class="hl-str">"JWT expired"</span>,       <span class="hl-cmt">// mensagem legível</span>
+  <span class="hl-prop">code</span>:    <span class="hl-str">"PGRST301"</span>,        <span class="hl-cmt">// código PostgREST</span>
+  <span class="hl-prop">hint</span>:    <span class="hl-str">"..."</span>,             <span class="hl-cmt">// dica de resolução</span>
+  <span class="hl-prop">details</span>: <span class="hl-str">"..."</span>              <span class="hl-cmt">// detalhes técnicos</span>
+}</code></pre>
+
+<table>
+  <thead><tr><th>Código HTTP</th><th>Código PostgREST</th><th>Significado</th><th>Ação no frontend</th></tr></thead>
+  <tbody>
+    <tr><td>200</td><td>—</td><td>Sucesso</td><td>Processar data[]</td></tr>
+    <tr><td>201</td><td>—</td><td>Criado com sucesso</td><td>Toast verde + fechar modal</td></tr>
+    <tr><td>204</td><td>—</td><td>Atualizado/Deletado sem body</td><td>Toast verde</td></tr>
+    <tr><td>400</td><td>PGRST100</td><td>Sintaxe inválida na query</td><td>Log console + toast erro</td></tr>
+    <tr><td>401</td><td>PGRST301</td><td>JWT ausente ou inválido</td><td>Redirecionar para login</td></tr>
+    <tr><td>403</td><td>PGRST302</td><td>RLS bloqueou</td><td>Toast "Acesso negado"</td></tr>
+    <tr><td>404</td><td>—</td><td>Registro não encontrado</td><td>Toast "Não encontrado"</td></tr>
+    <tr><td>409</td><td>PGRST204</td><td>Conflito de constraint (UNIQUE)</td><td>Toast com mensagem específica</td></tr>
+    <tr><td>422</td><td>PGRST203</td><td>Violação NOT NULL ou CHECK</td><td>Toast com campo inválido</td></tr>
+    <tr><td>500+</td><td>—</td><td>Erro interno Supabase</td><td>Toast "Erro interno, tente novamente"</td></tr>
+  </tbody>
+</table>
+
+<!-- SEÇÃO 5: SEGURANÇA -->
+<div class="section-divider" id="seguranca">
+  <div class="section-divider-bar"></div>
+  <h2>5. Segurança <span class="section-num">Seção 5</span></h2>
+</div>
+
+<h3 id="sec-jwt">5.1 JWT e Gestão de Sessão</h3>
+
+<div class="sec-card">
+  <div class="sec-head"><span class="sec-icon">🔑</span><span class="sec-title">Ciclo de vida do JWT</span></div>
+  <div class="sec-body">
+    <ul>
+      <li>JWT emitido pelo Supabase Auth após login bem-sucedido com e-mail + senha</li>
+      <li><strong>Expiração:</strong> 3.600 segundos (1 hora) — configurável no Supabase Dashboard</li>
+      <li><strong>Refresh token:</strong> Emitido junto ao JWT; válido por 7 dias; armazenado no localStorage pelo SDK</li>
+      <li><strong>Refresh automático:</strong> O SDK @supabase/supabase-js detecta JWT próximo da expiração e faz refresh transparente antes de qualquer chamada</li>
+      <li><strong>Armazenamento:</strong> <code>localStorage['sb-geojgcncmtbjebftosor-auth-token']</code> — sobrevive ao reload da página</li>
+      <li><strong>Logout:</strong> Remove o item do localStorage E invalida o refresh token no servidor (blacklist)</li>
+    </ul>
+    <pre><code><span class="hl-cmt">// Recuperação de sessão existente (no carregamento da página)</span>
+<span class="hl-key">const</span> { data } = <span class="hl-key">await</span> supabaseClient.auth.getSession();
+<span class="hl-key">if</span> (data?.session) {
+  EMAIL_USUARIO_LOGADO = data.session.user.email.toLowerCase();
+  <span class="hl-key">await</span> carregarPerfil(data.session.user.email);
+  iniciarSistema();
+}</code></pre>
+  </div>
+</div>
+
+<h3 id="sec-acesso">5.2 Controle de Acesso ao Módulo Licenciamento</h3>
+
+<div class="sec-card">
+  <div class="sec-head"><span class="sec-icon">🛡</span><span class="sec-title">Whitelist de acesso — proteção em dupla camada</span></div>
+  <div class="sec-body">
+    <pre><code><span class="hl-cmt">// Camada 1: Botão oculto no HTML</span>
+<span class="hl-key">const</span> LICENCIAMENTO_WHITELIST = [
+  <span class="hl-str">'gppereira@vendemmia.com.br'</span>,
+  <span class="hl-str">'jprado@vendemmia.com.br'</span>
+];
+
+<span class="hl-cmt">// Em aplicarPermissoes() — chamada após login</span>
+mostrar(<span class="hl-str">'nav-licenciamento'</span>, LICENCIAMENTO_WHITELIST
+  .includes(EMAIL_USUARIO_LOGADO));
+
+<span class="hl-cmt">// Camada 2: Guard na função navegar()</span>
+<span class="hl-key">function</span> <span class="hl-meth">navegar</span>(pagina) {
+  <span class="hl-key">if</span> (pagina === <span class="hl-str">'licenciamento'</span> &&
+      !LICENCIAMENTO_WHITELIST.includes(EMAIL_USUARIO_LOGADO)) {
+    <span class="hl-key">return</span>;  <span class="hl-cmt">// bloqueia mesmo se URL for manipulada</span>
+  }
+  <span class="hl-cmt">// ...</span>
+}</code></pre>
+    <div class="ep-field">Limitação e evolução</div>
+    <ul>
+      <li>A whitelist é hardcoded no JavaScript do cliente — visível via DevTools</li>
+      <li>A proteção real é fornecida pelo RLS do PostgreSQL — sem JWT válido, nenhum dado é retornado</li>
+      <li><strong>Evolução recomendada:</strong> Implementar tabela <code>lic_permissoes</code> no banco com perfis de acesso, eliminando o hardcode</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="sec-rls">5.3 Row Level Security — Arquitetura de Políticas</h3>
+
+<table>
+  <thead><tr><th>Tabela</th><th>Política atual</th><th>Risco</th><th>Evolução recomendada</th></tr></thead>
+  <tbody>
+    <tr><td><code>lic_leads</code></td><td>ALL USING (true) — permissiva</td><td><span class="badge badge-amber">Médio</span></td><td>Restringir por <code>auth.email() = ANY(whitelist)</code></td></tr>
+    <tr><td><code>lic_auditoria</code></td><td>ALL USING (true) — permissiva</td><td><span class="badge badge-amber">Médio</span></td><td>Idem</td></tr>
+    <tr><td><code>lic_performance</code></td><td>ALL USING (true) — permissiva</td><td><span class="badge badge-amber">Médio</span></td><td>Idem</td></tr>
+    <tr><td><code>lic_historico</code></td><td>ALL USING (true) — permissiva</td><td><span class="badge badge-amber">Médio</span></td><td>SELECT para todos autenticados; INSERT apenas para autores</td></tr>
+    <tr><td><code>lic_anexos</code></td><td>ALL USING (true) — permissiva</td><td><span class="badge badge-amber">Médio</span></td><td>INSERT anon permitido; DELETE apenas para <code>authenticated</code></td></tr>
+  </tbody>
+</table>
+
+<h4>Implementação futura de RLS granular</h4>
+<pre><code><span class="hl-cmt">-- Política avançada para lic_leads (versão futura)</span>
+<span class="hl-key">CREATE POLICY</span> <span class="hl-str">"lic_leads_whitelist"</span> <span class="hl-key">ON</span> lic_leads
+  <span class="hl-key">FOR ALL</span>
+  <span class="hl-key">TO</span> authenticated
+  <span class="hl-key">USING</span> (
+    auth.email() <span class="hl-key">IN</span> (
+      <span class="hl-key">SELECT</span> email <span class="hl-key">FROM</span> lic_permissoes <span class="hl-key">WHERE</span> ativo = <span class="hl-num">true</span>
+    )
+  )
+  <span class="hl-key">WITH CHECK</span> (
+    auth.email() <span class="hl-key">IN</span> (
+      <span class="hl-key">SELECT</span> email <span class="hl-key">FROM</span> lic_permissoes <span class="hl-key">WHERE</span> ativo = <span class="hl-num">true</span>
+    )
+  );
+
+<span class="hl-cmt">-- Política específica para portal público (anon com token válido)</span>
+<span class="hl-key">CREATE POLICY</span> <span class="hl-str">"lic_leads_portal_anon"</span> <span class="hl-key">ON</span> lic_leads
+  <span class="hl-key">FOR</span> SELECT
+  <span class="hl-key">TO</span> anon
+  <span class="hl-key">USING</span> (form_token <span class="hl-key">IS NOT NULL</span>);
+
+<span class="hl-key">CREATE POLICY</span> <span class="hl-str">"lic_leads_portal_update"</span> <span class="hl-key">ON</span> lic_leads
+  <span class="hl-key">FOR</span> UPDATE
+  <span class="hl-key">TO</span> anon
+  <span class="hl-key">USING</span> (form_token <span class="hl-key">IS NOT NULL</span>)
+  <span class="hl-key">WITH CHECK</span> (form_token <span class="hl-key">IS NOT NULL</span>);</code></pre>
+
+<h3 id="sec-storage">5.4 Segurança de Storage e Uploads</h3>
+
+<div class="sec-card">
+  <div class="sec-head"><span class="sec-icon">📦</span><span class="sec-title">Controles de segurança nos uploads</span></div>
+  <div class="sec-body">
+    <ul>
+      <li><strong>Validação de tipo no frontend:</strong> <code>accept</code> nos inputs file + validação JS antes do upload</li>
+      <li><strong>Validação de tamanho:</strong> Máximo 10 MB no frontend (20 MB para relatório de visita); arquivo maior é rejeitado com alerta</li>
+      <li><strong>Path isolation:</strong> Todos os arquivos sob <code>leads/{lead_id}/</code> — prevenção de path traversal via sanitização do nome</li>
+      <li><strong>Sanitização do nome:</strong> <code>file.name.replace(/[^a-zA-Z0-9._-]/g, '_')</code> — remove chars especiais</li>
+      <li><strong>Timestamp no path:</strong> <code>Date.now()</code> prefixado previne sobrescrita acidental e conflitos de nome</li>
+      <li><strong>upsert: false:</strong> Upload com <code>upsert: false</code> retorna 409 se o path já existir — nunca sobrescreve arquivos existentes</li>
+    </ul>
+    <div class="ep-field">Tipos de arquivo aceitos por categoria</div>
+    <table>
+      <thead><tr><th>Tipo de upload</th><th>Extensões aceitas</th><th>Tamanho máx.</th></tr></thead>
+      <tbody>
+        <tr><td>Contrato Social</td><td>.pdf, .jpg, .jpeg, .png, .doc, .docx</td><td>10 MB</td></tr>
+        <tr><td>Fotos de armazéns</td><td>.jpg, .jpeg, .png, .heic, .webp</td><td>10 MB cada</td></tr>
+        <tr><td>Certificados</td><td>.pdf, .jpg, .jpeg, .png</td><td>10 MB cada</td></tr>
+        <tr><td>Relatório de visita técnica</td><td>.pdf, .doc, .docx</td><td>20 MB</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warning" style="margin-top:10px;">
+      <div class="callout-icon">⚠</div>
+      <p><strong>Ausência de validação server-side de tipo:</strong> A validação de tipo de arquivo é feita apenas no frontend. O Supabase Storage não valida extensões ou MIME types por padrão. Evolução: implementar Supabase Edge Function para validar MIME type no servidor antes de aceitar o upload.</p>
+    </div>
+  </div>
+</div>
+
+<h3 id="sec-lgpd">5.5 LGPD e Privacidade de Dados</h3>
+
+<table>
+  <thead><tr><th>Categoria de dado</th><th>Exemplos</th><th>Base legal (LGPD)</th><th>Medidas implementadas</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Dados pessoais</strong></td><td>Nome do contato, e-mail, telefone, cargo</td><td>Legítimo interesse (prospecção B2B)</td><td>HTTPS em trânsito; RLS no banco; acesso restrito via whitelist</td></tr>
+    <tr><td><strong>Dados empresariais</strong></td><td>CNPJ, razão social, faturamento, armazéns</td><td>Execução de contrato / legítimo interesse</td><td>Mesmas medidas; tratados como confidenciais</td></tr>
+    <tr><td><strong>Documentos</strong></td><td>Contrato Social, certificados, fotos</td><td>Execução de contrato</td><td>Supabase Storage; URLs públicas mas sem indexação; acesso apenas por URL direta</td></tr>
+    <tr><td><strong>Dados de comportamento</strong></td><td>Histórico de eventos, KPIs</td><td>Legítimo interesse (gestão operacional)</td><td>Armazenados no banco com RLS; sem analytics externo</td></tr>
+    <tr><td><strong>Credenciais</strong></td><td>E-mail e senha dos usuários internos</td><td>—</td><td>Gerenciado pelo Supabase Auth; senha nunca armazenada em plaintext; hash bcrypt</td></tr>
+  </tbody>
+</table>
+
+<div class="callout info">
+  <div class="callout-icon">ℹ</div>
+  <p><strong>Direitos dos titulares:</strong> O sistema não possui interface para que parceiros (leads) solicitem exclusão ou acesso aos seus dados diretamente. Estas solicitações devem ser atendidas manualmente pela equipe Vendemmia via painel Supabase. Recomenda-se implementar endpoint de autoexclusão no portal público em versão futura.</p>
+</div>
+
+<h3 id="sec-vulnerabilidades">5.6 Análise de Vulnerabilidades</h3>
+
+<table>
+  <thead><tr><th>Vulnerabilidade</th><th>Status</th><th>Mitigação atual</th><th>Risco residual</th></tr></thead>
+  <tbody>
+    <tr><td><strong>XSS (Cross-Site Scripting)</strong></td><td><span class="badge badge-green">Mitigado</span></td><td>Template literals com interpolação direta de dados do banco — sem innerHTML com dados não sanitizados em campos críticos</td><td>Baixo — dados do banco são inseridos em contexto HTML conhecido</td></tr>
+    <tr><td><strong>SQL Injection</strong></td><td><span class="badge badge-green">Mitigado</span></td><td>Toda comunicação via SDK Supabase com queries parametrizadas; PostgREST nunca executa SQL dinâmico</td><td>Nenhum</td></tr>
+    <tr><td><strong>CSRF</strong></td><td><span class="badge badge-green">Mitigado</span></td><td>SPA com JWT Bearer token no header (não cookie) — CSRF não aplicável para Bearer auth</td><td>Nenhum</td></tr>
+    <tr><td><strong>Exposição da anon key</strong></td><td><span class="badge badge-blue">Aceitável</span></td><td>A anon key é projetada para ser pública — acesso real controlado pelo RLS e pelo JWT. Não é a service_role key</td><td>Baixo — documentado pelo Supabase como seguro para cliente</td></tr>
+    <tr><td><strong>Path traversal em Storage</strong></td><td><span class="badge badge-green">Mitigado</span></td><td>Sanitização do nome do arquivo + path prefixado por lead_id</td><td>Baixo</td></tr>
+    <tr><td><strong>RLS permissivo</strong></td><td><span class="badge badge-amber">Débito técnico</span></td><td>Política permissiva atual; whitelist no frontend como controle principal</td><td>Médio — endereçar na evolução com RLS por e-mail</td></tr>
+    <tr><td><strong>localStorage (JWT)</strong></td><td><span class="badge badge-blue">Aceitável</span></td><td>Padrão do Supabase SDK; alternativa (httpOnly cookie) requer backend próprio</td><td>Baixo no contexto B2B interno</td></tr>
+    <tr><td><strong>Upload de malware</strong></td><td><span class="badge badge-amber">Parcial</span></td><td>Extensões restritivas no frontend; Storage não escaneia vírus</td><td>Médio — evoluir com ClamAV via Edge Function</td></tr>
+  </tbody>
+</table>
+
+<h3 id="sec-auditoria">5.7 Logs e Auditoria</h3>
+
+<table>
+  <thead><tr><th>Fonte de log</th><th>Onde acessar</th><th>Retenção</th><th>O que captura</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Supabase API logs</strong></td><td>Dashboard → Logs → API</td><td>7 dias (Pro)</td><td>Todas as chamadas REST: endpoint, método, status, latência, IP</td></tr>
+    <tr><td><strong>Supabase Auth logs</strong></td><td>Dashboard → Logs → Auth</td><td>7 dias</td><td>Logins, logouts, resets de senha, falhas de autenticação</td></tr>
+    <tr><td><strong>Supabase Postgres logs</strong></td><td>Dashboard → Logs → Postgres</td><td>7 dias</td><td>Queries SQL lentas (&gt;1s), erros de constraint, deadlocks</td></tr>
+    <tr><td><strong>lic_historico (app-level)</strong></td><td>Tabela no banco</td><td>Permanente</td><td>Eventos de negócio: mudanças de etapa, KPIs, certificados, reuniões</td></tr>
+    <tr><td><strong>GitHub Actions</strong></td><td>github.com/Gueilee/pipeline-comercial</td><td>90 dias</td><td>Deploys: commit, autor, timestamp, status</td></tr>
+  </tbody>
+</table>
+
+<!-- SEÇÃO 6: INFRAESTRUTURA -->
+<div class="section-divider" id="infraestrutura">
+  <div class="section-divider-bar"></div>
+  <h2>6. Infraestrutura <span class="section-num">Seção 6</span></h2>
+</div>
+
+<h3 id="infra-hosting">6.1 Hosting e CDN</h3>
+
+<div class="infra-grid">
+  <div class="infra-card">
+    <div class="infra-card-head">
+      <div class="infra-icon" style="background:#f0f9ff;">🌐</div>
+      <div><div class="infra-title">GitHub Pages</div><div class="infra-sub">pipelinevendemmia.com.br</div></div>
+    </div>
+    <ul>
+      <li>Hospedagem de arquivos estáticos (HTML, CSS, JS, imagens)</li>
+      <li>CDN Akamai com PoPs globais — baixa latência no Brasil</li>
+      <li>HTTPS automático via Let's Encrypt</li>
+      <li>Domínio customizado configurado via CNAME</li>
+      <li>SLA implícito: 99,9% (Akamai CDN)</li>
+      <li>Zero custo operacional</li>
+      <li>Sem server-side rendering — apenas arquivos estáticos</li>
+    </ul>
+  </div>
+  <div class="infra-card">
+    <div class="infra-card-head">
+      <div class="infra-icon" style="background:#f0fdf4;">🗄</div>
+      <div><div class="infra-title">Supabase Cloud</div><div class="infra-sub">sa-east-1 (São Paulo)</div></div>
+    </div>
+    <ul>
+      <li>PostgreSQL 17.6.1 gerenciado (sem manutenção operacional)</li>
+      <li>PostgREST auto-configurado sobre todas as tabelas</li>
+      <li>Auth, Storage e Realtime incluídos no plano</li>
+      <li>Região sa-east-1 — latência &lt; 30ms para usuários no Brasil</li>
+      <li>SLA: 99,9% uptime (Plano Pro)</li>
+      <li>Auto-scaling de conexões pelo pgBouncer (pooling)</li>
+      <li>Backups automáticos diários</li>
+    </ul>
+  </div>
+</div>
+
+<h4>Configuração de DNS e domínio</h4>
+<pre><code><span class="hl-cmt"># DNS Records (Registro.br)</span>
+<span class="hl-prop">CNAME</span>  pipelinevendemmia.com.br  →  gueilee.github.io
+<span class="hl-prop">A</span>      pipelinevendemmia.com.br  →  185.199.108.153  <span class="hl-cmt">(GitHub Pages IPs)</span>
+<span class="hl-prop">A</span>      pipelinevendemmia.com.br  →  185.199.109.153
+<span class="hl-prop">A</span>      pipelinevendemmia.com.br  →  185.199.110.153
+<span class="hl-prop">A</span>      pipelinevendemmia.com.br  →  185.199.111.153
+
+<span class="hl-cmt"># Arquivo CNAME no repositório (raiz)</span>
+pipelinevendemmia.com.br</code></pre>
+
+<h3 id="infra-cicd">6.2 CI/CD Pipeline</h3>
+
+<p>O pipeline de CI/CD é extremamente simples: <strong>qualquer push para o branch <code>main</code> dispara o deploy automático via GitHub Actions</strong>, sem testes automatizados no momento.</p>
+
+<pre><code><span class="hl-cmt"># .github/workflows/pages.yml (implícito — GitHub Pages automático)</span>
+
+<span class="hl-prop">Trigger:</span>  git push origin main
+<span class="hl-prop">Build:</span>    Nenhum (arquivos estáticos — sem bundler)
+<span class="hl-prop">Test:</span>     Nenhum (débito técnico — ver Fase 3)
+<span class="hl-prop">Deploy:</span>   GitHub Pages atualiza em 30-60 segundos
+<span class="hl-prop">Rollback:</span> git revert HEAD + push (ou revert via GitHub UI)
+
+<span class="hl-cmt"># Fluxo de deploy</span>
+Developer → git add + git commit → git push origin main
+         → GitHub detecta push no main
+         → GitHub Actions: Pages build job (~30s)
+         → Akamai CDN invalida cache (~60s propagação global)
+         → pipelinevendemmia.com.br atualizado</code></pre>
+
+<h4>Branches e estratégia de versionamento</h4>
+<table>
+  <thead><tr><th>Branch</th><th>Propósito</th><th>Deploy automático</th></tr></thead>
+  <tbody>
+    <tr><td><code>main</code></td><td>Branch principal de produção</td><td>Sim → pipelinevendemmia.com.br</td></tr>
+    <tr><td><code>feature/*</code></td><td>Desenvolvimento de novas funcionalidades (recomendado para evolução)</td><td>Não</td></tr>
+    <tr><td><code>hotfix/*</code></td><td>Correções urgentes em produção</td><td>Não (merge manual para main)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout warning">
+  <div class="callout-icon">⚠</div>
+  <p><strong>Débito técnico — ausência de testes automatizados:</strong> Atualmente não há testes unitários, de integração ou E2E. Todo código vai direto para produção. Recomendado para evolução: implementar Playwright para testes E2E críticos (login, CRUD de lead, geração de PDF) executados no GitHub Actions antes do deploy.</p>
+</div>
+
+<h3 id="infra-ambientes">6.3 Ambientes</h3>
+
+<div class="callout info">
+  <div class="callout-icon">ℹ</div>
+  <p><strong>Ambiente único (Production):</strong> Atualmente o sistema opera com apenas um ambiente — produção. Não há ambiente de desenvolvimento separado (DEV) ou homologação (HML). Esta é uma limitação do estágio atual que deve ser endereçada conforme o sistema escalar.</p>
+</div>
+
+<table>
+  <thead><tr><th>Ambiente</th><th>Status</th><th>URL</th><th>Banco de dados</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Produção (PRD)</strong></td><td><span class="badge badge-green">✅ Ativo</span></td><td>pipelinevendemmia.com.br</td><td>Supabase geojgcncmtbjebftosor (sa-east-1)</td></tr>
+    <tr><td><strong>Homologação (HML)</strong></td><td><span class="badge badge-red">❌ Não existe</span></td><td>—</td><td>Recomendado: Supabase projeto separado</td></tr>
+    <tr><td><strong>Desenvolvimento (DEV)</strong></td><td><span class="badge badge-amber">⚠ Local</span></td><td>file:///index.html</td><td>Mesmo banco de PRD (risco)</td></tr>
+  </tbody>
+</table>
+
+<h4>Estratégia de ambiente recomendada (evolução)</h4>
+<pre><code><span class="hl-cmt">// Separação de ambientes via variável de configuração</span>
+<span class="hl-key">const</span> ENV = {
+  <span class="hl-prop">production</span>: {
+    supabaseUrl: <span class="hl-str">"https://geojgcncmtbjebftosor.supabase.co"</span>,
+    supabaseKey: <span class="hl-str">"eyJ..."</span>  <span class="hl-cmt">// anon key PRD</span>
+  },
+  <span class="hl-prop">staging</span>: {
+    supabaseUrl: <span class="hl-str">"https://STAGING_PROJECT.supabase.co"</span>,
+    supabaseKey: <span class="hl-str">"eyJ..."</span>  <span class="hl-cmt">// anon key HML</span>
+  }
+};
+
+<span class="hl-cmt">// Detectar ambiente via hostname</span>
+<span class="hl-key">const</span> isProd = location.hostname === <span class="hl-str">'pipelinevendemmia.com.br'</span>;
+<span class="hl-key">const</span> config = isProd ? ENV.production : ENV.staging;</code></pre>
+
+<h3 id="infra-monitoramento">6.4 Monitoramento e Observabilidade</h3>
+
+<div class="infra-grid">
+  <div class="infra-card">
+    <div class="infra-card-head">
+      <div class="infra-icon" style="background:#f0fdf4;">📊</div>
+      <div><div class="infra-title">Supabase Dashboard</div><div class="infra-sub">Monitoramento nativo</div></div>
+    </div>
+    <ul>
+      <li><strong>API Logs:</strong> Todas as chamadas REST em tempo real com latência e status</li>
+      <li><strong>Auth Logs:</strong> Eventos de login/logout/falhas</li>
+      <li><strong>Database:</strong> Conexões ativas, queries lentas, tamanho do banco</li>
+      <li><strong>Storage:</strong> Uso total, arquivos por bucket</li>
+      <li><strong>Alertas:</strong> Via Supabase Dashboard (e-mail quando atingir limites do plano)</li>
+    </ul>
+  </div>
+  <div class="infra-card">
+    <div class="infra-card-head">
+      <div class="infra-icon" style="background:#fffbeb;">⚠</div>
+      <div><div class="infra-title">Lacunas de observabilidade</div><div class="infra-sub">Itens sem monitoramento</div></div>
+    </div>
+    <ul>
+      <li>Sem APM (Application Performance Monitoring) no frontend</li>
+      <li>Sem tracking de erros JS (ex: Sentry)</li>
+      <li>Sem métricas de uso por usuário/feature</li>
+      <li>Sem alertas proativos de disponibilidade (UptimeRobot/Pingdom)</li>
+      <li><strong>Recomendado:</strong> Sentry.io (free tier) para captura de erros JS + UptimeRobot para monitoramento de URL</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="infra-backup">6.5 Backup e Disaster Recovery</h3>
+
+<table>
+  <thead><tr><th>Componente</th><th>Estratégia de backup</th><th>Retenção</th><th>RTO estimado</th><th>RPO estimado</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Banco de dados (PostgreSQL)</strong></td><td>Supabase: backup automático diário + PITR (Point-in-Time Recovery)</td><td>7 dias (Pro)</td><td>&lt; 30 minutos</td><td>24 horas (diário)</td></tr>
+    <tr><td><strong>Storage (arquivos)</strong></td><td>Supabase Storage replicado internamente — sem backup externo</td><td>Indefinido (enquanto conta ativa)</td><td>&lt; 1 hora</td><td>Sem backup externo</td></tr>
+    <tr><td><strong>Código-fonte</strong></td><td>GitHub com histórico completo de commits</td><td>Permanente</td><td>&lt; 5 minutos</td><td>Último commit</td></tr>
+    <tr><td><strong>Frontend (CDN)</strong></td><td>GitHub Pages reconstrói automaticamente de qualquer commit</td><td>—</td><td>&lt; 2 minutos</td><td>Último commit</td></tr>
+  </tbody>
+</table>
+
+<h4>Procedimento de Disaster Recovery</h4>
+<pre><code><span class="hl-cmt"># Cenário 1: Banco de dados corrompido / dado excluído incorretamente</span>
+<span class="hl-num">1.</span> Acessar Supabase Dashboard → Settings → Backups
+<span class="hl-num">2.</span> Selecionar backup do dia anterior (ou PITR para ponto específico)
+<span class="hl-num">3.</span> Clicar "Restore" → confirmar
+<span class="hl-num">4.</span> Aguardar restauração (~15-30 minutos)
+<span class="hl-num">5.</span> Verificar integridade dos dados críticos
+<span class="hl-cmt"># RTO: ~30 min | RPO: até 24h de dados</span>
+
+<span class="hl-cmt"># Cenário 2: Deploy com bug crítico em produção</span>
+<span class="hl-num">1.</span> git log --oneline -5  <span class="hl-cmt"># identificar último commit bom</span>
+<span class="hl-num">2.</span> git revert HEAD       <span class="hl-cmt"># ou revert de múltiplos commits</span>
+<span class="hl-num">3.</span> git push origin main  <span class="hl-cmt"># deploy automático do revert</span>
+<span class="hl-num">4.</span> GitHub Pages atualiza em ~60 segundos
+<span class="hl-cmt"># RTO: ~2 min | RPO: 0 (dado não é afetado)</span>
+
+<span class="hl-cmt"># Cenário 3: Supabase indisponível</span>
+<span class="hl-num">1.</span> Frontend carrega normalmente (estático no CDN)
+<span class="hl-num">2.</span> Login falha — usuários não conseguem autenticar
+<span class="hl-num">3.</span> Dados não carregam — sistema operacionalmente inativo
+<span class="hl-num">4.</span> Aguardar recovery do Supabase (SLA 99,9%)
+<span class="hl-cmt"># RTO: depende do Supabase | RPO: 0 (sem escrita durante outage)</span></code></pre>
+
+<!-- PHASE BANNER -->
+<div class="phase-banner">
+  <div>
+    <div class="phase-banner-text">⚙ Fase 2 concluída — APIs, Segurança e Infraestrutura documentadas</div>
+    <div class="phase-banner-sub">Continue com a Fase 3: Estrutura do código, Performance, DevOps, RNF e Plano técnico de evolução</div>
+  </div>
+  <span class="phase-banner-badge">FASE 3 → Código e Evolução</span>
+</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top:52px;padding-top:22px;border-top:2px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:13px;font-weight:800;color:var(--primary);">PIPELINE by Vendemmia</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;font-family:'JetBrains Mono',monospace;">ET-LIC-2026-001 · Versão 1.0 · Fase 2/3 · APIs, Segurança e Infraestrutura</div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-400);text-align:right;">
+    <div>Confidencial — Vendemmia Comércio Internacional Ltda.</div>
+    <div style="margin-top:2px;">pipelinevendemmia.com.br · Maio 2026</div>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+const items=document.querySelectorAll('.sidebar-item[href^="#"]');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){items.forEach(i=>i.classList.remove('active'));const l=document.querySelector('.sidebar-item[href="#'+e.target.id+'"]');if(l)l.classList.add('active');}});},{rootMargin:'-15% 0px -70% 0px'});
+document.querySelectorAll('[id]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
