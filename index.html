@@ -1657,6 +1657,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
                         <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
+                        <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
                     </div>
                 </div>
@@ -10669,6 +10670,57 @@ function renderizarLicDashboard() {
 
 let _licLinkAtual = '';
 
+function abrirModalGerarLink() {
+    // Popula select com leads existentes
+    const sel = document.getElementById('lic-nl-lead-sel');
+    sel.innerHTML = '<option value="">— Criar novo lead com este link —</option>' +
+        baseLicLeads.map(l => `<option value="${l.id}">${l.razao_social || 'Lead #'+l.id}</option>`).join('');
+    document.getElementById('lic-nl-empresa').value = '';
+    document.getElementById('lic-modal-novo-link').style.display = 'flex';
+    setTimeout(() => document.getElementById('lic-nl-empresa').focus(), 100);
+}
+
+async function licCriarEGerarLink() {
+    const btn = document.querySelector('#lic-modal-novo-link button[onclick="licCriarEGerarLink()"]');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando...'; }
+
+    try {
+        const selId = document.getElementById('lic-nl-lead-sel').value;
+        let targetId = selId ? parseInt(selId) : null;
+
+        // Se não selecionou lead existente, cria um novo
+        if (!targetId) {
+            const empresa = document.getElementById('lic-nl-empresa').value.trim();
+            const { data: novo, error: errNovo } = await supabaseClient
+                .from('lic_leads')
+                .insert([{
+                    razao_social: empresa || 'Novo lead via link',
+                    etapa: 'Prospecção',
+                    status: 'Ativo',
+                    form_status: 'pendente',
+                    criado_por: EMAIL_USUARIO_LOGADO,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                }])
+                .select('id')
+                .single();
+            if (errNovo) throw errNovo;
+            targetId = novo.id;
+            // Recarrega lista de leads
+            await carregarLicLeads();
+            renderizarLicenciamento();
+        }
+
+        document.getElementById('lic-modal-novo-link').style.display = 'none';
+        await licGerarLinkForm(targetId);
+
+    } catch(e) {
+        showToast('Erro: ' + (e.message || e), 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🔗 Gerar link agora'; }
+    }
+}
+
 async function licGerarLinkForm(leadId) {
     if (!leadId) return;
     const lead = baseLicLeads.find(l => String(l.id) === String(leadId));
@@ -10803,6 +10855,43 @@ async function salvarNovaSenha() {
 
 <!-- Template para geração de PDF -->
 <div id="lic-pdf-template" style="position:fixed;left:-9999px;top:-9999px;width:794px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#1a1a2e;line-height:1.4;"></div>
+
+<!-- Modal: Criar lead e gerar link -->
+<div id="lic-modal-novo-link" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:700;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:480px;max-width:95vw;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #86efac;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🔗</div>
+            <div>
+                <div style="font-size:17px;font-weight:800;color:#2d1b69;">Gerar link de preenchimento</div>
+                <div style="font-size:12px;color:#6b7280;margin-top:3px;">O lead preencherá os dados diretamente no portal</div>
+            </div>
+            <button onclick="document.getElementById('lic-modal-novo-link').style.display='none'" style="margin-left:auto;width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+
+        <!-- Escolha: lead existente ou novo -->
+        <div style="background:#f5f3ff;border-radius:12px;padding:16px;margin-bottom:18px;border:1.5px solid #e0d9f5;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:10px;">Para qual empresa é o link?</div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:6px;">Nome da empresa (opcional — pode deixar em branco)</label>
+                <input id="lic-nl-empresa" type="text" placeholder="Ex.: Logística ABC Ltda." style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;outline:none;background:#fff;box-sizing:border-box;transition:border-color .2s;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+            </div>
+            <div style="font-size:11px;color:#9b8cc0;">O lead preenche os dados no portal e eles aparecem aqui automaticamente.</div>
+        </div>
+
+        <!-- OU selecionar lead existente -->
+        <div style="margin-bottom:20px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">Ou gerar link para lead já cadastrado</div>
+            <select id="lic-nl-lead-sel" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;outline:none;background:#fff;box-sizing:border-box;cursor:pointer;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                <option value="">— Criar novo lead com este link —</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('lic-modal-novo-link').style.display='none'" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
+            <button onclick="licCriarEGerarLink()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3);">🔗 Gerar link agora</button>
+        </div>
+    </div>
+</div>
 
 <!-- Modal: Link de preenchimento do lead -->
 <div id="lic-modal-link" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:700;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
