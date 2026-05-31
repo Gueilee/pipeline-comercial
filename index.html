@@ -1943,6 +1943,48 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                     </div>
                                 </div>
                                 <div class="lic-sec-body">
+
+                                    <!-- Bloco CEP com autocomplete -->
+                                    <div style="background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:14px;padding:18px;margin-bottom:22px;border:1.5px solid #e0d9f5;">
+                                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                                            <span style="font-size:18px;">📍</span>
+                                            <div>
+                                                <div style="font-size:12px;font-weight:800;color:#2d1b69;">Localização exata no mapa</div>
+                                                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Digite o CEP para auto-preencher endereço e fixar o ponto no mapa</div>
+                                            </div>
+                                        </div>
+                                        <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:12px;">
+                                            <div style="flex:1;">
+                                                <label class="lic-field-label" style="margin-bottom:8px;">CEP</label>
+                                                <input class="lic-in lic-tracked" id="lf-cep" placeholder="00000-000" maxlength="9"
+                                                    oninput="licMascaraCEP(this)"
+                                                    style="font-family:'Courier New',monospace;font-size:16px;letter-spacing:2px;font-weight:700;">
+                                            </div>
+                                            <button onclick="licBuscarCEP(document.getElementById('lf-cep').value)" id="lic-cep-btn"
+                                                style="padding:10px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 3px 10px rgba(105,65,198,.3);">
+                                                🔍 Buscar CEP
+                                            </button>
+                                        </div>
+                                        <!-- Preview após busca -->
+                                        <div id="lic-cep-preview" style="display:none;padding:10px 12px;background:#fff;border-radius:10px;border-left:3px solid #16a34a;font-size:12px;color:#2d1b69;line-height:1.5;"></div>
+                                        <!-- Campos de endereço preenchidos automaticamente -->
+                                        <div id="lic-cep-fields" style="display:none;margin-top:14px;">
+                                            <div class="lic-field-row" style="margin-bottom:12px;">
+                                                <div>
+                                                    <label class="lic-field-label" style="margin-bottom:6px;">LOGRADOURO</label>
+                                                    <input class="lic-in" id="lf-endereco_logradouro" placeholder="Rua, Avenida, Rodovia...">
+                                                </div>
+                                                <div>
+                                                    <label class="lic-field-label" style="margin-bottom:6px;">BAIRRO</label>
+                                                    <input class="lic-in" id="lf-endereco_bairro" placeholder="Bairro / Distrito">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Campos ocultos de coordenadas -->
+                                        <input type="hidden" id="lf-lat">
+                                        <input type="hidden" id="lf-lng">
+                                    </div>
+
                                     <div class="lic-field-row">
                                         <div>
                                             <label class="lic-field-label">UF principal *</label>
@@ -9010,8 +9052,25 @@ function _licPreencherForm(lead) {
     set('lf-contato_nome', lead.contato_nome); set('lf-contato_cargo', lead.contato_cargo);
     set('lf-contato_email', lead.contato_email); set('lf-contato_telefone', lead.contato_telefone);
     set('lf-decisor_info', lead.decisor_info);
+    set('lf-cep', lead.cep); set('lf-lat', lead.lat||''); set('lf-lng', lead.lng||'');
+    set('lf-endereco_logradouro', lead.endereco_logradouro); set('lf-endereco_bairro', lead.endereco_bairro);
     set('lf-uf', lead.uf); set('lf-polo_logistico', lead.polo_logistico);
     set('lf-regiao_exclusividade', lead.regiao_exclusividade); set('lf-outras_ufs', lead.outras_ufs);
+    // Mostra campos de endereço se CEP já estava preenchido
+    if (lead.cep) {
+        const f = document.getElementById('lic-cep-fields');
+        const p = document.getElementById('lic-cep-preview');
+        if (f) f.style.display = '';
+        if (p) {
+            p.style.display = '';
+            p.style.borderLeftColor = '#6941c6';
+            const hasCoords = lead.lat && lead.lng;
+            p.innerHTML = `<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#6941c6;font-weight:600;">
+                <span>📍</span>${lead.cep}${lead.polo_logistico?' · '+lead.polo_logistico:''}${lead.uf?' — '+lead.uf:''}
+                ${hasCoords?'<span style="color:#16a34a;margin-left:4px;">· Coordenadas salvas ✓</span>':''}
+            </div>`;
+        }
+    }
     set('lf-obs_cargas', lead.obs_cargas); set('lf-wms_atual', lead.wms_atual); set('lf-erp_atual', lead.erp_atual);
     set('lf-otif_pct', lead.otif_pct); set('lf-acuracidade_pct', lead.acuracidade_pct);
     set('lf-fee_mensal', lead.fee_mensal); set('lf-motivo_perda', lead.motivo_perda);
@@ -9070,6 +9129,8 @@ function _licGetFormData() {
         contato_nome: g('lf-contato_nome'), contato_cargo: g('lf-contato_cargo'),
         contato_email: g('lf-contato_email'), contato_telefone: g('lf-contato_telefone'),
         decisor: gr('lf-decisor'), decisor_info: g('lf-decisor_info'),
+        cep: g('lf-cep'), lat: parseFloat(g('lf-lat')) || null, lng: parseFloat(g('lf-lng')) || null,
+        endereco_logradouro: g('lf-endereco_logradouro'), endereco_bairro: g('lf-endereco_bairro'),
         uf: g('lf-uf'), polo_logistico: g('lf-polo_logistico'),
         regiao_exclusividade: g('lf-regiao_exclusividade'), outras_ufs: g('lf-outras_ufs'),
         armazens, area_total_m2: areaTotal,
@@ -9236,6 +9297,107 @@ function licUpdateImplant() {
 function licToggleWms(show) {
     const b = document.getElementById('lic-wms-block');
     if (b) b.style.display = show ? '' : 'none';
+}
+
+// ── CEP — Busca e geocodificação ────────────────────────────────
+
+function licMascaraCEP(input) {
+    let v = input.value.replace(/\D/g, '').substring(0, 8);
+    if (v.length > 5) v = v.substring(0, 5) + '-' + v.substring(5);
+    input.value = v;
+    if (v.replace(/\D/g, '').length === 8) licBuscarCEP(v);
+}
+
+async function licBuscarCEP(cep) {
+    const raw = (cep || '').replace(/\D/g, '');
+    if (raw.length !== 8) return;
+
+    const btn = document.getElementById('lic-cep-btn');
+    const preview = document.getElementById('lic-cep-preview');
+    const fields  = document.getElementById('lic-cep-fields');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
+    if (preview) { preview.style.display = 'none'; }
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+
+    try {
+        // BrasilAPI v2 — retorna coordenadas exatas
+        const resp = await fetch(`https://brasilapi.com.br/api/cep/v2/${raw}`);
+        if (!resp.ok) throw new Error('CEP não encontrado');
+        const d = await resp.json();
+        if (d.error) throw new Error(d.message || 'CEP inválido');
+
+        // Preenche campos do formulário
+        set('lf-uf', d.state);
+        set('lf-polo_logistico', d.city);
+        set('lf-endereco_logradouro', d.street || '');
+        set('lf-endereco_bairro', d.neighborhood || '');
+
+        // Salva coordenadas exatas se disponíveis
+        const lat = d.location?.coordinates?.latitude;
+        const lng = d.location?.coordinates?.longitude;
+        set('lf-lat', lat || '');
+        set('lf-lng', lng || '');
+
+        // Mostra campos de endereço
+        if (fields) fields.style.display = '';
+
+        // Preview bonito
+        if (preview) {
+            const hasCoords = lat && lng;
+            preview.style.display = '';
+            preview.innerHTML = `
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                    <span style="font-size:20px;flex-shrink:0;">✅</span>
+                    <div>
+                        <div style="font-weight:700;color:#166534;font-size:13px;margin-bottom:3px;">${raw.substring(0,5)}-${raw.substring(5)} · ${d.city} — ${d.state}</div>
+                        ${d.street ? `<div style="color:#6b7280;font-size:11px;">${d.street}${d.neighborhood ? ', '+d.neighborhood : ''}</div>` : ''}
+                        <div style="margin-top:5px;font-size:10px;font-weight:700;${hasCoords ? 'color:#6941c6;' : 'color:#d97706;'}">
+                            ${hasCoords
+                                ? `📍 Coordenadas encontradas — ponto exato no mapa (${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)})`
+                                : '⚠ Coordenadas não disponíveis — será usado o centro da cidade'}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        showToast(`CEP encontrado: ${d.city} — ${d.state}${lat ? ' · Coordenadas OK' : ''}`, 'success');
+
+    } catch(e) {
+        // Fallback: ViaCEP (sem coordenadas)
+        try {
+            const r2 = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+            const d2 = await r2.json();
+            if (d2.erro) throw new Error('CEP não encontrado');
+
+            set('lf-uf', d2.uf);
+            set('lf-polo_logistico', d2.localidade);
+            set('lf-endereco_logradouro', d2.logradouro || '');
+            set('lf-endereco_bairro', d2.bairro || '');
+            set('lf-lat', ''); set('lf-lng', '');
+
+            if (fields) fields.style.display = '';
+            if (preview) {
+                preview.style.display = '';
+                preview.style.borderLeftColor = '#d97706';
+                preview.innerHTML = `
+                    <div style="display:flex;align-items:flex-start;gap:10px;">
+                        <span style="font-size:20px;flex-shrink:0;">⚠️</span>
+                        <div>
+                            <div style="font-weight:700;color:#92400e;font-size:13px;margin-bottom:2px;">${raw.substring(0,5)}-${raw.substring(5)} · ${d2.localidade} — ${d2.uf}</div>
+                            ${d2.logradouro ? `<div style="color:#6b7280;font-size:11px;">${d2.logradouro}${d2.bairro ? ', '+d2.bairro : ''}</div>` : ''}
+                            <div style="margin-top:4px;font-size:10px;color:#d97706;font-weight:600;">Sem coordenadas exatas — será usado o centro da cidade no mapa</div>
+                        </div>
+                    </div>`;
+            }
+            showToast(`CEP encontrado via ViaCEP: ${d2.localidade} — ${d2.uf}`, 'info');
+        } catch(e2) {
+            showToast('CEP não encontrado. Verifique o número.', 'error');
+            if (preview) { preview.style.display = 'none'; }
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🔍 Buscar CEP'; }
+    }
 }
 
 // ── Anexos de Licenciamento ───────────────────────────────────────
@@ -9794,6 +9956,12 @@ let _licMapAllAnexos  = [];        // todos os anexos carregados
 let _licMapHoverTimer = null;
 
 function _licGetCoords(lead) {
+    // 1. Coordenadas exatas do CEP — maior precisão
+    if (lead.lat && lead.lng) {
+        const la = parseFloat(lead.lat), lo = parseFloat(lead.lng);
+        if (!isNaN(la) && !isNaN(lo)) return [la, lo];
+    }
+    // 2. Polo logístico no dicionário interno
     const polo = (lead.polo_logistico||'').trim();
     if (polo) {
         const exact = _LIC_POLO_COORDS[polo];
@@ -9801,6 +9969,7 @@ function _licGetCoords(lead) {
         const key = Object.keys(_LIC_POLO_COORDS).find(k=>polo.toLowerCase().includes(k.toLowerCase())||k.toLowerCase().includes(polo.toLowerCase()));
         if (key) return [_LIC_POLO_COORDS[key][0]+(Math.random()-.5)*.04,_LIC_POLO_COORDS[key][1]+(Math.random()-.5)*.04];
     }
+    // 3. Fallback: capital do estado
     if (lead.uf && _LIC_UF_COORDS[lead.uf]) {
         const c = _LIC_UF_COORDS[lead.uf];
         return [c[0]+(Math.random()-.5)*.35,c[1]+(Math.random()-.5)*.35];
