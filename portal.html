@@ -25,17 +25,51 @@ body{font-family:'DM Sans',sans-serif;background:#f5f3ff;color:#1a1a2e;font-size
 .error-card{background:#fff;border-radius:20px;padding:40px;text-align:center;max-width:460px;margin:24px;}
 
 /* ── WELCOME ── */
-#screen-welcome{background:linear-gradient(145deg,#1a0f3d 0%,#2d1b69 35%,#6941c6 100%);}
-.welcome-inner{max-width:680px;margin:0 auto;padding:48px 28px;text-align:center;position:relative;}
-.welcome-logo{height:40px;margin-bottom:32px;filter:brightness(0) invert(1);}
-.welcome-title{font-size:32px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:12px;letter-spacing:-.5px;}
-.welcome-sub{font-size:15px;color:rgba(255,255,255,.7);margin-bottom:36px;line-height:1.6;}
-.welcome-company{font-size:18px;font-weight:800;color:#fde68a;margin-bottom:8px;}
-.welcome-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:28px 0;}
-.welcome-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 18px;color:#fff;font-size:13px;font-weight:600;}
-.btn-start{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#2d1b69;border:none;border-radius:14px;padding:16px 36px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.2);transition:transform .15s,box-shadow .15s;}
-.btn-start:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.28);}
-.welcome-footer{margin-top:40px;font-size:11px;color:rgba(255,255,255,.35);}
+#screen-welcome{background:#060212;overflow:hidden;position:relative;}
+.welcome-bg{position:absolute;inset:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,#6941c6 0%,transparent 70%);top:-200px;left:-150px;animation:orbFloat 12s ease-in-out infinite;opacity:.55;}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,#2d1b69 0%,transparent 70%);bottom:-150px;right:-100px;animation:orbFloat 15s ease-in-out infinite reverse;opacity:.65;}
+.orb-3{width:350px;height:350px;background:radial-gradient(circle,#9b5de5 0%,transparent 70%);top:45%;left:35%;animation:orbFloat 10s ease-in-out infinite 2s;opacity:.4;}
+.orb-4{width:220px;height:220px;background:radial-gradient(circle,#16a34a 0%,transparent 70%);top:15%;right:12%;animation:orbFloat 18s ease-in-out infinite 1s;opacity:.35;}
+.orb-5{width:280px;height:280px;background:radial-gradient(circle,#fde68a 0%,transparent 70%);bottom:25%;left:8%;animation:orbFloat 13s ease-in-out infinite 3.5s;opacity:.22;}
+.orb-6{width:180px;height:180px;background:radial-gradient(circle,#0891b2 0%,transparent 70%);top:60%;right:25%;animation:orbFloat 9s ease-in-out infinite 0.5s;opacity:.28;}
+@keyframes orbFloat{
+    0%,100%{transform:translate(0,0) scale(1);}
+    25%{transform:translate(40px,-60px) scale(1.08);}
+    50%{transform:translate(-30px,25px) scale(.93);}
+    75%{transform:translate(55px,40px) scale(1.05);}
+}
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:64px 64px;}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 40%,rgba(6,2,18,.6) 100%);}
+
+.welcome-inner{max-width:700px;margin:0 auto;padding:52px 28px 60px;text-align:center;position:relative;z-index:2;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.welcome-inner>*{animation:fadeUp .7s ease both;}
+.welcome-inner>*:nth-child(1){animation-delay:.05s;}
+.welcome-inner>*:nth-child(2){animation-delay:.15s;}
+.welcome-inner>*:nth-child(3){animation-delay:.25s;}
+.welcome-inner>*:nth-child(4){animation-delay:.35s;}
+.welcome-inner>*:nth-child(5){animation-delay:.45s;}
+.welcome-inner>*:nth-child(6){animation-delay:.55s;}
+.welcome-inner>*:nth-child(7){animation-delay:.65s;}
+
+.welcome-logo{height:42px;margin-bottom:36px;filter:brightness(0) invert(1);drop-shadow(0 0 20px rgba(155,93,229,.5));}
+.portal-logo-text{font-size:22px;font-weight:900;color:#fff;letter-spacing:.04em;margin-bottom:36px;text-shadow:0 0 30px rgba(155,93,229,.6);}
+.portal-logo-text span{font-size:11px;font-weight:400;opacity:.5;display:block;margin-top:2px;letter-spacing:.08em;text-transform:uppercase;}
+.welcome-eyebrow{display:inline-flex;align-items:center;gap:6px;background:rgba(105,65,198,.25);border:1px solid rgba(155,93,229,.4);border-radius:20px;padding:6px 16px;font-size:11px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;backdrop-filter:blur(8px);}
+.welcome-company{font-size:20px;font-weight:800;color:#fde68a;margin-bottom:6px;text-shadow:0 0 20px rgba(253,230,138,.4);}
+.welcome-title{font-size:36px;font-weight:900;color:#fff;line-height:1.15;margin-bottom:14px;letter-spacing:-.8px;text-shadow:0 2px 20px rgba(0,0,0,.3);}
+.welcome-sub{font-size:15px;color:rgba(255,255,255,.65);margin-bottom:0;line-height:1.7;max-width:540px;margin:0 auto;}
+.welcome-badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:32px 0;}
+.welcome-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 18px;color:rgba(255,255,255,.85);font-size:12px;font-weight:600;backdrop-filter:blur(10px);}
+.welcome-badge-icon{font-size:16px;}
+@keyframes btnGlow{0%,100%{box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 0 rgba(255,255,255,.2);}50%{box-shadow:0 8px 40px rgba(0,0,0,.4),0 0 0 8px rgba(255,255,255,.04);}}
+.btn-start{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,#fff 0%,#f0ebff 100%);color:#2d1b69;border:none;border-radius:16px;padding:18px 40px;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:900;cursor:pointer;animation:btnGlow 3s ease-in-out infinite;transition:transform .15s;}
+.btn-start:hover{transform:translateY(-3px) scale(1.02);}
+.btn-start-arrow{font-size:20px;transition:transform .2s;}
+.btn-start:hover .btn-start-arrow{transform:translateX(4px);}
+.welcome-footer{margin-top:40px;font-size:11px;color:rgba(255,255,255,.28);}
 
 /* ── FORM ── */
 #screen-form{background:#f5f3ff;}
@@ -110,6 +144,17 @@ textarea.p-input:focus{border-color:#6941c6;}
 .p-wh-body{padding:18px;}
 .p-add-wh{width:100%;padding:11px;border:2px dashed #d4b8f5;border-radius:10px;background:transparent;color:#7c5cbf;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s;margin-bottom:18px;}
 
+/* Upload de anexos */
+.p-upload-zone{border:2px dashed #d4b8f5;border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:#faf8ff;transition:all .15s;margin-top:6px;}
+.p-upload-zone:hover{border-color:#6941c6;background:#f0ebff;}
+.p-upload-zone.dragover{border-color:#6941c6;background:#f0ebff;}
+.p-file-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#f5f3ff;border:1.5px solid #e8e0f5;border-radius:10px;margin-top:8px;}
+.p-file-icon{font-size:18px;flex-shrink:0;}
+.p-file-name{flex:1;font-size:12px;color:#2d1b69;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.p-file-size{font-size:10px;color:#9b8cc0;white-space:nowrap;}
+.p-file-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;}
+.p-file-del{font-size:12px;cursor:pointer;color:#dc2626;background:#fef2f2;border:1px solid #fca5a5;padding:3px 7px;border-radius:5px;}
+
 /* Nav buttons */
 .form-nav{display:flex;gap:10px;margin-top:8px;}
 .btn-prev{padding:12px 22px;border:1.5px solid #e0d9f5;border-radius:12px;background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#6941c6;cursor:pointer;}
@@ -155,7 +200,7 @@ textarea.p-input:focus{border-color:#6941c6;}
         <div style="font-size:48px;margin-bottom:16px;">🔗</div>
         <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-bottom:8px;">Link inválido ou expirado</div>
         <div style="font-size:13px;color:#6b7280;line-height:1.6;">Este link não existe ou foi desativado. Entre em contato com o responsável comercial da Vendemmia para solicitar um novo link.</div>
-        <div style="margin-top:24px;"><img src="Pipeline.png" style="height:28px;" onerror="this.style.display='none'"></div>
+        <div style="margin-top:24px;"><img src="https://pipelinevendemmia.com.br/Pipeline.png" style="height:28px;" onerror="this.outerHTML='<div style=font-size:14px;font-weight:900;color:#2d1b69;>PIPELINE</div>'"></div>
     </div>
 </div>
 
@@ -171,20 +216,40 @@ textarea.p-input:focus{border-color:#6941c6;}
 
 <!-- WELCOME -->
 <div id="screen-welcome" class="screen">
+    <!-- Orbs animados -->
+    <div class="welcome-bg" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="orb orb-4"></div>
+        <div class="orb orb-5"></div>
+        <div class="orb orb-6"></div>
+        <div class="grid-overlay"></div>
+        <div class="vignette"></div>
+    </div>
     <div class="welcome-inner">
-        <img src="Pipeline.png" class="welcome-logo" onerror="this.style.display='none'">
+        <!-- Logo -->
+        <img src="https://pipelinevendemmia.com.br/Pipeline.png" class="welcome-logo"
+             onerror="this.outerHTML='<div class=\'portal-logo-text\'>PIPELINE<span>by vendemmia</span></div>'">
+        <!-- Eyebrow -->
+        <div class="welcome-eyebrow"><span>🤝</span> Rede de Licenciamento Vendemmia</div>
+        <!-- Company name (preenchido via JS) -->
         <div id="welcome-company" class="welcome-company"></div>
+        <!-- Title -->
         <h1 class="welcome-title">Formulário de Cadastro<br>de Parceiro Logístico</h1>
-        <p class="welcome-sub">Preencha as informações da sua empresa para que nossa equipe possa avaliar a parceria com a <strong style="color:#fde68a;">Rede de Licenciamento Vendemmia</strong>.</p>
+        <!-- Sub -->
+        <p class="welcome-sub">Preencha as informações da sua empresa para que nossa equipe possa avaliar a parceria com a <strong style="color:#fde68a;">Rede de Licenciamento Vendemmia</strong>. Leva apenas 10–15 minutos.</p>
+        <!-- Badges -->
         <div class="welcome-badges">
-            <div class="welcome-badge"><span>🔒</span> Dados protegidos</div>
-            <div class="welcome-badge"><span>💾</span> Salvo automaticamente</div>
-            <div class="welcome-badge"><span>⏱</span> ~10–15 minutos</div>
-            <div class="welcome-badge"><span>📱</span> Funciona no celular</div>
+            <div class="welcome-badge"><span class="welcome-badge-icon">🔒</span> Dados protegidos</div>
+            <div class="welcome-badge"><span class="welcome-badge-icon">💾</span> Salvo automaticamente</div>
+            <div class="welcome-badge"><span class="welcome-badge-icon">📎</span> Envio de documentos</div>
+            <div class="welcome-badge"><span class="welcome-badge-icon">📱</span> Funciona no celular</div>
         </div>
+        <!-- CTA -->
         <button class="btn-start" onclick="iniciarForm()">
             <span>Começar preenchimento</span>
-            <span>→</span>
+            <span class="btn-start-arrow">→</span>
         </button>
         <div class="welcome-footer">Vendemmia Comércio Internacional Ltda · pipelinevendemmia.com.br</div>
     </div>
@@ -193,7 +258,7 @@ textarea.p-input:focus{border-color:#6941c6;}
 <!-- FORMULÁRIO -->
 <div id="screen-form" class="screen">
     <div class="form-topbar">
-        <img src="Pipeline.png" class="form-logo" onerror="this.style.display='none'">
+        <img src="https://pipelinevendemmia.com.br/Pipeline.png" class="form-logo" onerror="this.style.display='none'">
         <div id="form-step-info" class="form-step-info">Etapa 1 de 7</div>
     </div>
     <div class="form-progress-wrap">
@@ -230,6 +295,20 @@ textarea.p-input:focus{border-color:#6941c6;}
                             <option>R$ 20M – R$ 50M</option><option>R$ 50M – R$ 100M</option><option>Acima de R$ 100M</option>
                         </select>
                     </div>
+                    <!-- Upload: Contrato Social -->
+                    <div class="p-divider">Contrato Social</div>
+                    <div class="p-upload-zone" id="p-uz-contrato"
+                        onclick="document.getElementById('p-fi-contrato').click()"
+                        ondragover="pUzOver(event,'p-uz-contrato')"
+                        ondragleave="pUzLeave('p-uz-contrato')"
+                        ondrop="pUzDrop(event,'contrato_social','p-uz-contrato')">
+                        <div style="font-size:26px;margin-bottom:6px;">📄</div>
+                        <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:3px;">Anexar Contrato Social</div>
+                        <div style="font-size:11px;color:#9b8cc0;">PDF, JPG, PNG, DOC — máx. 10 MB</div>
+                        <input type="file" id="p-fi-contrato" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple style="display:none;" onchange="pFileSel('contrato_social',this.files)">
+                    </div>
+                    <div id="p-fl-contrato_social"></div>
+
                     <div class="p-divider">Segmentos atendidos</div>
                     <div class="p-chips" id="p-segmentos">
                         <label class="p-chip"><input type="checkbox" value="Armazenagem"><span>Armazenagem</span></label>
@@ -462,6 +541,20 @@ textarea.p-input:focus{border-color:#6941c6;}
                         <div><label class="p-label">OTIF médio atual (%)</label><input class="p-input" id="p-otif_pct" type="number" min="0" max="100" placeholder="Ex.: 96"></div>
                         <div><label class="p-label">Acuracidade de inventário (%)</label><input class="p-input" id="p-acuracidade_pct" type="number" min="0" max="100" placeholder="Ex.: 99"></div>
                     </div>
+                    <!-- Upload: Certificados -->
+                    <div class="p-divider">Documentos de certificação (opcional)</div>
+                    <div class="p-upload-zone" id="p-uz-cert"
+                        onclick="document.getElementById('p-fi-cert').click()"
+                        ondragover="pUzOver(event,'p-uz-cert')"
+                        ondragleave="pUzLeave('p-uz-cert')"
+                        ondrop="pUzDrop(event,'certificado','p-uz-cert')">
+                        <div style="font-size:26px;margin-bottom:6px;">🏆</div>
+                        <div style="font-size:13px;font-weight:700;color:#6941c6;margin-bottom:3px;">Anexar certificados ativos</div>
+                        <div style="font-size:11px;color:#9b8cc0;">PDF, JPG, PNG — múltiplos arquivos, máx. 10 MB cada</div>
+                        <input type="file" id="p-fi-cert" accept=".pdf,.jpg,.jpeg,.png" multiple style="display:none;" onchange="pFileSel('certificado',this.files)">
+                    </div>
+                    <div id="p-fl-certificado"></div>
+
                     <div class="p-divider">Mensagem para a equipe Vendemmia (opcional)</div>
                     <textarea class="p-input" id="p-observacoes" rows="4" placeholder="Informações adicionais, diferenciais competitivos, expectativas da parceria…"></textarea>
                 </div>
@@ -482,7 +575,7 @@ textarea.p-input:focus{border-color:#6941c6;}
         <div class="thanks-title">Formulário enviado!</div>
         <div class="thanks-sub" id="thanks-msg">Suas informações foram recebidas pela equipe Vendemmia. Em breve entraremos em contato para dar continuidade ao processo de parceria.</div>
         <div class="thanks-badge"><span>🤝</span> Aguarde o contato da nossa equipe</div>
-        <div style="margin-top:28px;"><img src="Pipeline.png" style="height:24px;opacity:.6;" onerror="this.style.display='none'"></div>
+        <div style="margin-top:28px;"><img src="https://pipelinevendemmia.com.br/Pipeline.png" style="height:24px;opacity:.6;" onerror="this.outerHTML='<div style=font-size:12px;font-weight:900;color:#9ca3af;>PIPELINE</div>'"></div>
         <div style="margin-top:8px;font-size:11px;color:#9ca3af;">Vendemmia Comércio Internacional Ltda.</div>
     </div>
 </div>
@@ -642,6 +735,7 @@ async function portalSubmeter() {
         data.form_filled_at = new Date().toISOString();
         const { error } = await sb.from('lic_leads').update(data).eq('id', leadId);
         if (error) throw error;
+        await pUploadTodos(); // envia arquivos pendentes
         const name = document.getElementById('p-razao_social')?.value || '';
         if (name) {
             document.getElementById('thanks-msg').textContent =
@@ -771,6 +865,19 @@ function portalAddWh(d) {
                 <div><label class="p-label" style="margin-bottom:6px;">Capacidade de páletes</label><input class="p-input pwh-paletes" type="number" placeholder="Ex.: 3000" value="${dd.paletes||''}"></div>
                 <div><label class="p-label" style="margin-bottom:6px;">Pé-direito (m)</label><input class="p-input pwh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${dd.pe_direito||''}"></div>
             </div>
+            <div style="border-top:1px solid #f0ebff;padding-top:14px;margin-top:4px;">
+                <label class="p-label" style="margin-bottom:8px;">FOTOS DESTE ARMAZÉM</label>
+                <div class="p-upload-zone" id="p-uz-wh${n}" style="padding:14px;"
+                    onclick="document.getElementById('p-fi-wh${n}').click()"
+                    ondragover="pUzOver(event,'p-uz-wh${n}')" ondragleave="pUzLeave('p-uz-wh${n}')"
+                    ondrop="pUzDrop(event,'foto_armazem_${n}','p-uz-wh${n}')">
+                    <div style="font-size:22px;margin-bottom:4px;">📷</div>
+                    <div style="font-size:12px;font-weight:700;color:#6941c6;margin-bottom:2px;">Fotos do Armazém ${n}</div>
+                    <div style="font-size:10px;color:#9b8cc0;">JPG, PNG, HEIC — múltiplas, máx. 10 MB cada</div>
+                    <input type="file" id="p-fi-wh${n}" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;" onchange="pFileSel('foto_armazem_${n}',this.files)">
+                </div>
+                <div id="p-fl-foto_armazem_${n}"></div>
+            </div>
         </div>`;
     document.getElementById('p-wh-container').appendChild(div);
     portalUpdateSummary();
@@ -791,6 +898,72 @@ function portalUpdateSummary() {
     const sa=document.getElementById('p-sum-area'); if(sa) sa.textContent=area>0?area.toLocaleString('pt-BR')+' m²':'—';
     const sd=document.getElementById('p-sum-docas'); if(sd) sd.textContent=docas>0?docas:'—';
     const so=document.getElementById('p-sum-ocup'); if(so) so.textContent=avg!==null?avg+'%':'—';
+}
+
+// ── Upload de anexos ───────────────────────────────────────────
+
+let _pFiles = {}; // { tipo: File[] }
+
+function pUzOver(e, id) { e.preventDefault(); document.getElementById(id)?.classList.add('dragover'); }
+function pUzLeave(id) { document.getElementById(id)?.classList.remove('dragover'); }
+function pUzDrop(e, tipo, id) { e.preventDefault(); document.getElementById(id)?.classList.remove('dragover'); pFileSel(tipo, e.dataTransfer.files); }
+
+function pFileSel(tipo, files) {
+    if (!files || !files.length) return;
+    const MAX = 10 * 1024 * 1024;
+    if (!_pFiles[tipo]) _pFiles[tipo] = [];
+    [...files].forEach(f => {
+        if (f.size > MAX) { alert(`"${f.name}" excede 10 MB e foi ignorado.`); return; }
+        _pFiles[tipo].push(f);
+    });
+    pRenderFileList(tipo);
+}
+
+function pRenderFileList(tipo) {
+    const el = document.getElementById('p-fl-' + tipo);
+    if (!el) return;
+    const files = _pFiles[tipo] || [];
+    if (!files.length) { el.innerHTML = ''; return; }
+    el.innerHTML = files.map((f,i) => {
+        const ext = (f.name.split('.').pop()||'').toLowerCase();
+        const icon = ['jpg','jpeg','png','heic'].includes(ext) ? '🖼️' : ext==='pdf' ? '📄' : '📎';
+        const kb = f.size >= 1e6 ? (f.size/1e6).toFixed(1)+' MB' : Math.round(f.size/1024)+' KB';
+        return `<div class="p-file-item">
+            <span class="p-file-icon">${icon}</span>
+            <span class="p-file-name">${f.name}</span>
+            <span class="p-file-size">${kb}</span>
+            <span class="p-file-status" style="background:#f0ebff;color:#6941c6;">pendente</span>
+            <button class="p-file-del" onclick="pRemoveFile('${tipo}',${i})">✕</button>
+        </div>`;
+    }).join('');
+}
+
+function pRemoveFile(tipo, idx) {
+    if (_pFiles[tipo]) { _pFiles[tipo].splice(idx, 1); pRenderFileList(tipo); }
+}
+
+async function pUploadTodos() {
+    if (!leadId) return;
+    let count = 0;
+    for (const [tipo, files] of Object.entries(_pFiles)) {
+        if (!files.length) continue;
+        for (const file of files) {
+            try {
+                const safe = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+                const path = `leads/${leadId}/${tipo}/${Date.now()}_${safe}`;
+                const { error: upErr } = await sb.storage.from('lic-anexos').upload(path, file, { cacheControl:'3600', upsert:false });
+                if (upErr) { console.warn('Upload error:', upErr.message); continue; }
+                const { data: urlData } = sb.storage.from('lic-anexos').getPublicUrl(path);
+                await sb.from('lic_anexos').insert([{
+                    lead_id: leadId, tipo, nome_arquivo: file.name,
+                    url: urlData.publicUrl, storage_path: path, tamanho_bytes: file.size
+                }]);
+                count++;
+            } catch(e) { console.warn('Erro no upload:', e); }
+        }
+    }
+    _pFiles = {};
+    if (count > 0) console.log(`${count} arquivo(s) enviado(s).`);
 }
 
 // ── Init ────────────────────────────────────────────────────────
