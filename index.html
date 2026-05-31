@@ -817,15 +817,41 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
 /* Mapa */
 #lic-mapa-container { z-index:1; }
+
+/* Barra de busca do mapa */
+.lic-map-searchbar { background:#fff; border-bottom:1px solid #ede8f8; padding:10px 20px; display:flex; align-items:center; gap:10px; flex-shrink:0; flex-wrap:wrap; }
+.lic-map-search-input { flex:1; min-width:200px; border:1.5px solid #e0d9f5; border-radius:10px; padding:8px 14px 8px 36px; font-family:inherit; font-size:13px; color:#2d1b69; outline:none; background:#faf8ff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239b8cc0' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center; transition:border-color .15s; }
+.lic-map-search-input:focus { border-color:#6941c6; }
+.lic-map-filter-sel { border:1.5px solid #e0d9f5; border-radius:10px; padding:8px 12px; font-family:inherit; font-size:12px; color:#6941c6; background:#faf8ff; cursor:pointer; outline:none; font-weight:600; }
+.lic-map-filter-sel:focus { border-color:#6941c6; }
+.lic-map-filter-clear { padding:7px 14px; border:1.5px solid #fca5a5; border-radius:10px; background:#fef2f2; font-family:inherit; font-size:12px; color:#991b1b; cursor:pointer; font-weight:600; display:none; }
+.lic-map-filter-count { font-size:11px; color:#9b8cc0; white-space:nowrap; }
+
+/* Hover popup */
+.lic-map-hover { position:absolute; z-index:800; background:#fff; border-radius:16px; box-shadow:0 12px 40px rgba(45,27,105,.25); width:268px; pointer-events:none; opacity:0; transition:opacity .18s,transform .18s; transform:translateY(4px) scale(.98); transform-origin:bottom center; }
+.lic-map-hover.visible { opacity:1; transform:translateY(0) scale(1); }
+
+/* Side panel */
+.lic-map-panel { position:absolute; right:-420px; top:0; height:100%; width:400px; background:#fff; z-index:600; overflow-y:auto; transition:right .3s cubic-bezier(.16,1,.3,1); box-shadow:-4px 0 30px rgba(45,27,105,.12); }
+.lic-map-panel.open { right:0; }
+.lic-map-panel-overlay { position:absolute; inset:0; z-index:500; background:rgba(45,27,105,.08); display:none; }
+.lic-map-panel-overlay.show { display:block; }
+
+/* Marcadores estilo tag */
+.lic-tag { border-radius:8px; padding:7px 10px; color:#fff; font-family:Arial,sans-serif; font-weight:800; box-shadow:0 3px 14px rgba(0,0,0,.22); border:2.5px solid #fff; cursor:pointer; white-space:nowrap; transition:transform .15s,box-shadow .15s; display:inline-flex; flex-direction:column; align-items:center; position:relative; }
+.lic-tag:hover { transform:scale(1.1) translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.3); z-index:999; }
+.lic-tag::after { content:''; position:absolute; bottom:-9px; left:50%; transform:translateX(-50%); border-left:7px solid transparent; border-right:7px solid transparent; }
+.lic-tag-area { font-size:11px; line-height:1.1; }
+.lic-tag-uf { font-size:9px; opacity:.85; font-weight:600; }
+
+/* Popup Leaflet customizado */
 .lic-map-popup .leaflet-popup-content-wrapper { border-radius:16px!important; box-shadow:0 8px 40px rgba(45,27,105,.18)!important; padding:0!important; border:1px solid #ede8f8!important; }
 .lic-map-popup .leaflet-popup-content { margin:0!important; padding:16px!important; }
 .lic-map-popup .leaflet-popup-tip { background:#fff!important; }
 .lic-map-popup .leaflet-popup-close-button { color:#9b8cc0!important; font-size:18px!important; top:8px!important; right:10px!important; }
 .lic-map-tooltip { background:rgba(45,27,105,.88)!important; border:none!important; border-radius:8px!important; color:#fff!important; font-size:12px!important; font-weight:600!important; padding:6px 10px!important; box-shadow:0 4px 12px rgba(0,0,0,.2)!important; }
 .lic-map-tooltip::before { display:none!important; }
-.lic-map-marker:hover { transform:scale(1.12)!important; }
 @keyframes lic-pulse-map { 0%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 var(--pc,rgba(22,163,74,.5))}70%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 18px transparent}100%{box-shadow:0 4px 16px var(--pc,rgba(22,163,74,.4)),0 0 0 0 transparent} }
-.lic-map-pulse { animation:lic-pulse-map 2.2s ease-out infinite!important; }
 
 /* Upload de anexos */
 .lic-upload-zone{border:2px dashed #d4b8f5;border-radius:12px;padding:22px;text-align:center;cursor:pointer;background:#faf8ff;transition:all .15s;position:relative;}
@@ -2392,32 +2418,66 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 <div id="lic-view-mapa" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
 
     <!-- Header -->
-    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:14px;">
             <button onclick="fecharLicMapa()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">← Leads</button>
             <div>
-                <div style="font-size:15px;font-weight:800;color:#2d1b69;">🗺 Mapa da Rede · Licenciamento</div>
-                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Distribuição geográfica de armazéns licenciados</div>
+                <div style="font-size:15px;font-weight:800;color:#2d1b69;">🗺 Rede de Licenciamento</div>
+                <div id="lic-map-result-count" style="font-size:11px;color:#9b8cc0;margin-top:1px;">Carregando...</div>
             </div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
+        <div style="display:flex;gap:10px;">
             <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">⊕ Ver todo Brasil</button>
             <button onclick="abrirFormLead(null,'tabela')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
         </div>
     </div>
 
-    <!-- Body: painel + mapa -->
-    <div style="flex:1;display:flex;overflow:hidden;">
+    <!-- Barra de filtros -->
+    <div class="lic-map-searchbar">
+        <input id="lic-map-search" class="lic-map-search-input" placeholder="Buscar por empresa, armazém, cidade..." oninput="_licMapFiltrarAplicar()">
+        <select id="lic-map-uf" class="lic-map-filter-sel" onchange="_licMapFiltrarAplicar()">
+            <option value="">🗺 Todos os estados</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
+        </select>
+        <select id="lic-map-plano" class="lic-map-filter-sel" onchange="_licMapFiltrarAplicar()">
+            <option value="">💼 Todos os planos</option>
+            <option>Starter</option><option>Pro</option><option>Enterprise</option><option>Custom</option>
+        </select>
+        <select id="lic-map-status" class="lic-map-filter-sel" onchange="_licMapFiltrarAplicar()">
+            <option value="">● Todos os status</option>
+            <option value="Ativo">● Ativo</option>
+            <option value="Convertido">✓ Convertido</option>
+            <option value="Perdido">✕ Perdido</option>
+        </select>
+        <button id="lic-map-clear-btn" class="lic-map-filter-clear" onclick="_licMapLimparFiltros()">✕ Limpar filtros</button>
+        <span class="lic-map-filter-count" id="lic-map-filter-count"></span>
+    </div>
 
-        <!-- Painel lateral esquerdo -->
-        <div style="width:280px;flex-shrink:0;background:#fff;border-right:1px solid #ede8f8;overflow-y:auto;padding:18px;">
+    <!-- Body: painel + mapa -->
+    <div style="flex:1;display:flex;overflow:hidden;position:relative;">
+
+        <!-- Painel lateral esquerdo (resumo) -->
+        <div style="width:240px;flex-shrink:0;background:#fff;border-right:1px solid #ede8f8;overflow-y:auto;padding:16px 14px;">
             <div id="lic-mapa-panel">
                 <div style="text-align:center;padding:40px 0;color:#c4b5e8;font-size:13px;">Carregando...</div>
             </div>
         </div>
 
         <!-- Mapa Leaflet -->
-        <div id="lic-mapa-container" style="flex:1;background:#e8e4f8;"></div>
+        <div style="flex:1;position:relative;">
+            <div id="lic-mapa-container" style="width:100%;height:100%;"></div>
+
+            <!-- Hover popup (posicionado via JS) -->
+            <div id="lic-map-hover-popup" class="lic-map-hover"></div>
+
+            <!-- Overlay escurecimento quando panel aberto -->
+            <div id="lic-map-overlay" class="lic-map-panel-overlay" onclick="_licMapFecharPanel()"></div>
+
+            <!-- Side panel deslizante -->
+            <div id="lic-map-side-panel" class="lic-map-panel">
+                <div id="lic-map-side-content" style="padding:0;"></div>
+            </div>
+        </div>
 
     </div>
 </div>
@@ -9705,71 +9765,101 @@ const _LIC_POLO_COORDS = {
     'Campo Grande':[-20.443,-54.646],'Dourados':[-22.223,-54.813],
     'Cuiabá':[-15.599,-56.095],'Rondonópolis':[-16.472,-54.637],'Várzea Grande':[-15.647,-56.133],
     'Salvador':[-12.971,-38.501],'Camaçari':[-12.698,-38.325],'Feira de Santana':[-12.266,-38.966],
-    'Lauro de Freitas':[-12.898,-38.330],
     'Recife':[-8.048,-34.877],'Suape':[-8.356,-35.016],'Caruaru':[-8.276,-35.976],
-    'Jaboatão dos Guararapes':[-8.113,-35.002],
     'Fortaleza':[-3.717,-38.543],'Caucaia':[-3.735,-38.653],'Maracanaú':[-3.873,-38.625],
-    'Belém':[-1.456,-48.504],'Marabá':[-5.369,-49.118],'Ananindeua':[-1.364,-48.372],
-    'Manaus':[-3.119,-60.022],'Manacapuru':[-3.305,-60.620],
+    'Belém':[-1.456,-48.504],'Manaus':[-3.119,-60.022],
     'Vitória':[-20.316,-40.313],'Serra':[-20.129,-40.308],'Vila Velha':[-20.330,-40.292],
-    'Cariacica':[-20.263,-40.417],
-    'Brasília':[-15.780,-47.929],'Taguatinga':[-15.835,-48.058],'Gama':[-16.018,-48.059],
-    'São Luís':[-2.530,-44.303],'Imperatriz':[-5.527,-47.478],
-    'Natal':[-5.795,-35.211],'Mossoró':[-5.187,-37.345],
+    'Brasília':[-15.780,-47.929],'São Luís':[-2.530,-44.303],'Natal':[-5.795,-35.211],
     'João Pessoa':[-7.115,-34.864],'Campina Grande':[-7.231,-35.881],
-    'Maceió':[-9.666,-35.735],'Arapiraca':[-9.752,-36.661],
-    'Aracaju':[-10.909,-37.068],'Lagarto':[-10.916,-37.641],
-    'Teresina':[-5.092,-42.804],'Parnaíba':[-2.905,-41.777],
-    'Porto Velho':[-8.761,-63.900],'Ji-Paraná':[-10.879,-61.944],
-    'Rio Branco':[-9.975,-67.825],'Cruzeiro do Sul':[-7.631,-72.672],
-    'Boa Vista':[2.824,-60.676],'Macapá':[0.902,-52.003],'Palmas':[-10.169,-48.332],
+    'Maceió':[-9.666,-35.735],'Aracaju':[-10.909,-37.068],'Teresina':[-5.092,-42.804],
+    'Porto Velho':[-8.761,-63.900],'Rio Branco':[-9.975,-67.825],'Boa Vista':[2.824,-60.676],
+    'Macapá':[0.902,-52.003],'Palmas':[-10.169,-48.332],
 };
 
 const _LIC_REGIONS = {
-    Sul:          ['PR','SC','RS'],
-    Sudeste:      ['SP','RJ','MG','ES'],
+    Sul:['PR','SC','RS'], Sudeste:['SP','RJ','MG','ES'],
     'Centro-Oeste':['MT','MS','GO','DF'],
-    Nordeste:     ['MA','PI','CE','RN','PB','PE','AL','SE','BA'],
-    Norte:        ['AM','RR','AP','PA','TO','RO','AC'],
+    Nordeste:['MA','PI','CE','RN','PB','PE','AL','SE','BA'],
+    Norte:['AM','RR','AP','PA','TO','RO','AC'],
 };
-
-const _LIC_REGION_COLORS = {
-    Sul:'#6941c6', Sudeste:'#2563eb', 'Centro-Oeste':'#d97706', Nordeste:'#16a34a', Norte:'#0891b2'
-};
+const _LIC_REGION_COLORS = { Sul:'#6941c6',Sudeste:'#2563eb','Centro-Oeste':'#d97706',Nordeste:'#16a34a',Norte:'#0891b2' };
 
 let _licMap = null;
 let _licMapMarkers = [];
 let _licGeoJsonLayer = null;
 let _licGeoJsonData = null;
 let _licMapFiltro = 'todos';
+let _licMapPhotoCache = {};        // leadId → URL da primeira foto
+let _licMapAllAnexos  = [];        // todos os anexos carregados
+let _licMapHoverTimer = null;
 
 function _licGetCoords(lead) {
-    const polo = (lead.polo_logistico || '').trim();
+    const polo = (lead.polo_logistico||'').trim();
     if (polo) {
         const exact = _LIC_POLO_COORDS[polo];
-        if (exact) return [exact[0]+(Math.random()-.5)*.04, exact[1]+(Math.random()-.5)*.04];
-        const key = Object.keys(_LIC_POLO_COORDS).find(k =>
-            polo.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(polo.toLowerCase())
-        );
-        if (key) return [_LIC_POLO_COORDS[key][0]+(Math.random()-.5)*.04, _LIC_POLO_COORDS[key][1]+(Math.random()-.5)*.04];
+        if (exact) return [exact[0]+(Math.random()-.5)*.04,exact[1]+(Math.random()-.5)*.04];
+        const key = Object.keys(_LIC_POLO_COORDS).find(k=>polo.toLowerCase().includes(k.toLowerCase())||k.toLowerCase().includes(polo.toLowerCase()));
+        if (key) return [_LIC_POLO_COORDS[key][0]+(Math.random()-.5)*.04,_LIC_POLO_COORDS[key][1]+(Math.random()-.5)*.04];
     }
     if (lead.uf && _LIC_UF_COORDS[lead.uf]) {
         const c = _LIC_UF_COORDS[lead.uf];
-        return [c[0]+(Math.random()-.5)*.35, c[1]+(Math.random()-.5)*.35];
+        return [c[0]+(Math.random()-.5)*.35,c[1]+(Math.random()-.5)*.35];
     }
     return null;
 }
 
-function _licLeadsFiltrados() {
-    if (_licMapFiltro === 'convertidos') return baseLicLeads.filter(l => l.status === 'Convertido');
-    if (_licMapFiltro === 'ativos')      return baseLicLeads.filter(l => l.status === 'Ativo');
-    if (_licMapFiltro === 'perdidos')    return baseLicLeads.filter(l => l.status === 'Perdido');
-    return baseLicLeads;
+function _licMapGetFiltrados() {
+    const q  = (document.getElementById('lic-map-search')?.value||'').toLowerCase().trim();
+    const uf = document.getElementById('lic-map-uf')?.value||'';
+    const pl = document.getElementById('lic-map-plano')?.value||'';
+    const st = document.getElementById('lic-map-status')?.value||'';
+    return baseLicLeads.filter(l => {
+        if (uf && l.uf !== uf) return false;
+        if (pl && l.plano !== pl) return false;
+        if (st && l.status !== st) return false;
+        if (q) {
+            const arWh = Array.isArray(l.armazens) ? l.armazens : [];
+            const match =
+                (l.razao_social||'').toLowerCase().includes(q) ||
+                (l.polo_logistico||'').toLowerCase().includes(q) ||
+                (l.uf||'').toLowerCase().includes(q) ||
+                arWh.some(w=>(w.nome||'').toLowerCase().includes(q)||(w.cidade||'').toLowerCase().includes(q));
+            if (!match) return false;
+        }
+        return true;
+    });
 }
 
-function abrirLicMapa() {
+function _licMapFiltrarAplicar() {
+    const hasFiltro = !!(document.getElementById('lic-map-search')?.value ||
+        document.getElementById('lic-map-uf')?.value ||
+        document.getElementById('lic-map-plano')?.value ||
+        document.getElementById('lic-map-status')?.value);
+    const clearBtn = document.getElementById('lic-map-clear-btn');
+    if (clearBtn) clearBtn.style.display = hasFiltro ? '' : 'none';
+    _licAtualizarChoropleth();
+    _licAtualizarMarkers();
+    renderizarLicMapaPanel();
+}
+
+function _licMapLimparFiltros() {
+    ['lic-map-search','lic-map-uf','lic-map-plano','lic-map-status'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    _licMapFiltrarAplicar();
+}
+
+async function abrirLicMapa() {
     document.getElementById('lic-view-tabela').style.display = 'none';
     document.getElementById('lic-view-mapa').style.display = 'flex';
+    // Pré-carrega fotos
+    _licMapPhotoCache = {};
+    try {
+        const { data } = await supabaseClient.from('lic_anexos').select('lead_id,url,tipo,nome_arquivo').like('tipo','foto_armazem%').order('created_at');
+        _licMapAllAnexos = data || [];
+        (_licMapAllAnexos).forEach(a => { if (!_licMapPhotoCache[a.lead_id]) _licMapPhotoCache[a.lead_id] = a.url; });
+    } catch(e) { _licMapAllAnexos = []; }
     renderizarLicMapaPanel();
     setTimeout(() => { _licInicializarMapa(); }, 120);
 }
@@ -9782,248 +9872,322 @@ function fecharLicMapa() {
 
 function _licInicializarMapa() {
     if (_licMap) { _licMap.remove(); _licMap = null; }
-    _licMap = L.map('lic-mapa-container', {
-        center: [-15, -52], zoom: 4, zoomControl: false,
-        scrollWheelZoom: true, minZoom: 3, maxZoom: 14,
-    });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>',
-        maxZoom: 19,
+    _licMap = L.map('lic-mapa-container', { center:[-15,-52], zoom:4, zoomControl:false, scrollWheelZoom:true, minZoom:3, maxZoom:14 });
+    // Voyager tiles — mais colorido (estradas, água, parques)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution:'©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>', maxZoom:19,
     }).addTo(_licMap);
-    L.control.zoom({ position: 'bottomright' }).addTo(_licMap);
-
+    L.control.zoom({ position:'bottomright' }).addTo(_licMap);
+    // Fecha hover popup ao mover o mapa
+    _licMap.on('movestart', () => _licMapEsconderHover());
     fetch('https://raw.githubusercontent.com/giuliano-macedo/geodata-br-states/main/geojson/br_states.json')
-        .then(r => r.json())
-        .then(data => { _licGeoJsonData = data; _licAtualizarChoropleth(); _licAtualizarMarkers(); })
-        .catch(() => { _licAtualizarMarkers(); });
+        .then(r=>r.json()).then(data=>{ _licGeoJsonData=data; _licAtualizarChoropleth(); _licAtualizarMarkers(); })
+        .catch(()=>{ _licAtualizarMarkers(); });
 }
 
 function _licAtualizarChoropleth() {
     if (!_licMap || !_licGeoJsonData) return;
-    if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer = null; }
-
-    const m2ByUF = {};
-    _licLeadsFiltrados().forEach(l => {
-        if (l.uf) m2ByUF[l.uf] = (m2ByUF[l.uf] || 0) + (parseFloat(l.area_total_m2) || 0);
-    });
-    const maxV = Math.max(...Object.values(m2ByUF), 1);
-
+    if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
+    const m2ByUF={};
+    _licMapGetFiltrados().forEach(l=>{ if(l.uf) m2ByUF[l.uf]=(m2ByUF[l.uf]||0)+(parseFloat(l.area_total_m2)||0); });
+    const maxV=Math.max(...Object.values(m2ByUF),1);
     function getCor(uf) {
-        const v = m2ByUF[uf] || 0;
-        if (v === 0) return '#f0ebff';
-        const r = v / maxV;
-        if (r > .75) return '#2d1b69'; if (r > .5) return '#4c2a9e';
-        if (r > .25) return '#6941c6'; if (r > .08) return '#9b5de5';
-        return '#c4a8f0';
+        const v=m2ByUF[uf]||0; if(v===0) return '#e8e4f5';
+        const r=v/maxV;
+        if(r>.75) return '#2d1b69'; if(r>.5) return '#4c2a9e';
+        if(r>.25) return '#6941c6'; if(r>.08) return '#9b5de5'; return '#c4a8f0';
     }
-
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f => ({ fillColor: getCor(f.properties.sigla), weight: 1.5, color: '#fff', fillOpacity: .5 }),
-        onEachFeature: (feature, layer) => {
-            const uf = feature.properties.sigla; const v = m2ByUF[uf] || 0;
-            if (v > 0) layer.bindTooltip(
-                `<b>${feature.properties.name} (${uf})</b><br>${v.toLocaleString('pt-BR')} m² disponíveis`,
-                { className: 'lic-map-tooltip', sticky: true }
-            );
-            layer.on('mouseover', e => { e.target.setStyle({ fillOpacity: .75, weight: 2.5 }); e.target.bringToFront(); });
-            layer.on('mouseout', e => { _licGeoJsonLayer.resetStyle(e.target); });
-            layer.on('click', e => { if (v > 0) _licMap.fitBounds(e.target.getBounds(), { padding: [40,40] }); });
+        style: f=>({ fillColor:getCor(f.properties.sigla), weight:1.5, color:'#fff', fillOpacity:.4 }),
+        onEachFeature:(feature,layer)=>{
+            const uf=feature.properties.sigla; const v=m2ByUF[uf]||0;
+            if(v>0) layer.bindTooltip(`<b>${feature.properties.name} (${uf})</b><br>${v.toLocaleString('pt-BR')} m²`,{className:'lic-map-tooltip',sticky:true});
+            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.65,weight:2});e.target.bringToFront();});
+            layer.on('mouseout',e=>{_licGeoJsonLayer.resetStyle(e.target);});
+            layer.on('click',e=>{if(v>0)_licMap.fitBounds(e.target.getBounds(),{padding:[40,40]});});
         }
     }).addTo(_licMap);
 }
 
 function _licAtualizarMarkers() {
     if (!_licMap) return;
-    _licMapMarkers.forEach(m => _licMap.removeLayer(m));
-    _licMapMarkers = [];
+    _licMapMarkers.forEach(m=>_licMap.removeLayer(m));
+    _licMapMarkers=[];
 
-    const leads = _licLeadsFiltrados().filter(l => l.uf || l.polo_logistico);
-    const bounds = [];
-    const pBg  = {Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
-    const pCol = {Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+    const leads=_licMapGetFiltrados().filter(l=>l.uf||l.polo_logistico);
+    const bounds=[];
 
-    leads.forEach(lead => {
-        const coords = _licGetCoords(lead);
-        if (!coords) return;
+    // Atualiza contador
+    const countEl=document.getElementById('lic-map-result-count');
+    if(countEl) countEl.textContent=`${leads.length} parceiro${leads.length!==1?'s':''} encontrado${leads.length!==1?'s':''}`;
+    const filterCount=document.getElementById('lic-map-filter-count');
+    if(filterCount) filterCount.textContent=leads.length<baseLicLeads.length?`(${baseLicLeads.length-leads.length} oculto${baseLicLeads.length-leads.length!==1?'s':''} por filtro)`:'';
 
-        const area = parseFloat(lead.area_total_m2) || 0;
-        const isPulse = lead.status === 'Convertido';
-        const cor = lead.status === 'Convertido' ? '#16a34a' : lead.status === 'Perdido' ? '#dc2626' : '#6941c6';
-        const glow = lead.status === 'Convertido' ? 'rgba(22,163,74,.4)' : lead.status === 'Perdido' ? 'rgba(220,38,38,.25)' : 'rgba(105,65,198,.35)';
-        const size = area > 0 ? Math.max(38, Math.min(72, 38 + Math.log10(area + 1) * 10)) : 36;
-        const lbl  = area >= 1e6 ? (area/1e6).toFixed(1)+'M' : area >= 1e3 ? (area/1e3).toFixed(0)+'K' : area > 0 ? String(area) : '?';
-        const fee  = parseFloat(lead.fee_mensal) || 0;
+    leads.forEach(lead=>{
+        const coords=_licGetCoords(lead);
+        if(!coords) return;
 
-        const icon = L.divIcon({
-            className: '',
-            html: `<div class="lic-map-marker${isPulse?' lic-map-pulse':''}" style="
-                width:${size}px;height:${size}px;
-                background:linear-gradient(135deg,${cor}dd,${cor});
-                border-radius:50%;border:3px solid rgba(255,255,255,.92);
-                box-shadow:0 4px 16px ${glow};
-                display:flex;flex-direction:column;align-items:center;justify-content:center;
-                cursor:pointer;font-family:'Courier New',monospace;color:#fff;
-                transition:transform .15s ease;--pc:${glow};">
-                <div style="font-size:${size<46?8:10}px;font-weight:900;line-height:1.1;">${lbl}</div>
-                <div style="font-size:7px;opacity:.75;font-weight:600;">m²</div>
+        const area=parseFloat(lead.area_total_m2)||0;
+        const cor=lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
+        const lbl=area>=1e6?(area/1e6).toFixed(1)+'M m²':area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
+
+        const icon=L.divIcon({
+            className:'',
+            html:`<div class="lic-tag" style="background:${cor};"
+                    onmouseenter="_licMapMostrarHover(event,'${lead.id}')"
+                    onmouseleave="_licMapEsconderHover()">
+                <div class="lic-tag-area">${lbl}</div>
+                <div class="lic-tag-uf">${lead.uf||'BR'}${lead.polo_logistico?' · '+lead.polo_logistico.split(',')[0].trim():''}</div>
+                <div style="position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid ${cor};"></div>
             </div>`,
-            iconSize:[size,size], iconAnchor:[size/2,size/2],
+            iconSize:[110,48],
+            iconAnchor:[55,56],
         });
 
-        const popup = `<div style="font-family:DM Sans,sans-serif;min-width:230px;max-width:280px;">
-            <div style="font-size:14px;font-weight:800;color:#2d1b69;margin-bottom:8px;line-height:1.2;">${lead.razao_social||'—'}</div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                ${lead.uf?`<span style="font-size:10px;background:#f5f3ff;color:#6941c6;padding:2px 8px;border-radius:20px;font-weight:600;border:1px solid #e0d9f5;">${lead.uf}</span>`:''}
-                ${lead.polo_logistico?`<span style="font-size:11px;color:#6b7280;">${lead.polo_logistico}</span>`:''}
-            </div>
-            <div style="background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
-                <div style="font-size:9px;color:#7c5cbf;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Área na rede</div>
-                <div style="font-size:26px;font-weight:900;color:#2d1b69;font-family:'Courier New',monospace;line-height:1;">
-                    ${area>0?area.toLocaleString('pt-BR'):'—'} <span style="font-size:12px;font-weight:400;color:#9b8cc0;">m²</span>
-                </div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                ${lead.plano?`<span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};">${lead.plano}</span>`:''}
-                <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f5f3ff'};color:${cor};">${lead.status||'Ativo'}</span>
-                <span style="font-size:10px;color:#9b8cc0;">${lead.etapa||'—'}</span>
-            </div>
-            ${fee>0?`<div style="font-size:13px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;margin-bottom:6px;">R$${fee.toLocaleString('pt-BR')}<span style="font-size:10px;font-weight:400;color:#9b8cc0;">/mês</span></div>`:''}
-            ${lead.responsavel?`<div style="font-size:11px;color:#9b8cc0;margin-bottom:10px;">👤 ${lead.responsavel}</div>`:''}
-            <button onclick="abrirFormLead('${lead.id}','tabela');_licMap&&_licMap.closePopup()" style="width:100%;padding:8px;background:linear-gradient(135deg,#2d1b69,#6941c6);border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Ver / Editar lead →</button>
-        </div>`;
-
-        const m = L.marker(coords, { icon });
-        m.bindPopup(L.popup({ maxWidth:300, className:'lic-map-popup', closeButton:true }).setContent(popup));
-        m.addTo(_licMap);
-        _licMapMarkers.push(m);
+        const marker=L.marker(coords,{icon});
+        marker.on('click',()=>{ _licMapEsconderHover(); _licMapAbrirPanel(lead); });
+        marker.addTo(_licMap);
+        _licMapMarkers.push(marker);
         bounds.push(coords);
     });
 
-    if (bounds.length > 0) {
-        try { _licMap.fitBounds(bounds, { padding:[40,40], maxZoom:8 }); } catch(e) {}
-    }
+    if(bounds.length>0) { try { _licMap.fitBounds(bounds,{padding:[50,50],maxZoom:8}); } catch(e){} }
+}
+
+function _licMapMostrarHover(event, leadId) {
+    clearTimeout(_licMapHoverTimer);
+    const lead=baseLicLeads.find(l=>String(l.id)===String(leadId));
+    if(!lead) return;
+    const popup=document.getElementById('lic-map-hover-popup');
+    if(!popup) return;
+
+    const area=parseFloat(lead.area_total_m2)||0;
+    const fee=parseFloat(lead.fee_mensal)||0;
+    const foto=_licMapPhotoCache[lead.id]||'';
+    const cor=lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
+    const statusBg=lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f0ebff';
+    const pBg={Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol={Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+    const armazens=(Array.isArray(lead.armazens)?lead.armazens:[]).filter(w=>w.area_m2>0||w.nome);
+
+    popup.innerHTML=`
+        <div style="border-radius:16px;overflow:hidden;">
+            <div style="height:148px;background:linear-gradient(135deg,#f0ebff,#e8dff8);position:relative;overflow:hidden;">
+                ${foto
+                    ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`
+                    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+                        <div style="font-size:40px;">🏗️</div>
+                        <div style="font-size:10px;color:#9b8cc0;font-weight:600;">Sem foto cadastrada</div>
+                       </div>`}
+                ${lead.plano?`<div style="position:absolute;top:8px;right:8px;background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.15);">${lead.plano}</div>`:''}
+                <div style="position:absolute;top:8px;left:8px;background:${statusBg};color:${cor};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.1);">${lead.status||'Ativo'}</div>
+            </div>
+            <div style="padding:12px 14px;">
+                <div style="font-size:13px;font-weight:800;color:#2d1b69;margin-bottom:3px;line-height:1.2;">${lead.razao_social||'—'}</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:8px;display:flex;align-items:center;gap:4px;">
+                    <span>📍</span>${lead.uf||''}${lead.polo_logistico?' · '+lead.polo_logistico:''}
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    ${area>0?`<div><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Área total</div><div style="font-size:14px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">${area>=1e3?(area/1e3).toFixed(0)+'K':area} m²</div></div>`:''}
+                    ${fee>0?`<div style="border-left:1px solid #f0ebff;padding-left:12px;"><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Fee/mês</div><div style="font-size:14px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">R$${fee.toLocaleString('pt-BR')}</div></div>`:''}
+                </div>
+                ${armazens.length>0?`<div style="font-size:10px;color:#6b7280;margin-bottom:6px;">🏗 ${armazens.length} armazém${armazens.length>1?'s':''} cadastrado${armazens.length>1?'s':''}</div>`:''}
+                <div style="font-size:11px;color:#9b8cc0;font-style:italic;display:flex;align-items:center;gap:4px;">
+                    <span style="font-style:normal;">👉</span> Clique para ver todos os dados →
+                </div>
+            </div>
+        </div>`;
+
+    // Posiciona o popup perto do marcador
+    const mapEl=document.getElementById('lic-mapa-container');
+    const mapRect=mapEl?.getBoundingClientRect()||{left:0,top:0};
+    const tagEl=event.currentTarget||event.target;
+    const tagRect=tagEl.getBoundingClientRect();
+    const relX=tagRect.left-mapRect.left+tagRect.width/2;
+    const relY=tagRect.top-mapRect.top-8;
+    popup.style.left=(relX-134)+'px';
+    popup.style.top=Math.max(8,relY-popup.offsetHeight-4)+'px';
+    popup.classList.add('visible');
+}
+
+function _licMapEsconderHover() {
+    clearTimeout(_licMapHoverTimer);
+    _licMapHoverTimer = setTimeout(() => {
+        const popup=document.getElementById('lic-map-hover-popup');
+        if(popup) popup.classList.remove('visible');
+    }, 80);
+}
+
+function _licMapAbrirPanel(lead) {
+    const panel=document.getElementById('lic-map-side-panel');
+    const overlay=document.getElementById('lic-map-overlay');
+    if(!panel) return;
+
+    const area=parseFloat(lead.area_total_m2)||0;
+    const fee=parseFloat(lead.fee_mensal)||0;
+    const foto=_licMapPhotoCache[lead.id]||'';
+    const fotos=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&a.tipo?.startsWith('foto_armazem_'));
+    const docs=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&!a.tipo?.startsWith('foto_armazem_')&&a.tipo!=='pdf_lead');
+    const pdfs=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&a.tipo==='pdf_lead');
+    const cor=lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
+    const armazens=(Array.isArray(lead.armazens)?lead.armazens:[]).filter(w=>w.area_m2>0||w.nome);
+    const pBg={Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol={Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+
+    const field=(label,val)=>val?`<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:2px;">${label}</div><div style="font-size:12px;color:#2d1b69;font-weight:500;line-height:1.3;">${val}</div></div>`:'';
+
+    document.getElementById('lic-map-side-content').innerHTML=`
+        <!-- Close button -->
+        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f5f3ff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:12px;font-weight:700;color:#6941c6;">Detalhes do parceiro</div>
+            <button onclick="_licMapFecharPanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+        </div>
+
+        <!-- Galeria de fotos -->
+        <div style="height:200px;background:linear-gradient(135deg,#f0ebff,#e0d4f8);overflow:hidden;position:relative;">
+            ${foto
+                ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover;">`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"><div style="font-size:48px;">🏗️</div><div style="font-size:12px;color:#9b8cc0;">Sem fotos cadastradas</div></div>`}
+            ${fotos.length>1?`<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.5);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">📷 ${fotos.length} fotos</div>`:''}
+        </div>
+
+        <div style="padding:16px 16px 80px;">
+            <!-- Nome e badges -->
+            <div style="margin-bottom:12px;">
+                <div style="font-size:18px;font-weight:900;color:#2d1b69;line-height:1.2;margin-bottom:6px;">${lead.razao_social||'—'}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    ${lead.plano?`<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};">${lead.plano}</span>`:''}
+                    <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f0ebff'};color:${cor};">${lead.status||'Ativo'}</span>
+                    ${lead.etapa?`<span style="font-size:10px;color:#9b8cc0;padding:3px 10px;border-radius:20px;border:1px solid #f0ebff;">${lead.etapa}</span>`:''}
+                </div>
+            </div>
+
+            <!-- Métricas chave -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                ${area>0?`<div style="background:#f5f3ff;border-radius:10px;padding:10px 12px;border-left:3px solid #6941c6;"><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Área total</div><div style="font-size:16px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">${area>=1e3?(area/1e3).toFixed(0)+'K':area} m²</div></div>`:''}
+                ${fee>0?`<div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;border-left:3px solid #16a34a;"><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Fee/mês</div><div style="font-size:16px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">R$${fee.toLocaleString('pt-BR')}</div></div>`:''}
+            </div>
+
+            <!-- Localização -->
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📍 Localização</div>
+                <div style="font-size:12px;color:#2d1b69;font-weight:600;">${lead.uf||''}${lead.polo_logistico?' — '+lead.polo_logistico:''}</div>
+                ${lead.regiao_exclusividade?`<div style="font-size:11px;color:#9b8cc0;margin-top:3px;">Exclusividade: ${lead.regiao_exclusividade}</div>`:''}
+            </div>
+
+            <!-- Armazéns -->
+            ${armazens.length>0?`
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">🏗️ Armazéns (${armazens.length})</div>
+                ${armazens.map((w,i)=>`
+                <div style="padding:8px 0;${i<armazens.length-1?'border-bottom:1px solid #f9f7ff;':''}">
+                    <div style="font-size:11px;font-weight:700;color:#6941c6;margin-bottom:3px;">Armazém ${i+1}${w.nome?' — '+w.nome:''}</div>
+                    <div style="font-size:11px;color:#6b7280;display:flex;gap:10px;flex-wrap:wrap;">
+                        ${w.uf||w.cidade?`<span>${w.uf||''}${w.cidade?' / '+w.cidade:''}</span>`:''}
+                        ${w.area_m2>0?`<span><b>${Number(w.area_m2).toLocaleString('pt-BR')} m²</b></span>`:''}
+                        ${w.docas>0?`<span>${w.docas} docas</span>`:''}
+                        ${w.ocupacao>0?`<span>${w.ocupacao}% ocupado</span>`:''}
+                    </div>
+                </div>`).join('')}
+            </div>`:'' }
+
+            <!-- Dados complementares -->
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📋 Dados da empresa</div>
+                ${field('CNPJ', lead.cnpj)}
+                ${field('Faturamento anual', lead.faturamento_faixa)}
+                ${field('Segmentos', lead.segmentos)}
+                ${field('Contato', lead.contato_nome ? lead.contato_nome+(lead.contato_cargo?' · '+lead.contato_cargo:'') : null)}
+                ${field('E-mail', lead.contato_email)}
+                ${field('Telefone', lead.contato_telefone)}
+            </div>
+
+            <!-- Tecnologia e cert -->
+            ${(lead.wms_atual||lead.erp_atual||lead.nivel_maturidade||lead.certificacoes)?`
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">💻 Tecnologia & 🏆 Qualidade</div>
+                ${field('WMS', lead.wms_atual)} ${field('ERP', lead.erp_atual)}
+                ${field('Maturidade', lead.nivel_maturidade)} ${field('Certificações', lead.certificacoes)}
+                ${lead.otif_pct?field('OTIF',lead.otif_pct+'%'):''} ${lead.acuracidade_pct?field('Acuracidade',lead.acuracidade_pct+'%'):''}
+            </div>`:'' }
+
+            <!-- Acompanhamento -->
+            ${(lead.responsavel||lead.origem||lead.observacoes)?`
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📋 Acompanhamento</div>
+                ${field('Responsável', lead.responsavel)} ${field('Origem', lead.origem)}
+                ${lead.data_primeiro_contato?field('1º Contato',new Date(lead.data_primeiro_contato+'T00:00:00').toLocaleDateString('pt-BR')):''}
+                ${lead.proxima_acao?field('Próxima ação',lead.proxima_acao):''}
+                ${lead.observacoes?`<div style="font-size:11px;color:#6b7280;margin-top:4px;line-height:1.5;border-top:1px solid #f5f3ff;padding-top:8px;">${lead.observacoes}</div>`:''}
+            </div>`:'' }
+
+            <!-- Anexos -->
+            ${docs.length>0||pdfs.length>0?`
+            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📎 Documentos (${docs.length+pdfs.length})</div>
+                ${[...docs,...pdfs].map(a=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f9f7ff;">
+                    <span style="font-size:16px;">${a.nome_arquivo?.endsWith('.pdf')?'📄':a.nome_arquivo?.match(/\.(jpg|jpeg|png)/i)?'🖼️':'📎'}</span>
+                    <span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</span>
+                    <a href="${a.url}" target="_blank" style="font-size:10px;font-weight:700;color:#6941c6;text-decoration:none;background:#f0ebff;padding:3px 8px;border-radius:6px;white-space:nowrap;">⬇ Baixar</a>
+                </div>`).join('')}
+            </div>`:'' }
+
+        </div>
+
+        <!-- Botões de ação fixos no rodapé -->
+        <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #ede8f8;padding:12px 16px;display:flex;gap:8px;">
+            <button onclick="gerarLicPDF('${lead.id}')" style="flex:1;padding:9px;border:1.5px solid #e0d9f5;border-radius:10px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:700;color:#6941c6;cursor:pointer;">📄 Gerar PDF</button>
+            <button onclick="_licMapFecharPanel();abrirFormLead('${lead.id}','tabela')" style="flex:2;padding:9px;border:none;border-radius:10px;background:linear-gradient(135deg,#2d1b69,#6941c6);font-family:inherit;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">✏️ Editar lead completo</button>
+        </div>
+    `;
+
+    panel.classList.add('open');
+    if(overlay) overlay.classList.add('show');
+}
+
+function _licMapFecharPanel() {
+    document.getElementById('lic-map-side-panel')?.classList.remove('open');
+    document.getElementById('lic-map-overlay')?.classList.remove('show');
 }
 
 function _licMapFitAll() {
-    if (!_licMap) return;
-    _licMap.setView([-15, -52], 4, { animate: true });
-}
-
-function setLicMapFiltro(filtro) {
-    _licMapFiltro = filtro;
-    renderizarLicMapaPanel();
-    _licAtualizarChoropleth();
-    _licAtualizarMarkers();
+    if(!_licMap) return;
+    _licMap.setView([-15,-52],4,{animate:true});
 }
 
 function renderizarLicMapaPanel() {
-    const leads   = baseLicLeads;
-    const filt    = _licLeadsFiltrados();
-    const conv    = leads.filter(l => l.status === 'Convertido');
-    const m2Total = leads.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
-    const m2Conv  = conv.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
-    const fmt = n => n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
-
-    const m2Region = {};
-    Object.keys(_LIC_REGIONS).forEach(r => {
-        m2Region[r] = leads.filter(l=>_LIC_REGIONS[r].includes(l.uf)).reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
-    });
-    const maxR = Math.max(...Object.values(m2Region),1);
-
-    const m2UF = {};
+    const leads=baseLicLeads;
+    const filt=_licMapGetFiltrados();
+    const conv=leads.filter(l=>l.status==='Convertido');
+    const m2Total=leads.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const m2Conv=conv.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+    const m2Region={};
+    Object.keys(_LIC_REGIONS).forEach(r=>{m2Region[r]=leads.filter(l=>_LIC_REGIONS[r].includes(l.uf)).reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);});
+    const maxR=Math.max(...Object.values(m2Region),1);
+    const m2UF={};
     leads.forEach(l=>{if(l.uf)m2UF[l.uf]=(m2UF[l.uf]||0)+(parseFloat(l.area_total_m2)||0);});
-    const ufRank = Object.entries(m2UF).sort((a,b)=>b[1]-a[1]).slice(0,8);
-    const maxUF  = ufRank.length>0?ufRank[0][1]:1;
+    const ufRank=Object.entries(m2UF).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const maxUF=ufRank.length>0?ufRank[0][1]:1;
 
-    const FILTERS = [
-        ['todos','Todos',leads.length,'#6941c6'],
-        ['ativos','Ativos',leads.filter(l=>l.status==='Ativo').length,'#d97706'],
-        ['convertidos','Convertidos',conv.length,'#16a34a'],
-        ['perdidos','Perdidos',leads.filter(l=>l.status==='Perdido').length,'#dc2626'],
-    ];
-
-    document.getElementById('lic-mapa-panel').innerHTML = `
-        <!-- Hero total -->
-        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);border-radius:14px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden;">
-            <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
-            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Total da rede</div>
-            <div style="font-size:26px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">${fmt(m2Total)} <span style="font-size:12px;font-weight:400;opacity:.65;">m²</span></div>
-            <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:3px;">${leads.length} parceiros em ${Object.keys(m2UF).length} estados</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
-                <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;">
-                    <div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">m² convertidos</div>
-                    <div style="font-size:14px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${fmt(m2Conv)}</div>
-                </div>
-                <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:8px 10px;">
-                    <div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Parceiros</div>
-                    <div style="font-size:14px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${conv.length} conv.</div>
-                </div>
+    document.getElementById('lic-mapa-panel').innerHTML=`
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);border-radius:14px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Total da rede</div>
+            <div style="font-size:24px;font-weight:900;color:#fff;font-family:'Courier New',monospace;letter-spacing:-1px;">${fmt(m2Total)} <span style="font-size:11px;font-weight:400;opacity:.65;">m²</span></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;">${leads.length} parceiros · ${Object.keys(m2UF).length} estados</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;">
+                <div style="background:rgba(255,255,255,.1);border-radius:7px;padding:7px 9px;"><div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Convertidos</div><div style="font-size:13px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${conv.length}</div></div>
+                <div style="background:rgba(255,255,255,.1);border-radius:7px;padding:7px 9px;"><div style="font-size:8px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;margin-bottom:2px;">m² conv.</div><div style="font-size:13px;font-weight:800;color:#fff;font-family:'Courier New',monospace;">${fmt(m2Conv)}</div></div>
             </div>
         </div>
-
-        <!-- Filtros -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Filtrar mapa</div>
-            <div style="display:flex;flex-direction:column;gap:5px;">
-                ${FILTERS.map(([val,label,count,cor])=>`
-                <button onclick="setLicMapFiltro('${val}')"
-                    style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border:1.5px solid ${_licMapFiltro===val?cor+'66':'#e8e0f5'};border-radius:8px;background:${_licMapFiltro===val?cor+'10':'#faf8ff'};cursor:pointer;font-family:inherit;transition:all .15s;">
-                    <div style="display:flex;align-items:center;gap:7px;">
-                        <div style="width:8px;height:8px;border-radius:50%;background:${cor};"></div>
-                        <span style="font-size:12px;font-weight:600;color:${_licMapFiltro===val?cor:'#6b7280'};">${label}</span>
-                    </div>
-                    <span style="font-size:11px;font-weight:700;font-family:'Courier New',monospace;color:${_licMapFiltro===val?cor:'#9b8cc0'};">${count}</span>
-                </button>`).join('')}
-            </div>
+        <div style="margin-bottom:14px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Por região</div>
+            ${Object.entries(_LIC_REGION_COLORS).map(([reg,cor])=>{const v=m2Region[reg]||0;const pct=Math.round((v/maxR)*100);return`<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:11px;font-weight:600;color:#2d1b69;">${reg}</span><span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${v>0?fmt(v)+' m²':'—'}</span></div><div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;"></div></div></div>`;}).join('')}
         </div>
-
-        <!-- Por região -->
-        <div style="margin-bottom:16px;">
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">m² por região</div>
-            ${Object.entries(_LIC_REGION_COLORS).map(([reg,cor])=>{
-                const v=m2Region[reg]||0; const pct=Math.round((v/maxR)*100);
-                return `<div style="margin-bottom:9px;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
-                        <span style="font-size:11px;font-weight:600;color:#2d1b69;">${reg}</span>
-                        <span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${v>0?fmt(v)+' m²':'—'}</span>
-                    </div>
-                    <div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;">
-                        <div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;transition:width .6s;"></div>
-                    </div>
-                </div>`;
-            }).join('')}
-        </div>
-
-        <!-- Top estados -->
-        ${ufRank.length>0?`
-        <div style="margin-bottom:16px;">
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Top estados por m²</div>
-            ${ufRank.map(([uf,v],i)=>`
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                <div style="width:16px;height:16px;border-radius:50%;background:#f0ebff;border:1.5px solid #e0d9f5;font-size:8px;font-weight:700;color:#6941c6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
-                <div style="flex:1;">
-                    <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
-                        <span style="font-size:11px;font-weight:700;color:#2d1b69;">${uf}</span>
-                        <span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${fmt(v)}</span>
-                    </div>
-                    <div style="height:4px;background:#f0ebff;border-radius:2px;overflow:hidden;">
-                        <div style="height:100%;width:${Math.round((v/maxUF)*100)}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;"></div>
-                    </div>
-                </div>
-            </div>`).join('')}
-        </div>` : ''}
-
-        <!-- Legenda -->
-        <div style="border-top:1px solid #ede8f8;padding-top:12px;">
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#6b7280;">
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#16a34a;border:2px solid #fff;box-shadow:0 2px 8px rgba(22,163,74,.4);flex-shrink:0;"></div>Convertido (pulse)</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#6941c6;border:2px solid #fff;box-shadow:0 2px 8px rgba(105,65,198,.4);flex-shrink:0;"></div>Ativo</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:16px;height:16px;border-radius:50%;background:#dc2626;border:2px solid #fff;box-shadow:0 2px 8px rgba(220,38,38,.3);flex-shrink:0;"></div>Perdido</div>
-                <div style="font-size:10px;color:#c4b5e8;margin-top:4px;">⊙ Tamanho ∝ m²</div>
-                <div style="font-size:10px;color:#c4b5e8;">🎨 Intensidade estado = m² total</div>
-            </div>
-        </div>
+        ${ufRank.length>0?`<div style="margin-bottom:14px;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Top estados</div>${ufRank.map(([uf,v],i)=>`<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><div style="width:15px;height:15px;border-radius:50%;background:#f0ebff;border:1.5px solid #e0d9f5;font-size:8px;font-weight:700;color:#6941c6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div><div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:11px;font-weight:700;color:#2d1b69;">${uf}</span><span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${fmt(v)}</span></div><div style="height:4px;background:#f0ebff;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.round((v/maxUF)*100)}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;"></div></div></div></div>`).join('')}</div>`:''}
+        <div style="border-top:1px solid #ede8f8;padding-top:12px;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div><div style="display:flex;flex-direction:column;gap:5px;font-size:10px;color:#6b7280;"><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#16a34a;border:2px solid #fff;box-shadow:0 1px 5px rgba(22,163,74,.4);"></div>Convertido</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#6941c6;border:2px solid #fff;box-shadow:0 1px 5px rgba(105,65,198,.4);"></div>Ativo</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#dc2626;border:2px solid #fff;box-shadow:0 1px 5px rgba(220,38,38,.3);"></div>Perdido</div><div style="font-size:9px;color:#c4b5e8;margin-top:3px;">Tags = m² disponíveis</div></div></div>
     `;
 }
 
