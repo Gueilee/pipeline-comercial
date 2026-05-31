@@ -6,6 +6,7 @@
 
 <link rel="icon" type="image/png" href="Logo_azul.png">
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -730,6 +731,10 @@ header {
 
 /* BADGE DE PERFIL */
 /* ── LICENCIAMENTO ── */
+/* Tabler Icons no contexto Lic */
+.lic-btn-nav .ti, .lic-btn-next .ti, .lic-btn-prev .ti { font-size:14px; vertical-align:middle; }
+#lic-view-tabela .ti, #lic-view-scorecard .ti, #lic-view-auditoria .ti { vertical-align:-1px; }
+.lic-alertas-panel .ti { font-size:16px; }
 /* chips de status — compatibilidade tabela */
 .lic-chip{padding:4px 12px;border:1px solid #d4b8f5;border-radius:20px;background:#f0ebff;font-size:11px;color:#6941c6;cursor:pointer;font-family:inherit;transition:all .12s;}
 .lic-chip-on,.lic-chip:hover{background:#6941c6;border-color:#6941c6;color:#fff;}
@@ -926,7 +931,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <button type="button" id="nav-metas" class="btn-header" onclick="navegar('metas')"><span>🎯</span> Metas</button>
                 <button type="button" id="nav-financeiro" class="btn-header" onclick="navegar('financeiro')"><span>💰</span> Financeiro</button>
                 <button type="button" id="nav-historico" class="btn-header" onclick="navegar('historico')"><span>📂</span> Histórico</button>
-                <button type="button" id="nav-licenciamento" class="btn-header" onclick="navegar('licenciamento')" style="display:none;"><span>🏪</span> Licenciamento</button>
+                <button type="button" id="nav-licenciamento" class="btn-header" onclick="navegar('licenciamento')" style="display:none;"><i class="ti ti-building-warehouse" style="font-size:15px;"></i> Licenciamento</button>
             </div>
             
 <button type="button" id="btn-vendedores" class="btn-header" onclick="abrirModal('modalVendedor')" title="Gerenciar Vendedores"><span>👥</span> Vendedores</button>
@@ -1655,16 +1660,16 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             <button onclick="setLicFiltro('Convertido',this)" class="lic-chip">✓ Convertido</button>
                             <button onclick="setLicFiltro('Perdido',this)" class="lic-chip">✕ Perdido</button>
                         </div>
-                        <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
-                        <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
-                        <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔍 Auditoria</button>
-                        <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
-                        <button id="btn-lic-alertas" onclick="abrirLicAlertas()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;">🔔 Alertas</button>
-                        <button onclick="gerarBoardReport(event)" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(45,27,105,.3);">📋 Board Report</button>
-                        <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">💼 Disponibilidade</button>
-                        <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
-                        <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
-                        <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
+                        <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-map-2"></i> Mapa</button>
+                        <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-layout-kanban"></i> Kanban</button>
+                        <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-clipboard-check"></i> Auditoria</button>
+                        <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-target"></i> Scorecard</button>
+                        <button id="btn-lic-alertas" onclick="abrirLicAlertas()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;"><i class="ti ti-bell"></i> Alertas</button>
+                        <button onclick="gerarBoardReport(event)" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(45,27,105,.3);"><i class="ti ti-file-analytics"></i> Board Report</button>
+                        <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-package-export"></i> Disponibilidade</button>
+                        <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-bar"></i> Capacidade</button>
+                        <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);"><i class="ti ti-link"></i> Gerar link</button>
+                        <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-plus"></i> Novo Lead</button>
                     </div>
                 </div>
 
@@ -2433,7 +2438,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
         </div>
         <div style="display:flex;gap:10px;align-items:center;">
             <div id="lic-kb-stats" style="font-size:12px;color:#9b8cc0;"></div>
-            <button onclick="abrirFormLead(null,'kanban')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
+            <button onclick="abrirFormLead(null,'kanban')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
     </div>
 
@@ -2477,9 +2482,9 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
         </div>
         <div style="display:flex;gap:10px;">
-            <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">⊕ Ver todo Brasil</button>
-            <button id="lic-map-gap-btn" onclick="toggleLicGapAnalysis()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;transition:all .15s;">🔴 Gap Analysis</button>
-            <button onclick="abrirFormLead(null,'mapa')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
+            <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;"><i class="ti ti-focus-2"></i> Ver todo Brasil</button>
+            <button id="lic-map-gap-btn" onclick="toggleLicGapAnalysis()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;transition:all .15s;"><i class="ti ti-map-search"></i> Gap Analysis</button>
+            <button onclick="abrirFormLead(null,'mapa')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
     </div>
 
@@ -2791,7 +2796,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
             <div style="display:flex;gap:10px;align-items:center;">
                 <div id="aud-stats" style="font-size:12px;color:rgba(255,255,255,.6);"></div>
-                <button onclick="abrirModalIniciarAuditoria()" style="padding:8px 18px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;backdrop-filter:blur(4px);">+ Iniciar Auditoria</button>
+                <button onclick="abrirModalIniciarAuditoria()" style="padding:8px 18px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;backdrop-filter:blur(4px);"><i class="ti ti-plus"></i> Iniciar Auditoria</button>
             </div>
         </div>
         <!-- Mini KPIs no header -->
@@ -10094,10 +10099,10 @@ function calcLicScore(lead) {
 }
 
 const LIC_TIERS = [
-    { min:80, name:'Platina', icon:'💜', color:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Platina' },
-    { min:60, name:'Ouro',    icon:'⭐', color:'#b45309', bg:'#fffbeb', border:'#fcd34d', label:'Ouro'    },
-    { min:35, name:'Prata',   icon:'🔘', color:'#4b5563', bg:'#f9fafb', border:'#d1d5db', label:'Prata'   },
-    { min:0,  name:'Bronze',  icon:'🎖', color:'#92400e', bg:'#fef3c7', border:'#fbbf24', label:'Bronze'  },
+    { min:80, name:'Platina', icon:'<i class="ti ti-diamond"></i>',     color:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Platina' },
+    { min:60, name:'Ouro',    icon:'<i class="ti ti-star-filled"></i>', color:'#b45309', bg:'#fffbeb', border:'#fcd34d', label:'Ouro'    },
+    { min:35, name:'Prata',   icon:'<i class="ti ti-medal"></i>',       color:'#4b5563', bg:'#f9fafb', border:'#d1d5db', label:'Prata'   },
+    { min:0,  name:'Bronze',  icon:'<i class="ti ti-award"></i>',       color:'#92400e', bg:'#fef3c7', border:'#fbbf24', label:'Bronze'  },
 ];
 
 function getLicTier(lead) {
@@ -10163,12 +10168,12 @@ function fecharLicCapacidade() {
 // ── Scorecard de Performance ──────────────────────────────────────
 
 const LIC_KPI_META = {
-    otif_pct:               { label:'OTIF',              unit:'%',  icon:'📦', up:true,  verde:97,  amarelo:90  },
-    acuracidade_inventario: { label:'Acuracidade Inv.',  unit:'%',  icon:'🎯', up:true,  verde:98,  amarelo:95  },
-    dock_to_stock_hrs:      { label:'Dock-to-Stock',     unit:'h',  icon:'⏱', up:false, verde:24,  amarelo:48  },
-    utilizacao_capacidade:  { label:'Utilização Cap.',   unit:'%',  icon:'📐', up:false, verde:85,  amarelo:95  },
-    nps_score:              { label:'NPS',               unit:'pts',icon:'⭐', up:true,  verde:50,  amarelo:20  },
-    tempo_onboarding_dias:  { label:'Onboarding',        unit:'d',  icon:'🚀', up:false, verde:20,  amarelo:30  },
+    otif_pct:               { label:'OTIF',              unit:'%',  icon:'<i class="ti ti-package"></i>',       up:true,  verde:97,  amarelo:90  },
+    acuracidade_inventario: { label:'Acuracidade Inv.',  unit:'%',  icon:'<i class="ti ti-scan"></i>',          up:true,  verde:98,  amarelo:95  },
+    dock_to_stock_hrs:      { label:'Dock-to-Stock',     unit:'h',  icon:'<i class="ti ti-clock-hour-4"></i>',  up:false, verde:24,  amarelo:48  },
+    utilizacao_capacidade:  { label:'Utilização Cap.',   unit:'%',  icon:'<i class="ti ti-percentage"></i>',    up:false, verde:85,  amarelo:95  },
+    nps_score:              { label:'NPS',               unit:'pts',icon:'<i class="ti ti-star"></i>',          up:true,  verde:50,  amarelo:20  },
+    tempo_onboarding_dias:  { label:'Onboarding',        unit:'d',  icon:'<i class="ti ti-rocket"></i>',        up:false, verde:20,  amarelo:30  },
 };
 
 let _licPerfData = {};      // leadId → [{...performance records}]
@@ -10230,17 +10235,17 @@ function fecharLicScorecard() {
 // ── Pipeline de Qualificação e Auditoria ─────────────────────────
 
 const LIC_AUDIT_STAGES = [
-    { id:'prospectado', label:'Prospectado',       icon:'👋', color:'#6b7280', bg:'#f9fafb', border:'#d1d5db', sla:7,
+    { id:'prospectado', label:'Prospectado',       icon:'<i class="ti ti-user-search"></i>', color:'#6b7280', bg:'#f9fafb', border:'#d1d5db', sla:7,
       checklist:['Contato inicial realizado','Informações básicas da empresa coletadas','Potencial de m² confirmado','Link do formulário enviado ao parceiro'] },
-    { id:'formulario',  label:'Formulário Enviado', icon:'📋', color:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', sla:14,
+    { id:'formulario',  label:'Formulário Enviado', icon:'<i class="ti ti-forms"></i>', color:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', sla:14,
       checklist:['Formulário preenchido pelo parceiro','Contrato Social anexado','CNPJ e dados validados','Capacidade de m² confirmada nos dados'] },
-    { id:'documental',  label:'Análise Documental', icon:'📄', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', sla:10,
+    { id:'documental',  label:'Análise Documental', icon:'<i class="ti ti-file-search"></i>', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', sla:10,
       checklist:['Documentação jurídica aprovada','Certidões negativas OK','Situação fiscal regular','Certificações verificadas','Referências comerciais checadas'] },
-    { id:'visita',      label:'Visita Técnica',     icon:'🔍', color:'#d97706', bg:'#fffbeb', border:'#fcd34d', sla:21,
+    { id:'visita',      label:'Visita Técnica',     icon:'<i class="ti ti-home-search"></i>', color:'#d97706', bg:'#fffbeb', border:'#fcd34d', sla:21,
       checklist:['Visita agendada e confirmada','Estrutura física aprovada','Segurança (AVCB) verificada','m² confirmado in loco','WMS/sistema verificado','Fotos do local registradas','Relatório técnico elaborado e assinado'] },
-    { id:'aprovacao',   label:'Aprovação',          icon:'✅', color:'#16a34a', bg:'#f0fdf4', border:'#86efac', sla:14,
+    { id:'aprovacao',   label:'Aprovação',          icon:'<i class="ti ti-rosette-discount-check"></i>', color:'#16a34a', bg:'#f0fdf4', border:'#86efac', sla:14,
       checklist:['Relatório aprovado pela diretoria','Plano de implantação definido','Contrato de licenciamento assinado','Número de licenciado atribuído'] },
-    { id:'ativo',       label:'Ativo na Rede',      icon:'🎉', color:'#7c3aed', bg:'#faf5ff', border:'#c4b5fd', sla:null,
+    { id:'ativo',       label:'Ativo na Rede',      icon:'<i class="ti ti-check-circle"></i>', color:'#7c3aed', bg:'#faf5ff', border:'#c4b5fd', sla:null,
       checklist:['Certificado digital emitido','Credenciais enviadas ao parceiro','Treinamento técnico agendado','Go-live confirmado na plataforma'] },
 ];
 
@@ -10583,15 +10588,15 @@ function _buildBoardReportHtml(m) {
 // ── Central de Alertas e Renovações ──────────────────────────────
 
 const LIC_ALERTA_TIPOS = {
-    CERT_VENCENDO: { icon:'🏆', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Certificação vencendo', prioridade:0 },
-    CAPACIDADE_MIN: { icon:'📐', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Capacidade crítica', prioridade:0 },
-    SCORE_DOWN:     { icon:'📉', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Risco de downgrade', prioridade:0 },
-    SEM_ATIVIDADE:  { icon:'💤', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Sem atualização', prioridade:1 },
-    CAPACIDADE_70:  { icon:'⚠️', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Alta ocupação', prioridade:1 },
-    CERT_60:        { icon:'🏆', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Certificação atenção', prioridade:1 },
-    ANIVERSARIO:    { icon:'🎂', cor:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Aniversário de contrato', prioridade:2 },
-    FORM_PREENCHIDO:{ icon:'📋', cor:'#16a34a', bg:'#f0fdf4', border:'#86efac', label:'Formulário preenchido', prioridade:2 },
-    SEM_KPIS:       { icon:'📊', cor:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', label:'Sem KPIs', prioridade:2 },
+    CERT_VENCENDO: { icon:'<i class="ti ti-certificate"></i>',     cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Certificação vencendo', prioridade:0 },
+    CAPACIDADE_MIN: { icon:'<i class="ti ti-alert-triangle"></i>', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Capacidade crítica', prioridade:0 },
+    SCORE_DOWN:     { icon:'<i class="ti ti-trending-down"></i>',  cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Risco de downgrade', prioridade:0 },
+    SEM_ATIVIDADE:  { icon:'<i class="ti ti-clock-pause"></i>',    cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Sem atualização', prioridade:1 },
+    CAPACIDADE_70:  { icon:'<i class="ti ti-alert-circle"></i>',   cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Alta ocupação', prioridade:1 },
+    CERT_60:        { icon:'<i class="ti ti-certificate-2"></i>',  cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Certificação atenção', prioridade:1 },
+    ANIVERSARIO:    { icon:'<i class="ti ti-calendar-event"></i>', cor:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Aniversário de contrato', prioridade:2 },
+    FORM_PREENCHIDO:{ icon:'<i class="ti ti-clipboard-list"></i>', cor:'#16a34a', bg:'#f0fdf4', border:'#86efac', label:'Formulário preenchido', prioridade:2 },
+    SEM_KPIS:       { icon:'<i class="ti ti-chart-dots"></i>',     cor:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', label:'Sem KPIs', prioridade:2 },
 };
 
 function gerarLicAlertas() {
@@ -10696,10 +10701,10 @@ function atualizarBadgeAlertas() {
     const criticos = alertas.filter(a=>a.prioridade===0).length;
     const total = alertas.length;
     if (total > 0) {
-        btn.innerHTML = `🔔 Alertas <span style="background:${criticos>0?'#dc2626':'#d97706'};color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:2px;">${total}</span>`;
+        btn.innerHTML = `<i class="ti ti-bell"></i> Alertas <span style="background:${criticos>0?'#dc2626':'#d97706'};color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:2px;">${total}</span>`;
         btn.style.borderColor = criticos>0?'#fca5a5':'#fcd34d';
     } else {
-        btn.innerHTML = '🔔 Alertas';
+        btn.innerHTML = '<i class="ti ti-bell"></i> Alertas';
         btn.style.borderColor = '#e0d9f5';
     }
 }
@@ -10790,18 +10795,18 @@ function renderizarLicAlertas() {
 // ── Histórico do Lead (CRM Timeline) ─────────────────────────────
 
 const LIC_HIST = {
-    prospeccao_iniciada: { icon:'👋', cor:'#6b7280', bg:'#f9fafb', label:'Prospecção iniciada'    },
-    etapa_kanban:        { icon:'🔄', cor:'#6941c6', bg:'#f5f3ff', label:'Etapa atualizada'       },
-    auditoria_avanco:    { icon:'✅', cor:'#16a34a', bg:'#f0fdf4', label:'Auditoria avançou'      },
-    certificado_emitido: { icon:'🏆', cor:'#7c3aed', bg:'#faf5ff', label:'Certificado emitido'    },
-    kpi_lancado:         { icon:'📈', cor:'#0891b2', bg:'#f0f9ff', label:'KPIs registrados'       },
-    formulario_preench:  { icon:'📋', cor:'#16a34a', bg:'#f0fdf4', label:'Formulário preenchido'  },
-    link_gerado:         { icon:'🔗', cor:'#6941c6', bg:'#f5f3ff', label:'Link compartilhado'     },
-    reuniao:             { icon:'🤝', cor:'#2563eb', bg:'#eff6ff', label:'Reunião realizada'      },
-    contato:             { icon:'📞', cor:'#16a34a', bg:'#f0fdf4', label:'Contato realizado'      },
-    proposta_enviada:    { icon:'📄', cor:'#d97706', bg:'#fffbeb', label:'Proposta enviada'       },
-    nota_interna:        { icon:'📝', cor:'#6b7280', bg:'#f9fafb', label:'Nota interna'           },
-    status_mudanca:      { icon:'🔁', cor:'#2563eb', bg:'#eff6ff', label:'Status alterado'        },
+    prospeccao_iniciada: { icon:'<i class="ti ti-user-plus"></i>',       cor:'#6b7280', bg:'#f9fafb', label:'Prospecção iniciada'    },
+    etapa_kanban:        { icon:'<i class="ti ti-arrows-right-left"></i>',cor:'#6941c6', bg:'#f5f3ff', label:'Etapa atualizada'       },
+    auditoria_avanco:    { icon:'<i class="ti ti-circle-check"></i>',     cor:'#16a34a', bg:'#f0fdf4', label:'Auditoria avançou'      },
+    certificado_emitido: { icon:'<i class="ti ti-certificate"></i>',      cor:'#7c3aed', bg:'#faf5ff', label:'Certificado emitido'    },
+    kpi_lancado:         { icon:'<i class="ti ti-chart-line"></i>',       cor:'#0891b2', bg:'#f0f9ff', label:'KPIs registrados'       },
+    formulario_preench:  { icon:'<i class="ti ti-clipboard-check"></i>',  cor:'#16a34a', bg:'#f0fdf4', label:'Formulário preenchido'  },
+    link_gerado:         { icon:'<i class="ti ti-link"></i>',             cor:'#6941c6', bg:'#f5f3ff', label:'Link compartilhado'     },
+    reuniao:             { icon:'<i class="ti ti-users"></i>',            cor:'#2563eb', bg:'#eff6ff', label:'Reunião realizada'      },
+    contato:             { icon:'<i class="ti ti-phone-call"></i>',       cor:'#16a34a', bg:'#f0fdf4', label:'Contato realizado'      },
+    proposta_enviada:    { icon:'<i class="ti ti-file-text"></i>',        cor:'#d97706', bg:'#fffbeb', label:'Proposta enviada'       },
+    nota_interna:        { icon:'<i class="ti ti-note"></i>',             cor:'#6b7280', bg:'#f9fafb', label:'Nota interna'           },
+    status_mudanca:      { icon:'<i class="ti ti-refresh"></i>',          cor:'#2563eb', bg:'#eff6ff', label:'Status alterado'        },
 };
 
 let _licHistData = {}; // leadId → [records]
@@ -12750,7 +12755,7 @@ function _licMapAbrirPanel(lead) {
             <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
                 <div style="font-size:13px;font-weight:700;color:#6941c6;">Licenciado</div>
                 <div style="display:flex;gap:6px;">
-                    <button onclick="abrirModalHist('${lead.id}')" style="padding:5px 10px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;">+ Evento</button>
+                    <button onclick="abrirModalHist('${lead.id}')" style="padding:5px 10px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;"><i class="ti ti-plus"></i> Evento</button>
                     <button onclick="_licMapFecharPanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
                 </div>
             </div>
@@ -12957,7 +12962,7 @@ function toggleLicGapAnalysis() {
         btn.style.background = _licGapMode ? '#fef2f2' : '#faf8ff';
         btn.style.color = _licGapMode ? '#dc2626' : '#6941c6';
         btn.style.borderColor = _licGapMode ? '#fca5a5' : '#e0d9f5';
-        btn.innerHTML = _licGapMode ? '✕ Sair do Gap Analysis' : '🔴 Gap Analysis';
+        btn.innerHTML = _licGapMode ? '✕ Sair do Gap Analysis' : '<i class="ti ti-map-search"></i> Gap Analysis';
     }
     if (_licGapMode) {
         renderizarLicGapAnalysis();
