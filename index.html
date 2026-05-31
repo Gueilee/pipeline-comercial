@@ -10787,11 +10787,256 @@ function renderizarLicAlertas() {
     }).join('');
 }
 
-// Atualiza badge quando dados carregam
+// ── Histórico do Lead (CRM Timeline) ─────────────────────────────
+
+const LIC_HIST = {
+    prospeccao_iniciada: { icon:'👋', cor:'#6b7280', bg:'#f9fafb', label:'Prospecção iniciada'    },
+    etapa_kanban:        { icon:'🔄', cor:'#6941c6', bg:'#f5f3ff', label:'Etapa atualizada'       },
+    auditoria_avanco:    { icon:'✅', cor:'#16a34a', bg:'#f0fdf4', label:'Auditoria avançou'      },
+    certificado_emitido: { icon:'🏆', cor:'#7c3aed', bg:'#faf5ff', label:'Certificado emitido'    },
+    kpi_lancado:         { icon:'📈', cor:'#0891b2', bg:'#f0f9ff', label:'KPIs registrados'       },
+    formulario_preench:  { icon:'📋', cor:'#16a34a', bg:'#f0fdf4', label:'Formulário preenchido'  },
+    link_gerado:         { icon:'🔗', cor:'#6941c6', bg:'#f5f3ff', label:'Link compartilhado'     },
+    reuniao:             { icon:'🤝', cor:'#2563eb', bg:'#eff6ff', label:'Reunião realizada'      },
+    contato:             { icon:'📞', cor:'#16a34a', bg:'#f0fdf4', label:'Contato realizado'      },
+    proposta_enviada:    { icon:'📄', cor:'#d97706', bg:'#fffbeb', label:'Proposta enviada'       },
+    nota_interna:        { icon:'📝', cor:'#6b7280', bg:'#f9fafb', label:'Nota interna'           },
+    status_mudanca:      { icon:'🔁', cor:'#2563eb', bg:'#eff6ff', label:'Status alterado'        },
+};
+
+let _licHistData = {}; // leadId → [records]
+
+async function registrarLicHistorico(leadId, tipo, titulo, descricao, extras) {
+    if (!leadId || !tipo) return;
+    const record = {
+        lead_id: parseInt(leadId), tipo, titulo: titulo||'', descricao: descricao||'',
+        etapa_anterior: extras?.etapaAnterior || null,
+        etapa_nova:     extras?.etapaNova     || null,
+        autor:          extras?.autor         || EMAIL_USUARIO_LOGADO,
+        criado_por:     EMAIL_USUARIO_LOGADO,
+        created_at:     new Date().toISOString(),
+    };
+    try {
+        await supabaseClient.from('lic_historico').insert([record]);
+        // Atualiza cache local
+        const key = String(leadId);
+        if (_licHistData[key]) _licHistData[key].unshift(record);
+    } catch(e) { console.warn('Histórico error:', e.message); }
+}
+
+async function carregarLicHistorico(leadId) {
+    try {
+        const { data } = await supabaseClient.from('lic_historico').select('*').eq('lead_id', leadId).order('created_at', { ascending: false });
+        _licHistData[String(leadId)] = data || [];
+        return data || [];
+    } catch(e) { return []; }
+}
+
+function renderizarTimeline(registros, anexos, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    if (!registros.length && !anexos?.length) {
+        el.innerHTML = `<div style="text-align:center;padding:32px 16px;"><div style="font-size:36px;margin-bottom:10px;">📅</div><div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:6px;">Sem registros ainda</div><div style="font-size:12px;color:#9b8cc0;line-height:1.5;">Use "Registrar evento" para adicionar reuniões,<br>contatos e notas deste lead.</div></div>`;
+        return;
+    }
+
+    // Mescla registros e anexos numa timeline ordenada
+    const items = [
+        ...registros.map(r => ({ ...r, _kind: 'hist' })),
+        ...(anexos||[]).filter(a=>a.tipo!=='pdf_lead').map(a => ({
+            _kind: 'anexo', id: 'a_'+a.id, created_at: a.created_at,
+            tipo: 'documento_anexado', titulo: a.nome_arquivo,
+            descricao: ({contrato_social:'Contrato Social',certificado:'Certificado',pdf_lead:'Board Report'}[a.tipo]||('Foto Armazém '+(a.tipo.split('_')[2]||''))),
+            url: a.url, autor: a.criado_por,
+        })),
+    ].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+    el.innerHTML = items.map((item, idx) => {
+        const t = LIC_HIST[item.tipo] || { icon:'📌', cor:'#6b7280', bg:'#f9fafb', label:item.tipo };
+        const dt = new Date(item.created_at);
+        const dtStr = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+        const hrStr = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+        const isLast = idx === items.length - 1;
+
+        let extra = '';
+        if (item.etapa_anterior && item.etapa_nova) extra = `<div style="font-size:10px;color:#9b8cc0;margin-top:3px;display:flex;align-items:center;gap:4px;"><span style="background:#f0ebff;color:#6941c6;padding:1px 6px;border-radius:8px;font-weight:600;">${item.etapa_anterior}</span><span>→</span><span style="background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;font-weight:600;">${item.etapa_nova}</span></div>`;
+        if (item._kind === 'anexo' && item.url) extra = `<a href="${item.url}" target="_blank" style="font-size:10px;color:#6941c6;font-weight:700;text-decoration:none;background:#f0ebff;padding:2px 8px;border-radius:6px;margin-top:4px;display:inline-block;">⬇ Download</a>`;
+
+        return `<div style="display:flex;gap:12px;padding-bottom:${isLast?'0':'14px'};">
+            <!-- Linha do tempo -->
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+                <div style="width:32px;height:32px;border-radius:50%;background:${t.bg};border:2px solid ${t.cor}22;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">${t.icon}</div>
+                ${!isLast?`<div style="width:2px;flex:1;background:#f0ebff;margin-top:4px;min-height:10px;"></div>`:''}
+            </div>
+            <!-- Conteúdo -->
+            <div style="flex:1;padding-top:4px;padding-bottom:${isLast?'0':'4px'};">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;flex-wrap:wrap;gap:4px;">
+                    <span style="font-size:12px;font-weight:800;color:#2d1b69;line-height:1.2;">${item.titulo||t.label}</span>
+                    <span style="font-size:10px;color:#9b8cc0;white-space:nowrap;">${dtStr} · ${hrStr}</span>
+                </div>
+                ${item.descricao?`<div style="font-size:11px;color:#6b7280;line-height:1.4;margin-bottom:3px;">${item.descricao}</div>`:''}
+                ${extra}
+                ${item.autor?`<div style="font-size:10px;color:#c4b5e8;margin-top:3px;">por ${item.autor}</div>`:''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// Modal de registro manual
+let _histModalLeadId = null;
+
+function abrirModalHist(leadId) {
+    _histModalLeadId = leadId;
+    const lead = baseLicLeads.find(l=>String(l.id)===String(leadId));
+    document.getElementById('hist-modal-empresa').textContent = lead?.razao_social||'—';
+    document.getElementById('hist-titulo').value = '';
+    document.getElementById('hist-desc').value = '';
+    document.getElementById('hist-autor').value = EMAIL_USUARIO_LOGADO || '';
+    document.querySelectorAll('input[name="hist-tipo"]').forEach(r=>r.checked=false);
+    document.querySelectorAll('.hist-tipo-opt').forEach(l=>{l.style.background='#faf8ff';l.style.borderColor='#e0d9f5';});
+    document.getElementById('hist-etapas-block').style.display='none';
+    document.getElementById('lic-modal-hist').style.display='flex';
+    setTimeout(()=>document.getElementById('hist-titulo').focus(),100);
+}
+
+function fecharModalHist() {
+    document.getElementById('lic-modal-hist').style.display='none';
+    _histModalLeadId=null;
+}
+
+function histTipoChange() {
+    const tipo = document.querySelector('input[name="hist-tipo"]:checked')?.value;
+    document.querySelectorAll('.hist-tipo-opt').forEach(l=>{
+        const checked=l.querySelector('input')?.checked;
+        l.style.background=checked?'#f0ebff':'#faf8ff';
+        l.style.borderColor=checked?'#6941c6':'#e0d9f5';
+    });
+    document.getElementById('hist-etapas-block').style.display=tipo==='etapa_kanban'?'':'none';
+}
+
+async function salvarEventoHistorico() {
+    const tipo  = document.querySelector('input[name="hist-tipo"]:checked')?.value;
+    const titulo = document.getElementById('hist-titulo').value.trim();
+    const desc   = document.getElementById('hist-desc').value.trim();
+    const autor  = document.getElementById('hist-autor').value.trim();
+    if (!tipo || !titulo) { showToast('Selecione o tipo e informe o título.','error'); return; }
+    const extras = { autor, etapaAnterior: document.getElementById('hist-etapa-ant')?.value||null, etapaNova: document.getElementById('hist-etapa-nova')?.value||null };
+    const btn=document.querySelector('#lic-modal-hist button[onclick="salvarEventoHistorico()"]');
+    if(btn){btn.disabled=true;btn.textContent='⏳';}
+    await registrarLicHistorico(_histModalLeadId, tipo, titulo, desc, extras);
+    fecharModalHist();
+    // Recarrega painel do mapa se estiver aberto
+    const panel=document.getElementById('lic-map-side-panel');
+    if(panel?.classList.contains('open')) _licMapAtualizarHistTab(_histModalLeadId);
+    showToast('Evento registrado no histórico!','success');
+    if(btn){btn.disabled=false;btn.innerHTML='💾 Registrar evento';}
+}
+
+// ── Auto-registro em funções existentes ───────────────────────────
+
+// Sobrescreve audAvancarEtapa para registrar automaticamente
+const _origAudAvancar = audAvancarEtapa;
+audAvancarEtapa = async function(leadId) {
+    const aud = _audData[String(leadId)];
+    const etapaAnt = aud?.estagio_atual;
+    await _origAudAvancar.apply(this, [leadId]);
+    const etapaNova = _audData[String(leadId)]?.estagio_atual;
+    if (etapaAnt && etapaNova && etapaAnt !== etapaNova) {
+        const stageLabel = LIC_AUDIT_STAGES.find(s=>s.id===etapaNova)?.label||etapaNova;
+        await registrarLicHistorico(leadId,'auditoria_avanco',`Auditoria avançou para ${stageLabel}`,`Etapa concluída: ${LIC_AUDIT_STAGES.find(s=>s.id===etapaAnt)?.label||etapaAnt}`,{etapaAnterior:etapaAnt,etapaNova,autor:EMAIL_USUARIO_LOGADO});
+    }
+};
+
+// Sobrescreve emitirCertificado para registrar automaticamente
+const _origEmitirCert = emitirCertificado;
+emitirCertificado = async function() {
+    const leadId = _audCertLeadId;
+    await _origEmitirCert.apply(this, arguments);
+    if (leadId) {
+        const num = document.getElementById('cert-numero')?.value||'';
+        await registrarLicHistorico(leadId,'certificado_emitido',`Certificado emitido: ${num}`,`Licenciado homologado e ativado na rede Vendemmia.`,{autor:EMAIL_USUARIO_LOGADO});
+    }
+};
+
+// Sobrescreve salvarLicKpi para registrar automaticamente
+const _origSalvarKpi = salvarLicKpi;
+salvarLicKpi = async function() {
+    const leadId = _licKpiLeadId;
+    const tri = document.getElementById('kpi-trimestre')?.value;
+    const ano = document.getElementById('kpi-ano')?.value;
+    await _origSalvarKpi.apply(this, arguments);
+    if (leadId && tri && ano) {
+        const otif = document.getElementById('kpi-otif')?.value;
+        const acu  = document.getElementById('kpi-acuracidade')?.value;
+        const desc = [otif?`OTIF: ${otif}%`:'',acu?`Acuracidade: ${acu}%`:''].filter(Boolean).join(' | ');
+        await registrarLicHistorico(leadId,'kpi_lancado',`KPIs ${tri} ${ano} registrados`,desc,{autor:EMAIL_USUARIO_LOGADO});
+    }
+};
+
+// Sobrescreve licGerarLinkForm para registrar automaticamente
+const _origGerarLink = licGerarLinkForm;
+licGerarLinkForm = async function(leadId) {
+    await _origGerarLink.apply(this, [leadId]);
+    if (leadId) await registrarLicHistorico(leadId,'link_gerado','Link de formulário gerado e compartilhado','Portal de preenchimento enviado ao parceiro.',{autor:EMAIL_USUARIO_LOGADO});
+};
+
+// Sobrescreve _licKbMoverEtapa para registrar mudanças no Kanban
+const _origMoverEtapa = _licKbMoverEtapa;
+_licKbMoverEtapa = async function(id, etapa, motivo) {
+    const ant = baseLicLeads.find(l=>String(l.id)===String(id))?.etapa;
+    await _origMoverEtapa.apply(this, [id,etapa,motivo]);
+    if (ant && etapa && ant!==etapa) {
+        const desc = etapa==='Perdido'&&motivo?`Motivo: ${motivo}`:'';
+        await registrarLicHistorico(id,'etapa_kanban',`Etapa alterada para "${etapa}"`,desc,{etapaAnterior:ant,etapaNova:etapa,autor:EMAIL_USUARIO_LOGADO});
+    }
+};
+
+// Registra automaticamente quando formulário do portal é concluído
+let _prevFormStatus = {};
+
+// ── Integração com painel do mapa: tabs Dados | Histórico | Documentos ──
+
+async function _licMapAtualizarHistTab(leadId) {
+    const recs = await carregarLicHistorico(leadId);
+    const { data: anexos } = await supabaseClient.from('lic_anexos').select('*').eq('lead_id', leadId).order('created_at');
+    renderizarTimeline(recs, anexos||[], 'map-hist-timeline');
+    // Docs tab
+    const docsEl = document.getElementById('map-docs-list');
+    if (docsEl) {
+        const docs = (anexos||[]).filter(a=>a.tipo!=='pdf_lead');
+        const pdfs = (anexos||[]).filter(a=>a.tipo==='pdf_lead');
+        docsEl.innerHTML = [...docs,...pdfs].length===0
+            ? '<div style="text-align:center;padding:24px;color:#c4b5e8;font-size:13px;">Nenhum documento anexado</div>'
+            : [...docs,...pdfs].map(a=>{
+                const tipoLabel = {contrato_social:'Contrato Social',certificado:'Certificado',pdf_lead:'Board Report'}[a.tipo]||(a.tipo.startsWith('foto_armazem_')?'Foto Armazém '+(a.tipo.split('_')[2]||''):'Documento');
+                const icon = a.nome_arquivo?.match(/\.(jpg|jpeg|png)/i)?'🖼️':a.nome_arquivo?.endsWith('.pdf')?'📄':'📎';
+                return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f5f3ff;">
+                    <span style="font-size:18px;">${icon}</span>
+                    <div style="flex:1;overflow:hidden;">
+                        <div style="font-size:12px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</div>
+                        <div style="font-size:10px;color:#9b8cc0;">${tipoLabel} · ${a.tamanho_bytes?Math.round(a.tamanho_bytes/1024)+'KB':''}</div>
+                    </div>
+                    <a href="${a.url}" target="_blank" style="padding:4px 10px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;text-decoration:none;white-space:nowrap;">⬇ Baixar</a>
+                </div>`;
+            }).join('');
+    }
+}
+
+// Atualiza badge quando dados carregam e rastreia form_status para auto-registro
 const _origCarregarLicLeads = carregarLicLeads;
 carregarLicLeads = async function() {
     await _origCarregarLicLeads.apply(this, arguments);
     setTimeout(atualizarBadgeAlertas, 300);
+    // Detecta formulários recém-concluídos e registra no histórico
+    baseLicLeads.forEach(l => {
+        if (l.form_status==='concluido' && _prevFormStatus[l.id]!=='concluido') {
+            const dt = l.form_filled_at ? new Date(l.form_filled_at) : new Date();
+            if ((Date.now()-dt.getTime()) < 7*86400000) {
+                registrarLicHistorico(l.id,'formulario_preench','Formulário preenchido pelo parceiro via portal','Dados cadastrais enviados diretamente pelo licenciado através do portal público.',{autor:'Portal'});
+            }
+        }
+        _prevFormStatus[l.id] = l.form_status;
+    });
 };
 
 function renderizarLicDisponibilidade() {
@@ -12500,11 +12745,25 @@ function _licMapAbrirPanel(lead) {
     const field=(label,val)=>val?`<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:2px;">${label}</div><div style="font-size:12px;color:#2d1b69;font-weight:500;line-height:1.3;">${val}</div></div>`:'';
 
     document.getElementById('lic-map-side-content').innerHTML=`
-        <!-- Close button -->
-        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f5f3ff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:12px;font-weight:700;color:#6941c6;">Detalhes do parceiro</div>
-            <button onclick="_licMapFecharPanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+        <!-- Header com tabs -->
+        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f0ebff;">
+            <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:13px;font-weight:700;color:#6941c6;">Licenciado</div>
+                <div style="display:flex;gap:6px;">
+                    <button onclick="abrirModalHist('${lead.id}')" style="padding:5px 10px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;">+ Evento</button>
+                    <button onclick="_licMapFecharPanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
+                </div>
+            </div>
+            <!-- TABS -->
+            <div style="display:flex;border-top:1px solid #f0ebff;">
+                <button onclick="licMapTab('dados',this)" id="maptab-dados" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid #6941c6;background:#fff;font-family:inherit;font-size:11px;font-weight:800;color:#6941c6;cursor:pointer;">📋 Dados</button>
+                <button onclick="licMapTab('historico',this)" id="maptab-historico" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid transparent;background:#fff;font-family:inherit;font-size:11px;font-weight:600;color:#9b8cc0;cursor:pointer;">📅 Histórico</button>
+                <button onclick="licMapTab('documentos',this)" id="maptab-documentos" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid transparent;background:#fff;font-family:inherit;font-size:11px;font-weight:600;color:#9b8cc0;cursor:pointer;">📎 Documentos</button>
+            </div>
         </div>
+
+        <!-- Tab Dados -->
+        <div id="maptab-content-dados" style="display:block;">
 
         <!-- Galeria de fotos -->
         <div style="height:200px;background:linear-gradient(135deg,#f0ebff,#e0d4f8);overflow:hidden;position:relative;">
@@ -12598,15 +12857,48 @@ function _licMapAbrirPanel(lead) {
 
         </div>
 
-        <!-- Botões de ação fixos no rodapé -->
+        <!-- Botões de ação fixos no rodapé da tab Dados -->
         <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #ede8f8;padding:12px 16px;display:flex;gap:8px;">
             <button onclick="gerarLicPDF('${lead.id}')" style="flex:1;padding:9px;border:1.5px solid #e0d9f5;border-radius:10px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:700;color:#6941c6;cursor:pointer;">📄 Gerar PDF</button>
             <button onclick="_licMapFecharPanel();abrirFormLead('${lead.id}','tabela')" style="flex:2;padding:9px;border:none;border-radius:10px;background:linear-gradient(135deg,#2d1b69,#6941c6);font-family:inherit;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">✏️ Editar lead completo</button>
         </div>
+
+        </div><!-- /maptab-content-dados -->
+
+        <!-- Tab Histórico -->
+        <div id="maptab-content-historico" style="display:none;padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;">📅 Histórico do lead</div>
+                <button onclick="abrirModalHist('${lead.id}')" style="padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:11px;font-weight:700;color:#fff;cursor:pointer;">+ Registrar evento</button>
+            </div>
+            <div id="map-hist-timeline" style="font-size:12px;">
+                <div style="text-align:center;padding:32px;color:#c4b5e8;font-size:13px;">Carregando histórico...</div>
+            </div>
+        </div>
+
+        <!-- Tab Documentos -->
+        <div id="maptab-content-documentos" style="display:none;padding:16px;">
+            <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:14px;">📎 Documentos e anexos</div>
+            <div id="map-docs-list">
+                <div style="text-align:center;padding:24px;color:#c4b5e8;font-size:13px;">Carregando...</div>
+            </div>
+        </div>
     `;
+
+    // Carrega histórico e documentos em background
+    _licMapAtualizarHistTab(lead.id);
 
     panel.classList.add('open');
     if(overlay) overlay.classList.add('show');
+}
+
+function licMapTab(tab, btn) {
+    ['dados','historico','documentos'].forEach(t=>{
+        document.getElementById('maptab-content-'+t).style.display = t===tab?'block':'none';
+        document.getElementById('maptab-'+t).style.borderBottomColor = t===tab?'#6941c6':'transparent';
+        document.getElementById('maptab-'+t).style.color = t===tab?'#6941c6':'#9b8cc0';
+        document.getElementById('maptab-'+t).style.fontWeight = t===tab?'800':'600';
+    });
 }
 
 function _licMapFecharPanel() {
@@ -13317,6 +13609,56 @@ async function salvarNovaSenha() {
 
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:11px;color:#92400e;line-height:1.5;">
             💡 <strong>O parceiro não precisa de login.</strong> Ao abrir o link ele verá um portal exclusivo para preencher os dados da empresa. As informações são salvas automaticamente no sistema.
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Registrar evento no histórico -->
+<div id="lic-modal-hist" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div style="background:#fff;border-radius:20px;width:520px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);padding:20px 24px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:15px;font-weight:800;color:#fff;">📅 Registrar evento</div><div id="hist-modal-empresa" style="font-size:11px;color:rgba(255,255,255,.6);margin-top:2px;"></div></div>
+            <button onclick="fecharModalHist()" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="padding:22px 24px;">
+            <!-- Tipo de evento -->
+            <div style="margin-bottom:18px;">
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:10px;">TIPO DE EVENTO</label>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="reuniao" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">🤝</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Reunião</span></label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="contato" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">📞</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Contato</span></label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="proposta_enviada" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">📄</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Proposta</span></label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="nota_interna" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">📝</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Nota interna</span></label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="etapa_kanban" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">🔄</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Mudança etapa</span></label>
+                    <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1.5px solid #e0d9f5;border-radius:10px;cursor:pointer;background:#faf8ff;transition:all .15s;user-select:none;" class="hist-tipo-opt"><input type="radio" name="hist-tipo" value="status_mudanca" style="display:none;" onchange="histTipoChange()"><span style="font-size:16px;">🔁</span><span style="font-size:11px;font-weight:600;color:#6941c6;">Status</span></label>
+                </div>
+            </div>
+            <!-- Título -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">TÍTULO DO EVENTO *</label>
+                <input id="hist-titulo" type="text" placeholder="Ex.: Reunião com diretor de operações" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+            </div>
+            <!-- Descrição -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">DETALHES / RESULTADO</label>
+                <textarea id="hist-desc" rows="3" placeholder="Descreva o que aconteceu, quem participou, próximos passos..." style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'"></textarea>
+            </div>
+            <!-- Etapas (para tipo etapa_kanban) -->
+            <div id="hist-etapas-block" style="display:none;margin-bottom:14px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div><label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:6px;">ETAPA ANTERIOR</label><input id="hist-etapa-ant" type="text" placeholder="Ex.: Prospecção" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;"></div>
+                    <div><label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:6px;">NOVA ETAPA</label><input id="hist-etapa-nova" type="text" placeholder="Ex.: Reunião executiva" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;"></div>
+                </div>
+            </div>
+            <!-- Autor -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">REALIZADO POR</label>
+                <input id="hist-autor" type="text" placeholder="Nome do responsável" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="fecharModalHist()" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
+                <button onclick="salvarEventoHistorico()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.3);">💾 Registrar evento</button>
+            </div>
         </div>
     </div>
 </div>
