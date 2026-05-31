@@ -1657,6 +1657,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
                         <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
+                        <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔍 Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
@@ -2767,6 +2768,106 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <button onclick="fecharModalKpi()" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
                 <button onclick="salvarLicKpi()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.3);">💾 Salvar KPIs</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── VISÃO AUDITORIA ── -->
+<div id="lic-view-auditoria" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 50%,#6941c6 100%);padding:18px 24px;flex-shrink:0;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <button onclick="fecharLicAuditoria()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);cursor:pointer;">← Leads</button>
+                <div>
+                    <div style="font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;">🔍 Pipeline de Qualificação e Auditoria</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">Homologação estruturada de novos licenciados</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <div id="aud-stats" style="font-size:12px;color:rgba(255,255,255,.6);"></div>
+                <button onclick="abrirModalIniciarAuditoria()" style="padding:8px 18px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;backdrop-filter:blur(4px);">+ Iniciar Auditoria</button>
+            </div>
+        </div>
+        <!-- Mini KPIs no header -->
+        <div style="display:flex;gap:12px;margin-top:14px;position:relative;flex-wrap:wrap;">
+            <div id="aud-kpi-bar" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+    </div>
+
+    <!-- Kanban board -->
+    <div style="flex:1;overflow-x:auto;overflow-y:hidden;padding:18px 20px;">
+        <div id="aud-kanban-board" style="display:flex;gap:14px;height:100%;min-width:max-content;align-items:flex-start;"></div>
+    </div>
+
+    <!-- Side panel -->
+    <div id="aud-side-panel" style="position:absolute;right:-520px;top:0;height:100%;width:500px;background:#fff;z-index:300;overflow-y:auto;box-shadow:-4px 0 30px rgba(45,27,105,.15);transition:right .3s cubic-bezier(.16,1,.3,1);">
+        <div id="aud-side-content"></div>
+    </div>
+    <div id="aud-overlay" style="display:none;position:absolute;inset:0;background:rgba(45,27,105,.08);z-index:200;" onclick="fecharAudSidePanel()"></div>
+</div>
+
+<!-- Modal: Iniciar Auditoria -->
+<div id="aud-modal-iniciar" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:800;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:500px;max-width:95vw;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+            <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#f0ebff,#e0d4f8);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🔍</div>
+            <div><div style="font-size:17px;font-weight:800;color:#2d1b69;">Iniciar pipeline de auditoria</div><div style="font-size:12px;color:#6b7280;margin-top:3px;">Selecione o lead para homologar como licenciado</div></div>
+            <button onclick="document.getElementById('aud-modal-iniciar').style.display='none'" style="margin-left:auto;width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="margin-bottom:16px;">
+            <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">LEAD / EMPRESA</label>
+            <select id="aud-ini-lead" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;cursor:pointer;">
+                <option value="">Selecione um lead...</option>
+            </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">AUDITOR RESPONSÁVEL</label>
+                <input id="aud-ini-auditor" type="text" placeholder="Nome do auditor" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">PRAZO INICIAL (dias)</label>
+                <input id="aud-ini-prazo" type="number" value="7" min="1" max="60" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+            </div>
+        </div>
+        <div style="background:#f0ebff;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:12px;color:#6941c6;line-height:1.5;">
+            💡 O lead será adicionado na primeira etapa <strong>"Prospectado"</strong>. A cada etapa concluída, você avança manualmente após completar o checklist.
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('aud-modal-iniciar').style.display='none'" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
+            <button onclick="iniciarLicAuditoria()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.3);">🔍 Iniciar homologação</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Certificação Digital -->
+<div id="aud-modal-cert" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:800;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div style="background:#fff;border-radius:20px;padding:32px;width:480px;max-width:95vw;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="text-align:center;margin-bottom:24px;">
+            <div style="font-size:48px;margin-bottom:10px;">🏆</div>
+            <div style="font-size:20px;font-weight:900;color:#2d1b69;margin-bottom:6px;">Emitir Certificado de Licenciado</div>
+            <div id="cert-empresa-nome" style="font-size:13px;color:#6941c6;font-weight:700;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div>
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">NÚMERO DO CERTIFICADO</label>
+                <input id="cert-numero" type="text" placeholder="VDM-2026-001" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">DATA DE EMISSÃO</label>
+                <input id="cert-emissao" type="date" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+            </div>
+            <div style="grid-column:1/-1;">
+                <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;display:block;margin-bottom:8px;">VALIDADE (data)</label>
+                <input id="cert-validade" type="date" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button onclick="document.getElementById('aud-modal-cert').style.display='none'" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
+            <button onclick="emitirCertificado()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.3);">🏆 Emitir e Ativar Licenciado</button>
         </div>
     </div>
 </div>
@@ -9152,7 +9253,7 @@ function abrirFormLead(id, returnTo) {
     }
 
     // Esconde todas as views antes de exibir o formulário
-    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard'].forEach(id => {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard','lic-view-auditoria'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -9970,6 +10071,430 @@ async function abrirLicScorecard() {
 function fecharLicScorecard() {
     document.getElementById('lic-view-scorecard').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
+}
+
+// ── Pipeline de Qualificação e Auditoria ─────────────────────────
+
+const LIC_AUDIT_STAGES = [
+    { id:'prospectado', label:'Prospectado',       icon:'👋', color:'#6b7280', bg:'#f9fafb', border:'#d1d5db', sla:7,
+      checklist:['Contato inicial realizado','Informações básicas da empresa coletadas','Potencial de m² confirmado','Link do formulário enviado ao parceiro'] },
+    { id:'formulario',  label:'Formulário Enviado', icon:'📋', color:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', sla:14,
+      checklist:['Formulário preenchido pelo parceiro','Contrato Social anexado','CNPJ e dados validados','Capacidade de m² confirmada nos dados'] },
+    { id:'documental',  label:'Análise Documental', icon:'📄', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', sla:10,
+      checklist:['Documentação jurídica aprovada','Certidões negativas OK','Situação fiscal regular','Certificações verificadas','Referências comerciais checadas'] },
+    { id:'visita',      label:'Visita Técnica',     icon:'🔍', color:'#d97706', bg:'#fffbeb', border:'#fcd34d', sla:21,
+      checklist:['Visita agendada e confirmada','Estrutura física aprovada','Segurança (AVCB) verificada','m² confirmado in loco','WMS/sistema verificado','Fotos do local registradas','Relatório técnico elaborado e assinado'] },
+    { id:'aprovacao',   label:'Aprovação',          icon:'✅', color:'#16a34a', bg:'#f0fdf4', border:'#86efac', sla:14,
+      checklist:['Relatório aprovado pela diretoria','Plano de implantação definido','Contrato de licenciamento assinado','Número de licenciado atribuído'] },
+    { id:'ativo',       label:'Ativo na Rede',      icon:'🎉', color:'#7c3aed', bg:'#faf5ff', border:'#c4b5fd', sla:null,
+      checklist:['Certificado digital emitido','Credenciais enviadas ao parceiro','Treinamento técnico agendado','Go-live confirmado na plataforma'] },
+];
+
+let _audData = {};         // leadId → auditoria record
+let _audCertLeadId = null; // lead que está sendo certificado
+
+function audStageIdx(id) { return LIC_AUDIT_STAGES.findIndex(s=>s.id===id); }
+function audStageByIdx(idx) { return LIC_AUDIT_STAGES[idx]; }
+function audNextStage(current) { const i=audStageIdx(current); return i<LIC_AUDIT_STAGES.length-1?LIC_AUDIT_STAGES[i+1]:null; }
+
+function audDiasNaEtapa(aud) {
+    if (!aud?.etapa_iniciada_em) return 0;
+    return Math.floor((Date.now() - new Date(aud.etapa_iniciada_em).getTime()) / 86400000);
+}
+
+function audSlaStatus(aud) {
+    const stage = LIC_AUDIT_STAGES.find(s=>s.id===aud?.estagio_atual);
+    if (!stage?.sla) return 'ok';
+    const dias = audDiasNaEtapa(aud);
+    if (dias > stage.sla) return 'vencido';
+    if (dias > stage.sla * 0.7) return 'atencao';
+    return 'ok';
+}
+
+function audChecklistProgress(aud, stageId) {
+    const stage = LIC_AUDIT_STAGES.find(s=>s.id===stageId);
+    if (!stage) return { done:0, total:0 };
+    const checks = (aud?.checklists||{})[stageId] || new Array(stage.checklist.length).fill(false);
+    const done = checks.filter(Boolean).length;
+    return { done, total: stage.checklist.length };
+}
+
+async function abrirLicAuditoria() {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+    document.getElementById('lic-view-auditoria').style.display='flex';
+    await carregarLicAuditoria();
+    renderizarLicAuditoria();
+}
+
+function fecharLicAuditoria() {
+    document.getElementById('lic-view-auditoria').style.display='none';
+    document.getElementById('lic-view-tabela').style.display='';
+}
+
+async function carregarLicAuditoria() {
+    try {
+        const { data } = await supabaseClient.from('lic_auditoria').select('*');
+        _audData = {};
+        (data||[]).forEach(a=>{ _audData[String(a.lead_id)]=a; });
+    } catch(e) { _audData={}; }
+}
+
+function renderizarLicAuditoria() {
+    // Stats header
+    const total = Object.keys(_audData).length;
+    const vencidos = Object.values(_audData).filter(a=>audSlaStatus(a)==='vencido').length;
+    const statsEl = document.getElementById('aud-stats');
+    if (statsEl) statsEl.textContent = `${total} em homologação${vencidos>0?' · ⚠️ '+vencidos+' vencido'+(vencidos>1?'s':''):''}`;
+
+    // KPI bar por etapa
+    const kpiBar = document.getElementById('aud-kpi-bar');
+    if (kpiBar) kpiBar.innerHTML = LIC_AUDIT_STAGES.map(s=>{
+        const count = Object.values(_audData).filter(a=>a.estagio_atual===s.id).length;
+        return `<div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 12px;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);">
+            <span style="font-size:12px;">${s.icon}</span>
+            <span style="font-size:11px;font-weight:600;color:rgba(255,255,255,.8);">${s.label}</span>
+            <span style="font-size:12px;font-weight:900;color:#fff;font-family:'Courier New',monospace;">${count}</span>
+        </div>`;
+    }).join('');
+
+    // Kanban colunas
+    const board = document.getElementById('aud-kanban-board');
+    board.innerHTML = LIC_AUDIT_STAGES.map(stage=>{
+        const leadsNaEtapa = Object.values(_audData).filter(a=>a.estagio_atual===stage.id);
+        const cards = leadsNaEtapa.map(aud=>{
+            const lead = baseLicLeads.find(l=>String(l.id)===String(aud.lead_id));
+            if (!lead) return '';
+            const { done, total } = audChecklistProgress(aud, stage.id);
+            const pct = total > 0 ? Math.round((done/total)*100) : 0;
+            const dias = audDiasNaEtapa(aud);
+            const slaStatus = audSlaStatus(aud);
+            const slaColor = slaStatus==='vencido'?'#dc2626':slaStatus==='atencao'?'#d97706':'#16a34a';
+            const slaBg    = slaStatus==='vencido'?'#fef2f2':slaStatus==='atencao'?'#fffbeb':'#f0fdf4';
+            const slaIcon  = slaStatus==='vencido'?'🔴':slaStatus==='atencao'?'⚠️':'✅';
+            const t = getLicTier(lead);
+            return `<div style="background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid ${stage.border};cursor:pointer;transition:all .15s;" onclick="abrirAudDetalhe('${lead.id}')" onmouseover="this.style.boxShadow='0 4px 16px rgba(105,65,198,.15)'" onmouseout="this.style.boxShadow='none'">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;">
+                    <div style="flex:1;padding-right:6px;">
+                        <div style="font-size:12px;font-weight:800;color:#2d1b69;line-height:1.2;margin-bottom:4px;">${lead.razao_social||'—'}</div>
+                        ${t?`<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon}${t.name}</span>`:''}
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div style="font-size:10px;font-weight:700;color:${slaColor};background:${slaBg};padding:2px 8px;border-radius:8px;">${slaIcon} ${dias}d</div>
+                        ${stage.sla?`<div style="font-size:9px;color:#9b8cc0;margin-top:2px;">SLA: ${stage.sla}d</div>`:''}
+                    </div>
+                </div>
+                <div style="margin-bottom:6px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+                        <span style="font-size:10px;color:#9b8cc0;">Checklist</span>
+                        <span style="font-size:10px;font-weight:700;color:${pct===100?'#16a34a':stage.color};">${done}/${total}</span>
+                    </div>
+                    <div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:${pct===100?'#16a34a':stage.color};border-radius:3px;transition:width .5s;"></div>
+                    </div>
+                </div>
+                ${aud.auditor?`<div style="font-size:10px;color:#9b8cc0;">👤 ${aud.auditor}</div>`:''}
+            </div>`;
+        }).join('');
+
+        return `<div style="width:220px;flex-shrink:0;display:flex;flex-direction:column;max-height:calc(100vh-200px);">
+            <div style="background:#fff;border-radius:12px 12px 0 0;padding:12px 14px;border-top:3px solid ${stage.color};border:1px solid ${stage.border};border-top:3px solid ${stage.color};flex-shrink:0;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-size:14px;">${stage.icon}</span>
+                        <span style="font-size:11px;font-weight:800;color:#2d1b69;">${stage.label}</span>
+                    </div>
+                    <span style="background:${stage.bg};color:${stage.color};border:1px solid ${stage.border};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;">${leadsNaEtapa.length}</span>
+                </div>
+                ${stage.sla?`<div style="font-size:10px;color:#9b8cc0;">SLA: ${stage.sla} dias</div>`:'<div style="font-size:10px;color:#9b8cc0;">Etapa final</div>'}
+            </div>
+            <div style="flex:1;background:#f5f3ff;border:1px solid ${stage.border};border-top:none;border-radius:0 0 12px 12px;padding:10px;overflow-y:auto;min-height:80px;">
+                ${cards||`<div style="text-align:center;padding:20px 0;color:#c4b5e8;font-size:11px;border:1.5px dashed #e0d9f5;border-radius:8px;">Nenhum lead</div>`}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Modal Iniciar Auditoria ────────────────────────────────────────
+
+function abrirModalIniciarAuditoria() {
+    const sel = document.getElementById('aud-ini-lead');
+    const jaEmAuditoria = new Set(Object.keys(_audData));
+    const disponiveis = baseLicLeads.filter(l => !jaEmAuditoria.has(String(l.id)));
+    sel.innerHTML = '<option value="">Selecione um lead...</option>' +
+        disponiveis.map(l=>`<option value="${l.id}">${l.razao_social||'Lead #'+l.id}${l.uf?' ('+l.uf+')':''}</option>`).join('');
+    document.getElementById('aud-ini-auditor').value = '';
+    document.getElementById('aud-ini-prazo').value = '7';
+    document.getElementById('aud-modal-iniciar').style.display='flex';
+}
+
+async function iniciarLicAuditoria() {
+    const leadId = document.getElementById('aud-ini-lead').value;
+    const auditor = document.getElementById('aud-ini-auditor').value.trim();
+    if (!leadId) { alert('Selecione um lead.'); return; }
+    const btn = document.querySelector('#aud-modal-iniciar button[onclick="iniciarLicAuditoria()"]');
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Iniciando...'; }
+    try {
+        const prazo_dias = parseInt(document.getElementById('aud-ini-prazo').value)||7;
+        const prazo_date = new Date(); prazo_date.setDate(prazo_date.getDate()+prazo_dias);
+        const rec = {
+            lead_id: parseInt(leadId),
+            estagio_atual: 'prospectado',
+            checklists: {},
+            prazos: { prospectado: prazo_date.toISOString().split('T')[0] },
+            historico: [{ estagio:'prospectado', iniciado_em: new Date().toISOString() }],
+            etapa_iniciada_em: new Date().toISOString(),
+            auditor: auditor || EMAIL_USUARIO_LOGADO,
+            criado_por: EMAIL_USUARIO_LOGADO,
+        };
+        const { error } = await supabaseClient.from('lic_auditoria').insert([rec]);
+        if (error) throw error;
+        document.getElementById('aud-modal-iniciar').style.display='none';
+        await carregarLicAuditoria();
+        renderizarLicAuditoria();
+        showToast('Auditoria iniciada! Lead na etapa Prospectado.','success');
+    } catch(e) {
+        showToast('Erro: '+(e.message||e),'error');
+    } finally {
+        if(btn){btn.disabled=false;btn.innerHTML='🔍 Iniciar homologação';}
+    }
+}
+
+// ── Painel de detalhes da auditoria ───────────────────────────────
+
+function abrirAudDetalhe(leadId) {
+    const aud   = _audData[String(leadId)];
+    const lead  = baseLicLeads.find(l=>String(l.id)===String(leadId));
+    const stage = LIC_AUDIT_STAGES.find(s=>s.id===aud?.estagio_atual);
+    if (!aud || !lead || !stage) return;
+
+    const stageIdx = audStageIdx(stage.id);
+    const nextStage = audNextStage(stage.id);
+    const { done, total } = audChecklistProgress(aud, stage.id);
+    const canAdvance = done === total;
+    const dias = audDiasNaEtapa(aud);
+    const slaStatus = audSlaStatus(aud);
+    const checks = (aud.checklists||{})[stage.id] || new Array(stage.checklist.length).fill(false);
+
+    // Stepper visual
+    const stepperHtml = LIC_AUDIT_STAGES.map((s,i)=>{
+        const done_s = i < stageIdx;
+        const active_s = i === stageIdx;
+        const bg = done_s?'#16a34a':active_s?s.color:'#e8e0f5';
+        const col = (done_s||active_s)?'#fff':'#9b8cc0';
+        const line = i>0?`<div style="flex:1;height:2px;background:${i<=stageIdx?'#16a34a':'#e8e0f5'};margin:0 3px;"></div>`:'';
+        return `${line}<div style="width:28px;height:28px;border-radius:50%;background:${bg};color:${col};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;${active_s?'box-shadow:0 0 0 4px '+s.color+'33;':''}" title="${s.label}">${done_s?'✓':(i+1)}</div>`;
+    }).join('');
+
+    const slaHtml = slaStatus==='vencido'
+        ? `<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:#dc2626;">🔴 SLA vencido — ${dias} dias na etapa (limite: ${stage.sla} dias)</div>`
+        : slaStatus==='atencao'
+        ? `<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:#d97706;">⚠️ Atenção ao prazo — ${dias} de ${stage.sla} dias</div>`
+        : `<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#16a34a;">✅ No prazo — ${dias} de ${stage.sla||'—'} dias</div>`;
+
+    const uploadHtml = stage.id === 'visita' ? `
+        <div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">RELATÓRIO DE VISITA TÉCNICA</div>
+            ${aud.relatorio_visita_nome ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f5f3ff;border-radius:10px;border:1.5px solid #e0d9f5;margin-bottom:8px;">
+                <span style="font-size:18px;">📄</span>
+                <span style="flex:1;font-size:12px;font-weight:600;color:#2d1b69;">${aud.relatorio_visita_nome}</span>
+                ${aud.relatorio_visita_url?`<a href="${aud.relatorio_visita_url}" target="_blank" style="font-size:11px;font-weight:700;color:#6941c6;text-decoration:none;background:#f0ebff;padding:3px 8px;border-radius:6px;">⬇ Abrir</a>`:''}
+            </div>` : ''}
+            <div style="border:2px dashed #d4b8f5;border-radius:10px;padding:16px;text-align:center;cursor:pointer;background:#faf8ff;" onclick="document.getElementById('aud-fi-relatorio-${leadId}').click()">
+                <div style="font-size:22px;margin-bottom:5px;">📎</div>
+                <div style="font-size:12px;font-weight:700;color:#6941c6;">${aud.relatorio_visita_nome?'Substituir relatório':'Anexar relatório de visita'}</div>
+                <div style="font-size:10px;color:#9b8cc0;">PDF, DOC — máx. 20 MB</div>
+                <input type="file" id="aud-fi-relatorio-${leadId}" accept=".pdf,.doc,.docx" style="display:none;" onchange="audUploadRelatorio('${leadId}',this.files)">
+            </div>
+        </div>` : '';
+
+    const certHtml = stage.id === 'ativo' ? `
+        <div style="background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:14px;padding:16px;margin-bottom:16px;text-align:center;">
+            ${aud.certificado_numero ? `
+                <div style="font-size:24px;margin-bottom:8px;">🏆</div>
+                <div style="font-size:14px;font-weight:900;color:#7c3aed;margin-bottom:4px;">Certificado Emitido</div>
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;">${aud.certificado_numero}</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-top:3px;">Emitido: ${aud.certificado_emitido_em?new Date(aud.certificado_emitido_em+'T00:00:00').toLocaleDateString('pt-BR'):'—'} · Validade: ${aud.certificado_validade?new Date(aud.certificado_validade+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>
+            ` : `
+                <div style="font-size:36px;margin-bottom:8px;">🏆</div>
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:12px;">Emita o certificado digital para ativar este licenciado na rede</div>
+                <button onclick="abrirModalCert('${leadId}')" style="padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3);">🏆 Emitir Certificado e Ativar</button>
+            `}
+        </div>` : '';
+
+    document.getElementById('aud-side-content').innerHTML = `
+        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f0ebff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:700;color:#6941c6;">Pipeline de Auditoria</div>
+            <button onclick="fecharAudSidePanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="padding:18px 16px;">
+            <!-- Lead info -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:16px;font-weight:900;color:#2d1b69;margin-bottom:4px;">${lead.razao_social||'—'}</div>
+                <div style="font-size:11px;color:#9b8cc0;">${lead.uf||''}${lead.polo_logistico?' · '+lead.polo_logistico:''} · Auditor: ${aud.auditor||'—'}</div>
+            </div>
+
+            <!-- Stepper -->
+            <div style="display:flex;align-items:center;margin-bottom:16px;padding:0 4px;">${stepperHtml}</div>
+
+            <!-- Etapa atual -->
+            <div style="display:flex;align-items:center;gap:8px;background:${stage.bg};border:1.5px solid ${stage.border};border-radius:12px;padding:10px 14px;margin-bottom:12px;">
+                <span style="font-size:20px;">${stage.icon}</span>
+                <div><div style="font-size:13px;font-weight:800;color:${stage.color};">${stage.label}</div><div style="font-size:11px;color:#9b8cc0;">Etapa ${stageIdx+1} de ${LIC_AUDIT_STAGES.length}</div></div>
+                <div style="margin-left:auto;font-size:12px;font-weight:700;color:${stage.color};">${done}/${total} ✓</div>
+            </div>
+
+            <!-- SLA -->
+            <div style="margin-bottom:14px;">${slaHtml}</div>
+
+            <!-- Checklist -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:10px;">CHECKLIST DA ETAPA</div>
+                <div id="aud-checklist-${leadId}">
+                    ${stage.checklist.map((item,i)=>`
+                    <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid ${checks[i]?'#86efac':'#e8e0f5'};background:${checks[i]?'#f0fdf4':'#faf8ff'};border-radius:10px;cursor:pointer;margin-bottom:7px;transition:all .15s;">
+                        <input type="checkbox" ${checks[i]?'checked':''} style="display:none;" onchange="audToggleCheck('${leadId}','${stage.id}',${i},this.checked)">
+                        <div style="width:20px;height:20px;border-radius:6px;border:2px solid ${checks[i]?'#16a34a':'#d0c4f0'};background:${checks[i]?'#16a34a':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;">${checks[i]?'<span style="color:#fff;font-size:11px;">✓</span>':''}</div>
+                        <span style="font-size:12px;font-weight:${checks[i]?'600':'400'};color:${checks[i]?'#166534':'#374151'};line-height:1.3;">${item}</span>
+                    </label>`).join('')}
+                </div>
+            </div>
+
+            <!-- Upload relatório -->
+            ${uploadHtml}
+
+            <!-- Certificação -->
+            ${certHtml}
+
+            <!-- Notas -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">OBSERVAÇÕES DA ETAPA</div>
+                <textarea id="aud-notas-${leadId}" rows="3" placeholder="Anotações, pendências, observações..." style="width:100%;border:1.5px solid #e8e0f5;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:12px;color:#2d1b69;outline:none;resize:vertical;box-sizing:border-box;" onblur="audSalvarNotas('${leadId}',this.value)">${aud.notas||''}</textarea>
+            </div>
+
+            <!-- Botão avançar -->
+            ${stage.id !== 'ativo' ? `
+            <button onclick="audAvancarEtapa('${leadId}')" ${canAdvance?'':'disabled'}
+                style="width:100%;padding:13px;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:800;cursor:${canAdvance?'pointer':'not-allowed'};transition:all .2s;
+                background:${canAdvance?'linear-gradient(135deg,'+nextStage?.color+','+nextStage?.color+'cc)':'#e8e0f5'};
+                color:${canAdvance?'#fff':'#9b8cc0'};
+                box-shadow:${canAdvance?'0 4px 16px rgba(105,65,198,.25)':'none'};">
+                ${canAdvance?'✅ Avançar para '+nextStage?.label+' '+nextStage?.icon:'⏳ Complete o checklist para avançar ('+done+'/'+total+')'}
+            </button>` : ''}
+        </div>`;
+
+    document.getElementById('aud-side-panel').style.right='0';
+    document.getElementById('aud-overlay').style.display='block';
+}
+
+function fecharAudSidePanel() {
+    document.getElementById('aud-side-panel').style.right='-520px';
+    document.getElementById('aud-overlay').style.display='none';
+}
+
+async function audToggleCheck(leadId, stageId, idx, checked) {
+    const aud = _audData[String(leadId)]; if (!aud) return;
+    const stage = LIC_AUDIT_STAGES.find(s=>s.id===stageId);
+    const checks = (aud.checklists||{})[stageId] || new Array(stage.checklist.length).fill(false);
+    checks[idx] = checked;
+    const newChecklists = { ...(aud.checklists||{}), [stageId]: checks };
+    await supabaseClient.from('lic_auditoria').update({ checklists: newChecklists, updated_at: new Date().toISOString() }).eq('id', aud.id);
+    aud.checklists = newChecklists;
+    renderizarLicAuditoria();
+    // Atualiza botão avançar sem fechar painel
+    const { done, total } = audChecklistProgress(aud, stageId);
+    const canAdvance = done === total;
+    const btn = document.querySelector(`#aud-side-panel button[onclick="audAvancarEtapa('${leadId}')"]`);
+    const nextStage = audNextStage(stageId);
+    if (btn && nextStage) {
+        btn.disabled = !canAdvance;
+        btn.style.background = canAdvance?`linear-gradient(135deg,${nextStage.color},${nextStage.color}cc)`:'#e8e0f5';
+        btn.style.color = canAdvance?'#fff':'#9b8cc0';
+        btn.style.cursor = canAdvance?'pointer':'not-allowed';
+        btn.textContent = canAdvance?`✅ Avançar para ${nextStage.label} ${nextStage.icon}`:`⏳ Complete o checklist para avançar (${done}/${total})`;
+    }
+}
+
+async function audAvancarEtapa(leadId) {
+    const aud = _audData[String(leadId)]; if (!aud) return;
+    const next = audNextStage(aud.estagio_atual); if (!next) return;
+    const { done, total } = audChecklistProgress(aud, aud.estagio_atual);
+    if (done < total) { showToast('Complete todos os itens do checklist antes de avançar.','error'); return; }
+    const hist = [...(aud.historico||[])];
+    const ultimoHistIdx = hist.findIndex(h=>h.estagio===aud.estagio_atual&&!h.concluido_em);
+    if (ultimoHistIdx>=0) hist[ultimoHistIdx].concluido_em = new Date().toISOString();
+    hist.push({ estagio: next.id, iniciado_em: new Date().toISOString() });
+    await supabaseClient.from('lic_auditoria').update({
+        estagio_atual: next.id, etapa_iniciada_em: new Date().toISOString(),
+        historico: hist, notas: '', updated_at: new Date().toISOString()
+    }).eq('id', aud.id);
+    aud.estagio_atual = next.id; aud.etapa_iniciada_em = new Date().toISOString();
+    aud.historico = hist; aud.notas = '';
+    fecharAudSidePanel();
+    renderizarLicAuditoria();
+    showToast(`Lead avançado para "${next.label}"!`, 'success');
+    setTimeout(()=>abrirAudDetalhe(leadId), 300);
+}
+
+async function audSalvarNotas(leadId, notas) {
+    const aud = _audData[String(leadId)]; if (!aud) return;
+    await supabaseClient.from('lic_auditoria').update({ notas, updated_at: new Date().toISOString() }).eq('id', aud.id);
+    aud.notas = notas;
+}
+
+async function audUploadRelatorio(leadId, files) {
+    const aud = _audData[String(leadId)]; if (!aud||!files?.length) return;
+    const file = files[0];
+    const path = `leads/${leadId}/relatorio_visita/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const { error } = await supabaseClient.storage.from('lic-anexos').upload(path, file, { cacheControl:'3600', upsert:false });
+    if (error) { showToast('Erro no upload: '+error.message,'error'); return; }
+    const { data: urlData } = supabaseClient.storage.from('lic-anexos').getPublicUrl(path);
+    await supabaseClient.from('lic_auditoria').update({ relatorio_visita_url: urlData.publicUrl, relatorio_visita_nome: file.name, relatorio_visita_path: path, updated_at: new Date().toISOString() }).eq('id', aud.id);
+    aud.relatorio_visita_url = urlData.publicUrl; aud.relatorio_visita_nome = file.name;
+    showToast('Relatório de visita técnica enviado!','success');
+    abrirAudDetalhe(leadId);
+}
+
+function abrirModalCert(leadId) {
+    _audCertLeadId = leadId;
+    const lead = baseLicLeads.find(l=>String(l.id)===String(leadId));
+    document.getElementById('cert-empresa-nome').textContent = lead?.razao_social||'—';
+    document.getElementById('cert-numero').value = '';
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('cert-emissao').value = hoje;
+    const validade = new Date(); validade.setFullYear(validade.getFullYear()+2);
+    document.getElementById('cert-validade').value = validade.toISOString().split('T')[0];
+    document.getElementById('aud-modal-cert').style.display='flex';
+}
+
+async function emitirCertificado() {
+    const leadId = _audCertLeadId; if (!leadId) return;
+    const num = document.getElementById('cert-numero').value.trim();
+    const emissao = document.getElementById('cert-emissao').value;
+    const validade = document.getElementById('cert-validade').value;
+    if (!num) { alert('Informe o número do certificado.'); return; }
+    const btn = document.querySelector('#aud-modal-cert button[onclick="emitirCertificado()"]');
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Emitindo...'; }
+    try {
+        const aud = _audData[String(leadId)];
+        await supabaseClient.from('lic_auditoria').update({ certificado_numero:num, certificado_emitido_em:emissao, certificado_validade:validade, updated_at:new Date().toISOString() }).eq('id',aud.id);
+        await supabaseClient.from('lic_leads').update({ status:'Convertido', updated_at:new Date().toISOString() }).eq('id',leadId);
+        aud.certificado_numero=num; aud.certificado_emitido_em=emissao; aud.certificado_validade=validade;
+        const lead = baseLicLeads.find(l=>String(l.id)===String(leadId));
+        if (lead) lead.status='Convertido';
+        document.getElementById('aud-modal-cert').style.display='none';
+        _audCertLeadId=null;
+        fecharAudSidePanel();
+        await carregarLicLeads();
+        renderizarLicAuditoria();
+        renderizarLicenciamento();
+        showToast('🏆 Certificado emitido! Licenciado agora está ATIVO na rede.','success');
+    } catch(e) {
+        showToast('Erro: '+(e.message||e),'error');
+    } finally {
+        if(btn){btn.disabled=false;btn.innerHTML='🏆 Emitir e Ativar Licenciado';}
+    }
 }
 
 async function carregarLicPerformance() {
