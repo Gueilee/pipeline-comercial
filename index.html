@@ -1683,8 +1683,6 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-target"></i> Scorecard</button>
                         <button id="btn-lic-alertas" onclick="abrirLicAlertas()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;"><i class="ti ti-bell"></i> Alertas</button>
                         <button onclick="gerarBoardReport(event)" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(45,27,105,.3);"><i class="ti ti-file-analytics"></i> Board Report</button>
-                        <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-package-export"></i> Disponibilidade</button>
-                        <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-bar"></i> Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);"><i class="ti ti-link"></i> Gerar link</button>
                         <!-- Dropdown único de Especificações -->
                         <div style="position:relative;" id="spec-btn-wrap">
@@ -1725,8 +1723,30 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     </div>
                 </div>
 
-                <!-- KPIs -->
-                <div id="lic-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;"></div>
+                <!-- Filtros expandidos -->
+                <div style="display:flex;gap:8px;flex-wrap:wrap;padding:12px 0;border-top:1px solid #f0ebff;margin-bottom:16px;">
+                    <select id="lic-f-uf" onchange="renderizarLicenciamento()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                        <option value="">🗺 Todos os estados</option>
+                        <option>SP</option><option>RJ</option><option>MG</option><option>RS</option><option>PR</option><option>SC</option><option>BA</option><option>PE</option><option>CE</option><option>GO</option><option>DF</option><option>AM</option><option>PA</option><option>MT</option><option>MS</option><option>ES</option>
+                    </select>
+                    <select id="lic-f-tier" onchange="renderizarLicenciamento()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                        <option value="">💎 Todos os níveis</option>
+                        <option>Platina</option><option>Ouro</option><option>Prata</option><option>Bronze</option>
+                    </select>
+                    <select id="lic-f-regiao" onchange="renderizarLicenciamento()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                        <option value="">🌎 Todas as regiões</option>
+                        <option>Sul</option><option>Sudeste</option><option>Centro-Oeste</option><option>Nordeste</option><option>Norte</option>
+                    </select>
+                    <select id="lic-f-plano" onchange="renderizarLicenciamento()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                        <option value="">💼 Todos os planos</option>
+                        <option>Starter</option><option>Pro</option><option>Enterprise</option><option>Custom</option>
+                    </select>
+                    <button onclick="licLimparFiltrosDash()" id="lic-f-clear" style="display:none;padding:6px 12px;border:1.5px solid #fca5a5;border-radius:8px;background:#fef2f2;font-family:inherit;font-size:11px;font-weight:700;color:#dc2626;cursor:pointer;">✕ Limpar</button>
+                    <span id="lic-f-count" style="font-size:11px;color:#9b8cc0;display:flex;align-items:center;"></span>
+                </div>
+
+                <!-- KPIs (6 cards) -->
+                <div id="lic-kpis" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;"></div>
 
                 <!-- ── GRÁFICOS INLINE ── -->
                 <div id="lic-graficos" style="margin-top:18px;">
@@ -1837,6 +1857,98 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
                 </div>
                 <!-- ── FIM GRÁFICOS INLINE ── -->
+
+                <!-- ── CAPACIDADE E REDE ── -->
+                <div id="lic-graficos-rede" style="margin-top:6px;">
+
+                    <!-- Cabeçalho da seção -->
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;margin-top:10px;">
+                        <div style="width:3px;height:24px;border-radius:2px;background:linear-gradient(180deg,#6941c6,#a78bfa);"></div>
+                        <div style="font-size:14px;font-weight:800;color:#2d1b69;">Capacidade &amp; Disponibilidade da Rede</div>
+                    </div>
+
+                    <!-- KPIs de m² -->
+                    <div id="lic-kpis-m2" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+
+                    <!-- Linha: Distribuição regional + Tier -->
+                    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Capacidade por região</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">m² total, ocupado e disponível por região do Brasil</div>
+                            </div>
+                            <div style="height:230px;"><canvas id="ld-chart-regiao-cap"></canvas></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:16px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Composição por nível</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Licenciados convertidos por tier</div>
+                            </div>
+                            <div style="height:180px;"><canvas id="ld-chart-tier"></canvas></div>
+                            <div id="ld-legend-tier" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px;color:#6b7280;justify-content:center;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Linha: Top licenciados + Alertas de capacidade -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:14px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Top licenciados por m²</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Maiores operações convertidas</div>
+                            </div>
+                            <div id="ld-top-licenciados" style="display:flex;flex-direction:column;gap:8px;"></div>
+                        </div>
+                        <div style="background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                            <div style="margin-bottom:14px;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;">Alertas de capacidade</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Licenciados com ocupação elevada</div>
+                            </div>
+                            <div id="ld-alertas-capacidade" style="display:flex;flex-direction:column;gap:8px;"></div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- ── FIM CAPACIDADE E REDE ── -->
+
+                <!-- ── MATCH INLINE ── -->
+                <div id="lic-match-inline" style="background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-top:6px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                        <div>
+                            <div style="font-size:13px;font-weight:700;color:#2d1b69;">Ferramenta de Match — Encontrar licenciado disponível</div>
+                            <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Busca parceiros com m² disponível para um determinado perfil de cliente</div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr) auto;gap:12px;margin-bottom:16px;align-items:end;">
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:4px;">UF necessária</label>
+                            <select id="match-uf" style="width:100%;padding:8px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#2d1b69;background:#faf8ff;outline:none;">
+                                <option value="">Qualquer UF</option>
+                                <option>SP</option><option>RJ</option><option>MG</option><option>RS</option><option>PR</option><option>SC</option><option>BA</option><option>PE</option><option>CE</option><option>GO</option><option>DF</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:4px;">m² mínimo</label>
+                            <input id="match-m2" type="number" min="0" step="100" placeholder="ex: 500" style="width:100%;padding:8px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#2d1b69;background:#faf8ff;outline:none;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:4px;">Nível mínimo</label>
+                            <select id="match-tier" style="width:100%;padding:8px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#2d1b69;background:#faf8ff;outline:none;">
+                                <option value="">Qualquer nível</option>
+                                <option>Bronze</option><option>Prata</option><option>Ouro</option><option>Platina</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:4px;">Tipo de produto</label>
+                            <select id="match-tipo" style="width:100%;padding:8px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#2d1b69;background:#faf8ff;outline:none;">
+                                <option value="">Qualquer</option>
+                                <option>Ambiente refrigerado</option><option>Área seca</option><option>Produtos perigosos</option><option>Produtos farmacêuticos</option>
+                            </select>
+                        </div>
+                        <button onclick="executarMatchInline()" style="padding:8px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#a78bfa);font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;">Buscar match</button>
+                    </div>
+                    <div id="ld-match-results" style="min-height:60px;"></div>
+                </div>
+                <!-- ── FIM MATCH INLINE ── -->
 
                 <!-- Tabela -->
                 <div style="background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.07);overflow:hidden;">
@@ -2678,8 +2790,8 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     </div>
 </div>
 
-<!-- ── VISÃO CAPACIDADE ── -->
-<div id="lic-view-capacidade" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+<!-- lic-view-capacidade removida — conteúdo migrado para o dashboard principal -->
+<div id="lic-view-capacidade" style="display:none;">
 
     <!-- Hero header -->
     <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:24px 28px 28px;flex-shrink:0;position:relative;overflow:hidden;">
@@ -3020,8 +3132,8 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     </div>
 </div>
 
-<!-- ── VISÃO DISPONIBILIDADE COMERCIAL ── -->
-<div id="lic-view-disponibilidade" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+<!-- lic-view-disponibilidade removida — conteúdo migrado para o dashboard principal -->
+<div id="lic-view-disponibilidade" style="display:none;">
 
     <!-- Hero header -->
     <div style="background:linear-gradient(135deg,#0f2027 0%,#203a43 40%,#2c5364 100%);padding:22px 28px 26px;flex-shrink:0;position:relative;overflow:hidden;">
@@ -9543,21 +9655,55 @@ function setLicFiltro(status, btn) {
 }
 
 function renderizarLicenciamento() {
-    const leads = _licFiltro ? baseLicLeads.filter(l => l.status === _licFiltro) : baseLicLeads;
+    // Filtros combinados: status chip + dropdowns avançados
+    const fUf     = (document.getElementById('lic-f-uf')     || {}).value || '';
+    const fTier   = (document.getElementById('lic-f-tier')   || {}).value || '';
+    const fRegiao = (document.getElementById('lic-f-regiao') || {}).value || '';
+    const fPlano  = (document.getElementById('lic-f-plano')  || {}).value || '';
+    const REGIAO_UF = {
+        'Sul': ['RS','SC','PR'], 'Sudeste': ['SP','RJ','MG','ES'],
+        'Centro-Oeste': ['DF','GO','MT','MS'], 'Nordeste': ['BA','PE','CE','RN','PB','AL','SE','MA','PI'],
+        'Norte': ['AM','PA','AC','AP','RO','RR','TO']
+    };
+    const ufsRegiao = fRegiao ? (REGIAO_UF[fRegiao] || []) : [];
 
-    // KPIs
+    const leads = baseLicLeads.filter(l => {
+        if (_licFiltro && l.status !== _licFiltro) return false;
+        if (fUf && (l.uf || '').toUpperCase() !== fUf.toUpperCase()) return false;
+        if (fTier && (l.tier_nivel || '') !== fTier) return false;
+        if (fRegiao && !ufsRegiao.includes((l.uf || '').toUpperCase())) return false;
+        if (fPlano && (l.plano || '') !== fPlano) return false;
+        return true;
+    });
+
+    // Clear button + contador
+    const anyFilter = fUf || fTier || fRegiao || fPlano;
+    const clearBtn = document.getElementById('lic-f-clear');
+    const countEl  = document.getElementById('lic-f-count');
+    if (clearBtn) clearBtn.style.display = anyFilter ? '' : 'none';
+    if (countEl) countEl.textContent = anyFilter ? `${leads.length} lead${leads.length !== 1 ? 's' : ''} filtrado${leads.length !== 1 ? 's' : ''}` : '';
+
+    // KPIs (6 cards)
     const total    = baseLicLeads.length;
     const ativos   = baseLicLeads.filter(l => l.status === 'Ativo').length;
     const conv     = baseLicLeads.filter(l => l.status === 'Convertido').length;
     const perdidos = baseLicLeads.filter(l => l.status === 'Perdido').length;
     const m2Total  = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.area_total_m2) || 0), 0);
     const feeTotal = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.fee_mensal) || 0), 0);
+    const estados  = new Set(baseLicLeads.filter(l => l.status === 'Convertido' && l.uf).map(l => l.uf.toUpperCase())).size;
+    const m2Disp   = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => {
+        const tot  = parseFloat(l.area_total_m2) || 0;
+        const ocup = parseFloat(l.ocupacao_percentual) || 0;
+        return s + tot * (1 - ocup / 100);
+    }, 0);
 
     const kpiHtml = [
-        { label:'Total de leads', val: total, sub: `${((conv/total||0)*100).toFixed(0)}% taxa de conversão`, cor:'#2563eb' },
-        { label:'Em negociação', val: ativos, sub:'leads ativos', cor:'#f59e0b' },
-        { label:'Convertidos', val: conv, sub: m2Total > 0 ? `${m2Total.toLocaleString('pt-BR')} m²` : 'nenhum ainda', cor:'#16a34a' },
-        { label:'Fee/mês convertidos', val: feeTotal > 0 ? 'R$ '+feeTotal.toLocaleString('pt-BR') : '—', sub: `${perdidos} lead(s) perdido(s)`, cor:'#7c3aed' },
+        { label:'Total de leads', val: total, sub: `${((conv/(total||1))*100).toFixed(0)}% taxa de conversão`, cor:'#2563eb' },
+        { label:'Em negociação', val: ativos, sub: `${perdidos} perdido${perdidos !== 1 ? 's' : ''}`, cor:'#f59e0b' },
+        { label:'Convertidos', val: conv, sub: estados > 0 ? `${estados} estado${estados !== 1 ? 's' : ''}` : 'nenhum ainda', cor:'#16a34a' },
+        { label:'m² total convertido', val: m2Total > 0 ? m2Total.toLocaleString('pt-BR') : '—', sub:'área total da rede', cor:'#7c3aed' },
+        { label:'m² disponível', val: m2Disp > 0 ? Math.round(m2Disp).toLocaleString('pt-BR') : '—', sub:'capacidade livre estimada', cor:'#059669' },
+        { label:'Fee/mês convertidos', val: feeTotal > 0 ? 'R$'+feeTotal.toLocaleString('pt-BR') : '—', sub:'receita mensal recorrente', cor:'#dc2626' },
     ].map(k => `<div class="lic-kpi-card" style="border-top:3px solid ${k.cor};">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:6px;">${k.label}</div>
         <div style="font-size:22px;font-weight:700;font-family:'Courier New',monospace;color:#111827;">${k.val}</div>
@@ -9601,7 +9747,188 @@ function renderizarLicenciamento() {
     document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
 
     renderizarLicDashboard();
+    renderizarLicDashboardRede(leads);
     atualizarBadgeAlertas();
+}
+
+function licLimparFiltrosDash() {
+    ['lic-f-uf','lic-f-tier','lic-f-regiao','lic-f-plano'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    renderizarLicenciamento();
+}
+
+let _licRedeCharts = {};
+
+function renderizarLicDashboardRede(leads) {
+    const conv = (leads || baseLicLeads).filter(l => l.status === 'Convertido');
+
+    // Destroy old charts
+    Object.values(_licRedeCharts).forEach(c => { try { c.destroy(); } catch(e){} });
+    _licRedeCharts = {};
+
+    // KPIs de m²
+    const m2Kpis = document.getElementById('lic-kpis-m2');
+    if (m2Kpis) {
+        const m2Total = conv.reduce((s,l) => s + (parseFloat(l.area_total_m2)||0), 0);
+        const m2Disp  = conv.reduce((s,l) => {
+            const tot  = parseFloat(l.area_total_m2)||0;
+            const ocup = parseFloat(l.ocupacao_percentual)||0;
+            return s + tot*(1 - ocup/100);
+        }, 0);
+        const ufs     = new Set(conv.filter(l=>l.uf).map(l=>l.uf.toUpperCase()));
+        const alertas = conv.filter(l => (parseFloat(l.ocupacao_percentual)||0) >= 80).length;
+        const kpis2   = [
+            { label:'m² convertido total',  val: m2Total > 0 ? m2Total.toLocaleString('pt-BR') : '—', cor:'#7c3aed' },
+            { label:'m² disponível estimado', val: m2Disp > 0 ? Math.round(m2Disp).toLocaleString('pt-BR') : '—', cor:'#059669' },
+            { label:'Estados cobertos',     val: ufs.size || '—', cor:'#2563eb' },
+            { label:'Alertas de capacidade', val: alertas || '—', cor: alertas > 0 ? '#dc2626' : '#6b7280' },
+        ];
+        m2Kpis.innerHTML = kpis2.map(k => `<div class="lic-kpi-card" style="border-top:3px solid ${k.cor};">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:6px;">${k.label}</div>
+            <div style="font-size:22px;font-weight:700;font-family:'Courier New',monospace;color:#111827;">${k.val}</div>
+        </div>`).join('');
+    }
+
+    // Gráfico: Capacidade por região
+    const REGIAO_UF = {
+        'Sul':['RS','SC','PR'], 'Sudeste':['SP','RJ','MG','ES'],
+        'Centro-Oeste':['DF','GO','MT','MS'], 'Nordeste':['BA','PE','CE','RN','PB','AL','SE','MA','PI'],
+        'Norte':['AM','PA','AC','AP','RO','RR','TO']
+    };
+    const regioes = Object.keys(REGIAO_UF);
+    const m2PorRegiao = regioes.map(r => {
+        const ufs = REGIAO_UF[r];
+        const grp = conv.filter(l => ufs.includes((l.uf||'').toUpperCase()));
+        return {
+            total: grp.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0),
+            disp:  grp.reduce((s,l)=>{const t=parseFloat(l.area_total_m2)||0;const o=parseFloat(l.ocupacao_percentual)||0;return s+t*(1-o/100);},0),
+            ocup:  grp.reduce((s,l)=>{const t=parseFloat(l.area_total_m2)||0;const o=parseFloat(l.ocupacao_percentual)||0;return s+t*(o/100);},0),
+        };
+    });
+    const elRegCap = document.getElementById('ld-chart-regiao-cap');
+    if (elRegCap) {
+        _licRedeCharts.regiao = new Chart(elRegCap, {
+            type:'bar',
+            data:{
+                labels: regioes,
+                datasets:[
+                    { label:'Ocupado',    data: m2PorRegiao.map(r=>Math.round(r.ocup)), backgroundColor:'#6941c6', borderRadius:4 },
+                    { label:'Disponível', data: m2PorRegiao.map(r=>Math.round(r.disp)), backgroundColor:'#a78bfa', borderRadius:4 },
+                ]
+            },
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{ position:'bottom', labels:{font:{size:11}} }, datalabels:{display:false} },
+                scales:{ x:{stacked:true,grid:{display:false}}, y:{stacked:true,grid:{color:'#f3f4f6'},ticks:{callback:v=>v>=1000?Math.round(v/1000)+'K':v}} }
+            }
+        });
+    }
+
+    // Gráfico: Tier
+    const tierOrder = ['Platina','Ouro','Prata','Bronze'];
+    const tierCores  = {'Platina':'#7c3aed','Ouro':'#d97706','Prata':'#6b7280','Bronze':'#92400e'};
+    const tierCounts = tierOrder.map(t => conv.filter(l=>(l.tier_nivel||'').toLowerCase()===t.toLowerCase()).length);
+    const elTier = document.getElementById('ld-chart-tier');
+    if (elTier) {
+        _licRedeCharts.tier = new Chart(elTier, {
+            type:'doughnut',
+            data:{ labels:tierOrder, datasets:[{ data:tierCounts, backgroundColor:tierOrder.map(t=>tierCores[t]||'#ccc'), borderWidth:2, borderColor:'#fff' }] },
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{display:false}, datalabels:{display:false} },
+                cutout:'65%'
+            }
+        });
+        const legEl = document.getElementById('ld-legend-tier');
+        if (legEl) legEl.innerHTML = tierOrder.map((t,i)=>`<span style="display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:2px;background:${tierCores[t]};display:inline-block;"></span>${t}: ${tierCounts[i]}</span>`).join('');
+    }
+
+    // Top licenciados por m²
+    const elTop = document.getElementById('ld-top-licenciados');
+    if (elTop) {
+        const sorted = [...conv].sort((a,b)=>(parseFloat(b.area_total_m2)||0)-(parseFloat(a.area_total_m2)||0)).slice(0,6);
+        const maxM2  = parseFloat(sorted[0]?.area_total_m2)||1;
+        elTop.innerHTML = sorted.length === 0
+            ? '<div style="text-align:center;color:#bbb;padding:20px;font-size:12px;">Nenhum convertido ainda</div>'
+            : sorted.map(l=>{
+                const m2 = parseFloat(l.area_total_m2)||0;
+                const pct= (m2/maxM2*100).toFixed(0);
+                return `<div>
+                    <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+                        <span style="font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</span>
+                        <span style="color:#6941c6;font-family:'Courier New',monospace;">${m2.toLocaleString('pt-BR')} m²</span>
+                    </div>
+                    <div style="height:6px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#6941c6,#a78bfa);border-radius:3px;"></div>
+                    </div>
+                </div>`;
+            }).join('');
+    }
+
+    // Alertas de capacidade (ocupação >= 80%)
+    const elAlerts = document.getElementById('ld-alertas-capacidade');
+    if (elAlerts) {
+        const alertas = conv.filter(l=>(parseFloat(l.ocupacao_percentual)||0)>=80)
+            .sort((a,b)=>(parseFloat(b.ocupacao_percentual)||0)-(parseFloat(a.ocupacao_percentual)||0))
+            .slice(0,5);
+        elAlerts.innerHTML = alertas.length === 0
+            ? '<div style="text-align:center;color:#16a34a;padding:20px;font-size:12px;">✓ Nenhum alerta — rede com capacidade normal</div>'
+            : alertas.map(l=>{
+                const ocup = parseFloat(l.ocupacao_percentual)||0;
+                const cor  = ocup>=95?'#dc2626':ocup>=90?'#d97706':'#f59e0b';
+                return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:#fff7ed;border:1px solid ${cor}40;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;"></div>
+                    <div style="flex:1;font-size:11px;">
+                        <div style="font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</div>
+                        <div style="color:#6b7280;">${l.uf||''} · ${l.tier_nivel||''}</div>
+                    </div>
+                    <div style="font-size:12px;font-weight:700;color:${cor};">${ocup.toFixed(0)}%</div>
+                </div>`;
+            }).join('');
+    }
+}
+
+function executarMatchInline() {
+    const uf   = (document.getElementById('match-uf')   ||{}).value || '';
+    const m2min= parseFloat((document.getElementById('match-m2')   ||{}).value) || 0;
+    const tier = (document.getElementById('match-tier') ||{}).value || '';
+    const tipo = (document.getElementById('match-tipo') ||{}).value || '';
+
+    const TIER_RANK = { 'Bronze':1,'Prata':2,'Ouro':3,'Platina':4 };
+    const tierMinRank = tier ? (TIER_RANK[tier]||0) : 0;
+
+    const conv = baseLicLeads.filter(l => {
+        if (l.status !== 'Convertido') return false;
+        if (uf && (l.uf||'').toUpperCase() !== uf.toUpperCase()) return false;
+        if (tierMinRank && (TIER_RANK[l.tier_nivel]||0) < tierMinRank) return false;
+        const m2Tot  = parseFloat(l.area_total_m2)||0;
+        const ocup   = parseFloat(l.ocupacao_percentual)||0;
+        const m2Disp = m2Tot*(1-ocup/100);
+        if (m2min && m2Disp < m2min) return false;
+        return true;
+    });
+
+    const el = document.getElementById('ld-match-results');
+    if (!el) return;
+    if (conv.length === 0) {
+        el.innerHTML = '<div style="text-align:center;color:#dc2626;padding:24px;font-size:12px;">Nenhum licenciado encontrado com os critérios informados.</div>';
+        return;
+    }
+    el.innerHTML = `<div style="font-size:11px;font-weight:700;color:#6941c6;margin-bottom:10px;">${conv.length} licenciado${conv.length!==1?'s':''} compatível${conv.length!==1?'is':''}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">
+    ${conv.map(l=>{
+        const m2Tot  = parseFloat(l.area_total_m2)||0;
+        const ocup   = parseFloat(l.ocupacao_percentual)||0;
+        const m2Disp = Math.round(m2Tot*(1-ocup/100));
+        return `<div style="border:1.5px solid #e0d9f5;border-radius:10px;padding:14px;background:#faf8ff;">
+            <div style="font-size:12px;font-weight:700;color:#2d1b69;margin-bottom:4px;">${l.razao_social||'—'}</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">${l.uf||''} · ${l.tier_nivel||''}</div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;">
+                <span>m² disponível</span><span style="font-weight:700;color:#6941c6;">${m2Disp.toLocaleString('pt-BR')} m²</span>
+            </div>
+        </div>`;
+    }).join('')}
+    </div>`;
 }
 
 function abrirFormLead(id, returnTo) {
@@ -10488,16 +10815,8 @@ function fecharLicKanban() {
 
 let _lcCharts = {};
 
-function abrirLicCapacidade() {
-    document.getElementById('lic-view-tabela').style.display = 'none';
-    document.getElementById('lic-view-capacidade').style.display = 'flex';
-    renderizarLicCapacidade();
-}
-
-function fecharLicCapacidade() {
-    document.getElementById('lic-view-capacidade').style.display = 'none';
-    document.getElementById('lic-view-tabela').style.display = '';
-}
+function abrirLicCapacidade() { /* migrado para o dashboard principal */ }
+function fecharLicCapacidade() { /* migrado para o dashboard principal */ }
 
 // ── Scorecard de Performance ──────────────────────────────────────
 
@@ -10657,19 +10976,8 @@ function capStatusInfo(utilPct) {
     return                        { label:'Disponível',cor:'#16a34a', bg:'#f0fdf4', border:'#86efac', icon:'🟢' };
 }
 
-async function abrirLicDisponibilidade() {
-    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard','lic-view-auditoria'].forEach(id=>{
-        const el=document.getElementById(id); if(el) el.style.display='none';
-    });
-    document.getElementById('lic-view-disponibilidade').style.display='flex';
-    if (Object.keys(_licPerfData).length === 0) await carregarLicPerformance();
-    renderizarLicDisponibilidade();
-}
-
-function fecharLicDisponibilidade() {
-    document.getElementById('lic-view-disponibilidade').style.display='none';
-    document.getElementById('lic-view-tabela').style.display='';
-}
+async function abrirLicDisponibilidade() { /* migrado para o dashboard principal */ }
+function fecharLicDisponibilidade() { /* migrado para o dashboard principal */ }
 
 // ── Board Report Executivo ────────────────────────────────────────
 
