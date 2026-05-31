@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificação Funcional — Sistema Pipeline · Módulo Licenciamento · Vendemmia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:    #2d1b69;
+  --accent:     #6941c6;
+  --accent-lt:  #9b5de5;
+  --green:      #16a34a;
+  --amber:      #d97706;
+  --red:        #dc2626;
+  --blue:       #2563eb;
+  --gray-50:    #f9fafb;
+  --gray-100:   #f3f4f6;
+  --gray-200:   #e5e7eb;
+  --gray-400:   #9ca3af;
+  --gray-600:   #4b5563;
+  --gray-800:   #1f2937;
+  --sidebar-w:  280px;
+  --content-max:860px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--gray-800);background:#fff;}
+
+/* ── PRINT ── */
+@media print{
+  .sidebar,.topbar,.print-btn,.no-print{display:none!important}
+  .main{margin-left:0!important}
+  body{font-size:12px}
+  .page-break{page-break-before:always}
+  h2{page-break-before:avoid}
+}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#1a0f3d,#2d1b69);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:300;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.topbar-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:.04em;}
+.topbar-logo-sub{font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;}
+.topbar-meta{display:flex;align-items:center;gap:12px;}
+.topbar-badge{font-size:10px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2);}
+.print-btn{padding:6px 16px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.1);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:background .15s;}
+.print-btn:hover{background:rgba(255,255,255,.2);}
+
+/* ── SIDEBAR ── */
+.sidebar{position:fixed;top:52px;left:0;width:var(--sidebar-w);height:calc(100vh - 52px);background:var(--gray-50);border-right:1px solid var(--gray-200);overflow-y:auto;z-index:200;padding:20px 0;}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:12px 20px 6px;}
+.sidebar-item{display:block;padding:7px 20px;font-size:12px;color:var(--gray-600);text-decoration:none;border-left:2px solid transparent;transition:all .12s;cursor:pointer;}
+.sidebar-item:hover{background:rgba(105,65,198,.06);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item.active{background:rgba(105,65,198,.08);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+.sidebar-item.sub{padding-left:32px;font-size:11px;}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);padding-top:52px;min-height:100vh;}
+
+/* ── COVER ── */
+.cover{background:linear-gradient(145deg,#1a0f3d 0%,#2d1b69 40%,#6941c6 100%);padding:80px 60px 72px;position:relative;overflow:hidden;}
+.cover::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.04);}
+.cover::after{content:'';position:absolute;bottom:-60px;left:30%;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.03);}
+.cover-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;color:rgba(255,255,255,.8);margin-bottom:24px;position:relative;}
+.cover-title{font-size:38px;font-weight:900;color:#fff;letter-spacing:-.8px;line-height:1.15;margin-bottom:10px;position:relative;}
+.cover-sub{font-size:16px;color:rgba(255,255,255,.6);margin-bottom:40px;font-weight:400;position:relative;}
+.cover-meta{display:flex;gap:24px;flex-wrap:wrap;position:relative;}
+.cover-meta-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 18px;}
+.cover-meta-label{font-size:9px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.cover-meta-value{font-size:13px;font-weight:700;color:#fff;}
+
+/* ── CONTENT ── */
+.content{max-width:var(--content-max);margin:0 auto;padding:52px 48px 80px;}
+
+/* ── SECTION HEADERS ── */
+.section-divider{display:flex;align-items:center;gap:12px;margin:52px 0 28px;}
+.section-divider-bar{width:4px;height:28px;background:linear-gradient(135deg,var(--accent),var(--primary));border-radius:2px;flex-shrink:0;}
+.section-divider h2{font-size:22px;font-weight:800;color:var(--primary);letter-spacing:-.4px;}
+.section-num{font-size:11px;font-weight:700;color:var(--accent);background:rgba(105,65,198,.08);padding:3px 10px;border-radius:20px;margin-left:4px;}
+
+h3{font-size:16px;font-weight:700;color:var(--primary);margin:28px 0 12px;}
+h4{font-size:14px;font-weight:700;color:var(--gray-800);margin:22px 0 10px;}
+p{margin-bottom:14px;color:var(--gray-600);line-height:1.75;}
+strong{color:var(--gray-800);}
+
+/* ── CARDS ── */
+.card-grid{display:grid;gap:16px;margin:20px 0;}
+.card-grid-2{grid-template-columns:1fr 1fr;}
+.card-grid-3{grid-template-columns:repeat(3,1fr);}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:18px 20px;}
+.card-icon{font-size:22px;margin-bottom:10px;}
+.card-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:5px;}
+.card-text{font-size:12px;color:var(--gray-600);line-height:1.6;}
+.card.accent{border-top:3px solid var(--accent);}
+.card.green{border-top:3px solid var(--green);}
+.card.amber{border-top:3px solid var(--amber);}
+.card.blue{border-top:3px solid var(--blue);}
+.card.red{border-top:3px solid var(--red);}
+
+/* ── CALLOUT ── */
+.callout{border-radius:10px;padding:14px 18px;margin:18px 0;display:flex;gap:12px;align-items:flex-start;}
+.callout.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.callout.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.callout.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.callout.danger{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.callout-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.callout p{margin:0;font-size:12px;line-height:1.6;color:inherit;}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px;}
+thead tr{background:rgba(105,65,198,.06);}
+th{padding:10px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);border-bottom:2px solid rgba(105,65,198,.15);}
+td{padding:10px 14px;border-bottom:1px solid var(--gray-100);color:var(--gray-600);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray-50);}
+td strong{color:var(--gray-800);}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;}
+.badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;}
+.badge-amber{background:#fffbeb;color:#b45309;border:1px solid #fcd34d;}
+.badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-gray{background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;}
+
+/* ── RF CARDS ── */
+.rf-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:16px 0;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.rf-card-head{display:flex;align-items:center;gap:12px;padding:13px 18px;background:rgba(105,65,198,.04);border-bottom:1px solid var(--gray-200);}
+.rf-num{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);background:rgba(105,65,198,.1);padding:3px 9px;border-radius:6px;}
+.rf-title{font-size:13px;font-weight:700;color:var(--primary);}
+.rf-priority{margin-left:auto;}
+.rf-body{padding:16px 18px;}
+.rf-body p{font-size:12px;margin-bottom:8px;}
+.rf-field{font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 4px;}
+.rf-body ul{padding-left:18px;margin:4px 0 10px;}
+.rf-body li{font-size:12px;color:var(--gray-600);margin-bottom:3px;line-height:1.5;}
+
+/* ── FLOW ── */
+.flow-steps{display:flex;flex-direction:column;gap:0;margin:16px 0;}
+.flow-step{display:flex;gap:14px;padding-bottom:16px;}
+.flow-step:last-child{padding-bottom:0;}
+.flow-step-indicator{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.flow-step-circle{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.flow-step-line{width:2px;flex:1;background:var(--gray-200);margin-top:4px;}
+.flow-step-content{flex:1;padding-top:4px;}
+.flow-step-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
+.flow-step-desc{font-size:12px;color:var(--gray-600);line-height:1.5;}
+
+/* ── PROFILE CARD ── */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+.profile-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;}
+.profile-card-head{padding:14px 18px;border-bottom:1px solid var(--gray-200);}
+.profile-card-title{font-size:14px;font-weight:800;color:var(--primary);margin-bottom:2px;}
+.profile-card-sub{font-size:11px;color:var(--gray-400);}
+.profile-card-body{padding:14px 18px;}
+.profile-card-body ul{padding-left:16px;}
+.profile-card-body li{font-size:12px;color:var(--gray-600);margin-bottom:4px;}
+
+/* ── TIER TABLE ── */
+.tier-row{display:grid;grid-template-columns:100px 1fr 1fr 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100);}
+.tier-row:last-child{border-bottom:none;}
+.tier-badge-lg{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;}
+
+/* ── PHASE BANNER ── */
+.phase-banner{background:linear-gradient(135deg,#1a0f3d,#6941c6);border-radius:12px;padding:20px 24px;margin:28px 0;display:flex;align-items:center;justify-content:space-between;}
+.phase-banner-text{font-size:13px;font-weight:700;color:#fff;}
+.phase-banner-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px;}
+.phase-banner-badge{font-size:11px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:20px;font-weight:600;}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .main{margin-left:0}
+  .content{padding:32px 20px}
+  .card-grid-2,.card-grid-3,.profile-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">P</div>
+    <div>
+      <div class="topbar-logo-text">PIPELINE by Vendemmia</div>
+      <div class="topbar-logo-sub">Especificação Funcional · Módulo Licenciamento</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="topbar-badge">Versão 1.0 — Fase 1/3</span>
+    <span class="topbar-badge">Maio 2026</span>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar no-print">
+  <div class="sidebar-section">Documento</div>
+  <a class="sidebar-item" href="#cover">Capa</a>
+  <a class="sidebar-item" href="#sumario">Sumário Executivo</a>
+
+  <div class="sidebar-section">Seção 1</div>
+  <a class="sidebar-item" href="#visao-geral">1. Visão Geral</a>
+  <a class="sidebar-item sub" href="#objetivo">1.1 Objetivo</a>
+  <a class="sidebar-item sub" href="#escopo">1.2 Escopo</a>
+  <a class="sidebar-item sub" href="#beneficios">1.3 Benefícios</a>
+  <a class="sidebar-item sub" href="#problemas">1.4 Problemas que resolve</a>
+
+  <div class="sidebar-section">Seção 2</div>
+  <a class="sidebar-item" href="#perfis">2. Perfis de Usuário</a>
+  <a class="sidebar-item sub" href="#perfil-diretor">2.1 Diretor</a>
+  <a class="sidebar-item sub" href="#perfil-comercial">2.2 Comercial</a>
+  <a class="sidebar-item sub" href="#perfil-validador">2.3 Validador</a>
+  <a class="sidebar-item sub" href="#perfil-lead">2.4 Lead (Portal)</a>
+
+  <div class="sidebar-section">Seção 3</div>
+  <a class="sidebar-item" href="#modulos">3. Módulos do Sistema</a>
+
+  <div class="sidebar-section">Seção 4</div>
+  <a class="sidebar-item" href="#requisitos">4. Requisitos Funcionais</a>
+  <a class="sidebar-item sub" href="#rf-cadastro">RF-001 a 005 · Cadastro</a>
+  <a class="sidebar-item sub" href="#rf-portal">RF-006 a 010 · Portal</a>
+  <a class="sidebar-item sub" href="#rf-auditoria">RF-011 a 015 · Auditoria</a>
+  <a class="sidebar-item sub" href="#rf-scorecard">RF-016 a 020 · Scorecard</a>
+  <a class="sidebar-item sub" href="#rf-mapa">RF-021 a 025 · Mapa</a>
+  <a class="sidebar-item sub" href="#rf-alertas">RF-026 a 030 · Alertas</a>
+
+  <div class="sidebar-section" style="margin-top:16px;color:var(--accent);">Próximas Fases</div>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 2 · Regras e Fluxos</a>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 3 · Telas e Validações</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- CAPA -->
+<div class="cover" id="cover">
+  <div class="cover-tag">🏢 Vendemmia Comércio Internacional Ltda.</div>
+  <h1 class="cover-title">Especificação Funcional<br>Sistema Pipeline<br>Módulo de Licenciamento</h1>
+  <div class="cover-sub">Documentação técnica e operacional completa da rede de parceiros logísticos licenciados</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Documento</div>
+      <div class="cover-meta-value">EF-LIC-2026-001</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Versão</div>
+      <div class="cover-meta-value">1.0 — Fase 1 de 3</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Data</div>
+      <div class="cover-meta-value">Maio 2026</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Status</div>
+      <div class="cover-meta-value">🟢 Em produção</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">Plataforma</div>
+      <div class="cover-meta-value">pipelinevendemmia.com.br</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- SUMÁRIO EXECUTIVO -->
+<div class="section-divider" id="sumario">
+  <div class="section-divider-bar"></div>
+  <h2>Sumário Executivo</h2>
+</div>
+
+<p>Este documento constitui a <strong>Especificação Funcional Completa</strong> do Módulo de Licenciamento integrado ao sistema Pipeline da Vendemmia Comércio Internacional Ltda. O módulo foi concebido para suportar a operação e expansão estratégica da <strong>Rede de Licenciamento Vendemmia</strong> — modelo de negócio no qual operadores logísticos com espaço ocioso tornam-se parceiros certificados, oferecendo capacidade de armazenagem sob a marca e padrões operacionais da Vendemmia.</p>
+
+<p>O documento cobre, em três fases, todos os aspectos funcionais e técnicos necessários para operação, manutenção e evolução do sistema:</p>
+
+<div class="card-grid card-grid-3">
+  <div class="card accent">
+    <div class="card-title">📄 Fase 1 — Fundação</div>
+    <div class="card-text">Visão geral, perfis de usuário, módulos do sistema e requisitos funcionais RF-001 a RF-030.</div>
+  </div>
+  <div class="card green">
+    <div class="card-title">⚙️ Fase 2 — Processos</div>
+    <div class="card-text">Regras de negócio, fluxos operacionais, telas do sistema e casos de uso completos.</div>
+  </div>
+  <div class="card blue">
+    <div class="card-title">✅ Fase 3 — Qualidade</div>
+    <div class="card-text">Validações, relatórios, notificações, critérios de aceite e requisitos não-funcionais.</div>
+  </div>
+</div>
+
+<div class="callout info">
+  <div class="callout-icon">ℹ️</div>
+  <p><strong>Confidencialidade:</strong> Este documento contém informações estratégicas e proprietárias da Vendemmia Comércio Internacional Ltda. Sua distribuição é restrita à diretoria, equipe de tecnologia e parceiros autorizados. Reprodução não autorizada é proibida.</p>
+</div>
+
+<!-- SEÇÃO 1: VISÃO GERAL -->
+<div class="section-divider" id="visao-geral">
+  <div class="section-divider-bar"></div>
+  <h2>1. Visão Geral <span class="section-num">Seção 1</span></h2>
+</div>
+
+<h3 id="objetivo">1.1 Objetivo do Sistema</h3>
+<p>O Módulo de Licenciamento do Pipeline tem como objetivo central <strong>dar visibilidade operacional e estratégica ao time comercial e à diretoria da Vendemmia</strong> sobre todos os armazéns parceiros (licenciados) disponíveis na rede, incluindo sua localização geográfica, capacidade de armazenagem, nível de qualificação, performance operacional e status de negociação.</p>
+
+<p>O sistema suporta o ciclo de vida completo de um parceiro logístico: desde a <strong>prospecção inicial</strong>, passando pelo <strong>processo formal de auditoria e homologação</strong>, até a <strong>operação ativa como licenciado certificado</strong> na rede Vendemmia.</p>
+
+<h3 id="escopo">1.2 Escopo do Sistema</h3>
+<p>O módulo abrange as seguintes capacidades funcionais:</p>
+
+<table>
+  <thead><tr><th>Domínio</th><th>Escopo Incluído</th><th>Escopo Excluído</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Cadastro de Leads</strong></td><td>Prospecção, formulário completo de 11 seções, portal público de preenchimento</td><td>Contratos jurídicos assinados digitalmente</td></tr>
+    <tr><td><strong>Auditoria</strong></td><td>Pipeline de 6 etapas, checklists, relatório de visita, certificação digital</td><td>Auditorias de campo com geolocalização em tempo real</td></tr>
+    <tr><td><strong>Performance</strong></td><td>Scorecard de KPIs por licenciado, histórico trimestral, planos de remediação</td><td>Integração automática com WMS/TMS dos parceiros</td></tr>
+    <tr><td><strong>Mapa e Disponibilidade</strong></td><td>Mapa interativo com choropleth, gap analysis, ferramenta de match comercial</td><td>Cálculo de rotas e otimização logística</td></tr>
+    <tr><td><strong>Relatórios</strong></td><td>Board Report PDF automático, histórico do lead, alertas e renovações</td><td>BI externo ou integração com Power BI/Tableau</td></tr>
+    <tr><td><strong>Portal Público</strong></td><td>Link de preenchimento por parceiro, upload de documentos, auto-save</td><td>Assinatura digital de contratos pelo parceiro</td></tr>
+  </tbody>
+</table>
+
+<h3 id="beneficios">1.3 Benefícios do Sistema</h3>
+
+<div class="card-grid card-grid-2">
+  <div class="card accent">
+    <div class="card-title">📍 Visibilidade Geográfica Total</div>
+    <div class="card-text">O time comercial visualiza em tempo real onde há armazéns licenciados, m² disponíveis por estado e regiões sem cobertura — oportunidades de expansão identificadas em segundos.</div>
+  </div>
+  <div class="card green">
+    <div class="card-title">⏱ Zero Tempo de Preparação</div>
+    <div class="card-text">Board Report gerado em 1 clique, alertas automáticos proativos e scorecard sempre atualizado eliminam horas de trabalho manual de consolidação de dados.</div>
+  </div>
+  <div class="card blue">
+    <div class="card-title">🎯 Processo de Homologação Rastreável</div>
+    <div class="card-text">Pipeline de auditoria com 6 etapas estruturadas, checklists obrigatórios e histórico completo garantem rastreabilidade e conformidade em toda a jornada do parceiro.</div>
+  </div>
+  <div class="card amber">
+    <div class="card-title">🤝 Engajamento do Parceiro</div>
+    <div class="card-text">Portal público de preenchimento permite que o próprio candidato insira seus dados, reduzindo carga operacional do time comercial e acelerando o processo de qualificação.</div>
+  </div>
+</div>
+
+<h3 id="problemas">1.4 Problemas que o Sistema Resolve</h3>
+
+<div class="flow-steps">
+  <div class="flow-step">
+    <div class="flow-step-indicator">
+      <div class="flow-step-circle" style="background:var(--red);">!</div>
+      <div class="flow-step-line"></div>
+    </div>
+    <div class="flow-step-content">
+      <div class="flow-step-title">Falta de visibilidade da rede</div>
+      <div class="flow-step-desc">Antes do sistema, o time comercial dependia de planilhas desatualizadas para saber onde havia licenciados e qual a capacidade disponível. Hoje, um mapa interativo mostra isso em tempo real.</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-step-indicator">
+      <div class="flow-step-circle" style="background:var(--red);">!</div>
+      <div class="flow-step-line"></div>
+    </div>
+    <div class="flow-step-content">
+      <div class="flow-step-title">Processo de auditoria não estruturado</div>
+      <div class="flow-step-desc">A homologação de novos parceiros ocorria de forma informal, sem checklists padronizados, prazos definidos ou rastreabilidade das etapas. O sistema implementa um pipeline formal de 6 etapas com SLA por etapa.</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-step-indicator">
+      <div class="flow-step-circle" style="background:var(--red);">!</div>
+      <div class="flow-step-line"></div>
+    </div>
+    <div class="flow-step-content">
+      <div class="flow-step-title">Ausência de métricas de qualidade</div>
+      <div class="flow-step-desc">Não havia monitoramento sistemático de OTIF, acuracidade de inventário ou utilização de capacidade por parceiro. O módulo de Scorecard formaliza o acompanhamento trimestral com alertas proativos.</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-step-indicator">
+      <div class="flow-step-circle" style="background:var(--red);">!</div>
+      <div class="flow-step-line"></div>
+    </div>
+    <div class="flow-step-content">
+      <div class="flow-step-title">Dados dispersos e não consolidados</div>
+      <div class="flow-step-desc">Informações de candidatos chegavam por e-mail, WhatsApp e formulários avulsos. O portal público centraliza o preenchimento e o sistema organiza todos os dados, documentos e histórico em um único lugar.</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-step-indicator">
+      <div class="flow-step-circle" style="background:var(--red);">!</div>
+    </div>
+    <div class="flow-step-content">
+      <div class="flow-step-title">Relatórios executivos manuais</div>
+      <div class="flow-step-desc">A diretoria dependia de consolidação manual para obter visão da rede. O Board Report gera automaticamente um PDF profissional com todos os KPIs da rede em 1 clique.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 2: PERFIS DE USUÁRIO -->
+<div class="section-divider" id="perfis">
+  <div class="section-divider-bar"></div>
+  <h2>2. Perfis de Usuário e Permissões <span class="section-num">Seção 2</span></h2>
+</div>
+
+<p>O Módulo de Licenciamento opera com <strong>4 perfis distintos</strong>. Os três primeiros são usuários internos autenticados na plataforma Pipeline; o quarto é o parceiro externo que acessa apenas o portal público via link exclusivo.</p>
+
+<div class="callout warning">
+  <div class="callout-icon">⚠️</div>
+  <p><strong>Acesso restrito por whitelist:</strong> O botão "Licenciamento" no menu principal do Pipeline é visível apenas para usuários cujos e-mails estão na lista de acesso autorizado (atualmente: <code>gppereira@vendemmia.com.br</code> e <code>jprado@vendemmia.com.br</code>). Novos usuários devem ser adicionados pela equipe técnica.</p>
+</div>
+
+<div class="profile-grid">
+  <div class="profile-card" id="perfil-diretor">
+    <div class="profile-card-head" style="background:rgba(105,65,198,.06);">
+      <div class="profile-card-title">👤 Diretor / Gestor Executivo</div>
+      <div class="profile-card-sub">Acesso total de leitura e aprovação</div>
+    </div>
+    <div class="profile-card-body">
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Usuário com visão estratégica completa da rede. Utiliza principalmente o Board Report, Mapa e Scorecard para tomada de decisão.</p>
+      <p style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">PERMISSÕES</p>
+      <ul>
+        <li>Visualizar todos os leads e licenciados</li>
+        <li>Gerar Board Report PDF</li>
+        <li>Aprovar etapas de auditoria</li>
+        <li>Emitir certificados digitais</li>
+        <li>Acessar scorecard e histórico completo</li>
+        <li>Visualizar mapa e gap analysis</li>
+        <li>Exportar dados e relatórios</li>
+      </ul>
+      <p style="font-size:11px;font-weight:700;color:var(--red);margin:10px 0 6px;">RESTRIÇÕES</p>
+      <ul>
+        <li>Não altera configurações de acesso de outros usuários</li>
+        <li>Não exclui registros históricos</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="profile-card" id="perfil-comercial">
+    <div class="profile-card-head" style="background:rgba(22,163,74,.04);">
+      <div class="profile-card-title">💼 Comercial / Gestor de Leads</div>
+      <div class="profile-card-sub">Operação completa de prospecção e gestão</div>
+    </div>
+    <div class="profile-card-body">
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Usuário principal do sistema. Prospecta novos parceiros, conduz o processo de auditoria, acompanha o kanban e gera links de formulário.</p>
+      <p style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">PERMISSÕES</p>
+      <ul>
+        <li>Criar, editar e excluir leads</li>
+        <li>Gerar links de formulário para parceiros</li>
+        <li>Mover leads no Kanban de Auditoria</li>
+        <li>Registrar eventos no histórico (reuniões, contatos)</li>
+        <li>Lançar KPIs no Scorecard</li>
+        <li>Usar ferramenta de match comercial</li>
+        <li>Gerar PDF individual do lead</li>
+        <li>Acessar mapa e disponibilidade</li>
+      </ul>
+      <p style="font-size:11px;font-weight:700;color:var(--red);margin:10px 0 6px;">RESTRIÇÕES</p>
+      <ul>
+        <li>Não emite certificados digitais</li>
+        <li>Não acessa configurações de sistema</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="profile-card" id="perfil-validador">
+    <div class="profile-card-head" style="background:rgba(37,99,235,.04);">
+      <div class="profile-card-title">🔍 Validador / Auditor Técnico</div>
+      <div class="profile-card-sub">Execução de auditorias e checklists</div>
+    </div>
+    <div class="profile-card-body">
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">Responsável pela condução técnica do processo de homologação. Realiza visitas técnicas, completa checklists e faz upload de relatórios.</p>
+      <p style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">PERMISSÕES</p>
+      <ul>
+        <li>Visualizar todos os leads</li>
+        <li>Completar checklists de auditoria</li>
+        <li>Fazer upload de relatório de visita</li>
+        <li>Avançar etapas após checklist completo</li>
+        <li>Registrar notas e observações</li>
+        <li>Visualizar scorecard e histórico</li>
+      </ul>
+      <p style="font-size:11px;font-weight:700;color:var(--red);margin:10px 0 6px;">RESTRIÇÕES</p>
+      <ul>
+        <li>Não cria nem exclui leads</li>
+        <li>Não gera relatórios executivos</li>
+        <li>Não emite certificados</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="profile-card" id="perfil-lead">
+    <div class="profile-card-head" style="background:rgba(217,119,6,.04);">
+      <div class="profile-card-title">🏢 Lead / Parceiro Candidato (Portal)</div>
+      <div class="profile-card-sub">Acesso exclusivo via link público — sem autenticação</div>
+    </div>
+    <div class="profile-card-body">
+      <p style="font-size:12px;color:var(--gray-600);margin-bottom:10px;">O candidato a licenciado recebe um link único por WhatsApp ou e-mail e acessa o portal público para preencher seus dados operacionais.</p>
+      <p style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px;">PERMISSÕES (no portal público)</p>
+      <ul>
+        <li>Preencher formulário de 11 seções</li>
+        <li>Fazer upload de documentos (Contrato Social, fotos, certificados)</li>
+        <li>Salvar progresso parcial e retornar depois</li>
+        <li>Enviar formulário final</li>
+      </ul>
+      <p style="font-size:11px;font-weight:700;color:var(--red);margin:10px 0 6px;">RESTRIÇÕES</p>
+      <ul>
+        <li>Não acessa o sistema Pipeline interno</li>
+        <li>Visualiza apenas os dados do seu próprio lead</li>
+        <li>Não pode editar após status "concluído" (sem autorização)</li>
+        <li>Link único e intransferível por lead</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 3: MÓDULOS -->
+<div class="section-divider" id="modulos">
+  <div class="section-divider-bar"></div>
+  <h2>3. Módulos do Sistema <span class="section-num">Seção 3</span></h2>
+</div>
+
+<p>O Módulo de Licenciamento é composto por <strong>9 sub-módulos</strong> integrados, cada um acessível pelo menu de navegação horizontal dentro da tela de Licenciamento:</p>
+
+<table>
+  <thead><tr><th>#</th><th>Módulo</th><th>Função Principal</th><th>Usuários Principais</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge badge-purple">01</span></td><td><strong>Tela Inicial / Dashboard</strong></td><td>Visão consolidada: KPIs, gráficos de evolução, funil de leads, receita projetada e tabela de todos os leads</td><td>Todos os perfis internos</td></tr>
+    <tr><td><span class="badge badge-blue">02</span></td><td><strong>Mapa Interativo</strong></td><td>Visualização geográfica da rede com marcadores por licenciado, choropleth de cobertura, Gap Analysis e painel de detalhes por ponto</td><td>Comercial, Diretor</td></tr>
+    <tr><td><span class="badge badge-purple">03</span></td><td><strong>Kanban de Licenciamento</strong></td><td>Gestão visual dos leads pelas etapas do pipeline comercial (Prospecção → Onboarding → Perdido), com drag & drop</td><td>Comercial</td></tr>
+    <tr><td><span class="badge badge-blue">04</span></td><td><strong>Capacidade da Rede</strong></td><td>Visão operacional de m² total, por nível, por região; composição de tiers; top licenciados; alertas de capacidade</td><td>Comercial, Diretor</td></tr>
+    <tr><td><span class="badge badge-green">05</span></td><td><strong>Disponibilidade Comercial</strong></td><td>m² disponível em tempo real (considerando utilização), ferramenta de match cliente-licenciado, projeção 3/6 meses</td><td>Comercial</td></tr>
+    <tr><td><span class="badge badge-amber">06</span></td><td><strong>Scorecard de Performance</strong></td><td>KPIs operacionais por licenciado (OTIF, acuracidade, D2S, utilização, NPS, onboarding), histórico trimestral, planos de remediação</td><td>Gestor, Diretor</td></tr>
+    <tr><td><span class="badge badge-red">07</span></td><td><strong>Pipeline de Auditoria</strong></td><td>Kanban de 6 etapas de homologação com checklists obrigatórios, SLA por etapa, upload de relatório de visita técnica e emissão de certificado digital</td><td>Auditor, Comercial, Diretor</td></tr>
+    <tr><td><span class="badge badge-purple">08</span></td><td><strong>Board Report</strong></td><td>Geração em 1 clique de PDF executivo completo com todos os indicadores da rede para apresentação à diretoria</td><td>Diretor</td></tr>
+    <tr><td><span class="badge badge-blue">09</span></td><td><strong>Central de Alertas</strong></td><td>Notificações proativas sobre eventos críticos: certificações vencendo, score em queda, capacidade crítica, formulários preenchidos, aniversários de contrato</td><td>Todos os perfis internos</td></tr>
+  </tbody>
+</table>
+
+<div class="callout success">
+  <div class="callout-icon">✅</div>
+  <p><strong>Portal Público (externo):</strong> Adicionalmente, existe o <code>portal.html</code> — uma página pública acessível via link único, sem autenticação, onde o candidato a licenciado preenche o formulário completo de cadastro com 7 seções e upload de documentos.</p>
+</div>
+
+<!-- SEÇÃO 4: REQUISITOS FUNCIONAIS -->
+<div class="section-divider" id="requisitos">
+  <div class="section-divider-bar"></div>
+  <h2>4. Requisitos Funcionais <span class="section-num">Seção 4</span></h2>
+</div>
+
+<p>Os requisitos funcionais estão organizados por domínio. Cada requisito contém: identificador único, descrição, regras de negócio, fluxo de execução, validações e critério de aceite.</p>
+
+<!-- RF: CADASTRO -->
+<h3 id="rf-cadastro">4.1 Gestão de Leads e Cadastro</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-001</span>
+    <span class="rf-title">Cadastro de Lead de Licenciamento</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve permitir o cadastro completo de um candidato a licenciado (lead) por meio de formulário interno de 11 seções, cobrindo dados da empresa, contato, localização com CEP e geocodificação, capacidade instalada (múltiplos armazéns), tipos de carga, maturidade tecnológica, certificações, plano comercial, opção de WMS, etapa do funil e acompanhamento comercial.</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Os campos <strong>Razão Social</strong> e <strong>E-mail do contato</strong> são obrigatórios para salvar o lead</li>
+      <li>O CEP, quando informado, deve ser validado via BrasilAPI e, como fallback, via ViaCEP</li>
+      <li>Coordenadas GPS (lat/lng) são extraídas automaticamente do CEP via BrasilAPI e salvas no banco</li>
+      <li>O campo <strong>Status</strong> aceita apenas os valores: <em>Ativo</em>, <em>Convertido</em> ou <em>Perdido</em></li>
+      <li>Se status = "Perdido", o campo <strong>Motivo da perda</strong> deve ser preenchido</li>
+      <li>Armazéns são cadastrados dinamicamente (múltiplos por lead), com consolidação automática de m² total</li>
+    </ul>
+    <div class="rf-field">Fluxo</div>
+    <ul>
+      <li>1. Usuário clica em "+ Novo Lead" → formulário abre em modo criação, etapa 1 de 11</li>
+      <li>2. Usuário navega entre seções pelo stepper ou botão "Próximo →"</li>
+      <li>3. Na etapa 11, o botão "Próximo" muda para "✅ Salvar lead"</li>
+      <li>4. Ao salvar, dados são enviados para Supabase (tabela <code>lic_leads</code>) e anexos para Storage bucket <code>lic-anexos</code></li>
+      <li>5. Sistema exibe toast de confirmação e retorna à tela de origem</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Lead salvo corretamente no banco com todos os campos preenchidos</li>
+      <li>CEP válido resulta em preenchimento automático de UF, cidade, logradouro e bairro</li>
+      <li>Salvar sem Razão Social exibe mensagem de erro e mantém o formulário aberto</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-002</span>
+    <span class="rf-title">Edição de Lead Existente</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve permitir a edição de qualquer campo de um lead já cadastrado, com carregamento dos dados existentes no formulário de 11 seções.</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Ao editar, todos os campos são pré-preenchidos com os valores atuais do banco</li>
+      <li>Arquivos anexados são exibidos com link de download; novos arquivos podem ser adicionados</li>
+      <li>A alteração de status para "Convertido" dispara registro automático no histórico do lead</li>
+      <li>O campo <code>updated_at</code> é atualizado automaticamente no Supabase a cada edição</li>
+      <li>O botão "📄 Gerar PDF" aparece no formulário somente quando há um lead existente (edição)</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Dados editados salvos corretamente; campos não alterados mantêm seus valores anteriores</li>
+      <li>Evento de edição registrado automaticamente no histórico do lead</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-003</span>
+    <span class="rf-title">Exclusão de Lead</span>
+    <span class="rf-priority"><span class="badge badge-amber">Prioridade Média</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve permitir a exclusão definitiva de um lead, removendo todos os dados associados (anexos, histórico, KPIs de performance, dados de auditoria).</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>A exclusão exige confirmação via modal (dialog de confirmação)</li>
+      <li>A exclusão em cascata remove automaticamente: <code>lic_anexos</code>, <code>lic_historico</code>, <code>lic_performance</code>, <code>lic_auditoria</code></li>
+      <li>Arquivos no Storage não são removidos automaticamente — requerem limpeza manual ou job agendado</li>
+      <li>Leads com status "Convertido" e ativos na rede devem exibir aviso adicional antes da exclusão</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Lead removido do banco e da tabela sem erros</li>
+      <li>Modal de confirmação exibido antes da exclusão efetiva</li>
+      <li>Lead não aparece mais em nenhuma tela após exclusão</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-004</span>
+    <span class="rf-title">Sistema de Classificação por Nível (Tier)</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve calcular automaticamente o nível (tier) de qualidade de cada licenciado ativo, com base em um score de 0 a 100 pontos, e exibir o nível em todos os componentes visuais do sistema.</p>
+    <div class="rf-field">Fórmula de Score</div>
+    <table>
+      <thead><tr><th>Dimensão</th><th>Peso Máximo</th><th>Critério</th></tr></thead>
+      <tbody>
+        <tr><td>OTIF (%)</td><td>30 pts</td><td>≥98%=30 | ≥95%=20 | ≥90%=12 | &gt;0%=5</td></tr>
+        <tr><td>Acuracidade de Inventário (%)</td><td>25 pts</td><td>≥99.5%=25 | ≥98%=18 | ≥95%=10 | &gt;0%=4</td></tr>
+        <tr><td>Certificações ativas</td><td>20 pts</td><td>5 pts por certificação (máx. 20)</td></tr>
+        <tr><td>Maturidade tecnológica</td><td>15 pts</td><td>Avançado=15 | Intermediário=10 | Em desenvolvimento=5</td></tr>
+        <tr><td>Escala (m² total)</td><td>10 pts</td><td>≥20k=10 | ≥10k=7 | ≥5k=4 | &gt;0=2</td></tr>
+      </tbody>
+    </table>
+    <div class="rf-field">Tabela de Níveis</div>
+    <div class="tier-row" style="font-weight:700;font-size:11px;color:var(--accent);border-bottom:2px solid rgba(105,65,198,.15);padding-bottom:8px;margin-bottom:4px;">
+      <span>Score</span><span>Nível</span><span>Benefício Principal</span><span>Requisito Mínimo</span>
+    </div>
+    <div class="tier-row">
+      <span><span class="tier-badge-lg" style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;">Platina</span></span>
+      <span style="font-size:12px;">80–100 pts</span>
+      <span style="font-size:12px;">Match prioritário com clientes premium</span>
+      <span style="font-size:12px;">OTIF ≥98%, WMS integrado, ISO 9001</span>
+    </div>
+    <div class="tier-row">
+      <span><span class="tier-badge-lg" style="background:#fffbeb;color:#b45309;border:1px solid #fcd34d;">Ouro</span></span>
+      <span style="font-size:12px;">60–79 pts</span>
+      <span style="font-size:12px;">Acesso a clientes de médio porte</span>
+      <span style="font-size:12px;">OTIF ≥96%, ao menos 2 certificações</span>
+    </div>
+    <div class="tier-row">
+      <span><span class="tier-badge-lg" style="background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;">Prata</span></span>
+      <span style="font-size:12px;">35–59 pts</span>
+      <span style="font-size:12px;">Acesso padrão à rede</span>
+      <span style="font-size:12px;">OTIF ≥93%, documentação regular</span>
+    </div>
+    <div class="tier-row">
+      <span><span class="tier-badge-lg" style="background:#fef3c7;color:#92400e;border:1px solid #fbbf24;">Bronze</span></span>
+      <span style="font-size:12px;">0–34 pts</span>
+      <span style="font-size:12px;">Em qualificação; suporte intensivo</span>
+      <span style="font-size:12px;">Primeiros 90 dias ou em remediação</span>
+    </div>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Score calculado corretamente conforme a fórmula</li>
+      <li>Badge exibido na tabela de leads, kanban, mapa e scorecard</li>
+      <li>Somente leads com status "Convertido" recebem classificação</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-005</span>
+    <span class="rf-title">Histórico do Lead (CRM Timeline)</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve manter um histórico cronológico completo de todos os eventos relacionados a um lead, desde a prospecção inicial até o status atual.</p>
+    <div class="rf-field">Eventos Registrados Automaticamente</div>
+    <ul>
+      <li>Mudança de etapa no Kanban de Licenciamento</li>
+      <li>Avanço de etapa no Pipeline de Auditoria</li>
+      <li>Emissão de certificado digital</li>
+      <li>Lançamento de KPIs no Scorecard</li>
+      <li>Geração de link de formulário</li>
+      <li>Preenchimento do formulário pelo parceiro (portal público)</li>
+    </ul>
+    <div class="rf-field">Eventos Registrados Manualmente</div>
+    <ul>
+      <li>Reunião realizada (data, participantes, resultado)</li>
+      <li>Contato realizado (tipo, resultado)</li>
+      <li>Proposta enviada</li>
+      <li>Nota interna</li>
+      <li>Mudança de etapa manual</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Timeline exibida no painel do mapa (tab "Histórico") e no formulário do lead</li>
+      <li>Eventos ordenados cronologicamente (mais recentes primeiro)</li>
+      <li>Documentos anexados aparecem mesclados na timeline com link de download</li>
+    </ul>
+  </div>
+</div>
+
+<!-- RF: PORTAL -->
+<h3 id="rf-portal">4.2 Portal Público de Preenchimento</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-006</span>
+    <span class="rf-title">Geração de Link Exclusivo por Lead</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve gerar um link único e seguro para cada lead, permitindo que o próprio candidato preencha seus dados no portal público sem necessidade de login.</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>O token é gerado via <code>crypto.getRandomValues()</code> — 32 caracteres hexadecimais</li>
+      <li>O token é salvo no campo <code>form_token</code> da tabela <code>lic_leads</code> (campo UNIQUE)</li>
+      <li>O link tem o formato: <code>https://pipelinevendemmia.com.br/portal.html?token=TOKEN</code></li>
+      <li>Um novo token pode ser gerado para o mesmo lead — o anterior é substituído</li>
+      <li>O modal exibe: link copiável, QR Code, botão de compartilhar via WhatsApp e via E-mail</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Token único salvo no banco sem erro de duplicidade</li>
+      <li>Link abre o portal público com os dados do lead pré-preenchidos (se existentes)</li>
+      <li>QR Code gerado e exibido corretamente</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-007</span>
+    <span class="rf-title">Portal Público — Formulário de 7 Seções</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O portal público (<code>portal.html</code>) exibe um formulário multi-etapa de 7 seções para que o candidato a licenciado preencha seus dados operacionais sem intervenção do time comercial.</p>
+    <div class="rf-field">Seções do Formulário</div>
+    <table>
+      <thead><tr><th>#</th><th>Seção</th><th>Campos Principais</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Dados da empresa</td><td>Razão social*, CNPJ*, website, faturamento*, segmentos, upload Contrato Social</td></tr>
+        <tr><td>2</td><td>Contato principal</td><td>Nome*, cargo*, e-mail*, telefone*, decisor</td></tr>
+        <tr><td>3</td><td>Localização</td><td>CEP (com geocodificação automática), UF*, polo logístico*, logradouro, bairro, exclusividade</td></tr>
+        <tr><td>4</td><td>Capacidade instalada</td><td>Múltiplos armazéns: nome, UF, cidade, m²*, docas, ocupação, páletes, pé-direito, upload fotos</td></tr>
+        <tr><td>5</td><td>Tipos de carga</td><td>Carga geral, perigosa (classes IMDG), temperatura controlada, licenças ativas, observações</td></tr>
+        <tr><td>6</td><td>Maturidade tecnológica</td><td>WMS, ERP, sistemas integrados, nível de maturidade (Básico→Avançado)</td></tr>
+        <tr><td>7</td><td>Certificações</td><td>Certificações ativas, OTIF, acuracidade de inventário, observações, upload de certificados</td></tr>
+      </tbody>
+    </table>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Auto-save após cada seção avançada — dados salvos com <code>form_status = 'preenchendo'</code></li>
+      <li>Ao enviar, <code>form_status</code> muda para <code>'concluido'</code> e <code>form_filled_at</code> é registrado</li>
+      <li>Se formulário já estava "concluído", exibe tela de aviso com opção de editar</li>
+      <li>Token inválido exibe tela de "Link inválido ou expirado"</li>
+      <li>Uploads enviados para bucket <code>lic-anexos</code> no Supabase Storage</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Formulário salvo automaticamente em cada navegação entre etapas</li>
+      <li>Dados persistidos corretamente na tabela <code>lic_leads</code> ao final</li>
+      <li>Tela de agradecimento exibida após envio final</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-008</span>
+    <span class="rf-title">Upload de Documentos pelo Parceiro</span>
+    <span class="rf-priority"><span class="badge badge-amber">Prioridade Média</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O portal deve permitir que o parceiro faça upload de documentos em seções específicas do formulário, com armazenamento seguro no Supabase Storage.</p>
+    <div class="rf-field">Campos de Upload</div>
+    <ul>
+      <li><strong>Seção 1 (Empresa):</strong> Contrato Social — PDF, DOC, JPG, PNG — máx. 10 MB</li>
+      <li><strong>Seção 4 (Capacidade):</strong> Fotos por armazém (cada armazém tem sua própria zona de upload) — JPG, PNG, HEIC — máx. 10 MB cada</li>
+      <li><strong>Seção 7 (Certificações):</strong> Documentos de certificação — PDF, JPG, PNG — múltiplos — máx. 10 MB cada</li>
+    </ul>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Arquivos ficam "pendentes" durante o preenchimento e são enviados ao Supabase no submit final</li>
+      <li>Cada foto de armazém é vinculada ao armazém específico (tipo: <code>foto_armazem_1</code>, <code>foto_armazem_2</code>)</li>
+      <li>Política de Storage: bucket <code>lic-anexos</code> com política de INSERT para usuários anônimos</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Arquivo enviado aparece listado com nome e tamanho</li>
+      <li>Registro criado em <code>lic_anexos</code> com URL pública para download</li>
+      <li>Arquivo superior a 10 MB exibe alerta e é ignorado</li>
+    </ul>
+  </div>
+</div>
+
+<!-- RF: AUDITORIA -->
+<h3 id="rf-auditoria">4.3 Pipeline de Auditoria e Homologação</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-011</span>
+    <span class="rf-title">Abertura de Processo de Auditoria</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve permitir iniciar o processo formal de homologação de qualquer lead cadastrado, criando um registro de auditoria com a etapa inicial "Prospectado".</p>
+    <div class="rf-field">Etapas do Pipeline de Auditoria</div>
+    <table>
+      <thead><tr><th>Etapa</th><th>Descrição</th><th>SLA</th><th>Checklist</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Prospectado</strong></td><td>Contato inicial e envio do formulário</td><td>7 dias</td><td>4 itens</td></tr>
+        <tr><td><strong>2. Formulário Enviado</strong></td><td>Dados preenchidos pelo parceiro</td><td>14 dias</td><td>4 itens</td></tr>
+        <tr><td><strong>3. Análise Documental</strong></td><td>Revisão jurídica, fiscal e de certificações</td><td>10 dias</td><td>5 itens</td></tr>
+        <tr><td><strong>4. Visita Técnica</strong></td><td>Inspeção in loco e relatório</td><td>21 dias</td><td>7 itens</td></tr>
+        <tr><td><strong>5. Aprovação</strong></td><td>Revisão pela diretoria e assinatura de contrato</td><td>14 dias</td><td>4 itens</td></tr>
+        <tr><td><strong>6. Ativo na Rede</strong></td><td>Certificado emitido e go-live confirmado</td><td>—</td><td>4 itens</td></tr>
+      </tbody>
+    </table>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Cada lead pode ter apenas 1 registro ativo em <code>lic_auditoria</code> (campo UNIQUE por <code>lead_id</code>)</li>
+      <li>Alertas visuais de SLA: verde (no prazo), âmbar (70%+ do prazo), vermelho (vencido)</li>
+      <li>O avanço de etapa só é possível após todos os itens do checklist estarem marcados</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Registro criado em <code>lic_auditoria</code> com etapa "prospectado" e prazo calculado</li>
+      <li>Botão "Avançar" bloqueado enquanto checklist incompleto</li>
+      <li>Card do lead exibido na coluna correta do kanban</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-012</span>
+    <span class="rf-title">Emissão de Certificado Digital</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>Ao concluir a etapa "Ativo na Rede", o sistema deve permitir a emissão formal de um certificado digital ao licenciado, contendo número único, data de emissão e validade.</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>A emissão do certificado altera automaticamente o <code>status</code> do lead para <strong>"Convertido"</strong></li>
+      <li>O formato do número segue a convenção: <code>VDM-AAAA-NNN</code> (ex.: VDM-2026-001)</li>
+      <li>A validade padrão é de 2 anos a partir da data de emissão</li>
+      <li>O evento é registrado automaticamente no histórico do lead</li>
+      <li>Após emissão, o licenciado passa a aparecer no mapa, scorecard e painel de capacidade</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Campos de número, emissão e validade salvos em <code>lic_auditoria</code></li>
+      <li>Lead com status "Convertido" visível em todos os painéis da rede</li>
+      <li>Toast de confirmação exibido com mensagem de sucesso</li>
+    </ul>
+  </div>
+</div>
+
+<!-- RF: SCORECARD -->
+<h3 id="rf-scorecard">4.4 Scorecard de Performance</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-016</span>
+    <span class="rf-title">Lançamento de KPIs por Período</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve permitir o registro trimestral de KPIs operacionais para cada licenciado ativo, com validação automática dos thresholds e ativação de plano de remediação quando necessário.</p>
+    <div class="rf-field">KPIs e Thresholds</div>
+    <table>
+      <thead><tr><th>KPI</th><th>Unidade</th><th>Verde</th><th>Amarelo</th><th>Vermelho</th></tr></thead>
+      <tbody>
+        <tr><td>OTIF</td><td>%</td><td>≥97%</td><td>90–96%</td><td>&lt;90%</td></tr>
+        <tr><td>Acuracidade de Inventário</td><td>%</td><td>≥98%</td><td>95–97%</td><td>&lt;95%</td></tr>
+        <tr><td>Dock-to-Stock Time</td><td>horas</td><td>≤24h</td><td>24–48h</td><td>&gt;48h</td></tr>
+        <tr><td>Utilização de Capacidade</td><td>%</td><td>≤85%</td><td>85–95%</td><td>&gt;95%</td></tr>
+        <tr><td>NPS do cliente alocado</td><td>pontos</td><td>≥50</td><td>20–49</td><td>&lt;20</td></tr>
+        <tr><td>Tempo médio de onboarding</td><td>dias</td><td>≤20d</td><td>21–30d</td><td>&gt;30d</td></tr>
+      </tbody>
+    </table>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>O bloco de "Plano de Remediação" aparece automaticamente quando qualquer KPI estiver em vermelho OU quando o licenciado for nível Bronze</li>
+      <li>O lançamento de KPIs atualiza automaticamente <code>otif_pct</code> e <code>acuracidade_pct</code> na tabela <code>lic_leads</code></li>
+      <li>O período segue o formato <code>Q1/Q2/Q3/Q4 AAAA</code> e é salvo com data de referência (<code>periodo_ref</code>)</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>KPIs salvos em <code>lic_performance</code> com período correto</li>
+      <li>Semáforos atualizados nos cards do scorecard após o lançamento</li>
+      <li>Plano de remediação exibido quando aplicável</li>
+    </ul>
+  </div>
+</div>
+
+<!-- RF: MAPA -->
+<h3 id="rf-mapa">4.5 Mapa Interativo e Disponibilidade</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-021</span>
+    <span class="rf-title">Mapa Interativo da Rede</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve exibir um mapa interativo do Brasil com todos os licenciados e leads ativos representados por marcadores georreferenciados, com choropleth de intensidade por estado.</p>
+    <div class="rf-field">Componentes do Mapa</div>
+    <ul>
+      <li><strong>Tile base:</strong> CartoDB Voyager (colorido — estradas, parques, água em cores reais)</li>
+      <li><strong>Choropleth:</strong> Estados coloridos em tons de roxo conforme volume de m² de licenciados ativos</li>
+      <li><strong>Marcadores:</strong> Tags retangulares com área (m²) e UF; cor por status (verde=Convertido, roxo=Ativo, vermelho=Perdido)</li>
+      <li><strong>Hover popup:</strong> Ao passar o mouse, exibe foto, nome, m² disponível, fee/mês, badges</li>
+      <li><strong>Side panel:</strong> Ao clicar, abre painel lateral com 3 abas: Dados | Histórico | Documentos</li>
+    </ul>
+    <div class="rf-field">Precisão de Geocodificação</div>
+    <ul>
+      <li><strong>Prioridade 1:</strong> Coordenadas GPS do CEP (via BrasilAPI) — máxima precisão</li>
+      <li><strong>Prioridade 2:</strong> Polo logístico/cidade no dicionário interno (80+ cidades)</li>
+      <li><strong>Prioridade 3:</strong> Capital do estado como fallback</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Mapa exibe todos os licenciados com coordenadas corretas</li>
+      <li>Hover popup aparece em menos de 300ms após passar o mouse</li>
+      <li>Side panel carrega dados e histórico do lead ao clicar no marcador</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-022</span>
+    <span class="rf-title">Gap Analysis de Cobertura Geográfica</span>
+    <span class="rf-priority"><span class="badge badge-amber">Prioridade Média</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve oferecer um modo de análise de gaps que destaca visualmente os estados sem cobertura de licenciados, permitindo identificação rápida de oportunidades de expansão.</p>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Acionado pelo botão "Gap Analysis" no header do mapa</li>
+      <li>Estados coloridos em 3 categorias: <span class="badge badge-green">Verde</span> = licenciado ativo, <span class="badge badge-amber">Âmbar</span> = em prospecção, <span class="badge badge-red">Vermelho</span> = sem cobertura</li>
+      <li>Painel lateral exibe contagem por categoria e lista de UFs sem cobertura como "Oportunidades prioritárias"</li>
+      <li>Clicar no botão novamente desativa o modo e retorna ao mapa normal</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Choropleth tricolor exibido corretamente ao ativar o modo</li>
+      <li>Lista de UFs sem cobertura atualizada em tempo real conforme os dados do banco</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-023</span>
+    <span class="rf-title">Ferramenta de Match Comercial</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve oferecer uma ferramenta de busca de disponibilidade no painel "Disponibilidade Comercial" para que o time de vendas encontre licenciados compatíveis com as necessidades de um cliente durante uma reunião.</p>
+    <div class="rf-field">Filtros da Ferramenta de Match</div>
+    <ul>
+      <li><strong>Estados necessários:</strong> Multi-select (Ctrl+clique para múltiplos)</li>
+      <li><strong>m² mínimo:</strong> Campo numérico (capacidade disponível mínima)</li>
+      <li><strong>Tipo de carga:</strong> Dropdown (paletizado, refrigerado, farmacêutico, alto valor, etc.)</li>
+    </ul>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>m² disponível = <code>area_total_m2 × (1 - utilizacao_capacidade / 100)</code></li>
+      <li>Resultados ordenados por maior m² disponível</li>
+      <li>Licenciados sem dados de utilização registrados não são filtrados pelo critério de m²</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Resultados exibidos inline no painel com m² disponível, tier badge e status</li>
+      <li>Nenhum resultado exibe mensagem clara ao usuário</li>
+    </ul>
+  </div>
+</div>
+
+<!-- RF: ALERTAS -->
+<h3 id="rf-alertas">4.6 Central de Alertas e Renovações</h3>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-026</span>
+    <span class="rf-title">Geração Automática de Alertas Proativos</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve gerar automaticamente alertas baseados em eventos e condições detectadas nos dados, exibindo-os em um painel centralizado com badge de contagem no botão de navegação.</p>
+    <div class="rf-field">Tipos de Alerta e Condições</div>
+    <table>
+      <thead><tr><th>Tipo</th><th>Prioridade</th><th>Condição</th></tr></thead>
+      <tbody>
+        <tr><td>Certificação vencendo</td><td><span class="badge badge-red">Crítico</span></td><td>Validade do certificado ≤ 30 dias</td></tr>
+        <tr><td>Capacidade crítica</td><td><span class="badge badge-red">Crítico</span></td><td>m² disponível &lt; 500</td></tr>
+        <tr><td>Risco de downgrade</td><td><span class="badge badge-red">Crítico</span></td><td>Queda de OTIF &gt;3% ou acuracidade &gt;2% entre períodos</td></tr>
+        <tr><td>Certificação atenção</td><td><span class="badge badge-amber">Atenção</span></td><td>Validade do certificado entre 31 e 60 dias</td></tr>
+        <tr><td>Alta ocupação</td><td><span class="badge badge-amber">Atenção</span></td><td>Utilização de capacidade &gt; 70%</td></tr>
+        <tr><td>Sem atualização</td><td><span class="badge badge-amber">Atenção</span></td><td>Lead ativo sem atualização há &gt; 60 dias</td></tr>
+        <tr><td>Aniversário de contrato</td><td><span class="badge badge-purple">Info</span></td><td>Aniversário do certificado nos próximos 30 dias</td></tr>
+        <tr><td>Formulário preenchido</td><td><span class="badge badge-green">Info</span></td><td>Portal preenchido nos últimos 7 dias</td></tr>
+        <tr><td>Sem KPIs registrados</td><td><span class="badge badge-purple">Info</span></td><td>Licenciado ativo sem nenhum registro em <code>lic_performance</code></td></tr>
+      </tbody>
+    </table>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Alertas dispensados são salvos em <code>localStorage</code> por ID único gerado a partir do tipo + lead_id + mês</li>
+      <li>Alertas reaparecerão no mês seguinte se a condição persistir</li>
+      <li>O badge no botão "Alertas" fica vermelho se há alertas críticos, âmbar se apenas atenção</li>
+      <li>Cada alerta tem um botão "Ver →" que navega diretamente à tela relevante</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>Badge atualizado automaticamente após cada carregamento de dados</li>
+      <li>Alertas agrupados corretamente por prioridade (Crítico → Atenção → Informação)</li>
+      <li>Dispensar um alerta o remove da lista sem afetar outros</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rf-card">
+  <div class="rf-card-head">
+    <span class="rf-num">RF-027</span>
+    <span class="rf-title">Board Report PDF Executivo</span>
+    <span class="rf-priority"><span class="badge badge-red">Prioridade Alta</span></span>
+  </div>
+  <div class="rf-body">
+    <div class="rf-field">Descrição</div>
+    <p>O sistema deve gerar automaticamente, em 1 clique, um relatório executivo em PDF com todos os indicadores da rede, pronto para apresentação à diretoria.</p>
+    <div class="rf-field">Conteúdo do Board Report</div>
+    <ul>
+      <li><strong>Capa:</strong> Branding Vendemmia/Pipeline, mês de referência, data e hora de geração</li>
+      <li><strong>4 KPIs de destaque:</strong> Licenciados ativos, m² total da rede, score médio, fee mensal total</li>
+      <li><strong>Distribuição por nível:</strong> Contagem e m² por Platina/Ouro/Prata/Bronze com barras</li>
+      <li><strong>Atividade do período:</strong> Novos licenciados, em qualificação, alertas, sem KPIs</li>
+      <li><strong>Saúde da rede:</strong> Verde/Amarelo/Vermelho/Sem dados com percentuais</li>
+      <li><strong>Cobertura geográfica:</strong> Contagem e m² por região + lista de estados cobertos</li>
+      <li><strong>Top 5 licenciados:</strong> Tabela ordenada por score com tier badge</li>
+      <li><strong>Alertas e pontos de atenção:</strong> Licenciados críticos identificados</li>
+    </ul>
+    <div class="rf-field">Regras</div>
+    <ul>
+      <li>Geração via html2canvas (escala 2x) + jsPDF com paginação automática em A4</li>
+      <li>Nome do arquivo: <code>Board_Report_Licenciamento_AAAA-MM.pdf</code></li>
+      <li>Rodapé: "Documento Confidencial — distribuição restrita à diretoria Vendemmia"</li>
+    </ul>
+    <div class="rf-field">Critério de Aceite</div>
+    <ul>
+      <li>PDF gerado e baixado automaticamente em menos de 10 segundos</li>
+      <li>Conteúdo reflete os dados atuais do banco no momento da geração</li>
+      <li>Formatação A4 correta sem cortes de conteúdo</li>
+    </ul>
+  </div>
+</div>
+
+<!-- PHASE BANNER -->
+<div class="phase-banner">
+  <div>
+    <div class="phase-banner-text">📄 Fase 1 concluída — Visão Geral, Perfis e Requisitos Funcionais RF-001 a RF-030</div>
+    <div class="phase-banner-sub">Continue com a Fase 2: Regras de Negócio, Fluxos Operacionais, Telas do Sistema e Casos de Uso</div>
+  </div>
+  <span class="phase-banner-badge">Fase 2 em desenvolvimento →</span>
+</div>
+
+<div class="callout info">
+  <div class="callout-icon">ℹ️</div>
+  <p><strong>Próximas entregas:</strong><br>
+  <strong>Fase 2</strong> cobre: Regras de Negócio detalhadas (RN-001 a RN-040), Fluxos Operacionais completos com passo a passo, especificação de cada tela do sistema e Casos de Uso completos.<br>
+  <strong>Fase 3</strong> cobre: Validações por campo, Relatórios e Dashboards, Notificações, Critérios de Aceite para homologação e Requisitos Não-Funcionais (performance, segurança, escalabilidade).</p>
+</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top:60px;padding-top:24px;border-top:2px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:13px;font-weight:800;color:var(--primary);">PIPELINE by Vendemmia</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;">Especificação Funcional EF-LIC-2026-001 · Versão 1.0 · Fase 1 de 3</div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-400);text-align:right;">
+    <div>Confidencial — Vendemmia Comércio Internacional Ltda.</div>
+    <div style="margin-top:2px;">pipelinevendemmia.com.br · Maio 2026</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// Sidebar active state
+const items = document.querySelectorAll('.sidebar-item[href]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      items.forEach(i => i.classList.remove('active'));
+      const link = document.querySelector(`.sidebar-item[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin:'-20% 0px -70% 0px' });
+document.querySelectorAll('[id]').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
