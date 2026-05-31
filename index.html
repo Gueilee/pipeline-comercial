@@ -1657,6 +1657,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
                         <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
+                        <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
@@ -2636,6 +2637,136 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 </thead>
                 <tbody id="lc-tabela-tbody"></tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- ── VISÃO SCORECARD ── -->
+<div id="lic-view-scorecard" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Header -->
+    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:14px;">
+            <button onclick="fecharLicScorecard()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">← Leads</button>
+            <div>
+                <div style="font-size:15px;font-weight:800;color:#2d1b69;">🎯 Scorecard de Performance</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Acompanhamento de KPIs dos licenciados ativos</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <div id="sc-rede-health" style="font-size:12px;color:#9b8cc0;"></div>
+            <select id="sc-filtro-tier" onchange="renderizarLicScorecard()" style="padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                <option value="">Todos os níveis</option>
+                <option>Platina</option><option>Ouro</option><option>Prata</option><option>Bronze</option>
+            </select>
+            <select id="sc-filtro-health" onchange="renderizarLicScorecard()" style="padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+                <option value="">Todos os status</option>
+                <option value="verde">✅ Saudável</option>
+                <option value="amarelo">⚠️ Atenção</option>
+                <option value="vermelho">🔴 Crítico</option>
+                <option value="sem-dados">— Sem KPIs</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Resumo da rede -->
+    <div id="sc-rede-banner" style="flex-shrink:0;padding:12px 24px 0;"></div>
+
+    <!-- Grid de licenciados -->
+    <div style="flex:1;overflow-y:auto;padding:16px 24px;">
+        <div id="sc-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+    </div>
+
+    <!-- Painel lateral de detalhes -->
+    <div id="sc-side-panel" style="position:absolute;right:-500px;top:0;height:100%;width:480px;background:#fff;z-index:200;overflow-y:auto;box-shadow:-4px 0 30px rgba(45,27,105,.12);transition:right .3s cubic-bezier(.16,1,.3,1);">
+        <div id="sc-side-content"></div>
+    </div>
+    <div id="sc-overlay" style="display:none;position:absolute;inset:0;background:rgba(45,27,105,.08);z-index:100;" onclick="fecharScSidePanel()"></div>
+</div>
+
+<!-- Modal: Lançar KPIs -->
+<div id="lic-modal-kpi" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:800;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div style="background:#fff;border-radius:20px;width:560px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);padding:22px 28px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:16px;font-weight:800;color:#fff;">📊 Lançar KPIs de Performance</div>
+                <div id="kpi-modal-empresa" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px;"></div>
+            </div>
+            <button onclick="fecharModalKpi()" style="width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="padding:24px 28px;">
+            <!-- Período -->
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin-bottom:8px;">PERÍODO DE REFERÊNCIA</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <select id="kpi-trimestre" style="border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;">
+                        <option value="Q1">Q1 (Jan–Mar)</option><option value="Q2">Q2 (Abr–Jun)</option>
+                        <option value="Q3">Q3 (Jul–Set)</option><option value="Q4">Q4 (Out–Dez)</option>
+                    </select>
+                    <select id="kpi-ano" style="border:1.5px solid #e0d9f5;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:#2d1b69;background:#faf8ff;outline:none;">
+                        <option>2025</option><option selected>2026</option><option>2027</option>
+                    </select>
+                </div>
+            </div>
+            <!-- KPIs grid -->
+            <div style="background:#f9f7ff;border-radius:14px;padding:16px;margin-bottom:20px;">
+                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:14px;">KPIs OPERACIONAIS</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">📦 OTIF (%) <span style="font-size:9px;background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;">meta ≥ 97%</span></label>
+                        <input id="kpi-otif" type="number" min="0" max="100" step="0.1" placeholder="Ex.: 98.5" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">🎯 Acuracidade Inv. (%) <span style="font-size:9px;background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;">≥ 98%</span></label>
+                        <input id="kpi-acuracidade" type="number" min="0" max="100" step="0.1" placeholder="Ex.: 99.2" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">⏱ Dock-to-Stock (h) <span style="font-size:9px;background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;">≤ 24h</span></label>
+                        <input id="kpi-d2s" type="number" min="0" step="0.5" placeholder="Ex.: 18" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">📐 Utilização Cap. (%) <span style="font-size:9px;background:#fffbeb;color:#d97706;padding:1px 6px;border-radius:8px;">≤ 85%</span></label>
+                        <input id="kpi-util" type="number" min="0" max="100" step="1" placeholder="Ex.: 72" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">⭐ NPS (pts) <span style="font-size:9px;background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;">≥ 50</span></label>
+                        <input id="kpi-nps" type="number" min="-100" max="100" step="1" placeholder="Ex.: 72" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9b8cc0;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:5px;margin-bottom:6px;">🚀 Onboarding (dias) <span style="font-size:9px;background:#f0fdf4;color:#16a34a;padding:1px 6px;border-radius:8px;">≤ 20d</span></label>
+                        <input id="kpi-onboarding" type="number" min="0" step="1" placeholder="Ex.: 18" style="width:100%;border:1.5px solid #e0d9f5;border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:14px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;" onfocus="this.style.borderColor='#6941c6'" onblur="this.style.borderColor='#e0d9f5'">
+                    </div>
+                </div>
+            </div>
+            <!-- Plano de remediação -->
+            <div id="kpi-remediacao-block" style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:16px;margin-bottom:20px;display:none;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                    <span style="font-size:20px;">⚠️</span>
+                    <div>
+                        <div style="font-size:13px;font-weight:800;color:#c2410c;">KPI abaixo do threshold — plano de remediação</div>
+                        <div style="font-size:11px;color:#9a3412;margin-top:2px;">Defina as ações corretivas e prazo de resolução</div>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#c2410c;display:block;margin-bottom:6px;">AÇÕES CORRETIVAS</label>
+                    <textarea id="kpi-plano" rows="3" placeholder="Descreva as ações que serão tomadas para corrigir os KPIs abaixo do threshold..." style="width:100%;border:1.5px solid #fed7aa;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:#2d1b69;outline:none;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#ea580c'" onblur="this.style.borderColor='#fed7aa'"></textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">INÍCIO DO PLANO</label>
+                        <input type="date" id="kpi-inicio-rem" style="width:100%;border:1.5px solid #fed7aa;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:#2d1b69;outline:none;box-sizing:border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size:10px;font-weight:700;color:#9a3412;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">RESOLUÇÃO PREVISTA</label>
+                        <input type="date" id="kpi-fim-rem" style="width:100%;border:1.5px solid #fed7aa;border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;color:#2d1b69;outline:none;box-sizing:border-box;">
+                    </div>
+                </div>
+            </div>
+            <!-- Footer buttons -->
+            <div style="display:flex;gap:10px;">
+                <button onclick="fecharModalKpi()" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
+                <button onclick="salvarLicKpi()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.3);">💾 Salvar KPIs</button>
+            </div>
         </div>
     </div>
 </div>
@@ -9021,7 +9152,7 @@ function abrirFormLead(id, returnTo) {
     }
 
     // Esconde todas as views antes de exibir o formulário
-    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade'].forEach(id => {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -9772,6 +9903,373 @@ function abrirLicCapacidade() {
 function fecharLicCapacidade() {
     document.getElementById('lic-view-capacidade').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
+}
+
+// ── Scorecard de Performance ──────────────────────────────────────
+
+const LIC_KPI_META = {
+    otif_pct:               { label:'OTIF',              unit:'%',  icon:'📦', up:true,  verde:97,  amarelo:90  },
+    acuracidade_inventario: { label:'Acuracidade Inv.',  unit:'%',  icon:'🎯', up:true,  verde:98,  amarelo:95  },
+    dock_to_stock_hrs:      { label:'Dock-to-Stock',     unit:'h',  icon:'⏱', up:false, verde:24,  amarelo:48  },
+    utilizacao_capacidade:  { label:'Utilização Cap.',   unit:'%',  icon:'📐', up:false, verde:85,  amarelo:95  },
+    nps_score:              { label:'NPS',               unit:'pts',icon:'⭐', up:true,  verde:50,  amarelo:20  },
+    tempo_onboarding_dias:  { label:'Onboarding',        unit:'d',  icon:'🚀', up:false, verde:20,  amarelo:30  },
+};
+
+let _licPerfData = {};      // leadId → [{...performance records}]
+let _licKpiLeadId = null;   // lead sendo editado no modal
+let _licScCharts  = {};
+
+function kpiSaude(kpiKey, value) {
+    if (value === null || value === undefined || value === '') return null;
+    const m = LIC_KPI_META[kpiKey]; if (!m) return null;
+    const v = parseFloat(value);
+    if (m.up)  return v >= m.verde ? 'verde' : v >= m.amarelo ? 'amarelo' : 'vermelho';
+    return v <= m.verde ? 'verde' : v <= m.amarelo ? 'amarelo' : 'vermelho';
+}
+
+function kpiCorPaleta(saude) {
+    if (saude === 'verde')   return { cor:'#16a34a', bg:'#f0fdf4', border:'#86efac' };
+    if (saude === 'amarelo') return { cor:'#d97706', bg:'#fffbeb', border:'#fcd34d' };
+    if (saude === 'vermelho')return { cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5' };
+    return { cor:'#9b8cc0', bg:'#f9f7ff', border:'#e0d9f5' };
+}
+
+function kpiSaudeGeral(perf) {
+    if (!perf) return 'sem-dados';
+    const saudeList = Object.keys(LIC_KPI_META).map(k => kpiSaude(k, perf[k])).filter(Boolean);
+    if (saudeList.includes('vermelho')) return 'vermelho';
+    if (saudeList.includes('amarelo'))  return 'amarelo';
+    if (saudeList.length > 0)           return 'verde';
+    return 'sem-dados';
+}
+
+function kpiLinhaCard(kpiKey, value) {
+    const m = LIC_KPI_META[kpiKey];
+    const saude = kpiSaude(kpiKey, value);
+    const p = kpiCorPaleta(saude);
+    const semaforo = saude === 'verde' ? '🟢' : saude === 'amarelo' ? '🟡' : saude === 'vermelho' ? '🔴' : '⚪';
+    const display = (value !== null && value !== undefined) ? `${value}${m.unit}` : '—';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f9f7ff;">
+        <span style="font-size:13px;">${m.icon}</span>
+        <span style="font-size:11px;color:#6b7280;flex:1;">${m.label}</span>
+        <span style="font-size:10px;">${semaforo}</span>
+        <span style="font-size:12px;font-weight:700;color:${p.cor};background:${p.bg};border:1px solid ${p.border};padding:2px 8px;border-radius:10px;">${display}</span>
+    </div>`;
+}
+
+async function abrirLicScorecard() {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.style.display = 'none';
+    });
+    document.getElementById('lic-view-scorecard').style.display = 'flex';
+    await carregarLicPerformance();
+    renderizarLicScorecard();
+}
+
+function fecharLicScorecard() {
+    document.getElementById('lic-view-scorecard').style.display = 'none';
+    document.getElementById('lic-view-tabela').style.display = '';
+}
+
+async function carregarLicPerformance() {
+    try {
+        const { data } = await supabaseClient.from('lic_performance').select('*').order('periodo_ref', { ascending: true });
+        _licPerfData = {};
+        (data || []).forEach(p => {
+            const key = String(p.lead_id);
+            if (!_licPerfData[key]) _licPerfData[key] = [];
+            _licPerfData[key].push(p);
+        });
+    } catch(e) { _licPerfData = {}; }
+}
+
+function getLicUltimoPeriodo(leadId) {
+    const recs = _licPerfData[String(leadId)] || [];
+    return recs.length > 0 ? recs[recs.length - 1] : null;
+}
+
+function renderizarLicScorecard() {
+    const tierFiltro   = document.getElementById('sc-filtro-tier')?.value   || '';
+    const healthFiltro = document.getElementById('sc-filtro-health')?.value || '';
+
+    const ativos = baseLicLeads.filter(l => l.status === 'Convertido');
+    const filtrados = ativos.filter(l => {
+        if (tierFiltro   && getLicTier(l)?.name !== tierFiltro) return false;
+        const perf = getLicUltimoPeriodo(l.id);
+        if (healthFiltro) {
+            const sg = kpiSaudeGeral(perf);
+            if (healthFiltro === 'sem-dados' && sg !== 'sem-dados') return false;
+            if (healthFiltro !== 'sem-dados' && sg !== healthFiltro) return false;
+        }
+        return true;
+    });
+
+    // Banner de saúde da rede
+    const verde    = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'verde').length;
+    const amarelo  = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'amarelo').length;
+    const vermelho = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'vermelho').length;
+    const semDados = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'sem-dados').length;
+    const banner = document.getElementById('sc-rede-banner');
+    if (banner) banner.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:6px;">🟢 Saudável: ${verde}</div>
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#d97706;display:flex;align-items:center;gap:6px;">🟡 Atenção: ${amarelo}</div>
+        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:6px;">🔴 Crítico: ${vermelho}</div>
+        <div style="background:#f9f7ff;border:1px solid #e0d9f5;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;color:#9b8cc0;display:flex;align-items:center;gap:6px;">⚪ Sem KPIs: ${semDados}</div>
+    </div>`;
+
+    const health = document.getElementById('sc-rede-health');
+    if (health) health.textContent = `${filtrados.length} licenciado${filtrados.length!==1?'s':''}`;
+
+    // Grid de cards
+    const grid = document.getElementById('sc-grid');
+    if (!grid) return;
+    if (filtrados.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#c4b5e8;font-size:14px;">
+            ${ativos.length === 0 ? 'Nenhum licenciado ativo. Converta leads para ver o scorecard.' : 'Nenhum resultado com os filtros aplicados.'}
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = filtrados.sort((a,b) => {
+        const sa = kpiSaudeGeral(getLicUltimoPeriodo(a.id));
+        const sb = kpiSaudeGeral(getLicUltimoPeriodo(b.id));
+        const ordem = { vermelho:0, amarelo:1, verde:2, 'sem-dados':3 };
+        return (ordem[sa]||4) - (ordem[sb]||4);
+    }).map(lead => {
+        const t = getLicTier(lead);
+        const perf = getLicUltimoPeriodo(lead.id);
+        const sg = kpiSaudeGeral(perf);
+        const sgCor = sg==='verde'?'#16a34a':sg==='amarelo'?'#d97706':sg==='vermelho'?'#dc2626':'#9b8cc0';
+        const sgBg  = sg==='verde'?'#f0fdf4':sg==='amarelo'?'#fffbeb':sg==='vermelho'?'#fef2f2':'#f9f7ff';
+        const sgTxt = sg==='verde'?'✅ Saudável':sg==='amarelo'?'⚠️ Atenção':sg==='vermelho'?'🔴 Crítico':'— Sem KPIs';
+        const periodo = perf?.periodo || '—';
+        const area = parseFloat(lead.area_total_m2)||0;
+        const emRem = perf?.em_remediacao;
+
+        return `<div style="background:#fff;border-radius:16px;padding:0;box-shadow:0 2px 20px rgba(105,65,198,.08);overflow:hidden;border-top:3px solid ${sgCor};">
+            <div style="padding:16px 18px;">
+                <!-- Header do card -->
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+                    <div style="flex:1;padding-right:8px;">
+                        <div style="font-size:13px;font-weight:800;color:#2d1b69;line-height:1.2;margin-bottom:5px;">${lead.razao_social||'—'}</div>
+                        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                            ${t ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon} ${t.name}</span>` : ''}
+                            <span style="font-size:10px;color:#9b8cc0;">${lead.uf||''}${lead.polo_logistico?' · '+lead.polo_logistico:''}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div style="font-size:11px;font-weight:700;color:${sgCor};background:${sgBg};padding:4px 10px;border-radius:10px;">${sgTxt}</div>
+                        <div style="font-size:10px;color:#9b8cc0;margin-top:3px;">Ref: ${periodo}</div>
+                    </div>
+                </div>
+
+                <!-- KPI linhas -->
+                <div style="margin-bottom:12px;">
+                    ${Object.keys(LIC_KPI_META).map(k => kpiLinhaCard(k, perf?.[k]??null)).join('')}
+                </div>
+
+                ${emRem ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#c2410c;font-weight:600;">⚠️ Em plano de remediação${perf.data_prevista_resolucao?' · Prev.: '+new Date(perf.data_prevista_resolucao+'T00:00:00').toLocaleDateString('pt-BR'):''}</div>` : ''}
+
+                <!-- Métricas secundárias -->
+                <div style="display:flex;gap:10px;font-size:10px;color:#9b8cc0;margin-bottom:14px;">
+                    ${area>0?`<span>📐 ${area.toLocaleString('pt-BR')} m²</span>`:''}
+                    ${lead.plano?`<span>💼 ${lead.plano}</span>`:''}
+                    ${t?`<span>🏅 Score ${t.score}/100</span>`:''}
+                </div>
+            </div>
+            <!-- Ações do card -->
+            <div style="border-top:1px solid #f0ebff;padding:10px 18px;display:flex;gap:8px;background:#faf8ff;">
+                <button onclick="abrirScDetalhe('${lead.id}')" style="flex:1;padding:8px;border:1.5px solid #e0d9f5;border-radius:8px;background:#fff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">📈 Ver histórico</button>
+                <button onclick="abrirModalKpi('${lead.id}')" style="flex:1;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">+ Lançar KPIs</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Modal de KPIs ──────────────────────────────────────────────────
+
+function abrirModalKpi(leadId) {
+    _licKpiLeadId = leadId;
+    const lead = baseLicLeads.find(l => String(l.id) === String(leadId));
+    document.getElementById('kpi-modal-empresa').textContent = lead?.razao_social || '—';
+    // Limpar campos
+    ['kpi-otif','kpi-acuracidade','kpi-d2s','kpi-util','kpi-nps','kpi-onboarding','kpi-plano','kpi-inicio-rem','kpi-fim-rem'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    // Pré-carregar último período
+    const last = getLicUltimoPeriodo(leadId);
+    if (last) {
+        const set = (id,val) => { const el=document.getElementById(id); if(el&&val!==null&&val!==undefined) el.value=val; };
+        set('kpi-otif',last.otif_pct); set('kpi-acuracidade',last.acuracidade_inventario);
+        set('kpi-d2s',last.dock_to_stock_hrs); set('kpi-util',last.utilizacao_capacidade);
+        set('kpi-nps',last.nps_score); set('kpi-onboarding',last.tempo_onboarding_dias);
+        if (last.em_remediacao) { set('kpi-plano',last.plano_remediacao); set('kpi-inicio-rem',last.data_inicio_remediacao); set('kpi-fim-rem',last.data_prevista_resolucao); }
+    }
+    // Default trimestre atual
+    const q = Math.ceil((new Date().getMonth()+1)/3);
+    document.getElementById('kpi-trimestre').value = 'Q'+q;
+    document.getElementById('lic-modal-kpi').style.display = 'flex';
+    atualizarRemediacao();
+    // Listener de mudanças nos inputs para mostrar remediação
+    ['kpi-otif','kpi-acuracidade','kpi-d2s','kpi-util','kpi-nps','kpi-onboarding'].forEach(id => {
+        const el=document.getElementById(id); if(el) el.oninput=atualizarRemediacao;
+    });
+}
+
+function fecharModalKpi() { document.getElementById('lic-modal-kpi').style.display='none'; _licKpiLeadId=null; }
+
+function atualizarRemediacao() {
+    const vals = {
+        otif_pct:               parseFloat(document.getElementById('kpi-otif')?.value)||null,
+        acuracidade_inventario: parseFloat(document.getElementById('kpi-acuracidade')?.value)||null,
+        dock_to_stock_hrs:      parseFloat(document.getElementById('kpi-d2s')?.value)||null,
+        utilizacao_capacidade:  parseFloat(document.getElementById('kpi-util')?.value)||null,
+        nps_score:              parseFloat(document.getElementById('kpi-nps')?.value)||null,
+        tempo_onboarding_dias:  parseFloat(document.getElementById('kpi-onboarding')?.value)||null,
+    };
+    const temVermelho = Object.keys(LIC_KPI_META).some(k => kpiSaude(k, vals[k]) === 'vermelho');
+    const lead = baseLicLeads.find(l => String(l.id) === String(_licKpiLeadId));
+    const isBronze = getLicTier(lead)?.name === 'Bronze';
+    const mostrar = temVermelho || isBronze;
+    document.getElementById('kpi-remediacao-block').style.display = mostrar ? '' : 'none';
+}
+
+async function salvarLicKpi() {
+    if (!_licKpiLeadId) return;
+    const btn = document.querySelector('#lic-modal-kpi button[onclick="salvarLicKpi()"]');
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Salvando...'; }
+    const tri = document.getElementById('kpi-trimestre').value;
+    const ano = document.getElementById('kpi-ano').value;
+    const periodo = `${tri} ${ano}`;
+    const meses = {Q1:'01',Q2:'04',Q3:'07',Q4:'10'};
+    const periodo_ref = `${ano}-${meses[tri]}-01`;
+    const getN = id => { const v=document.getElementById(id)?.value; return v!==''&&v!==null?parseFloat(v):null; };
+    const temVermelho = Object.keys(LIC_KPI_META).some(k => {
+        const fieldMap = {otif_pct:'kpi-otif',acuracidade_inventario:'kpi-acuracidade',dock_to_stock_hrs:'kpi-d2s',utilizacao_capacidade:'kpi-util',nps_score:'kpi-nps',tempo_onboarding_dias:'kpi-onboarding'};
+        return kpiSaude(k, getN(fieldMap[k])) === 'vermelho';
+    });
+    const remBloco = document.getElementById('kpi-remediacao-block');
+    const emRem = remBloco?.style.display !== 'none' && !!document.getElementById('kpi-plano')?.value;
+    const record = {
+        lead_id: parseInt(_licKpiLeadId), periodo, periodo_ref,
+        otif_pct: getN('kpi-otif'), acuracidade_inventario: getN('kpi-acuracidade'),
+        dock_to_stock_hrs: getN('kpi-d2s'), utilizacao_capacidade: getN('kpi-util'),
+        nps_score: getN('kpi-nps'), tempo_onboarding_dias: getN('kpi-onboarding'),
+        em_remediacao: emRem,
+        plano_remediacao: document.getElementById('kpi-plano')?.value || null,
+        data_inicio_remediacao: document.getElementById('kpi-inicio-rem')?.value || null,
+        data_prevista_resolucao: document.getElementById('kpi-fim-rem')?.value || null,
+        criado_por: EMAIL_USUARIO_LOGADO,
+    };
+    try {
+        const { error } = await supabaseClient.from('lic_performance').insert([record]);
+        if (error) throw error;
+        // Atualiza otif_pct e acuracidade_pct no lead principal
+        const upd = {};
+        if (record.otif_pct!==null) upd.otif_pct=record.otif_pct;
+        if (record.acuracidade_inventario!==null) upd.acuracidade_pct=record.acuracidade_inventario;
+        if (Object.keys(upd).length>0) await supabaseClient.from('lic_leads').update(upd).eq('id',_licKpiLeadId);
+        await carregarLicLeads();
+        await carregarLicPerformance();
+        fecharModalKpi();
+        renderizarLicScorecard();
+        showToast(`KPIs do período ${periodo} salvos!`, 'success');
+    } catch(e) {
+        showToast('Erro ao salvar: '+(e.message||e),'error');
+    } finally {
+        if(btn){btn.disabled=false;btn.innerHTML='💾 Salvar KPIs';}
+    }
+}
+
+// ── Painel de detalhes (histórico) ────────────────────────────────
+
+function abrirScDetalhe(leadId) {
+    const panel = document.getElementById('sc-side-panel');
+    const overlay = document.getElementById('sc-overlay');
+    const lead = baseLicLeads.find(l=>String(l.id)===String(leadId));
+    const recs = _licPerfData[String(leadId)]||[];
+    const t = getLicTier(lead);
+
+    // Destroy old charts
+    Object.values(_licScCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+    _licScCharts={};
+
+    const gc='rgba(105,65,198,.06)'; const tc='#9b8cc0';
+    const periodos = recs.map(r=>r.periodo);
+    const histHtml = recs.length===0
+        ? `<div style="text-align:center;color:#c4b5e8;padding:32px;font-size:13px;">Nenhum KPI lançado ainda.<br>Clique em "+ Lançar KPIs" para começar.</div>`
+        : `<div style="height:200px;"><canvas id="sc-chart-hist"></canvas></div>
+           <div style="overflow-x:auto;margin-top:16px;">
+             <table style="width:100%;border-collapse:collapse;font-size:11px;">
+               <thead><tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                 <th style="padding:8px;text-align:left;color:#7c5cbf;font-size:10px;text-transform:uppercase;">Período</th>
+                 ${Object.values(LIC_KPI_META).map(m=>`<th style="padding:8px;text-align:center;color:#7c5cbf;font-size:10px;">${m.icon}</th>`).join('')}
+               </tr></thead>
+               <tbody>${recs.map(r=>`<tr style="border-bottom:1px solid #f5f3ff;">
+                 <td style="padding:7px 8px;font-weight:700;color:#2d1b69;white-space:nowrap;">${r.periodo}</td>
+                 ${Object.keys(LIC_KPI_META).map(k=>{
+                     const s=kpiSaude(k,r[k]); const p=kpiCorPaleta(s);
+                     const v=r[k]!==null&&r[k]!==undefined?r[k]+LIC_KPI_META[k].unit:'—';
+                     return `<td style="padding:7px 8px;text-align:center;"><span style="font-size:10px;font-weight:700;color:${p.cor};background:${p.bg};padding:2px 7px;border-radius:8px;border:1px solid ${p.border};">${v}</span></td>`;
+                 }).join('')}
+               </tr>`).join('')}</tbody>
+             </table>
+           </div>`;
+
+    const lastRem = recs.filter(r=>r.em_remediacao).pop();
+    const remHtml = lastRem ? `
+        <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:12px;padding:16px;margin-top:16px;">
+            <div style="font-size:12px;font-weight:800;color:#c2410c;margin-bottom:8px;">⚠️ Plano de remediação ativo</div>
+            <div style="font-size:12px;color:#9a3412;line-height:1.6;">${lastRem.plano_remediacao||'—'}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;font-size:11px;color:#c2410c;">
+                <div><b>Início:</b> ${lastRem.data_inicio_remediacao?new Date(lastRem.data_inicio_remediacao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>
+                <div><b>Prazo:</b> ${lastRem.data_prevista_resolucao?new Date(lastRem.data_prevista_resolucao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>
+            </div>
+        </div>` : '';
+
+    document.getElementById('sc-side-content').innerHTML = `
+        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f0ebff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:700;color:#6941c6;">Histórico de KPIs</div>
+            <button onclick="fecharScSidePanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="padding:18px 16px;">
+            <div style="margin-bottom:14px;">
+                <div style="font-size:16px;font-weight:900;color:#2d1b69;margin-bottom:5px;">${lead?.razao_social||'—'}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    ${t?`<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon} ${t.name} · Score ${t.score}/100</span>`:''}
+                    <span style="font-size:10px;color:#9b8cc0;">${recs.length} registro${recs.length!==1?'s':''} de KPI</span>
+                </div>
+            </div>
+            <div style="margin-bottom:16px;">${histHtml}</div>
+            ${remHtml}
+            <div style="margin-top:16px;">
+                <button onclick="abrirModalKpi('${leadId}')" style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:13px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.25);">+ Lançar KPIs do próximo período</button>
+            </div>
+        </div>`;
+
+    panel.style.right = '0';
+    if (overlay) overlay.style.display = 'block';
+
+    // Renderiza chart após o DOM ser inserido
+    if (recs.length > 0) {
+        setTimeout(() => {
+            _licScCharts.hist = new Chart(document.getElementById('sc-chart-hist'), {
+                type:'line',
+                data:{ labels:periodos, datasets:[
+                    { label:'OTIF %', data:recs.map(r=>r.otif_pct), borderColor:'#6941c6', backgroundColor:'rgba(105,65,198,.08)', tension:.4, pointRadius:4, pointBackgroundColor:'#6941c6', fill:true, borderWidth:2.5 },
+                    { label:'Acuracidade %', data:recs.map(r=>r.acuracidade_inventario), borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.06)', tension:.4, pointRadius:4, pointBackgroundColor:'#16a34a', fill:true, borderWidth:2.5 },
+                    { label:'NPS (pts)', data:recs.map(r=>r.nps_score), borderColor:'#d97706', tension:.4, pointRadius:4, pointBackgroundColor:'#d97706', borderWidth:2, borderDash:[4,3] },
+                ]},
+                options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}, datalabels:{display:false} }, scales:{ x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}, y:{grid:{color:gc},ticks:{color:tc,font:{size:10}},beginAtZero:false} } }
+            });
+        }, 80);
+    }
+}
+
+function fecharScSidePanel() {
+    const panel = document.getElementById('sc-side-panel');
+    const overlay = document.getElementById('sc-overlay');
+    if (panel) panel.style.right = '-500px';
+    if (overlay) overlay.style.display = 'none';
 }
 
 function renderizarLicCapacidade() {
