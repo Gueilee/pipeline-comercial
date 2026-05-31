@@ -2733,6 +2733,11 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             <!-- Hover popup (posicionado via JS) -->
             <div id="lic-map-hover-popup" class="lic-map-hover"></div>
 
+            <!-- Botão escape de tela cheia — sempre acessível mesmo que o header fique coberto -->
+            <div id="lic-map-fs-escape" onclick="toggleLicMapaFullscreen()" style="display:none;position:fixed;top:16px;right:16px;z-index:10002;align-items:center;gap:8px;padding:10px 18px;background:rgba(45,27,105,.92);backdrop-filter:blur(8px);color:#fff;border:none;border-radius:50px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.35);">
+                <i class="ti ti-arrows-minimize" style="font-size:15px;"></i> Sair da tela cheia
+            </div>
+
             <!-- FULL VIEW — Página completa com scroll natural -->
             <div id="lic-map-fullview" style="display:none;position:fixed;inset:0;z-index:901;background:#f5f3ff;overflow-y:auto;">
 
@@ -13137,6 +13142,7 @@ let _licMap = null;
 let _licMapMarkers = [];
 let _licGeoJsonLayer = null;
 let _licGeoJsonData = null;
+let _licUFBounds = {};
 let _licMapFiltro = 'todos';
 let _licMapPhotoCache = {};        // leadId → URL da primeira foto
 let _licMapAllAnexos  = [];        // todos os anexos carregados
@@ -13224,21 +13230,25 @@ let _licMapaFullscreen = false;
 
 function toggleLicMapaFullscreen() {
     const viewMapa = document.getElementById('lic-view-mapa');
-    const btn = document.getElementById('lic-map-fs-btn');
+    const btn      = document.getElementById('lic-map-fs-btn');
+    const fsEsc    = document.getElementById('lic-map-fs-escape');
+    const appHeader = document.querySelector('header');
     _licMapaFullscreen = !_licMapaFullscreen;
     if (_licMapaFullscreen) {
-        viewMapa.style.position = 'fixed';
-        viewMapa.style.inset = '0';
-        viewMapa.style.zIndex = '999';
-        viewMapa.style.display = 'flex';
-        if (btn) btn.innerHTML = '<i class="ti ti-arrows-minimize"></i> Sair da tela cheia';
+        // z-index 10001 — acima do <header> sticky (z-index:1000) e modais (9999)
+        viewMapa.style.cssText += ';position:fixed!important;inset:0!important;z-index:10001!important;display:flex!important;';
+        if (appHeader) appHeader.style.visibility = 'hidden';
+        if (btn)   btn.innerHTML = '<i class="ti ti-arrows-minimize"></i> Sair';
+        if (fsEsc) fsEsc.style.display = 'flex';
     } else {
-        viewMapa.style.position = 'absolute';
-        viewMapa.style.inset = '0';
-        viewMapa.style.zIndex = '';
-        if (btn) btn.innerHTML = '<i class="ti ti-arrows-maximize"></i> Tela cheia';
+        viewMapa.style.position = '';
+        viewMapa.style.inset    = '';
+        viewMapa.style.zIndex   = '';
+        if (appHeader) appHeader.style.visibility = '';
+        if (btn)   btn.innerHTML = '<i class="ti ti-arrows-maximize"></i> Tela cheia';
+        if (fsEsc) fsEsc.style.display = 'none';
     }
-    setTimeout(() => { if (_licMap) _licMap.invalidateSize(); }, 120);
+    setTimeout(() => { if (_licMap) _licMap.invalidateSize(); }, 150);
 }
 
 function fecharLicMapa() {
@@ -13276,23 +13286,16 @@ function _licInicializarMapa() {
 function _licAtualizarChoropleth() {
     if (!_licMap || !_licGeoJsonData) return;
     if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
-    const m2ByUF={};
-    _licMapGetFiltrados().forEach(l=>{ if(l.uf) m2ByUF[l.uf]=(m2ByUF[l.uf]||0)+(parseFloat(l.area_total_m2)||0); });
-    const maxV=Math.max(...Object.values(m2ByUF),1);
-    function getCor(uf) {
-        const v=m2ByUF[uf]||0; if(v===0) return '#e8e4f5';
-        const r=v/maxV;
-        if(r>.75) return '#2d1b69'; if(r>.5) return '#4c2a9e';
-        if(r>.25) return '#6941c6'; if(r>.08) return '#9b5de5'; return '#c4a8f0';
-    }
+    // Modo sem Gap Analysis: todos estados em cinza neutro suave
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f=>({ fillColor:getCor(f.properties.sigla), weight:1.5, color:'#fff', fillOpacity:.4 }),
+        style: () => ({ fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.12 }),
         onEachFeature:(feature,layer)=>{
-            const uf=feature.properties.sigla; const v=m2ByUF[uf]||0;
-            if(v>0) layer.bindTooltip(`<b>${feature.properties.name} (${uf})</b><br>${v.toLocaleString('pt-BR')} m²`,{className:'lic-map-tooltip',sticky:true});
-            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.65,weight:2});e.target.bringToFront();});
+            const uf  = (feature.properties.sigla||'').trim().toUpperCase();
+            const nome = _LIC_UF_NOMES[uf] || feature.properties.name || uf;
+            if (nome && uf) layer.bindTooltip(`<b>${nome} (${uf})</b>`,{className:'lic-map-tooltip',sticky:true});
+            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.28,weight:1.5});e.target.bringToFront();});
             layer.on('mouseout',e=>{_licGeoJsonLayer.resetStyle(e.target);});
-            layer.on('click',e=>{if(v>0)_licMap.fitBounds(e.target.getBounds(),{padding:[40,40]});});
+            layer.on('click',e=>{ _licMap.fitBounds(e.target.getBounds(),{padding:[40,40]}); });
         }
     }).addTo(_licMap);
 }
@@ -13952,19 +13955,19 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=normUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // Cores suaves — baixa opacidade para não cobrir labels das cidades
+    // Cores claras mas visíveis — opacity balanceada para ver cor + ler labels
     function getEstilo(rawUF) {
         const uf = normUF(rawUF);
-        if (!uf) return { fillColor:'#e5e7eb', weight:1, color:'#d1d5db', fillOpacity:.3 };
-        if (ufsConv.has(uf))  return { fillColor:'#16a34a', weight:1.5, color:'#15803d', fillOpacity:.28 };
-        if (ufsProsp.has(uf)) return { fillColor:'#ca8a04', weight:1.5, color:'#a16207', fillOpacity:.25 };
-        return                         { fillColor:'#ef4444', weight:1,   color:'#f87171', fillOpacity:.18 };
+        if (!uf) return { fillColor:'#e5e7eb', weight:0.5, color:'#d1d5db', fillOpacity:.15 };
+        if (ufsConv.has(uf))  return { fillColor:'#22c55e', weight:1.5, color:'#16a34a', fillOpacity:.42 };
+        if (ufsProsp.has(uf)) return { fillColor:'#facc15', weight:1.5, color:'#ca8a04', fillOpacity:.40 };
+        return                         { fillColor:'#f87171', weight:1,   color:'#ef4444', fillOpacity:.35 };
     }
     function getEstiloHover(rawUF) {
         const uf = normUF(rawUF);
-        if (ufsConv.has(uf))  return { fillOpacity:.55, weight:2, color:'#15803d' };
-        if (ufsProsp.has(uf)) return { fillOpacity:.50, weight:2, color:'#a16207' };
-        return                         { fillOpacity:.40, weight:2, color:'#dc2626' };
+        if (ufsConv.has(uf))  return { fillOpacity:.65, weight:2.5, color:'#15803d' };
+        if (ufsProsp.has(uf)) return { fillOpacity:.60, weight:2.5, color:'#a16207' };
+        return                         { fillOpacity:.55, weight:2,   color:'#dc2626' };
     }
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
@@ -14001,6 +14004,13 @@ function renderizarLicGapAnalysis() {
             });
         }
     }).addTo(_licMap);
+
+    // Armazena bounds por UF para o focar rápido nos chips
+    _licUFBounds = {};
+    _licGeoJsonLayer.eachLayer(layer => {
+        const uf = normUF(layer.feature?.properties?.sigla);
+        if (uf) try { _licUFBounds[uf] = layer.getBounds(); } catch(e){}
+    });
 
     // ── Painel lateral ──
     const totalUFs = 27;
@@ -14074,14 +14084,24 @@ function renderizarLicGapAnalysis() {
 }
 
 function _licMapFocarUF(uf) {
-    if (!_licGeoJsonLayer || !_licMap) return;
-    _licGeoJsonLayer.eachLayer(layer => {
-        if ((layer.feature?.properties?.sigla || '').toUpperCase() === uf.toUpperCase()) {
-            _licMap.fitBounds(layer.getBounds(), {padding:[30,30]});
-            layer.setStyle({fillOpacity:.95, weight:4});
-            setTimeout(() => { _licGeoJsonLayer.resetStyle(layer); }, 1800);
+    if (!_licMap) return;
+    const UF = (uf || '').trim().toUpperCase();
+    const bounds = _licUFBounds[UF];
+    if (bounds) {
+        _licMap.fitBounds(bounds, {padding:[40,40]});
+        // Pisca o estado
+        if (_licGeoJsonLayer) {
+            _licGeoJsonLayer.eachLayer(layer => {
+                if ((layer.feature?.properties?.sigla || '').trim().toUpperCase() === UF) {
+                    layer.setStyle({fillOpacity:.75, weight:3});
+                    setTimeout(() => { if (_licGeoJsonLayer) _licGeoJsonLayer.resetStyle(layer); }, 1600);
+                }
+            });
         }
-    });
+    } else {
+        // Fallback: fitBounds no Brasil inteiro se UF não encontrada
+        _licMap.setView([-15,-52], 4);
+    }
 }
 
 function renderizarLicKanban() {
