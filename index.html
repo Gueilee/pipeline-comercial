@@ -1657,6 +1657,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
                         <button onclick="abrirLicMapa()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🗺 Mapa</button>
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
+                        <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
                     </div>
@@ -1788,11 +1789,12 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                 <th style="padding:10px 8px;text-align:right;font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;">Fee/mês</th>
                                 <th style="padding:10px 8px;text-align:left;font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;">Responsável</th>
                                 <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;">Status</th>
+                                <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;">Nível</th>
                                 <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.5px;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="lic-leads-tbody">
-                            <tr><td colspan="9" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Carregando leads…</td></tr>
+                            <tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Carregando leads…</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2471,6 +2473,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
         </div>
         <div style="display:flex;gap:10px;">
             <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">⊕ Ver todo Brasil</button>
+            <button id="lic-map-gap-btn" onclick="toggleLicGapAnalysis()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;transition:all .15s;">🔴 Gap Analysis</button>
             <button onclick="abrirFormLead(null,'mapa')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
         </div>
     </div>
@@ -2522,6 +2525,118 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- ── VISÃO CAPACIDADE ── -->
+<div id="lic-view-capacidade" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Hero header -->
+    <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:24px 28px 28px;flex-shrink:0;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-40px;right:120px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <button onclick="fecharLicCapacidade()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);cursor:pointer;backdrop-filter:blur(4px);">← Leads</button>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px;">Capacidade da Rede</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">Visão comercial de disponibilidade · Licenciados ativos</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <select id="lic-cap-filtro-uf" onchange="renderizarLicCapacidade()" style="padding:6px 12px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:12px;outline:none;backdrop-filter:blur(4px);">
+                    <option value="">Todas as UFs</option>
+                    <option>SP</option><option>RJ</option><option>MG</option><option>RS</option><option>PR</option><option>SC</option><option>BA</option><option>PE</option><option>CE</option><option>GO</option><option>DF</option><option>AM</option><option>PA</option><option>MT</option><option>MS</option>
+                </select>
+                <select id="lic-cap-filtro-tier" onchange="renderizarLicCapacidade()" style="padding:6px 12px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:12px;outline:none;backdrop-filter:blur(4px);">
+                    <option value="">Todos os níveis</option>
+                    <option>Platina</option><option>Ouro</option><option>Prata</option><option>Bronze</option>
+                </select>
+            </div>
+        </div>
+        <!-- KPI cards no hero -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;position:relative;">
+            <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">m² total da rede</div>
+                <div id="lc-kpi-m2total" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">todos os licenciados ativos</div>
+            </div>
+            <div style="background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.35);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(134,239,172,.8);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Licenciados ativos</div>
+                <div id="lc-kpi-ativos" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div id="lc-kpi-ativos-sub" style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">—</div>
+            </div>
+            <div style="background:rgba(105,65,198,.25);border:1px solid rgba(155,93,229,.35);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(192,168,245,.8);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Estados cobertos</div>
+                <div id="lc-kpi-estados" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div id="lc-kpi-estados-sub" style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">de 27 UFs do Brasil</div>
+            </div>
+            <div style="background:rgba(217,119,6,.2);border:1px solid rgba(245,158,11,.3);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(253,230,138,.8);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Fee total/mês</div>
+                <div id="lc-kpi-fee" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">receita recorrente da rede</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo scrollável -->
+    <div style="flex:1;overflow-y:auto;padding:20px 24px;">
+        <!-- Linha 1: Classificação por nível + m² por região -->
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-bottom:16px;">
+            <!-- Ranking de níveis -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:4px;">Composição por nível</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:16px;">Distribuição de licenciados ativos</div>
+                <div id="lc-tier-breakdown"></div>
+            </div>
+            <!-- m² por região -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:4px;">m² disponível por região</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:16px;">Capacidade instalada da rede</div>
+                <div style="height:200px;"><canvas id="lc-chart-regioes"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Linha 2: Top licenciados + alertas -->
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;">
+            <!-- Top licenciados por capacidade -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:4px;">Top licenciados por capacidade</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:14px;">Ordenados por m² total instalado</div>
+                <div id="lc-top-list"></div>
+            </div>
+            <!-- Capacidade por tipo de carga + alertas -->
+            <div style="display:flex;flex-direction:column;gap:14px;">
+                <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:14px;">Tipos de carga habilitados</div>
+                    <div id="lc-cargo-types"></div>
+                </div>
+                <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);flex:1;">
+                    <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:4px;">🔔 Alertas da rede</div>
+                    <div style="font-size:11px;color:#9b8cc0;margin-bottom:14px;">Pontos de atenção</div>
+                    <div id="lc-alertas"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linha 3: Tabela completa dos licenciados ativos -->
+        <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:14px;">Licenciados ativos — detalhamento</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Licenciado</th>
+                        <th style="padding:9px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Nível</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">UF / Cidade</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">m² total</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Plano</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Fee/mês</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Score</th>
+                    </tr>
+                </thead>
+                <tbody id="lc-tabela-tbody"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -8877,6 +8992,7 @@ function renderizarLicenciamento() {
             <td style="padding:10px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${fee > 0 ? 'R$'+fee.toLocaleString('pt-BR') : '—'}</td>
             <td style="padding:10px 8px;color:#6b7280;font-size:12px;">${l.responsavel || '—'}</td>
             <td style="padding:10px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${statusStyle[l.status]||''}">${l.status || '—'}</span></td>
+            <td style="padding:10px 8px;text-align:center;">${licTierBadge(l, true)}</td>
             <td style="padding:10px 8px;text-align:center;" onclick="event.stopPropagation()">
                 <button onclick="licGerarLinkForm('${l.id}')" style="padding:3px 9px;border:1px solid #a7f3d0;border-radius:4px;background:#f0fdf4;color:#166534;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar link de preenchimento">🔗</button>
                 <button onclick="gerarLicPDF('${l.id}')" style="padding:3px 9px;border:1px solid #e0d9f5;border-radius:4px;background:#faf8ff;color:#6941c6;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar PDF">📄</button>
@@ -8886,7 +9002,7 @@ function renderizarLicenciamento() {
         </tr>`;
     }).join('');
 
-    document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="9" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
+    document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
 
     renderizarLicDashboard();
 }
@@ -8905,7 +9021,7 @@ function abrirFormLead(id, returnTo) {
     }
 
     // Esconde todas as views antes de exibir o formulário
-    ['lic-view-tabela','lic-view-mapa','lic-view-kanban'].forEach(id => {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -9567,6 +9683,54 @@ function _licResetAnexos() {
     ['contrato_social','certificado'].forEach(t => _licRenderFileList(t));
 }
 
+// ── Classificação de Licenciados ──────────────────────────────────
+
+function calcLicScore(lead) {
+    let s = 0;
+    const otif = parseFloat(lead.otif_pct) || 0;
+    const acu  = parseFloat(lead.acuracidade_pct) || 0;
+    const certs = (lead.certificacoes||'').split(', ').filter(c=>c&&c!=='Nenhuma').length;
+    const mat  = lead.nivel_maturidade || '';
+    const area = parseFloat(lead.area_total_m2) || 0;
+
+    // OTIF (0-30)
+    if (otif >= 98) s += 30; else if (otif >= 95) s += 20; else if (otif >= 90) s += 12; else if (otif > 0) s += 5;
+    // Acuracidade (0-25)
+    if (acu >= 99.5) s += 25; else if (acu >= 98) s += 18; else if (acu >= 95) s += 10; else if (acu > 0) s += 4;
+    // Certificações (0-20)
+    s += Math.min(20, certs * 5);
+    // Maturidade tecnológica (0-15)
+    if (mat === 'Avançado') s += 15; else if (mat === 'Intermediário') s += 10; else if (mat === 'Em desenvolvimento') s += 5;
+    // Escala / área (0-10)
+    if (area >= 20000) s += 10; else if (area >= 10000) s += 7; else if (area >= 5000) s += 4; else if (area > 0) s += 2;
+
+    return Math.min(100, s);
+}
+
+const LIC_TIERS = [
+    { min:80, name:'Platina', icon:'💜', color:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Platina' },
+    { min:60, name:'Ouro',    icon:'⭐', color:'#b45309', bg:'#fffbeb', border:'#fcd34d', label:'Ouro'    },
+    { min:35, name:'Prata',   icon:'🔘', color:'#4b5563', bg:'#f9fafb', border:'#d1d5db', label:'Prata'   },
+    { min:0,  name:'Bronze',  icon:'🎖', color:'#92400e', bg:'#fef3c7', border:'#fbbf24', label:'Bronze'  },
+];
+
+function getLicTier(lead) {
+    if (lead.status !== 'Convertido') return null;
+    const score = calcLicScore(lead);
+    const tier = LIC_TIERS.find(t => score >= t.min) || LIC_TIERS[3];
+    return { ...tier, score };
+}
+
+function licTierBadge(lead, compact) {
+    const t = getLicTier(lead);
+    if (!t) return '';
+    if (compact) return `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};white-space:nowrap;">${t.icon} ${t.name}</span>`;
+    return `<div style="display:inline-flex;align-items:center;gap:6px;background:${t.bg};border:1.5px solid ${t.border};border-radius:10px;padding:6px 12px;">
+        <span style="font-size:16px;">${t.icon}</span>
+        <div><div style="font-size:11px;font-weight:800;color:${t.color};">${t.name.toUpperCase()}</div><div style="font-size:10px;color:#9b8cc0;">Score: ${t.score}/100</div></div>
+    </div>`;
+}
+
 // ── Kanban de Licenciamento ──────────────────────────────────────
 
 const LIC_KB_COLS = [
@@ -9593,6 +9757,151 @@ function abrirLicKanban() {
 function fecharLicKanban() {
     document.getElementById('lic-view-kanban').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
+}
+
+// ── Painel de Capacidade da Rede ──────────────────────────────────────
+
+let _lcCharts = {};
+
+function abrirLicCapacidade() {
+    document.getElementById('lic-view-tabela').style.display = 'none';
+    document.getElementById('lic-view-capacidade').style.display = 'flex';
+    renderizarLicCapacidade();
+}
+
+function fecharLicCapacidade() {
+    document.getElementById('lic-view-capacidade').style.display = 'none';
+    document.getElementById('lic-view-tabela').style.display = '';
+}
+
+function renderizarLicCapacidade() {
+    const ufFiltro   = document.getElementById('lic-cap-filtro-uf')?.value || '';
+    const tierFiltro = document.getElementById('lic-cap-filtro-tier')?.value || '';
+
+    const ativos = baseLicLeads.filter(l => {
+        if (l.status !== 'Convertido') return false;
+        if (ufFiltro   && l.uf !== ufFiltro) return false;
+        if (tierFiltro && getLicTier(l)?.name !== tierFiltro) return false;
+        return true;
+    });
+
+    const m2Total  = ativos.reduce((s,l) => s+(parseFloat(l.area_total_m2)||0), 0);
+    const feeTotal = ativos.reduce((s,l) => s+(parseFloat(l.fee_mensal)||0), 0);
+    const ufs      = [...new Set(ativos.map(l=>l.uf).filter(Boolean))];
+    const fmt = n => n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+
+    document.getElementById('lc-kpi-m2total').textContent  = m2Total > 0 ? fmt(m2Total)+' m²' : '—';
+    document.getElementById('lc-kpi-ativos').textContent   = ativos.length;
+    document.getElementById('lc-kpi-ativos-sub').textContent = `${ufs.length} estado${ufs.length!==1?'s':''} · ${LIC_TIERS.filter(t=>ativos.some(l=>getLicTier(l)?.name===t.name)).length} níveis`;
+    document.getElementById('lc-kpi-estados').textContent  = ufs.length;
+    document.getElementById('lc-kpi-fee').textContent      = feeTotal > 0 ? 'R$'+fmt(feeTotal) : '—';
+
+    // Tier breakdown
+    const tierEl = document.getElementById('lc-tier-breakdown');
+    const tierCounts = LIC_TIERS.map(t => ({ ...t, count: ativos.filter(l=>getLicTier(l)?.name===t.name).length, m2: ativos.filter(l=>getLicTier(l)?.name===t.name).reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0) }));
+    const maxCount = Math.max(...tierCounts.map(t=>t.count), 1);
+    tierEl.innerHTML = tierCounts.map(t => `
+        <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:16px;">${t.icon}</span>
+                    <span style="font-size:12px;font-weight:700;color:${t.color};">${t.name}</span>
+                    <span style="font-size:10px;background:${t.bg};color:${t.color};border:1px solid ${t.border};border-radius:20px;padding:2px 8px;font-weight:600;">${t.count} licenciado${t.count!==1?'s':''}</span>
+                </div>
+                <span style="font-size:11px;color:#9b8cc0;font-family:'Courier New',monospace;">${t.m2>0?fmt(t.m2)+' m²':'—'}</span>
+            </div>
+            <div style="height:6px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${Math.round((t.count/maxCount)*100)}%;background:${t.color};border-radius:3px;transition:width .6s;"></div>
+            </div>
+        </div>`).join('');
+
+    // Chart m² por região
+    const REGIONS = {Sul:['PR','SC','RS'],Sudeste:['SP','RJ','MG','ES'],'Centro-Oeste':['MT','MS','GO','DF'],Nordeste:['MA','PI','CE','RN','PB','PE','AL','SE','BA'],Norte:['AM','RR','AP','PA','TO','RO','AC']};
+    const regColors = ['#6941c6','#2563eb','#d97706','#16a34a','#0891b2'];
+    const regLabels = Object.keys(REGIONS);
+    const regData   = regLabels.map(r => ativos.filter(l=>REGIONS[r].includes(l.uf)).reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0));
+    if (_lcCharts.regioes) _lcCharts.regioes.destroy();
+    _lcCharts.regioes = new Chart(document.getElementById('lc-chart-regioes'), {
+        type:'bar',
+        data:{ labels:regLabels, datasets:[{ label:'m²', data:regData, backgroundColor:regColors.map(c=>c+'33'), borderColor:regColors, borderWidth:2, borderRadius:8 }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, datalabels:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmt(ctx.raw)+' m²'}} }, scales:{ x:{grid:{display:false},ticks:{font:{size:11},color:'#9b8cc0'}}, y:{grid:{color:'rgba(105,65,198,.06)'},ticks:{callback:v=>v>=1e3?(v/1e3).toFixed(0)+'K':v,color:'#9b8cc0',font:{size:10}},beginAtZero:true} } }
+    });
+
+    // Top licenciados
+    const topList = [...ativos].sort((a,b)=>(parseFloat(b.area_total_m2)||0)-(parseFloat(a.area_total_m2)||0)).slice(0,8);
+    const maxM2 = topList.length > 0 ? (parseFloat(topList[0].area_total_m2)||1) : 1;
+    document.getElementById('lc-top-list').innerHTML = topList.length === 0
+        ? '<div style="text-align:center;color:#c4b5e8;padding:20px;font-size:13px;">Nenhum licenciado ativo ainda</div>'
+        : topList.map((l,i) => {
+            const t = getLicTier(l); const m2 = parseFloat(l.area_total_m2)||0; const pct = Math.round((m2/maxM2)*100);
+            return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#f0ebff;border:1.5px solid #e0d9f5;font-size:9px;font-weight:700;color:#6941c6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+                <div style="flex:1;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                        <span style="font-size:12px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${l.razao_social||'—'}</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            ${t?`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon}${t.name}</span>`:''}
+                            <span style="font-size:11px;font-family:'Courier New',monospace;color:#6b7280;">${fmt(m2)} m²</span>
+                        </div>
+                    </div>
+                    <div style="height:4px;background:#f0ebff;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;"></div></div>
+                </div>
+            </div>`;
+        }).join('');
+
+    // Tipos de carga
+    const cargoTypes = { 'Paletizado seco':'📦','Refrigerado':'❄️','Farmacêutico / GDP':'💊','Alto valor':'💎','E-commerce':'🛒','Congelado':'🧊','Granel sólido':'🏭' };
+    const cargoCounts = {};
+    ativos.forEach(l => { const c = (l.cargas_geral||'')+(','+(l.cargas_especiais||'')); c.split(',').map(x=>x.trim()).filter(Boolean).forEach(x => { cargoCounts[x]=(cargoCounts[x]||0)+1; }); });
+    const cargoEl = document.getElementById('lc-cargo-types');
+    const cargoSorted = Object.entries(cargoCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    if (cargoSorted.length === 0) { cargoEl.innerHTML = '<div style="color:#c4b5e8;font-size:12px;text-align:center;padding:10px;">Sem dados de carga</div>'; }
+    else cargoEl.innerHTML = cargoSorted.map(([label,count]) => {
+        const icon = cargoTypes[label] || '📋';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f9f7ff;">
+            <span style="font-size:12px;color:#2d1b69;">${icon} ${label}</span>
+            <span style="font-size:11px;font-weight:700;background:#f0ebff;color:#6941c6;padding:2px 8px;border-radius:10px;">${count}</span>
+        </div>`;
+    }).join('');
+
+    // Alertas
+    const alertas = [];
+    const semCert = ativos.filter(l => !(l.certificacoes||'').replace('Nenhuma','').trim());
+    if (semCert.length > 0) alertas.push({ icon:'⚠️', color:'#d97706', bg:'#fffbeb', msg:`${semCert.length} licenciado${semCert.length>1?'s':''} sem certificações ativas` });
+    const bronze = ativos.filter(l => getLicTier(l)?.name === 'Bronze');
+    if (bronze.length > 0) alertas.push({ icon:'🔶', color:'#92400e', bg:'#fef3c7', msg:`${bronze.length} licenciado${bronze.length>1?'s':''} no nível Bronze — em qualificação` });
+    const semOTIF = ativos.filter(l => !l.otif_pct);
+    if (semOTIF.length > 0) alertas.push({ icon:'📊', color:'#6941c6', bg:'#f0ebff', msg:`${semOTIF.length} licenciado${semOTIF.length>1?'s':''} sem OTIF registrado` });
+    if (ufs.length < 10) alertas.push({ icon:'🗺️', color:'#2563eb', bg:'#eff6ff', msg:`Rede cobre apenas ${ufs.length} estado${ufs.length!==1?'s':''} — oportunidade de expansão` });
+    if (alertas.length === 0) alertas.push({ icon:'✅', color:'#16a34a', bg:'#f0fdf4', msg:'Nenhum alerta crítico no momento' });
+    document.getElementById('lc-alertas').innerHTML = alertas.map(a => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:${a.bg};border-radius:8px;margin-bottom:7px;font-size:12px;color:${a.color};font-weight:600;">
+            <span style="font-size:16px;flex-shrink:0;">${a.icon}</span>${a.msg}
+        </div>`).join('');
+
+    // Tabela detalhada
+    const pBg={Starter:'#f1f5f9',Pro:'#f0ebff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol={Starter:'#475569',Pro:'#6941c6',Enterprise:'#166534',Custom:'#92400e'};
+    document.getElementById('lc-tabela-tbody').innerHTML = ativos.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;padding:40px;color:#c4b5e8;font-size:13px;">Nenhum licenciado ativo. Converta leads para ver aqui.</td></tr>'
+        : [...ativos].sort((a,b)=>calcLicScore(b)-calcLicScore(a)).map(l => {
+            const t=getLicTier(l); const score=calcLicScore(l); const m2=parseFloat(l.area_total_m2)||0; const fee=parseFloat(l.fee_mensal)||0;
+            const scoreColor = score>=80?'#7c3aed':score>=60?'#b45309':score>=35?'#4b5563':'#92400e';
+            return `<tr style="border-bottom:1px solid #f5f3ff;cursor:pointer;" onclick="abrirFormLead('${l.id}','tabela')">
+                <td style="padding:9px 12px;font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</td>
+                <td style="padding:9px 8px;text-align:center;">${t?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon} ${t.name}</span>`:''}</td>
+                <td style="padding:9px 8px;font-size:12px;color:#6b7280;">${l.uf||'—'}${l.polo_logistico?' · '+l.polo_logistico:''}</td>
+                <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:12px;font-weight:600;color:#2d1b69;">${m2>0?m2.toLocaleString('pt-BR')+' m²':'—'}</td>
+                <td style="padding:9px 8px;"><span style="font-size:10px;padding:2px 8px;border-radius:20px;background:${pBg[l.plano]||'#f3f4f6'};color:${pCol[l.plano]||'#374151'};font-weight:600;">${l.plano||'—'}</span></td>
+                <td style="padding:9px 8px;text-align:right;font-size:12px;font-weight:600;color:#16a34a;">${fee>0?'R$'+fee.toLocaleString('pt-BR'):'—'}</td>
+                <td style="padding:9px 8px;text-align:right;">
+                    <div style="display:inline-flex;align-items:center;gap:4px;">
+                        <div style="width:32px;height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${score}%;background:${scoreColor};border-radius:3px;"></div></div>
+                        <span style="font-size:11px;font-weight:700;color:${scoreColor};font-family:'Courier New',monospace;">${score}</span>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
 }
 
 // ── Geração de PDF do Lead ───────────────────────────────────────
@@ -10368,6 +10677,105 @@ function renderizarLicMapaPanel() {
     `;
 }
 
+// ── Gap Analysis ──────────────────────────────────────────────────
+
+let _licGapMode = false;
+
+function toggleLicGapAnalysis() {
+    _licGapMode = !_licGapMode;
+    const btn = document.getElementById('lic-map-gap-btn');
+    if (btn) {
+        btn.style.background = _licGapMode ? '#fef2f2' : '#faf8ff';
+        btn.style.color = _licGapMode ? '#dc2626' : '#6941c6';
+        btn.style.borderColor = _licGapMode ? '#fca5a5' : '#e0d9f5';
+        btn.innerHTML = _licGapMode ? '✕ Sair do Gap Analysis' : '🔴 Gap Analysis';
+    }
+    if (_licGapMode) {
+        renderizarLicGapAnalysis();
+    } else {
+        _licAtualizarChoropleth();
+        _licAtualizarMarkers();
+        renderizarLicMapaPanel();
+    }
+}
+
+function renderizarLicGapAnalysis() {
+    if (!_licMap || !_licGeoJsonData) return;
+    if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
+
+    const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
+    const prosp  = baseLicLeads.filter(l=>l.status==='Ativo');
+    const ufsAtivas = new Set(ativos.map(l=>l.uf).filter(Boolean));
+    const ufsProsp  = new Set(prosp.map(l=>l.uf).filter(Boolean));
+
+    function getCor(uf) {
+        if (ufsAtivas.has(uf)) return '#16a34a'; // verde = tem licenciado ativo
+        if (ufsProsp.has(uf))  return '#f59e0b'; // âmbar = em prospecção
+        return '#dc2626';                          // vermelho = sem cobertura
+    }
+    function getOpacity(uf) {
+        return ufsAtivas.has(uf) ? .5 : ufsProsp.has(uf) ? .4 : .35;
+    }
+
+    _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
+        style: f => ({ fillColor:getCor(f.properties.sigla), weight:1.5, color:'#fff', fillOpacity:getOpacity(f.properties.sigla) }),
+        onEachFeature: (feature, layer) => {
+            const uf=feature.properties.sigla; const nome=feature.properties.name;
+            const hasAtivo=ufsAtivas.has(uf); const hasProsp=ufsProsp.has(uf);
+            const status = hasAtivo ? '✅ Coberto — licenciado ativo' : hasProsp ? '🟡 Em prospecção' : '🔴 Sem cobertura — oportunidade';
+            layer.bindTooltip(`<b>${nome} (${uf})</b><br>${status}`,{className:'lic-map-tooltip',sticky:true});
+            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.7,weight:2});e.target.bringToFront();});
+            layer.on('mouseout',e=>{_licGeoJsonLayer.resetStyle(e.target);});
+        }
+    }).addTo(_licMap);
+
+    // Atualiza painel lateral com análise de gaps
+    const totalUFs = 27;
+    const cobertas = ufsAtivas.size;
+    const emPros   = [...ufsProsp].filter(u=>!ufsAtivas.has(u)).length;
+    const semCob   = totalUFs - cobertas - emPros;
+    const semCobList = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].filter(u=>!ufsAtivas.has(u)&&!ufsProsp.has(u));
+
+    document.getElementById('lic-mapa-panel').innerHTML = `
+        <div style="background:linear-gradient(135deg,#1a0f3d,#dc2626);border-radius:14px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
+            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Gap Analysis</div>
+            <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:10px;">Cobertura da Rede Vendemmia</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;">
+                <div style="background:rgba(22,163,74,.25);border-radius:8px;padding:8px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(134,239,172,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Cobertos</div>
+                    <div style="font-size:20px;font-weight:900;color:#fff;">${cobertas}</div>
+                </div>
+                <div style="background:rgba(245,158,11,.25);border-radius:8px;padding:8px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(253,230,138,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Prospecção</div>
+                    <div style="font-size:20px;font-weight:900;color:#fff;">${emPros}</div>
+                </div>
+                <div style="background:rgba(220,38,38,.25);border-radius:8px;padding:8px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(252,165,165,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Sem cob.</div>
+                    <div style="font-size:20px;font-weight:900;color:#fff;">${semCob}</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#16a34a;"></div>Licenciado ativo (${cobertas} UFs)</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#f59e0b;"></div>Em prospecção (${emPros} UFs)</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#dc2626;"></div>Sem cobertura (${semCob} UFs)</div>
+            </div>
+        </div>
+
+        ${semCobList.length > 0 ? `
+        <div>
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#dc2626;margin-bottom:8px;">🎯 Oportunidades prioritárias</div>
+            <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">Estados sem nenhum licenciado ou prospecção ativa:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                ${semCobList.map(u=>`<span style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${u}</span>`).join('')}
+            </div>
+        </div>` : `<div style="background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;font-size:12px;font-weight:700;color:#16a34a;">🎉 Rede com cobertura em todos os estados!</div>`}
+    `;
+}
+
 function renderizarLicKanban() {
     const leads = baseLicLeads;
     const board = document.getElementById('lic-kanban-board');
@@ -10400,6 +10808,7 @@ function renderizarLicKanban() {
                 ${fee > 0 ? `<div style="font-size:12px;font-weight:700;color:#16a34a;font-family:'Courier New',monospace;">R$${fee.toLocaleString('pt-BR')}<span style="font-size:9px;font-weight:400;color:#9b8cc0;">/mês</span></div>` : ''}
                 ${lead.responsavel ? `<div style="font-size:10px;color:#9b8cc0;margin-top:6px;display:flex;align-items:center;gap:4px;"><span style="font-size:11px;">👤</span>${lead.responsavel}</div>` : ''}
                 ${col.etapa === 'Perdido' && lead.motivo_perda ? `<div style="font-size:10px;color:#dc2626;margin-top:7px;background:#fef2f2;border-radius:6px;padding:5px 8px;line-height:1.3;border-left:2px solid #dc2626;">${lead.motivo_perda}</div>` : ''}
+                ${getLicTier(lead) ? `<div style="margin-top:6px;">${licTierBadge(lead, true)}</div>` : ''}
                 <div style="display:flex;justify-content:flex-end;margin-top:8px;">
                     <span style="font-size:10px;color:#c4b5e8;">✏ editar</span>
                 </div>
