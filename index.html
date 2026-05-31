@@ -13261,13 +13261,9 @@ function fecharLicMapa() {
 function _licInicializarMapa() {
     if (_licMap) { _licMap.remove(); _licMap = null; }
     _licMap = L.map('lic-mapa-container', { center:[-15,-52], zoom:4, zoomControl:false, scrollWheelZoom:true, minZoom:3, maxZoom:14 });
-    // Mapa base cinza claro — deixa os estados coloridos do choropleth se destacar
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    // Uma só tile — light_all tem labels integrados; o GeoJSON fica no overlayPane acima
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution:'©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>', maxZoom:19,
-    }).addTo(_licMap);
-    // Labels por cima (cidades, nomes) — camada separada para ficar acima do choropleth
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-        attribution:'', maxZoom:19, pane:'overlayPane',
     }).addTo(_licMap);
     L.control.zoom({ position:'bottomright' }).addTo(_licMap);
     _licMap.on('movestart', () => _licMapEsconderHover());
@@ -13293,14 +13289,14 @@ function _licInicializarMapa() {
 function _licAtualizarChoropleth() {
     if (!_licMap || !_licGeoJsonData) return;
     if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
-    // Modo sem Gap Analysis: todos estados em cinza neutro suave
+    // Modo sem Gap Analysis: contorno neutro apenas (sem fill)
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: () => ({ fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.12 }),
+        style: () => ({ fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.08 }),
         onEachFeature:(feature,layer)=>{
-            const uf  = (feature.properties.sigla||'').trim().toUpperCase();
-            const nome = _LIC_UF_NOMES[uf] || feature.properties.name || uf;
+            const uf  = _licNormUF(feature.properties?.sigla);
+            const nome = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
             if (nome && uf) layer.bindTooltip(`<b>${nome} (${uf})</b>`,{className:'lic-map-tooltip',sticky:true});
-            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.28,weight:1.5});e.target.bringToFront();});
+            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.22,weight:1.5,color:'#7c3aed'});e.target.bringToFront();});
             layer.on('mouseout',e=>{_licGeoJsonLayer.resetStyle(e.target);});
             layer.on('click',e=>{ _licMap.fitBounds(e.target.getBounds(),{padding:[40,40]}); });
         }
@@ -13958,19 +13954,19 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // Fills bem visíveis mas suaves — borda fina, fill médio
+    // Cores suaves mas definitivamente visíveis no basemap light
     function getEstilo(rawUF) {
         const uf = _licNormUF(rawUF);
-        if (!uf) return { fillColor:'transparent', weight:0, color:'transparent', fillOpacity:0 };
-        if (ufsConv.has(uf))  return { fillColor:'#4ade80', weight:1, color:'#22c55e', fillOpacity:.55 };
-        if (ufsProsp.has(uf)) return { fillColor:'#fde047', weight:1, color:'#facc15', fillOpacity:.52 };
-        return                         { fillColor:'#fca5a5', weight:1, color:'#f87171', fillOpacity:.48 };
+        if (!uf) return { fillColor:'#e5e7eb', weight:0.5, color:'#d1d5db', fillOpacity:.2 };
+        if (ufsConv.has(uf))  return { fillColor:'#86efac', weight:1.5, color:'#16a34a', fillOpacity:.72 };
+        if (ufsProsp.has(uf)) return { fillColor:'#fde68a', weight:1.5, color:'#ca8a04', fillOpacity:.68 };
+        return                         { fillColor:'#fca5a5', weight:1.5, color:'#ef4444', fillOpacity:.65 };
     }
     function getEstiloHover(rawUF) {
         const uf = _licNormUF(rawUF);
-        if (ufsConv.has(uf))  return { fillOpacity:.78, weight:2, color:'#16a34a' };
-        if (ufsProsp.has(uf)) return { fillOpacity:.74, weight:2, color:'#ca8a04' };
-        return                         { fillOpacity:.70, weight:2, color:'#ef4444' };
+        if (ufsConv.has(uf))  return { fillOpacity:.88, weight:2.5, color:'#15803d' };
+        if (ufsProsp.has(uf)) return { fillOpacity:.84, weight:2.5, color:'#92400e' };
+        return                         { fillOpacity:.82, weight:2.5, color:'#b91c1c' };
     }
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
