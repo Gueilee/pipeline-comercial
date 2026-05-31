@@ -1659,6 +1659,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
                         <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔍 Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
+                        <button onclick="gerarBoardReport(event)" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(45,27,105,.3);">📋 Board Report</button>
                         <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">💼 Disponibilidade</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
@@ -10327,6 +10328,254 @@ async function abrirLicDisponibilidade() {
 function fecharLicDisponibilidade() {
     document.getElementById('lic-view-disponibilidade').style.display='none';
     document.getElementById('lic-view-tabela').style.display='';
+}
+
+// ── Board Report Executivo ────────────────────────────────────────
+
+async function gerarBoardReport(e) {
+    const btn = e?.target?.closest('button');
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Gerando PDF…'; }
+    showToast('Gerando Board Report… aguarde alguns segundos.', 'info');
+
+    try {
+        if (Object.keys(_licPerfData).length === 0) await carregarLicPerformance();
+        if (Object.keys(_audData).length === 0) await carregarLicAuditoria();
+
+        const ativos = baseLicLeads.filter(l => l.status === 'Convertido');
+        const hoje = new Date();
+        const mesNome = hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const dataHora = hoje.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+        const m2Total = ativos.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+        let m2Disponivel = 0;
+        ativos.forEach(l=>{ const {disponivel}=getM2Disponivel(l); if(disponivel!==null) m2Disponivel+=disponivel; });
+
+        const estados = [...new Set(ativos.map(l=>l.uf).filter(Boolean))];
+        const feeTotal = ativos.reduce((s,l)=>s+(parseFloat(l.fee_mensal)||0),0);
+
+        const tierMap = {};
+        LIC_TIERS.forEach(t => {
+            tierMap[t.name] = { count:0, m2:0, ...t };
+            ativos.forEach(l => { if(getLicTier(l)?.name===t.name){ tierMap[t.name].count++; tierMap[t.name].m2+=(parseFloat(l.area_total_m2)||0); } });
+        });
+
+        const scores = ativos.map(l=>calcLicScore(l));
+        const scoreMedia = scores.length>0 ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
+
+        const primDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        const novosNoMes = baseLicLeads.filter(l=>l.status==='Convertido'&&new Date(l.created_at)>=primDia);
+        const emQualificacao = Object.values(_audData).filter(a=>a.estagio_atual!=='ativo').length;
+
+        const saude = { verde:0, amarelo:0, vermelho:0, semDados:0 };
+        ativos.forEach(l=>{ const sg=kpiSaudeGeral(getLicUltimoPeriodo(l.id)); saude[sg in saude?sg:'semDados']++; });
+
+        const alertasCap = ativos.filter(l=>{ const {utilPct}=getM2Disponivel(l); return utilPct!==null&&utilPct>70; });
+        const semKpis = ativos.filter(l=>!getLicUltimoPeriodo(l.id)).length;
+        const top5 = [...ativos].sort((a,b)=>calcLicScore(b)-calcLicScore(a)).slice(0,5);
+
+        const REGS = {Sul:['PR','SC','RS'],Sudeste:['SP','RJ','MG','ES'],'Centro-Oeste':['MT','MS','GO','DF'],Nordeste:['MA','PI','CE','RN','PB','PE','AL','SE','BA'],Norte:['AM','RR','AP','PA','TO','RO','AC']};
+        const regioes = {};
+        Object.entries(REGS).forEach(([r,ufs])=>{ const lr=ativos.filter(l=>ufs.includes(l.uf)); regioes[r]={count:lr.length,m2:lr.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0)}; });
+
+        const metrics = { mesNome, dataHora, ativos, m2Total, m2Disponivel, estados, feeTotal, tierMap, scoreMedia, novosNoMes, emQualificacao, saude, alertasCap, semKpis, top5, regioes };
+
+        const tmpl = document.getElementById('lic-pdf-template');
+        tmpl.innerHTML = _buildBoardReportHtml(metrics);
+
+        await new Promise(r=>setTimeout(r,700));
+
+        const canvas = await html2canvas(tmpl,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',width:794,windowWidth:794});
+        const {jsPDF} = window.jspdf;
+        const imgData = canvas.toDataURL('image/jpeg',0.92);
+        const pdfW=210, pageH=297;
+        const pdfH=(canvas.height*pdfW)/canvas.width;
+        const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+        if (pdfH<=pageH) {
+            doc.addImage(imgData,'JPEG',0,0,pdfW,pdfH);
+        } else {
+            const sliceH=Math.round(canvas.width*(pageH/pdfW));
+            let srcY=0,remaining=canvas.height,page=0;
+            while(remaining>0){
+                const h=Math.min(sliceH,remaining);
+                const sc=document.createElement('canvas'); sc.width=canvas.width; sc.height=h;
+                sc.getContext('2d').drawImage(canvas,0,srcY,canvas.width,h,0,0,canvas.width,h);
+                if(page>0) doc.addPage();
+                doc.addImage(sc.toDataURL('image/jpeg',0.92),'JPEG',0,0,pdfW,(h*pdfW)/canvas.width);
+                srcY+=h; remaining-=h; page++;
+            }
+        }
+
+        doc.save(`Board_Report_Licenciamento_${hoje.toISOString().substring(0,7)}.pdf`);
+        showToast('📋 Board Report gerado com sucesso!','success');
+
+    } catch(err) {
+        console.error(err);
+        showToast('Erro ao gerar relatório: '+(err.message||err),'error');
+    } finally {
+        const tmpl=document.getElementById('lic-pdf-template');
+        if(tmpl) tmpl.innerHTML='';
+        if(btn){btn.disabled=false;btn.innerHTML='📋 Board Report';}
+    }
+}
+
+function _buildBoardReportHtml(m) {
+    const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+    const fmtM2=n=>fmt(n)+' m²';
+    const fmtR=n=>n>0?'R$ '+n.toLocaleString('pt-BR'):'—';
+    const TC={'Platina':'#7c3aed','Ouro':'#b45309','Prata':'#4b5563','Bronze':'#92400e'};
+    const TB={'Platina':'#f5f3ff','Ouro':'#fffbeb','Prata':'#f9fafb','Bronze':'#fef3c7'};
+    const TBD={'Platina':'#c4b5fd','Ouro':'#fcd34d','Prata':'#d1d5db','Bronze':'#fbbf24'};
+    const TI={'Platina':'💜','Ouro':'⭐','Prata':'🔘','Bronze':'🎖'};
+    const RC=['#6941c6','#2563eb','#d97706','#16a34a','#0891b2'];
+
+    const secTitle=(title,danger=false)=>`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid ${danger?'#fef2f2':'#f0ebff'};"><div style="width:4px;height:18px;background:${danger?'#dc2626':'linear-gradient(135deg,#6941c6,#2d1b69)'};border-radius:2px;"></div><div style="font-size:13px;font-weight:800;color:#2d1b69;">${title}</div></div>`;
+
+    return `<div style="width:794px;background:#fff;font-family:Arial,Helvetica,sans-serif;color:#1a1a2e;">
+
+    <!-- CAPA -->
+    <div style="background:linear-gradient(135deg,#1a0f3d 0%,#2d1b69 45%,#6941c6 100%);padding:38px 44px;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-60px;right:-60px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-40px;right:100px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;position:relative;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;">P</div>
+                <div><div style="font-size:15px;font-weight:900;color:#fff;letter-spacing:.05em;">PIPELINE</div><div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;">by vendemmia</div></div>
+            </div>
+            <div style="text-align:right;"><div style="font-size:8px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;">Gerado em</div><div style="font-size:11px;color:rgba(255,255,255,.65);">${m.dataHora}</div></div>
+        </div>
+        <div style="position:relative;">
+            <div style="font-size:8px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px;">RELATÓRIO EXECUTIVO · BOARD REPORT</div>
+            <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-.7px;line-height:1.15;margin-bottom:6px;">Rede de Licenciamento<br>Vendemmia</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.6);font-weight:600;text-transform:capitalize;">${m.mesNome}</div>
+        </div>
+        <!-- KPIs no cover -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px;position:relative;">
+            ${[
+                {label:'LICENCIADOS ATIVOS',val:m.ativos.length,sub:m.estados.length+' estados cobertos'},
+                {label:'m² TOTAL DA REDE',val:fmtM2(m.m2Total),sub:fmtM2(Math.round(m.m2Disponivel))+' disponível'},
+                {label:'SCORE MÉDIO DA REDE',val:m.scoreMedia+'/100',sub:'índice de qualidade'},
+                {label:'FEE MENSAL TOTAL',val:fmtR(m.feeTotal),sub:'receita recorrente ativa'},
+            ].map(k=>`<div style="background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:13px 14px;"><div style="font-size:7px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">${k.label}</div><div style="font-size:22px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;">${k.val}</div><div style="font-size:8px;color:rgba(255,255,255,.38);margin-top:3px;">${k.sub}</div></div>`).join('')}
+        </div>
+    </div>
+
+    <div style="padding:28px 36px;">
+
+    <!-- DISTRIBUIÇÃO POR NÍVEL -->
+    <div style="margin-bottom:24px;">
+        ${secTitle('Distribuição por Nível de Certificação')}
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            ${LIC_TIERS.map(t=>{
+                const d=m.tierMap[t.name]||{count:0,m2:0};
+                const pct=m.ativos.length>0?Math.round((d.count/m.ativos.length)*100):0;
+                return `<div style="background:${TB[t.name]};border:1.5px solid ${TBD[t.name]};border-radius:11px;padding:14px;border-top:3px solid ${TC[t.name]};">
+                    <div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;"><span style="font-size:16px;">${TI[t.name]}</span><span style="font-size:11px;font-weight:800;color:${TC[t.name]};">${t.name.toUpperCase()}</span></div>
+                    <div style="font-size:26px;font-weight:900;color:${TC[t.name]};font-family:'Courier New',monospace;line-height:1;margin-bottom:3px;">${d.count}</div>
+                    <div style="font-size:9px;color:#6b7280;margin-bottom:7px;">${pct}% · ${fmt(d.m2)} m²</div>
+                    <div style="height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${TC[t.name]};border-radius:2px;"></div></div>
+                </div>`;
+            }).join('')}
+        </div>
+    </div>
+
+    <!-- ATIVIDADE + SAÚDE DA REDE -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+        <div style="background:#fff;border:1px solid #ede8f8;border-radius:11px;padding:16px;">
+            ${secTitle('Atividade do Período')}
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                ${[
+                    {icon:'🆕',label:'Novos licenciados (mês)',val:m.novosNoMes.length,cor:'#6941c6',bg:'#f9f7ff'},
+                    {icon:'🔍',label:'Em qualificação (auditoria)',val:m.emQualificacao,cor:'#d97706',bg:'#fffbeb'},
+                    {icon:'⭐',label:'Score médio da rede',val:m.scoreMedia+'/100',cor:'#16a34a',bg:'#f0fdf4'},
+                    {icon:'⚠️',label:'Alertas de capacidade (>70%)',val:m.alertasCap.length,cor:'#dc2626',bg:'#fef2f2'},
+                    {icon:'📊',label:'Sem KPIs registrados',val:m.semKpis,cor:'#9b8cc0',bg:'#f9f7ff'},
+                ].map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:${r.bg};border-radius:8px;">
+                    <span style="font-size:11px;color:#374151;">${r.icon} ${r.label}</span>
+                    <span style="font-size:15px;font-weight:900;color:${r.cor};font-family:'Courier New',monospace;">${r.val}</span>
+                </div>`).join('')}
+            </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ede8f8;border-radius:11px;padding:16px;">
+            ${secTitle('Saúde da Rede (KPIs Operacionais)')}
+            <div style="display:flex;flex-direction:column;gap:7px;">
+                ${[
+                    {label:'🟢 Saudável — todos KPIs OK',count:m.saude.verde,cor:'#16a34a',bg:'#f0fdf4'},
+                    {label:'🟡 Atenção — algum KPI em alerta',count:m.saude.amarelo,cor:'#d97706',bg:'#fffbeb'},
+                    {label:'🔴 Crítico — KPI abaixo do threshold',count:m.saude.vermelho,cor:'#dc2626',bg:'#fef2f2'},
+                    {label:'⚪ Sem dados de KPI registrados',count:m.saude.semDados,cor:'#9b8cc0',bg:'#f9f7ff'},
+                ].map(s=>{const total=m.ativos.length||1;const pct=Math.round((s.count/total)*100);return `<div style="padding:8px 11px;background:${s.bg};border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                        <span style="font-size:10px;color:#374151;">${s.label}</span>
+                        <span style="font-size:13px;font-weight:900;color:${s.cor};font-family:'Courier New',monospace;">${s.count}</span>
+                    </div>
+                    <div style="height:4px;background:rgba(0,0,0,.07);border-radius:2px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${s.cor};border-radius:2px;"></div></div>
+                </div>`}).join('')}
+            </div>
+        </div>
+    </div>
+
+    <!-- COBERTURA GEOGRÁFICA -->
+    <div style="margin-bottom:24px;">
+        ${secTitle('Cobertura Geográfica da Rede')}
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px;">
+            ${Object.entries(m.regioes).map(([reg,data],ri)=>`<div style="background:#fff;border:1px solid #ede8f8;border-radius:9px;padding:12px;border-top:3px solid ${RC[ri]};text-align:center;">
+                <div style="font-size:10px;font-weight:800;color:${RC[ri]};margin-bottom:5px;">${reg}</div>
+                <div style="font-size:20px;font-weight:900;color:#2d1b69;font-family:'Courier New',monospace;">${data.count}</div>
+                <div style="font-size:8px;color:#9b8cc0;margin-top:2px;">licenciados</div>
+                ${data.m2>0?`<div style="font-size:9px;font-weight:700;color:${RC[ri]};margin-top:3px;">${fmt(data.m2)} m²</div>`:''}
+            </div>`).join('')}
+        </div>
+        ${m.estados.length>0?`<div style="margin-top:10px;padding:8px 12px;background:#f9f7ff;border-radius:7px;font-size:10px;color:#6b7280;"><strong>Estados cobertos (${m.estados.length}):</strong> ${m.estados.sort().join(' · ')}</div>`:''}
+    </div>
+
+    <!-- TOP LICENCIADOS -->
+    ${m.top5.length>0?`<div style="margin-bottom:24px;">
+        ${secTitle('Top '+m.top5.length+' Licenciados por Score de Qualidade')}
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+            <thead><tr style="background:#f0ebff;border-bottom:2px solid #e0d9f5;">
+                <th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">#</th>
+                <th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Licenciado</th>
+                <th style="padding:8px 8px;text-align:center;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Nível</th>
+                <th style="padding:8px 8px;text-align:left;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">UF</th>
+                <th style="padding:8px 8px;text-align:right;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">m² Total</th>
+                <th style="padding:8px 8px;text-align:right;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Score</th>
+            </tr></thead>
+            <tbody>${m.top5.map((l,i)=>{
+                const t=getLicTier(l);const sc=calcLicScore(l);const m2=parseFloat(l.area_total_m2)||0;
+                const sc_cor=sc>=80?'#7c3aed':sc>=60?'#b45309':sc>=35?'#4b5563':'#92400e';
+                return `<tr style="border-bottom:1px solid #f5f3ff;">
+                    <td style="padding:8px 12px;font-weight:800;color:#9b8cc0;font-family:'Courier New',monospace;">${String(i+1).padStart(2,'0')}</td>
+                    <td style="padding:8px 12px;font-weight:700;color:#2d1b69;">${l.razao_social||'—'}</td>
+                    <td style="padding:8px;text-align:center;">${t?`<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;background:${TB[t.name]};color:${TC[t.name]};border:1px solid ${TBD[t.name]};">${TI[t.name]} ${t.name}</span>`:''}</td>
+                    <td style="padding:8px;color:#6b7280;">${l.uf||'—'}</td>
+                    <td style="padding:8px;text-align:right;font-family:'Courier New',monospace;font-weight:600;">${m2>0?m2.toLocaleString('pt-BR')+' m²':'—'}</td>
+                    <td style="padding:8px;text-align:right;"><span style="font-size:13px;font-weight:900;color:${sc_cor};font-family:'Courier New',monospace;">${sc}</span><span style="font-size:9px;color:#9b8cc0;">/100</span></td>
+                </tr>`;
+            }).join('')}</tbody>
+        </table>
+    </div>`:''}
+
+    <!-- ALERTAS -->
+    <div style="margin-bottom:24px;">
+        ${secTitle('Alertas e Pontos de Atenção',true)}
+        ${m.alertasCap.length===0&&m.semKpis===0
+            ?`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:9px;padding:12px 16px;font-size:12px;font-weight:700;color:#16a34a;text-align:center;">✅ Nenhum alerta crítico — rede operando dentro dos parâmetros estabelecidos</div>`
+            :`<div style="display:flex;flex-direction:column;gap:7px;">
+                ${m.semKpis>0?`<div style="background:#f9f7ff;border:1px solid #e0d9f5;border-left:4px solid #6941c6;border-radius:8px;padding:9px 13px;font-size:11px;color:#2d1b69;"><strong>📊 ${m.semKpis} licenciado${m.semKpis>1?'s':''}</strong> sem KPIs de performance — necessário lançar dados no Scorecard para monitoramento.</div>`:''}
+                ${m.alertasCap.map(l=>{const {utilPct}=getM2Disponivel(l);const crit=utilPct>90;return `<div style="background:${crit?'#fef2f2':'#fffbeb'};border:1px solid ${crit?'#fca5a5':'#fcd34d'};border-left:4px solid ${crit?'#dc2626':'#d97706'};border-radius:8px;padding:9px 13px;font-size:11px;color:#2d1b69;display:flex;justify-content:space-between;align-items:center;"><span><strong>${crit?'🔴':'⚠️'} ${l.razao_social||'—'}</strong> — ${utilPct}% de ocupação${crit?' (CRÍTICO — capacidade esgotada)':' (atenção — capacidade limitada)'}</span><span style="font-size:10px;color:#6b7280;background:rgba(0,0,0,.06);padding:2px 8px;border-radius:6px;">${l.uf||''}</span></div>`;}).join('')}
+            </div>`}
+    </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div style="background:linear-gradient(90deg,#2d1b69,#422c76);padding:14px 36px;display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:9px;color:rgba(255,255,255,.45);">pipelinevendemmia.com.br</span>
+        <span style="font-size:9px;color:rgba(255,255,255,.35);">Documento CONFIDENCIAL — distribuição restrita à diretoria Vendemmia</span>
+        <span style="font-size:9px;color:rgba(255,255,255,.45);">${m.dataHora}</span>
+    </div>
+    </div>`;
 }
 
 function renderizarLicDisponibilidade() {
