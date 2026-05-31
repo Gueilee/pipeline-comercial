@@ -3648,7 +3648,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
             <div class="form-group" style="flex:1; margin-bottom:0;">
                 <label>Ano</label>
-                <select id="cmAno" onchange="_renderListaMetasVendedor()" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
+                <select id="cmAno" onchange="_renderListaMetasVendedor(); _renderTodasMetas();" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #e0e0e0; font-size:13px;">
                     <option value="2025">2025</option>
                     <option value="2026" selected>2026</option>
                     <option value="2027">2027</option>
@@ -3657,7 +3657,16 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
         </div>
 
-        <div id="cmListaMetas" style="margin-bottom:20px; min-height:50px;"></div>
+        <div id="cmListaMetas" style="margin-bottom:16px; min-height:50px;"></div>
+
+        <!-- Todas as metas cadastradas no banco -->
+        <div id="cmTodasMetas" style="margin-bottom:20px; display:none;">
+            <div style="font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.4px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <span>📋 Todas as metas cadastradas no banco</span>
+                <span id="cmTodasMetasCount" style="background:#422c76; color:#fff; border-radius:10px; padding:1px 8px; font-size:10px;"></span>
+            </div>
+            <div id="cmTodasMetasLista"></div>
+        </div>
 
         <div style="background:#f7f5fb; border-radius:12px; padding:18px; border:1.5px solid #e0d9f5;">
             <div style="font-size:12px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.4px; margin-bottom:14px;">
@@ -4069,7 +4078,7 @@ function _buildMetasMensais(ano) {
     }
 
     if (Object.keys(novo).length > 0) {
-        Object.keys(METAS_MENSAIS).forEach(k => { if (!novo[k]) delete METAS_MENSAIS[k]; });
+        // Sobrescreve apenas os vendedores presentes no banco — mantém hardcoded para os demais
         Object.assign(METAS_MENSAIS, novo);
     }
 }
@@ -4423,6 +4432,7 @@ function abrirModalConfigurarMeta(vendedorPreselect, tipoPreselect) {
     if (tipoPreselect) document.getElementById('cmTipo').value = tipoPreselect;
     cmCancelarEdicao();
     _renderListaMetasVendedor();
+    _renderTodasMetas();
     abrirModal('modalConfigurarMeta');
 }
 
@@ -4499,6 +4509,7 @@ async function salvarMetaAnual() {
     await carregarMetasAnuais();
     cmCancelarEdicao();
     _renderListaMetasVendedor();
+    _renderTodasMetas();
     renderizarMetas();
 }
 
@@ -4509,6 +4520,7 @@ async function deletarMetaAnual(id) {
         showToast('Meta excluída.', 'info');
         await carregarMetasAnuais();
         _renderListaMetasVendedor();
+        _renderTodasMetas();
         renderizarMetas();
     });
 }
@@ -4567,6 +4579,42 @@ function _renderListaMetasVendedor() {
             </div>
             <div style="display:flex; gap:6px;">
                 <button type="button" class="btn-mini btn-edit-mini" onclick="editarMetaAnual('${r.id}')">EDITAR</button>
+                <button type="button" class="btn-mini btn-del-mini" onclick="deletarMetaAnual('${r.id}')">EXCLUIR</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function _renderTodasMetas() {
+    const ano  = parseInt(document.getElementById('cmAno').value) || periodoAno;
+    const wrap = document.getElementById('cmTodasMetas');
+    const lista = document.getElementById('cmTodasMetasLista');
+    const count = document.getElementById('cmTodasMetasCount');
+    if (!wrap || !lista) return;
+
+    const registros = (baseMetasAnuais || []).filter(r => r.ano === ano);
+    if (registros.length === 0) { wrap.style.display = 'none'; return; }
+
+    wrap.style.display = '';
+    if (count) count.textContent = registros.length + ' registro' + (registros.length !== 1 ? 's' : '');
+
+    const NM = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(Math.round(v));
+
+    lista.innerHTML = registros.sort((a,b) => a.vendedor.localeCompare(b.vendedor)).map(r => {
+        const tCls   = r.tipo === 'SDR' ? 'sdr' : r.tipo === 'SDR_TEAM' ? 'sdr-team' : 'vendedor';
+        const tLabel = r.tipo === 'SDR' ? 'SDR' : r.tipo === 'SDR_TEAM' ? 'PRÉ VENDAS' : 'Vendedor';
+        const per    = `${NM[(r.mes_inicio||1)-1]} → ${NM[(r.mes_fim||12)-1]}`;
+        const fat    = (parseFloat(r.trading_mes)||0)+(parseFloat(r.armazem_mes)||0)+(parseFloat(r.transporte_mes)||0)+(parseFloat(r.analytics_mes)||0);
+        const reuniao = Math.round(r.reuniao_mes||0);
+        return `<div class="meta-lista-item" style="margin-bottom:5px;">
+            <div style="flex:1; min-width:0;">
+                <span class="meta-tag ${tCls}">${tLabel}</span>
+                <strong style="font-size:12px; color:#333;">${r.vendedor}</strong>
+                <span style="font-size:11px; color:#888; margin-left:8px;">${per} · ${reuniao} reun/mês${fat>0?' · R$'+_fmtM(fat)+'/mês':''}</span>
+            </div>
+            <div style="display:flex; gap:5px; flex-shrink:0;">
+                <button type="button" class="btn-mini btn-edit-mini" onclick="editarMetaAnual('${r.id}'); document.getElementById('cmVendedor').value='${r.vendedor}'; _renderListaMetasVendedor();">EDITAR</button>
                 <button type="button" class="btn-mini btn-del-mini" onclick="deletarMetaAnual('${r.id}')">EXCLUIR</button>
             </div>
         </div>`;
