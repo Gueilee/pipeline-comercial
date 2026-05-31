@@ -1659,6 +1659,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
                         <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔍 Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
+                        <button id="btn-lic-alertas" onclick="abrirLicAlertas()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;position:relative;">🔔 Alertas</button>
                         <button onclick="gerarBoardReport(event)" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(45,27,105,.3);">📋 Board Report</button>
                         <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">💼 Disponibilidade</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
@@ -9389,6 +9390,7 @@ function renderizarLicenciamento() {
     document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
 
     renderizarLicDashboard();
+    atualizarBadgeAlertas();
 }
 
 function abrirFormLead(id, returnTo) {
@@ -10577,6 +10579,220 @@ function _buildBoardReportHtml(m) {
     </div>
     </div>`;
 }
+
+// ── Central de Alertas e Renovações ──────────────────────────────
+
+const LIC_ALERTA_TIPOS = {
+    CERT_VENCENDO: { icon:'🏆', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Certificação vencendo', prioridade:0 },
+    CAPACIDADE_MIN: { icon:'📐', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Capacidade crítica', prioridade:0 },
+    SCORE_DOWN:     { icon:'📉', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', label:'Risco de downgrade', prioridade:0 },
+    SEM_ATIVIDADE:  { icon:'💤', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Sem atualização', prioridade:1 },
+    CAPACIDADE_70:  { icon:'⚠️', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Alta ocupação', prioridade:1 },
+    CERT_60:        { icon:'🏆', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', label:'Certificação atenção', prioridade:1 },
+    ANIVERSARIO:    { icon:'🎂', cor:'#7c3aed', bg:'#f5f3ff', border:'#c4b5fd', label:'Aniversário de contrato', prioridade:2 },
+    FORM_PREENCHIDO:{ icon:'📋', cor:'#16a34a', bg:'#f0fdf4', border:'#86efac', label:'Formulário preenchido', prioridade:2 },
+    SEM_KPIS:       { icon:'📊', cor:'#6941c6', bg:'#f5f3ff', border:'#c4b5fd', label:'Sem KPIs', prioridade:2 },
+};
+
+function gerarLicAlertas() {
+    const hoje = new Date();
+    const dispensados = licGetDispensados();
+    const alertas = [];
+    const addAlerta = (tipo, leadId, titulo, desc, acao) => {
+        const id = `${tipo}_${leadId}_${new Date().toISOString().substring(0,7)}`;
+        if (dispensados.has(id)) return;
+        const t = LIC_ALERTA_TIPOS[tipo];
+        if (!t) return;
+        alertas.push({ id, tipo, leadId, titulo, desc, acao, ...t, ts: new Date().toISOString() });
+    };
+
+    baseLicLeads.forEach(lead => {
+        const aud = _audData[String(lead.id)];
+        const perf = getLicUltimoPeriodo(lead.id);
+        const isAtivo = lead.status === 'Convertido';
+
+        // 1. Certificação vencendo (30/60/90 dias)
+        if (aud?.certificado_validade) {
+            const val = new Date(aud.certificado_validade+'T00:00:00');
+            const dias = Math.round((val - hoje) / 86400000);
+            if (dias <= 30 && dias >= 0) addAlerta('CERT_VENCENDO', lead.id, `Certificado vence em ${dias} dia${dias!==1?'s':''}`, `${lead.razao_social||'—'} · Validade: ${val.toLocaleDateString('pt-BR')}`, 'auditoria');
+            else if (dias <= 60 && dias > 30) addAlerta('CERT_60', lead.id, `Certificado vence em ${dias} dias`, `${lead.razao_social||'—'} · Validade: ${val.toLocaleDateString('pt-BR')}`, 'auditoria');
+        }
+
+        // 2. Sem atividade >60 dias (licenciado ativo sem atualização)
+        if (isAtivo && lead.updated_at) {
+            const diasSem = Math.round((hoje - new Date(lead.updated_at)) / 86400000);
+            if (diasSem > 60) addAlerta('SEM_ATIVIDADE', lead.id, `Sem atualização há ${diasSem} dias`, `${lead.razao_social||'—'} · Último acesso: ${new Date(lead.updated_at).toLocaleDateString('pt-BR')}`, 'form');
+        }
+
+        // 3. Score downgrade (tier atual < tier anterior)
+        if (isAtivo) {
+            const recs = _licPerfData[String(lead.id)]||[];
+            if (recs.length >= 2) {
+                const tier = getLicTier(lead);
+                if (tier?.name === 'Prata' || tier?.name === 'Bronze') {
+                    const ultimo = recs[recs.length-1];
+                    const anterior = recs[recs.length-2];
+                    const otifDrop = (anterior.otif_pct||0) - (ultimo.otif_pct||0);
+                    const acuDrop  = (anterior.acuracidade_inventario||0) - (ultimo.acuracidade_inventario||0);
+                    if (otifDrop > 3 || acuDrop > 2) addAlerta('SCORE_DOWN', lead.id, `Queda de performance detectada`, `${lead.razao_social||'—'} · OTIF: -${otifDrop.toFixed(1)}% | Acuracidade: -${acuDrop.toFixed(1)}%`, 'scorecard');
+                }
+            }
+        }
+
+        // 4. Capacidade mínima <500 m²
+        if (isAtivo) {
+            const { disponivel, utilPct } = getM2Disponivel(lead);
+            if (disponivel !== null && disponivel < 500) addAlerta('CAPACIDADE_MIN', lead.id, `Capacidade crítica: ${Math.round(disponivel)} m² disponíveis`, `${lead.razao_social||'—'} · ${utilPct}% de ocupação`, 'disponibilidade');
+            else if (utilPct !== null && utilPct > 70 && disponivel !== null) addAlerta('CAPACIDADE_70', lead.id, `Alta ocupação: ${utilPct}% utilizado`, `${lead.razao_social||'—'} · ${Math.round(disponivel||0)} m² disponíveis`, 'disponibilidade');
+        }
+
+        // 5. Formulário preenchido nos últimos 7 dias
+        if (lead.form_status === 'concluido' && lead.form_filled_at) {
+            const diasD = Math.round((hoje - new Date(lead.form_filled_at)) / 86400000);
+            if (diasD <= 7) addAlerta('FORM_PREENCHIDO', lead.id, `Formulário preenchido há ${diasD} dia${diasD!==1?'s':''}`, `${lead.razao_social||'—'} · Lead pronto para análise`, 'form');
+        }
+
+        // 6. Aniversário de contrato (dentro de 30 dias)
+        if (aud?.certificado_emitido_em) {
+            const em = new Date(aud.certificado_emitido_em+'T00:00:00');
+            const aniv = new Date(hoje.getFullYear(), em.getMonth(), em.getDate());
+            const diasAniv = Math.round((aniv - hoje) / 86400000);
+            if (diasAniv >= 0 && diasAniv <= 30) {
+                const anos = hoje.getFullYear() - em.getFullYear();
+                addAlerta('ANIVERSARIO', lead.id, `Aniversário de contrato em ${diasAniv === 0 ? 'hoje' : diasAniv+' dias'}`, `${lead.razao_social||'—'} · ${anos} ano${anos!==1?'s':''} de parceria`, 'form');
+            }
+        }
+
+        // 7. Sem KPIs (ativo sem nenhum registro de performance)
+        if (isAtivo && !perf) addAlerta('SEM_KPIS', lead.id, `Sem KPIs registrados no Scorecard`, `${lead.razao_social||'—'} · Lançar dados de performance`, 'scorecard');
+    });
+
+    return alertas.sort((a,b) => a.prioridade - b.prioridade);
+}
+
+function licGetDispensados() {
+    try { return new Set(JSON.parse(localStorage.getItem('lic_alertas_dispensados')||'[]')); } catch(e) { return new Set(); }
+}
+function licDispensar(id) {
+    const d = licGetDispensados(); d.add(id);
+    localStorage.setItem('lic_alertas_dispensados', JSON.stringify([...d]));
+    renderizarLicAlertas();
+    atualizarBadgeAlertas();
+}
+function licDispensarTodos() {
+    const alertas = gerarLicAlertas();
+    const d = licGetDispensados();
+    alertas.forEach(a=>d.add(a.id));
+    localStorage.setItem('lic_alertas_dispensados', JSON.stringify([...d]));
+    renderizarLicAlertas();
+    atualizarBadgeAlertas();
+}
+
+function atualizarBadgeAlertas() {
+    const btn = document.getElementById('btn-lic-alertas');
+    if (!btn) return;
+    const alertas = gerarLicAlertas();
+    const criticos = alertas.filter(a=>a.prioridade===0).length;
+    const total = alertas.length;
+    if (total > 0) {
+        btn.innerHTML = `🔔 Alertas <span style="background:${criticos>0?'#dc2626':'#d97706'};color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:2px;">${total}</span>`;
+        btn.style.borderColor = criticos>0?'#fca5a5':'#fcd34d';
+    } else {
+        btn.innerHTML = '🔔 Alertas';
+        btn.style.borderColor = '#e0d9f5';
+    }
+}
+
+async function abrirLicAlertas() {
+    if (Object.keys(_licPerfData).length===0) await carregarLicPerformance();
+    if (Object.keys(_audData).length===0) await carregarLicAuditoria();
+    renderizarLicAlertas();
+    document.getElementById('lic-alertas-overlay').style.display='block';
+    document.getElementById('lic-alertas-panel').style.right='0';
+}
+
+function fecharLicAlertas() {
+    document.getElementById('lic-alertas-overlay').style.display='none';
+    document.getElementById('lic-alertas-panel').style.right='-440px';
+}
+
+function renderizarLicAlertas() {
+    const alertas = gerarLicAlertas();
+    const sub = document.getElementById('lic-alertas-sub');
+    const list = document.getElementById('lic-alertas-list');
+    if (!list) return;
+
+    if (sub) {
+        const criticos = alertas.filter(a=>a.prioridade===0).length;
+        const atencao  = alertas.filter(a=>a.prioridade===1).length;
+        const info     = alertas.filter(a=>a.prioridade===2).length;
+        sub.innerHTML = alertas.length===0
+            ? 'Nenhum alerta ativo — rede em dia ✅'
+            : `${criticos>0?'<span style="color:#fca5a5;font-weight:700;">'+criticos+' crítico'+( criticos!==1?'s':'')+'</span> · ':''}${atencao>0?atencao+' atenção · ':''}${info>0?info+' info':''}`;
+    }
+
+    if (alertas.length===0) {
+        list.innerHTML=`<div style="text-align:center;padding:50px 20px;">
+            <div style="font-size:48px;margin-bottom:16px;">✅</div>
+            <div style="font-size:15px;font-weight:800;color:#2d1b69;margin-bottom:8px;">Nenhum alerta ativo</div>
+            <div style="font-size:13px;color:#9b8cc0;line-height:1.6;">A rede está operando dentro dos parâmetros. Os alertas surgem automaticamente conforme eventos críticos são detectados.</div>
+        </div>`;
+        return;
+    }
+
+    const grupos = [
+        { prioridade:0, label:'🔴 Crítico', cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5' },
+        { prioridade:1, label:'⚠️ Atenção', cor:'#d97706', bg:'#fffbeb', border:'#fcd34d' },
+        { prioridade:2, label:'💡 Informação', cor:'#6941c6', bg:'#f5f3ff', border:'#e0d9f5' },
+    ];
+
+    const acoes = {
+        auditoria:      `onclick="fecharLicAlertas();abrirLicAuditoria()" style="cursor:pointer;"`,
+        scorecard:      `onclick="fecharLicAlertas();abrirLicScorecard()" style="cursor:pointer;"`,
+        disponibilidade:`onclick="fecharLicAlertas();abrirLicDisponibilidade()" style="cursor:pointer;"`,
+        form:           (leadId)=>`onclick="fecharLicAlertas();abrirFormLead('${leadId}')" style="cursor:pointer;"`,
+    };
+
+    list.innerHTML = grupos.map(g=>{
+        const items = alertas.filter(a=>a.prioridade===g.prioridade);
+        if (!items.length) return '';
+        const cards = items.map(a=>{
+            const btnAcao = a.acao==='form'
+                ? `<button ${acoes.form(a.leadId)} style="padding:5px 12px;border:1.5px solid ${a.border};border-radius:7px;background:#fff;font-family:inherit;font-size:11px;font-weight:700;color:${a.cor};cursor:pointer;">Ver lead →</button>`
+                : `<button ${acoes[a.acao]||''} style="padding:5px 12px;border:1.5px solid ${a.border};border-radius:7px;background:#fff;font-family:inherit;font-size:11px;font-weight:700;color:${a.cor};cursor:pointer;">Ver →</button>`;
+            return `<div style="background:#fff;border:1.5px solid ${a.border};border-left:4px solid ${a.cor};border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;flex:1;">
+                        <span style="font-size:18px;flex-shrink:0;">${a.icon}</span>
+                        <div>
+                            <div style="font-size:12px;font-weight:800;color:#2d1b69;line-height:1.2;margin-bottom:2px;">${a.titulo}</div>
+                            <div style="font-size:11px;color:#6b7280;line-height:1.3;">${a.desc}</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
+                    <span style="font-size:9px;background:${a.bg};color:${a.cor};border:1px solid ${a.border};border-radius:20px;padding:2px 8px;font-weight:700;">${a.label}</span>
+                    <div style="display:flex;gap:6px;">
+                        ${btnAcao}
+                        <button onclick="licDispensar('${a.id}')" style="padding:5px 10px;border:1px solid #e0d9f5;border-radius:7px;background:#f9f7ff;font-family:inherit;font-size:10px;color:#9b8cc0;cursor:pointer;">Dispensar</button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        return `<div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:${g.cor};margin-bottom:8px;display:flex;align-items:center;gap:6px;">${g.label} <span style="font-size:11px;background:${g.bg};color:${g.cor};border:1px solid ${g.border};border-radius:20px;padding:1px 7px;">${items.length}</span></div>
+            ${cards}
+        </div>`;
+    }).join('');
+}
+
+// Atualiza badge quando dados carregam
+const _origCarregarLicLeads = carregarLicLeads;
+carregarLicLeads = async function() {
+    await _origCarregarLicLeads.apply(this, arguments);
+    setTimeout(atualizarBadgeAlertas, 300);
+};
 
 function renderizarLicDisponibilidade() {
     const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
@@ -13103,6 +13319,27 @@ async function salvarNovaSenha() {
             💡 <strong>O parceiro não precisa de login.</strong> Ao abrir o link ele verá um portal exclusivo para preencher os dados da empresa. As informações são salvas automaticamente no sistema.
         </div>
     </div>
+</div>
+
+<!-- Central de Alertas e Renovações -->
+<div id="lic-alertas-overlay" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.45);z-index:900;backdrop-filter:blur(4px);" onclick="fecharLicAlertas()"></div>
+<div id="lic-alertas-panel" style="position:fixed;top:0;right:-440px;height:100vh;width:420px;background:#fff;z-index:901;overflow:hidden;display:flex;flex-direction:column;box-shadow:-4px 0 40px rgba(45,27,105,.18);transition:right .32s cubic-bezier(.16,1,.3,1);">
+    <!-- Header do painel -->
+    <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);padding:18px 20px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:20px;">🔔</span>
+                <div style="font-size:15px;font-weight:800;color:#fff;">Central de Alertas</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button onclick="licDispensarTodos()" style="padding:4px 10px;border:1px solid rgba(255,255,255,.25);border-radius:6px;background:rgba(255,255,255,.1);font-family:inherit;font-size:10px;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;">Dispensar todos</button>
+                <button onclick="fecharLicAlertas()" style="width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">×</button>
+            </div>
+        </div>
+        <div id="lic-alertas-sub" style="font-size:11px;color:rgba(255,255,255,.5);">Carregando...</div>
+    </div>
+    <!-- Lista de alertas -->
+    <div id="lic-alertas-list" style="flex:1;overflow-y:auto;padding:14px 16px;background:#f9f7ff;"></div>
 </div>
 
 </body>
