@@ -1669,14 +1669,41 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-package-export"></i> Disponibilidade</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-chart-bar"></i> Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);"><i class="ti ti-link"></i> Gerar link</button>
-                        <div style="position:relative;display:flex;" id="spec-btn-wrap">
-    <a href="Licenciamento/especificacao-fase1.html" target="_blank" title="Especificação Funcional — Fase 1" style="padding:8px 12px;background:#fff;border:1.5px solid #e0d9f5;border-right:none;color:#6941c6;border-radius:8px 0 0 8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;text-decoration:none;"><i class="ti ti-file-description"></i> Espec.</a>
-    <a href="Licenciamento/especificacao-fase2.html" target="_blank" title="Especificação Funcional — Fase 2" style="padding:8px 6px;background:#f5f3ff;border:1.5px solid #e0d9f5;border-left:none;border-right:none;color:#6941c6;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;text-decoration:none;">F2</a>
-    <a href="Licenciamento/especificacao-fase3.html" target="_blank" title="Especificação Funcional — Fase 3 (Final)" style="padding:8px 7px;background:#f0fdf4;border:1.5px solid #86efac;color:#16a34a;border-left:none;border-right:none;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;text-decoration:none;">F3</a>
-    <a href="Licenciamento/especificacao-tecnica-fase1.html" target="_blank" style="padding:8px 6px;background:#f0f9ff;border:1.5px solid #7dd3fc;border-left:none;border-right:none;color:#0284c7;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;text-decoration:none;" title="Especificação Técnica — Fase 1">⚙</a>
-    <a href="Licenciamento/especificacao-tecnica-fase2.html" target="_blank" style="padding:8px 5px;background:#e0f2fe;border:1.5px solid #7dd3fc;border-left:none;border-right:none;color:#0284c7;font-size:9px;font-weight:700;cursor:pointer;display:flex;align-items:center;text-decoration:none;" title="Especificação Técnica — Fase 2">T2</a>
-    <a href="Licenciamento/especificacao-tecnica-fase3.html" target="_blank" style="padding:8px 7px;background:#dcfce7;border:1.5px solid #86efac;color:#16a34a;border-radius:0 8px 8px 0;font-size:9px;font-weight:700;cursor:pointer;display:flex;align-items:center;text-decoration:none;" title="Especificação Técnica — Fase 3 (Final)">T3</a>
-</div>
+                        <!-- Dropdown único de Especificações -->
+                        <div style="position:relative;" id="spec-btn-wrap">
+                            <button onclick="toggleEspecMenu()" id="btn-espec" style="padding:8px 16px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                <i class="ti ti-file-description"></i> Especificações <i class="ti ti-chevron-down" id="espec-chevron" style="font-size:12px;transition:transform .2s;"></i>
+                            </button>
+                            <div id="espec-menu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1.5px solid #e0d9f5;border-radius:12px;box-shadow:0 8px 28px rgba(105,65,198,.18);min-width:310px;z-index:500;overflow:hidden;">
+                                <div style="padding:9px 14px 5px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9b8cc0;border-bottom:1px solid #f5f3ff;">📋 Especificação Funcional</div>
+                                <a href="Licenciamento/especificacao-fase1.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;border-bottom:1px solid #faf8ff;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">📄</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#2d1b69;">Fundação — Perfis, Módulos e Requisitos</div><div style="font-size:10px;color:#9b8cc0;margin-top:1px;">Seções 1–4 · RF-001 a RF-030</div></div>
+                                </a>
+                                <a href="Licenciamento/especificacao-fase2.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;border-bottom:1px solid #faf8ff;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">⚙️</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#2d1b69;">Regras, Fluxos e Telas do Sistema</div><div style="font-size:10px;color:#9b8cc0;margin-top:1px;">Seções 5–8 · RN, Fluxos, UC</div></div>
+                                </a>
+                                <a href="Licenciamento/especificacao-fase3.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;" onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">✅</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#2d1b69;">Validações, Critérios de Aceite e RNF</div><div style="font-size:10px;color:#9b8cc0;margin-top:1px;">Seções 9–13 · Glossário · Documento completo</div></div>
+                                </a>
+                                <div style="height:1px;background:#e0d9f5;"></div>
+                                <div style="padding:9px 14px 5px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9b8cc0;border-bottom:1px solid #f0f9ff;">🔧 Especificação Técnica</div>
+                                <a href="Licenciamento/especificacao-tecnica-fase1.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;border-bottom:1px solid #f0f9ff;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">🗄️</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#0f172a;">Arquitetura, Stack e Banco de Dados</div><div style="font-size:10px;color:#94a3b8;margin-top:1px;">Seções 1–3 · Stack, Modelo de dados</div></div>
+                                </a>
+                                <a href="Licenciamento/especificacao-tecnica-fase2.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;border-bottom:1px solid #f0f9ff;" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">🔐</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#0f172a;">APIs, Segurança e Infraestrutura</div><div style="font-size:10px;color:#94a3b8;margin-top:1px;">Seções 4–6 · Endpoints, RLS, CI/CD</div></div>
+                                </a>
+                                <a href="Licenciamento/especificacao-tecnica-fase3.html" target="_blank" onclick="fecharEspecMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 14px;text-decoration:none;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">
+                                    <span style="font-size:20px;flex-shrink:0;">🚀</span>
+                                    <div><div style="font-size:12px;font-weight:700;color:#0f172a;">Código, DevOps e Plano de Evolução</div><div style="font-size:10px;color:#94a3b8;margin-top:1px;">Seções 7–12 · Performance · Documento completo</div></div>
+                                </a>
+                            </div>
+                        </div>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="ti ti-plus"></i> Novo Lead</button>
                     </div>
                 </div>
@@ -9347,6 +9374,24 @@ async function subirPlanilhaExcel(event) {
 // Versões com debounce para os filtros de texto (evita query a cada tecla)
 const debouncedRenderizar = debounce(renderizar, 300);
 const debouncedRenderizarFin = debounce(renderizarFinanceiro, 300);
+
+// ── Dropdown de Especificações ─────────────────────────────────
+function toggleEspecMenu() {
+    const menu = document.getElementById('espec-menu');
+    const chevron = document.getElementById('espec-chevron');
+    const open = menu.style.display !== 'none';
+    menu.style.display = open ? 'none' : 'block';
+    if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+function fecharEspecMenu() {
+    const menu = document.getElementById('espec-menu');
+    const chevron = document.getElementById('espec-chevron');
+    if (menu) menu.style.display = 'none';
+    if (chevron) chevron.style.transform = '';
+}
+document.addEventListener('click', e => {
+    if (!document.getElementById('spec-btn-wrap')?.contains(e.target)) fecharEspecMenu();
+});
 
 // ════════════════════════════════════════════════════════════════
 // ── MÓDULO LICENCIAMENTO ─────────────────────────────────────────
