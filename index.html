@@ -2470,7 +2470,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
         </div>
         <div style="display:flex;gap:10px;">
             <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">⊕ Ver todo Brasil</button>
-            <button onclick="abrirFormLead(null,'tabela')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
+            <button onclick="abrirFormLead(null,'mapa')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+ Novo Lead</button>
         </div>
     </div>
 
@@ -8902,9 +8902,12 @@ function abrirFormLead(id, returnTo) {
         if (lead) _licPreencherForm(lead);
     }
 
-    document.getElementById('lic-view-tabela').style.display = 'none';
-    const fv = document.getElementById('lic-view-form');
-    fv.style.display = 'flex';
+    // Esconde todas as views antes de exibir o formulário
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    document.getElementById('lic-view-form').style.display = 'flex';
     _licUpdateProgress();
 }
 
@@ -8913,6 +8916,9 @@ function fecharFormLead() {
     if (_licFormReturnTo === 'kanban') {
         document.getElementById('lic-view-kanban').style.display = 'flex';
         renderizarLicKanban();
+    } else if (_licFormReturnTo === 'mapa') {
+        document.getElementById('lic-view-mapa').style.display = 'flex';
+        carregarLicLeads().then(() => { renderizarLicMapaPanel(); _licAtualizarMarkers(); });
     } else {
         document.getElementById('lic-view-tabela').style.display = '';
     }
