@@ -820,6 +820,23 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 .lic-wms-price-row span:first-child{color:#9b8cc0;}
 .lic-wms-price-row span:last-child{font-weight:700;color:#2d1b69;}
 
+/* Full-view modal */
+#lic-map-fullview.open{display:flex!important;}
+.lfv-section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #f0ebff;}
+.lfv-address-line{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:13px;color:#374151;}
+.lfv-address-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.lfv-wh-card{border:1.5px solid #e8e0f5;border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.lfv-wh-head{background:linear-gradient(135deg,#f0ebff,#e8dff8);padding:11px 14px;display:flex;align-items:center;gap:10px;}
+.lfv-wh-body{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.lfv-wh-stat{background:#fff;border:1px solid #f0ebff;border-radius:8px;padding:8px 10px;text-align:center;}
+.lfv-wh-stat-val{font-size:16px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;}
+.lfv-wh-stat-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-top:2px;}
+.lfv-metric-card{background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:12px;padding:14px 16px;text-align:center;border:1px solid #e0d9f5;}
+.lfv-metric-val{font-size:22px;font-weight:900;color:#2d1b69;font-family:'Courier New',monospace;line-height:1.1;}
+.lfv-metric-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-top:4px;}
+.lfv-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+#lb-thumbs::-webkit-scrollbar{height:4px;} #lb-thumbs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:2px;}
+
 /* Mapa */
 #lic-mapa-container { z-index:1; }
 
@@ -2556,12 +2573,50 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             <!-- Hover popup (posicionado via JS) -->
             <div id="lic-map-hover-popup" class="lic-map-hover"></div>
 
-            <!-- Overlay escurecimento quando panel aberto -->
-            <div id="lic-map-overlay" class="lic-map-panel-overlay" onclick="_licMapFecharPanel()"></div>
+            <!-- Overlay do full-view -->
+            <div id="lic-fv-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,5,30,.75);z-index:900;backdrop-filter:blur(4px);" onclick="fecharLicMapFullView()"></div>
 
-            <!-- Side panel deslizante -->
-            <div id="lic-map-side-panel" class="lic-map-panel">
-                <div id="lic-map-side-content" style="padding:0;"></div>
+            <!-- FULL VIEW MODAL (Booking.com style) -->
+            <div id="lic-map-fullview" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.97);width:min(1100px,96vw);max-height:90vh;background:#fff;border-radius:20px;overflow:hidden;z-index:901;box-shadow:0 32px 80px rgba(0,0,0,.35);flex-direction:column;transition:transform .25s cubic-bezier(.16,1,.3,1),opacity .2s;">
+                <!-- Botão fechar fixo -->
+                <button onclick="fecharLicMapFullView()" style="position:absolute;top:14px;right:14px;z-index:10;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">×</button>
+
+                <!-- GALERIA DE FOTOS -->
+                <div id="lfv-gallery-wrap" style="flex-shrink:0;background:#1a1a2e;position:relative;cursor:pointer;" onclick="lfvAbrirLightbox(0)">
+                    <!-- Foto principal -->
+                    <div id="lfv-main-photo" style="height:340px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                        <div id="lfv-main-inner" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b69);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:rgba(255,255,255,.3);">
+                            <div style="font-size:52px;">🏗️</div>
+                            <div style="font-size:13px;font-weight:600;">Sem fotos cadastradas</div>
+                        </div>
+                    </div>
+                    <!-- Faixa de thumbs -->
+                    <div id="lfv-thumbs" style="display:flex;gap:4px;padding:4px;background:#111;height:72px;overflow-x:auto;"></div>
+                    <!-- Badge de contagem -->
+                    <div id="lfv-photo-count" style="display:none;position:absolute;bottom:80px;right:14px;background:rgba(0,0,0,.6);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;backdrop-filter:blur(4px);cursor:pointer;"></div>
+                </div>
+
+                <!-- BODY: 2 colunas -->
+                <div style="display:flex;overflow:hidden;flex:1;min-height:0;">
+                    <!-- COLUNA ESQUERDA: Dados principais -->
+                    <div style="flex:1;overflow-y:auto;padding:24px 28px;" id="lfv-body-left">
+                        <!-- Populado por JS -->
+                    </div>
+                    <!-- COLUNA DIREITA: Sidebar -->
+                    <div style="width:300px;flex-shrink:0;overflow-y:auto;background:#f9f7ff;border-left:1px solid #ede8f8;padding:22px 20px;" id="lfv-body-right">
+                        <!-- Populado por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIGHTBOX de fotos -->
+            <div id="lic-map-lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:2000;flex-direction:column;align-items:center;justify-content:center;">
+                <button onclick="lfvFecharLightbox()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;opacity:.7;line-height:1;">×</button>
+                <div style="position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:13px;color:rgba(255,255,255,.6);" id="lb-counter"></div>
+                <button onclick="lfvNavLightbox(-1)" style="position:absolute;left:20px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;border-radius:50%;width:48px;height:48px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">‹</button>
+                <img id="lb-img" src="" style="max-width:90vw;max-height:82vh;border-radius:10px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.5);">
+                <button onclick="lfvNavLightbox(1)" style="position:absolute;right:20px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;border-radius:50%;width:48px;height:48px;font-size:22px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">›</button>
+                <div id="lb-thumbs" style="position:absolute;bottom:16px;display:flex;gap:6px;max-width:90vw;overflow-x:auto;padding:4px;"></div>
             </div>
         </div>
 
@@ -10970,8 +11025,8 @@ async function salvarEventoHistorico() {
     await registrarLicHistorico(_histModalLeadId, tipo, titulo, desc, extras);
     fecharModalHist();
     // Recarrega painel do mapa se estiver aberto
-    const panel=document.getElementById('lic-map-side-panel');
-    if(panel?.classList.contains('open')) _licMapAtualizarHistTab(_histModalLeadId);
+    const fvPanel=document.getElementById('lic-map-fullview');
+    if(fvPanel?.style.display==='flex') _licMapAtualizarHistTab(_histModalLeadId);
     showToast('Evento registrado no histórico!','success');
     if(btn){btn.disabled=false;btn.innerHTML='💾 Registrar evento';}
 }
@@ -12770,185 +12825,274 @@ function _licMapEsconderHover() {
     }, 80);
 }
 
-function _licMapAbrirPanel(lead) {
-    const panel=document.getElementById('lic-map-side-panel');
-    const overlay=document.getElementById('lic-map-overlay');
-    if(!panel) return;
+let _lfvPhotos   = [];   // URLs das fotos do lead atual
+let _lfvLbIdx    = 0;    // índice atual no lightbox
+let _lfvLeadId   = null; // lead aberto no full-view
 
-    const area=parseFloat(lead.area_total_m2)||0;
-    const fee=parseFloat(lead.fee_mensal)||0;
-    const foto=_licMapPhotoCache[lead.id]||'';
-    const fotos=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&a.tipo?.startsWith('foto_armazem_'));
-    const docs=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&!a.tipo?.startsWith('foto_armazem_')&&a.tipo!=='pdf_lead');
-    const pdfs=_licMapAllAnexos.filter(a=>a.lead_id===lead.id&&a.tipo==='pdf_lead');
-    const cor=lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
-    const armazens=(Array.isArray(lead.armazens)?lead.armazens:[]).filter(w=>w.area_m2>0||w.nome);
-    const pBg={Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
-    const pCol={Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+function _licMapAbrirPanel(lead) { _licMapAbrirFullView(lead); } // alias
 
-    const field=(label,val)=>val?`<div style="margin-bottom:8px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9b8cc0;margin-bottom:2px;">${label}</div><div style="font-size:12px;color:#2d1b69;font-weight:500;line-height:1.3;">${val}</div></div>`:'';
+function _licMapAbrirFullView(lead) {
+    _lfvLeadId = lead.id;
+    const pBg  = {Starter:'#f1f5f9',Pro:'#f0ebff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol = {Starter:'#475569',Pro:'#6941c6',Enterprise:'#166534',Custom:'#92400e'};
+    const t    = getLicTier(lead);
+    const cor  = lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
+    const m2   = parseFloat(lead.area_total_m2)||0;
+    const fee  = parseFloat(lead.fee_mensal)||0;
+    const armazens = Array.isArray(lead.armazens)?lead.armazens.filter(w=>w.area_m2>0||w.nome):[];
 
-    document.getElementById('lic-map-side-content').innerHTML=`
-        <!-- Header com tabs -->
-        <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #f0ebff;">
-            <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:13px;font-weight:700;color:#6941c6;">Licenciado</div>
-                <div style="display:flex;gap:6px;">
-                    <button onclick="abrirModalHist('${lead.id}')" style="padding:5px 10px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;"><i class="ti ti-plus"></i> Evento</button>
-                    <button onclick="_licMapFecharPanel()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #e0d9f5;background:#faf8ff;cursor:pointer;font-size:16px;color:#9b8cc0;display:flex;align-items:center;justify-content:center;">×</button>
-                </div>
-            </div>
-            <!-- TABS -->
-            <div style="display:flex;border-top:1px solid #f0ebff;">
-                <button onclick="licMapTab('dados',this)" id="maptab-dados" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid #6941c6;background:#fff;font-family:inherit;font-size:11px;font-weight:800;color:#6941c6;cursor:pointer;">📋 Dados</button>
-                <button onclick="licMapTab('historico',this)" id="maptab-historico" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid transparent;background:#fff;font-family:inherit;font-size:11px;font-weight:600;color:#9b8cc0;cursor:pointer;">📅 Histórico</button>
-                <button onclick="licMapTab('documentos',this)" id="maptab-documentos" style="flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid transparent;background:#fff;font-family:inherit;font-size:11px;font-weight:600;color:#9b8cc0;cursor:pointer;">📎 Documentos</button>
-            </div>
-        </div>
+    // ── Galeria de fotos ──
+    _lfvPhotos = (_licMapAllAnexos||[]).filter(a=>a.lead_id===lead.id&&a.tipo?.startsWith('foto_armazem_')).map(a=>a.url);
+    const allAnexos = (_licMapAllAnexos||[]).filter(a=>a.lead_id===lead.id);
+    const docs     = allAnexos.filter(a=>!a.tipo?.startsWith('foto_armazem_')&&a.tipo!=='pdf_lead');
+    _lfvRenderGaleria();
 
-        <!-- Tab Dados -->
-        <div id="maptab-content-dados" style="display:block;">
+    // ── Endereço completo ──
+    const endPartes = [
+        lead.endereco_logradouro,
+        lead.endereco_bairro,
+        lead.polo_logistico,
+        lead.uf,
+        lead.cep
+    ].filter(Boolean);
+    const endCompleto = endPartes.join(', ');
 
-        <!-- Galeria de fotos -->
-        <div style="height:200px;background:linear-gradient(135deg,#f0ebff,#e0d4f8);overflow:hidden;position:relative;">
-            ${foto
-                ? `<img src="${foto}" style="width:100%;height:100%;object-fit:cover;">`
-                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"><div style="font-size:48px;">🏗️</div><div style="font-size:12px;color:#9b8cc0;">Sem fotos cadastradas</div></div>`}
-            ${fotos.length>1?`<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.5);color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;">📷 ${fotos.length} fotos</div>`:''}
-        </div>
+    // ── COLUNA ESQUERDA ──
+    const fmtM2 = n=>n>=1e3?(n/1e3).toFixed(0)+'K':String(Math.round(n));
+    const fmtMoney = n=>'R$ '+n.toLocaleString('pt-BR');
 
-        <div style="padding:16px 16px 80px;">
-            <!-- Nome e badges -->
-            <div style="margin-bottom:12px;">
-                <div style="font-size:18px;font-weight:900;color:#2d1b69;line-height:1.2;margin-bottom:6px;">${lead.razao_social||'—'}</div>
-                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    ${lead.plano?`<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};">${lead.plano}</span>`:''}
-                    <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f0ebff'};color:${cor};">${lead.status||'Ativo'}</span>
-                    ${lead.etapa?`<span style="font-size:10px;color:#9b8cc0;padding:3px 10px;border-radius:20px;border:1px solid #f0ebff;">${lead.etapa}</span>`:''}
-                </div>
-            </div>
-
-            <!-- Métricas chave -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-                ${area>0?`<div style="background:#f5f3ff;border-radius:10px;padding:10px 12px;border-left:3px solid #6941c6;"><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Área total</div><div style="font-size:16px;font-weight:800;color:#2d1b69;font-family:'Courier New',monospace;">${area>=1e3?(area/1e3).toFixed(0)+'K':area} m²</div></div>`:''}
-                ${fee>0?`<div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;border-left:3px solid #16a34a;"><div style="font-size:9px;color:#9b8cc0;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Fee/mês</div><div style="font-size:16px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">R$${fee.toLocaleString('pt-BR')}</div></div>`:''}
-            </div>
-
-            <!-- Localização -->
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📍 Localização</div>
-                <div style="font-size:12px;color:#2d1b69;font-weight:600;">${lead.uf||''}${lead.polo_logistico?' — '+lead.polo_logistico:''}</div>
-                ${lead.regiao_exclusividade?`<div style="font-size:11px;color:#9b8cc0;margin-top:3px;">Exclusividade: ${lead.regiao_exclusividade}</div>`:''}
-            </div>
-
-            <!-- Armazéns -->
-            ${armazens.length>0?`
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">🏗️ Armazéns (${armazens.length})</div>
-                ${armazens.map((w,i)=>`
-                <div style="padding:8px 0;${i<armazens.length-1?'border-bottom:1px solid #f9f7ff;':''}">
-                    <div style="font-size:11px;font-weight:700;color:#6941c6;margin-bottom:3px;">Armazém ${i+1}${w.nome?' — '+w.nome:''}</div>
-                    <div style="font-size:11px;color:#6b7280;display:flex;gap:10px;flex-wrap:wrap;">
-                        ${w.uf||w.cidade?`<span>${w.uf||''}${w.cidade?' / '+w.cidade:''}</span>`:''}
-                        ${w.area_m2>0?`<span><b>${Number(w.area_m2).toLocaleString('pt-BR')} m²</b></span>`:''}
-                        ${w.docas>0?`<span>${w.docas} docas</span>`:''}
-                        ${w.ocupacao>0?`<span>${w.ocupacao}% ocupado</span>`:''}
-                    </div>
-                </div>`).join('')}
-            </div>`:'' }
-
-            <!-- Dados complementares -->
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📋 Dados da empresa</div>
-                ${field('CNPJ', lead.cnpj)}
-                ${field('Faturamento anual', lead.faturamento_faixa)}
-                ${field('Segmentos', lead.segmentos)}
-                ${field('Contato', lead.contato_nome ? lead.contato_nome+(lead.contato_cargo?' · '+lead.contato_cargo:'') : null)}
-                ${field('E-mail', lead.contato_email)}
-                ${field('Telefone', lead.contato_telefone)}
-            </div>
-
-            <!-- Tecnologia e cert -->
-            ${(lead.wms_atual||lead.erp_atual||lead.nivel_maturidade||lead.certificacoes)?`
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">💻 Tecnologia & 🏆 Qualidade</div>
-                ${field('WMS', lead.wms_atual)} ${field('ERP', lead.erp_atual)}
-                ${field('Maturidade', lead.nivel_maturidade)} ${field('Certificações', lead.certificacoes)}
-                ${lead.otif_pct?field('OTIF',lead.otif_pct+'%'):''} ${lead.acuracidade_pct?field('Acuracidade',lead.acuracidade_pct+'%'):''}
-            </div>`:'' }
-
-            <!-- Acompanhamento -->
-            ${(lead.responsavel||lead.origem||lead.observacoes)?`
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📋 Acompanhamento</div>
-                ${field('Responsável', lead.responsavel)} ${field('Origem', lead.origem)}
-                ${lead.data_primeiro_contato?field('1º Contato',new Date(lead.data_primeiro_contato+'T00:00:00').toLocaleDateString('pt-BR')):''}
-                ${lead.proxima_acao?field('Próxima ação',lead.proxima_acao):''}
-                ${lead.observacoes?`<div style="font-size:11px;color:#6b7280;margin-top:4px;line-height:1.5;border-top:1px solid #f5f3ff;padding-top:8px;">${lead.observacoes}</div>`:''}
-            </div>`:'' }
-
-            <!-- Anexos -->
-            ${docs.length>0||pdfs.length>0?`
-            <div style="background:#fff;border:1px solid #ede8f8;border-radius:12px;padding:12px;margin-bottom:12px;">
-                <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#7c5cbf;margin-bottom:8px;">📎 Documentos (${docs.length+pdfs.length})</div>
-                ${[...docs,...pdfs].map(a=>`
-                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f9f7ff;">
-                    <span style="font-size:16px;">${a.nome_arquivo?.endsWith('.pdf')?'📄':a.nome_arquivo?.match(/\.(jpg|jpeg|png)/i)?'🖼️':'📎'}</span>
-                    <span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</span>
-                    <a href="${a.url}" target="_blank" style="font-size:10px;font-weight:700;color:#6941c6;text-decoration:none;background:#f0ebff;padding:3px 8px;border-radius:6px;white-space:nowrap;">⬇ Baixar</a>
-                </div>`).join('')}
-            </div>`:'' }
-
-        </div>
-
-        <!-- Botões de ação fixos no rodapé da tab Dados -->
-        <div style="position:sticky;bottom:0;background:#fff;border-top:1px solid #ede8f8;padding:12px 16px;display:flex;gap:8px;">
-            <button onclick="gerarLicPDF('${lead.id}')" style="flex:1;padding:9px;border:1.5px solid #e0d9f5;border-radius:10px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:700;color:#6941c6;cursor:pointer;">📄 Gerar PDF</button>
-            <button onclick="_licMapFecharPanel();abrirFormLead('${lead.id}','tabela')" style="flex:2;padding:9px;border:none;border-radius:10px;background:linear-gradient(135deg,#2d1b69,#6941c6);font-family:inherit;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">✏️ Editar lead completo</button>
-        </div>
-
-        </div><!-- /maptab-content-dados -->
-
-        <!-- Tab Histórico -->
-        <div id="maptab-content-historico" style="display:none;padding:16px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-                <div style="font-size:13px;font-weight:700;color:#2d1b69;">📅 Histórico do lead</div>
-                <button onclick="abrirModalHist('${lead.id}')" style="padding:6px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:11px;font-weight:700;color:#fff;cursor:pointer;">+ Registrar evento</button>
-            </div>
-            <div id="map-hist-timeline" style="font-size:12px;">
-                <div style="text-align:center;padding:32px;color:#c4b5e8;font-size:13px;">Carregando histórico...</div>
+    document.getElementById('lfv-body-left').innerHTML = `
+        <!-- Nome + badges -->
+        <div style="margin-bottom:18px;">
+            <h2 style="font-size:22px;font-weight:900;color:#2d1b69;letter-spacing:-.4px;margin-bottom:8px;line-height:1.2;">${lead.razao_social||'—'}</h2>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                ${t?`<span class="lfv-chip" style="background:${t.bg};color:${t.color};border:1.5px solid ${t.border};">${t.icon} ${t.name} · Score ${t.score}/100</span>`:''}
+                ${lead.plano?`<span class="lfv-chip" style="background:${pBg[lead.plano]||'#f3f4f6'};color:${pCol[lead.plano]||'#374151'};border:1px solid ${pBg[lead.plano]||'#e5e7eb'};">${lead.plano}</span>`:''}
+                <span class="lfv-chip" style="background:${lead.status==='Convertido'?'#f0fdf4':lead.status==='Perdido'?'#fef2f2':'#f0ebff'};color:${cor};border:1px solid ${cor}33;">${lead.status||'Ativo'}</span>
+                ${lead.etapa?`<span style="font-size:11px;color:#9b8cc0;">${lead.etapa}</span>`:''}
             </div>
         </div>
 
-        <!-- Tab Documentos -->
-        <div id="maptab-content-documentos" style="display:none;padding:16px;">
-            <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:14px;">📎 Documentos e anexos</div>
-            <div id="map-docs-list">
-                <div style="text-align:center;padding:24px;color:#c4b5e8;font-size:13px;">Carregando...</div>
+        <!-- Métricas -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;">
+            <div class="lfv-metric-card"><div class="lfv-metric-val">${m2>0?fmtM2(m2)+' m²':'—'}</div><div class="lfv-metric-lbl">Área total</div></div>
+            <div class="lfv-metric-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac;"><div class="lfv-metric-val" style="color:#16a34a;">${fee>0?fmtMoney(fee):'—'}</div><div class="lfv-metric-lbl">Fee/mês</div></div>
+            <div class="lfv-metric-card"><div class="lfv-metric-val">${armazens.length||'—'}</div><div class="lfv-metric-lbl">Armazéns</div></div>
+        </div>
+
+        <!-- Endereço -->
+        ${endCompleto?`
+        <div class="lfv-section-title">📍 Localização</div>
+        <div class="lfv-address-line"><span class="lfv-address-icon">📍</span><span><strong>${lead.polo_logistico||lead.uf||'—'}</strong>${lead.uf?` — ${lead.uf}`:''}</span></div>
+        ${lead.endereco_logradouro?`<div class="lfv-address-line"><span class="lfv-address-icon">🏠</span><span>${lead.endereco_logradouro}${lead.endereco_bairro?', '+lead.endereco_bairro:''}</span></div>`:''}
+        ${lead.cep?`<div class="lfv-address-line"><span class="lfv-address-icon">📮</span><span>CEP ${lead.cep}${lead.lat&&lead.lng?` · <span style="font-size:11px;color:#9b8cc0;">GPS ${parseFloat(lead.lat).toFixed(4)}, ${parseFloat(lead.lng).toFixed(4)}</span>`:''}</span></div>`:''}
+        ${lead.regiao_exclusividade?`<div class="lfv-address-line"><span class="lfv-address-icon">🗺️</span><span>Exclusividade: ${lead.regiao_exclusividade}</span></div>`:''}
+        `:''}
+
+        <!-- Armazéns -->
+        ${armazens.length>0?`
+        <div class="lfv-section-title">🏗️ Armazéns cadastrados (${armazens.length})</div>
+        ${armazens.map((w,i)=>`
+        <div class="lfv-wh-card">
+            <div class="lfv-wh-head">
+                <div style="width:22px;height:22px;border-radius:7px;background:#6941c6;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;">${w.nome||'Armazém '+(i+1)}</div>
+                ${w.uf?`<span style="font-size:10px;background:#f0ebff;color:#6941c6;padding:2px 8px;border-radius:20px;margin-left:auto;">${w.uf}${w.cidade?' · '+w.cidade:''}</span>`:''}
             </div>
+            <div class="lfv-wh-body">
+                ${w.area_m2>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${Number(w.area_m2).toLocaleString('pt-BR')} m²</div><div class="lfv-wh-stat-lbl">Área total</div></div>`:''}
+                ${w.docas>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.docas}</div><div class="lfv-wh-stat-lbl">Docas</div></div>`:''}
+                ${w.ocupacao>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.ocupacao}%</div><div class="lfv-wh-stat-lbl">Ocupação</div></div>`:''}
+                ${w.paletes?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${Number(w.paletes).toLocaleString('pt-BR')}</div><div class="lfv-wh-stat-lbl">Páletes</div></div>`:''}
+                ${w.pe_direito?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.pe_direito}m</div><div class="lfv-wh-stat-lbl">Pé-direito</div></div>`:''}
+            </div>
+        </div>`).join('')}
+        `:''}
+
+        <!-- Tecnologia -->
+        ${(lead.wms_atual||lead.erp_atual||lead.nivel_maturidade)?`
+        <div class="lfv-section-title">💻 Tecnologia</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            ${lead.wms_atual?`<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:3px;">WMS</div><div style="font-size:12px;font-weight:600;color:#1e293b;">${lead.wms_atual}</div></div>`:''}
+            ${lead.erp_atual?`<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;border:1px solid #e2e8f0;"><div style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:3px;">ERP</div><div style="font-size:12px;font-weight:600;color:#1e293b;">${lead.erp_atual}</div></div>`:''}
+            ${lead.nivel_maturidade?`<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;border:1px solid #e2e8f0;grid-column:1/-1;"><div style="font-size:9px;color:#94a3b8;font-weight:700;text-transform:uppercase;margin-bottom:3px;">Maturidade tecnológica</div><div style="font-size:12px;font-weight:600;color:#1e293b;">${lead.nivel_maturidade}</div></div>`:''}
+        </div>
+        `:''}
+
+        <!-- Certificações -->
+        ${lead.certificacoes&&lead.certificacoes!=='Nenhuma'?`
+        <div class="lfv-section-title">🏆 Certificações</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;">
+            ${lead.certificacoes.split(', ').filter(c=>c&&c!=='Nenhuma').map(c=>`<span style="background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">${c}</span>`).join('')}
+        </div>
+        `:''}
+
+        <!-- Observações -->
+        ${lead.observacoes?`
+        <div class="lfv-section-title">📋 Observações</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;background:#f9f7ff;border-radius:10px;padding:12px 14px;border-left:3px solid #6941c6;">${lead.observacoes}</div>
+        `:''}
+    `;
+
+    // ── COLUNA DIREITA ──
+    const aud = _audData[String(lead.id)];
+    document.getElementById('lfv-body-right').innerHTML = `
+        <!-- Responsável -->
+        ${lead.responsavel?`<div style="margin-bottom:18px;padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #e0d9f5;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:6px;">Responsável comercial</div>
+            <div style="font-size:14px;font-weight:700;color:#2d1b69;">👤 ${lead.responsavel}</div>
+        </div>`:''}
+
+        <!-- Contato -->
+        ${(lead.contato_nome||lead.contato_email||lead.contato_telefone)?`
+        <div style="margin-bottom:18px;">
+            <div class="lfv-section-title" style="margin-top:0;">Contato principal</div>
+            ${lead.contato_nome?`<div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:4px;">${lead.contato_nome}${lead.contato_cargo?' · <span style="font-weight:400;color:#6b7280;">'+lead.contato_cargo+'</span>':''}</div>`:''}
+            ${lead.contato_email?`<div style="font-size:12px;color:#6941c6;margin-bottom:3px;">✉️ ${lead.contato_email}</div>`:''}
+            ${lead.contato_telefone?`<div style="font-size:12px;color:#6b7280;">📞 ${lead.contato_telefone}</div>`:''}
+        </div>`:''}
+
+        <!-- Dados empresa -->
+        ${(lead.cnpj||lead.faturamento_faixa)?`
+        <div style="margin-bottom:18px;">
+            <div class="lfv-section-title" style="margin-top:0;">Empresa</div>
+            ${lead.cnpj?`<div style="font-size:12px;color:#6b7280;margin-bottom:4px;">CNPJ: <strong>${lead.cnpj}</strong></div>`:''}
+            ${lead.faturamento_faixa?`<div style="font-size:12px;color:#6b7280;">Faturamento: <strong>${lead.faturamento_faixa}</strong></div>`:''}
+        </div>`:''}
+
+        <!-- KPIs -->
+        ${(lead.otif_pct||lead.acuracidade_pct)?`
+        <div style="margin-bottom:18px;">
+            <div class="lfv-section-title" style="margin-top:0;">Performance</div>
+            ${lead.otif_pct?`<div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:12px;color:#6b7280;">OTIF</span><strong style="font-size:12px;color:#16a34a;">${lead.otif_pct}%</strong></div>`:''}
+            ${lead.acuracidade_pct?`<div style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:#6b7280;">Acuracidade</span><strong style="font-size:12px;color:#16a34a;">${lead.acuracidade_pct}%</strong></div>`:''}
+        </div>`:''}
+
+        <!-- Certificado -->
+        ${aud?.certificado_numero?`
+        <div style="margin-bottom:18px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:12px 14px;">
+            <div style="font-size:9px;color:#16a34a;font-weight:700;text-transform:uppercase;margin-bottom:4px;">🏆 Certificado ativo</div>
+            <div style="font-size:13px;font-weight:800;color:#2d1b69;">${aud.certificado_numero}</div>
+            ${aud.certificado_validade?`<div style="font-size:10px;color:#16a34a;margin-top:2px;">Válido até ${new Date(aud.certificado_validade+'T00:00:00').toLocaleDateString('pt-BR')}</div>`:''}
+        </div>`:''}
+
+        <!-- Documentos -->
+        ${docs.length>0?`
+        <div style="margin-bottom:18px;">
+            <div class="lfv-section-title" style="margin-top:0;">📎 Documentos (${docs.length})</div>
+            ${docs.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #f5f3ff;">
+                <span style="font-size:16px;">${a.nome_arquivo?.endsWith('.pdf')?'📄':a.nome_arquivo?.match(/\.(jpg|jpeg|png)/i)?'🖼️':'📎'}</span>
+                <span style="font-size:11px;color:#2d1b69;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'—'}</span>
+                <a href="${a.url}" target="_blank" style="font-size:10px;color:#6941c6;font-weight:700;text-decoration:none;background:#f0ebff;padding:2px 7px;border-radius:6px;white-space:nowrap;flex-shrink:0;">⬇</a>
+            </div>`).join('')}
+        </div>`:''}
+
+        <!-- Botões ação -->
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;position:sticky;bottom:0;background:#f9f7ff;padding:12px 0 0;">
+            <button onclick="gerarLicPDF('${lead.id}')" style="width:100%;padding:10px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:12px;font-weight:700;color:#6941c6;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">📄 Gerar PDF do lead</button>
+            <button onclick="fecharLicMapFullView();abrirFormLead('${lead.id}','mapa')" style="width:100%;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,#2d1b69,#6941c6);font-family:inherit;font-size:12px;font-weight:800;color:#fff;cursor:pointer;">✏️ Editar lead completo</button>
+            <button onclick="abrirModalHist('${lead.id}')" style="width:100%;padding:10px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:12px;font-weight:700;color:#6941c6;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">+ Registrar evento</button>
         </div>
     `;
 
-    // Carrega histórico e documentos em background
-    _licMapAtualizarHistTab(lead.id);
+    // Abre o modal
+    document.getElementById('lic-fv-overlay').style.display = 'block';
+    const fv = document.getElementById('lic-map-fullview');
+    fv.style.display = 'flex';
+    requestAnimationFrame(() => { fv.style.transform = 'translate(-50%,-50%) scale(1)'; fv.style.opacity = '1'; });
 
-    panel.classList.add('open');
-    if(overlay) overlay.classList.add('show');
+    // Carrega histórico em background
+    _licMapAtualizarHistTab && _licMapAtualizarHistTab(lead.id);
 }
 
-function licMapTab(tab, btn) {
-    ['dados','historico','documentos'].forEach(t=>{
-        document.getElementById('maptab-content-'+t).style.display = t===tab?'block':'none';
-        document.getElementById('maptab-'+t).style.borderBottomColor = t===tab?'#6941c6':'transparent';
-        document.getElementById('maptab-'+t).style.color = t===tab?'#6941c6':'#9b8cc0';
-        document.getElementById('maptab-'+t).style.fontWeight = t===tab?'800':'600';
+function fecharLicMapFullView() {
+    const fv = document.getElementById('lic-map-fullview');
+    if (fv) { fv.style.transform = 'translate(-50%,-50%) scale(.97)'; fv.style.opacity = '0'; setTimeout(()=>{ fv.style.display='none'; }, 200); }
+    const ov = document.getElementById('lic-fv-overlay');
+    if (ov) ov.style.display = 'none';
+}
+
+function _lfvRenderGaleria() {
+    const mainWrap = document.getElementById('lfv-main-inner');
+    const thumbsEl = document.getElementById('lfv-thumbs');
+    const countEl  = document.getElementById('lfv-photo-count');
+    if (!mainWrap || !thumbsEl) return;
+
+    if (_lfvPhotos.length === 0) {
+        mainWrap.innerHTML = `<div style="font-size:52px;margin-bottom:10px;">🏗️</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.4);">Sem fotos cadastradas</div>`;
+        thumbsEl.style.display = 'none';
+        if (countEl) countEl.style.display = 'none';
+        return;
+    }
+
+    // Foto principal
+    const mainImg = document.getElementById('lfv-main-photo');
+    mainImg.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
+
+    // Thumbnails
+    thumbsEl.style.display = 'flex';
+    thumbsEl.innerHTML = _lfvPhotos.slice(0, 8).map((url, i) =>
+        `<img src="${url}" data-idx="${i}" onclick="lfvMainSwitch(${i})" style="height:64px;width:90px;object-fit:cover;border-radius:5px;cursor:pointer;opacity:${i===0?1:.65};border:${i===0?'2px solid #6941c6':'2px solid transparent'};flex-shrink:0;transition:opacity .15s,border .15s;" loading="lazy">`
+    ).join('');
+
+    // Contador
+    if (countEl) {
+        countEl.textContent = `📷 ${_lfvPhotos.length} foto${_lfvPhotos.length>1?'s':''}`;
+        countEl.style.display = '';
+    }
+}
+
+function lfvMainSwitch(idx) {
+    const mainPhoto = document.getElementById('lfv-main-photo');
+    if (mainPhoto) mainPhoto.innerHTML = `<img src="${_lfvPhotos[idx]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(${idx})" loading="lazy">`;
+    document.querySelectorAll('#lfv-thumbs img').forEach((el,i) => {
+        el.style.opacity = i===idx?'1':'.65';
+        el.style.borderColor = i===idx?'#6941c6':'transparent';
     });
 }
 
-function _licMapFecharPanel() {
-    document.getElementById('lic-map-side-panel')?.classList.remove('open');
-    document.getElementById('lic-map-overlay')?.classList.remove('show');
+function lfvAbrirLightbox(idx) {
+    _lfvLbIdx = idx;
+    const lb = document.getElementById('lic-map-lightbox');
+    if (!lb) return;
+    lb.style.display = 'flex';
+    _lfvRenderLightbox();
 }
+
+function lfvFecharLightbox() {
+    const lb = document.getElementById('lic-map-lightbox');
+    if (lb) lb.style.display = 'none';
+}
+
+function lfvNavLightbox(dir) {
+    _lfvLbIdx = (_lfvLbIdx + dir + _lfvPhotos.length) % _lfvPhotos.length;
+    _lfvRenderLightbox();
+}
+
+function _lfvRenderLightbox() {
+    const img = document.getElementById('lb-img');
+    const counter = document.getElementById('lb-counter');
+    const thumbs  = document.getElementById('lb-thumbs');
+    if (img) img.src = _lfvPhotos[_lfvLbIdx];
+    if (counter) counter.textContent = `${_lfvLbIdx+1} / ${_lfvPhotos.length}`;
+    if (thumbs) thumbs.innerHTML = _lfvPhotos.map((url,i) =>
+        `<img src="${url}" onclick="_lfvLbIdx=${i};_lfvRenderLightbox()" style="height:50px;width:70px;object-fit:cover;border-radius:4px;cursor:pointer;opacity:${i===_lfvLbIdx?1:.5};border:${i===_lfvLbIdx?'2px solid #fff':'2px solid transparent'};flex-shrink:0;" loading="lazy">`
+    ).join('');
+}
+
+// Fechar lightbox com Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        if (document.getElementById('lic-map-lightbox')?.style.display==='flex') lfvFecharLightbox();
+        else fecharLicMapFullView();
+    }
+    if (e.key === 'ArrowLeft'  && document.getElementById('lic-map-lightbox')?.style.display==='flex') lfvNavLightbox(-1);
+    if (e.key === 'ArrowRight' && document.getElementById('lic-map-lightbox')?.style.display==='flex') lfvNavLightbox(1);
+});
+
+/* removed */ function licMapTab() {}
+
+function _licMapFecharPanel() { fecharLicMapFullView(); }
 
 function _licMapFitAll() {
     if(!_licMap) return;
