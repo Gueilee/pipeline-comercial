@@ -1659,6 +1659,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicKanban()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔲 Kanban</button>
                         <button onclick="abrirLicAuditoria()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🔍 Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">🎯 Scorecard</button>
+                        <button onclick="abrirLicDisponibilidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">💼 Disponibilidade</button>
                         <button onclick="abrirLicCapacidade()" style="padding:8px 18px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">📊 Capacidade</button>
                         <button onclick="abrirModalGerarLink()" style="padding:8px 18px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(22,163,74,.3);">🔗 Gerar link</button>
                         <button onclick="abrirFormLead(null)" style="padding:8px 18px;background:linear-gradient(135deg,#0d47a1,#1976d2);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">+ Novo Lead</button>
@@ -2869,6 +2870,156 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             <button onclick="document.getElementById('aud-modal-cert').style.display='none'" style="padding:11px 20px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;color:#6941c6;cursor:pointer;font-weight:600;">Cancelar</button>
             <button onclick="emitirCertificado()" style="flex:1;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:14px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.3);">🏆 Emitir e Ativar Licenciado</button>
         </div>
+    </div>
+</div>
+
+<!-- ── VISÃO DISPONIBILIDADE COMERCIAL ── -->
+<div id="lic-view-disponibilidade" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
+
+    <!-- Hero header -->
+    <div style="background:linear-gradient(135deg,#0f2027 0%,#203a43 40%,#2c5364 100%);padding:22px 28px 26px;flex-shrink:0;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-50px;right:-50px;width:250px;height:250px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-40px;left:40%;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.025);pointer-events:none;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;">
+            <div style="display:flex;align-items:center;gap:14px;">
+                <button onclick="fecharLicDisponibilidade()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);cursor:pointer;">← Leads</button>
+                <div>
+                    <div style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px;">💼 Disponibilidade Comercial</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">Capacidade disponível da rede para novos clientes · Tempo real</div>
+                </div>
+            </div>
+            <button onclick="renderizarLicDisponibilidade()" style="padding:7px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-family:inherit;font-size:12px;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;">↻ Atualizar</button>
+        </div>
+        <!-- KPI cards no hero -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative;">
+            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">m² DISPONÍVEL AGORA</div>
+                <div id="dsp-kpi-disponivel" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div id="dsp-kpi-disp-pct" style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">da capacidade total</div>
+            </div>
+            <div style="background:rgba(22,163,74,.15);border:1px solid rgba(22,163,74,.3);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(134,239,172,.8);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">LICENCIADOS COM ESPAÇO</div>
+                <div id="dsp-kpi-com-espaco" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">com < 70% de ocupação</div>
+            </div>
+            <div style="background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(252,165,165,.8);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">ALERTAS DE CAPACIDADE</div>
+                <div id="dsp-kpi-alertas" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">> 70% de ocupação</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;backdrop-filter:blur(8px);">
+                <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">SEM DADOS DE UTILIZ.</div>
+                <div id="dsp-kpi-sem-dados" style="font-size:28px;font-weight:900;color:#fff;font-family:'Courier New',monospace;line-height:1;letter-spacing:-1px;">—</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.45);margin-top:5px;">lançar KPIs no Scorecard</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo scrollável -->
+    <div style="flex:1;overflow-y:auto;padding:20px 24px;">
+
+        <!-- FERRAMENTA DE MATCH RÁPIDO -->
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);border-radius:16px;padding:22px;margin-bottom:18px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-30px;right:-30px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none;"></div>
+            <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">🎯 Buscar disponibilidade para cliente</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:16px;">Filtre a rede e encontre licenciados que atendem ao cliente</div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:12px;align-items:end;">
+                <div>
+                    <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.55);display:block;margin-bottom:6px;">ESTADOS NECESSÁRIOS</label>
+                    <select id="dsp-match-ufs" multiple style="width:100%;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:12px;color:#2d1b69;background:#fff;outline:none;height:80px;">
+                        <option>SP</option><option>RJ</option><option>MG</option><option>RS</option><option>PR</option><option>SC</option><option>BA</option><option>PE</option><option>CE</option><option>GO</option><option>DF</option><option>AM</option><option>PA</option><option>MT</option><option>MS</option><option>ES</option>
+                    </select>
+                    <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:3px;">Ctrl+clique para múltiplos</div>
+                </div>
+                <div>
+                    <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.55);display:block;margin-bottom:6px;">m² MÍNIMO</label>
+                    <input id="dsp-match-m2" type="number" min="0" step="100" placeholder="Ex.: 2000" style="width:100%;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:9px 12px;font-family:'Courier New',monospace;font-size:13px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.55);display:block;margin-bottom:6px;">TIPO DE CARGA</label>
+                    <select id="dsp-match-carga" style="width:100%;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:12px;color:#2d1b69;background:#fff;outline:none;box-sizing:border-box;">
+                        <option value="">Qualquer tipo</option>
+                        <option value="Paletizado seco">📦 Paletizado seco</option>
+                        <option value="Refrigerado">❄️ Refrigerado / câmara fria</option>
+                        <option value="Congelado">🧊 Congelado</option>
+                        <option value="Alto valor">💎 Alto valor</option>
+                        <option value="E-commerce">🛒 E-commerce</option>
+                        <option value="Farmacêutico">💊 Farmacêutico / GDP</option>
+                        <option value="Granel sólido">🏭 Granel sólido</option>
+                        <option value="Agroquímicos">🌿 Agroquímicos</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="executarMatchComercial()" style="padding:9px 22px;border:none;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:800;color:#6941c6;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);white-space:nowrap;height:40px;">🔍 Buscar</button>
+                </div>
+            </div>
+            <!-- Resultado do match -->
+            <div id="dsp-match-result" style="margin-top:14px;display:none;">
+                <div style="height:1px;background:rgba(255,255,255,.15);margin-bottom:14px;"></div>
+                <div id="dsp-match-content"></div>
+            </div>
+        </div>
+
+        <!-- Linha 1: Disponibilidade por região + Alertas -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;">
+            <!-- Disponibilidade por região -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:3px;">m² disponível por região</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:16px;">Total disponível considerando utilização registrada</div>
+                <div style="height:220px;"><canvas id="dsp-chart-regioes"></canvas></div>
+            </div>
+            <!-- Alertas de capacidade -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:3px;">🔔 Alertas de capacidade</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:14px;">Licenciados com alto nível de ocupação</div>
+                <div id="dsp-alertas-list"></div>
+            </div>
+        </div>
+
+        <!-- Linha 2: Por tipo de carga + Projeção -->
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px;margin-bottom:16px;">
+            <!-- Por tipo de carga -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:3px;">Disponível por tipo de carga</div>
+                <div style="font-size:11px;color:#9b8cc0;margin-bottom:14px;">Licenciados habilitados por modalidade</div>
+                <div id="dsp-carga-breakdown"></div>
+            </div>
+            <!-- Projeção 3/6 meses -->
+            <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                    <div>
+                        <div style="font-size:13px;font-weight:700;color:#2d1b69;">Projeção de disponibilidade</div>
+                        <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">Tendência baseada no histórico de utilização</div>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="setDspProjecao(3,this)" class="dsp-proj-btn dsp-proj-active" style="padding:4px 12px;border:1.5px solid #6941c6;border-radius:20px;background:#f0ebff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;">3 meses</button>
+                        <button onclick="setDspProjecao(6,this)" class="dsp-proj-btn" style="padding:4px 12px;border:1.5px solid #e0d9f5;border-radius:20px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:600;color:#9b8cc0;cursor:pointer;">6 meses</button>
+                    </div>
+                </div>
+                <div style="height:180px;"><canvas id="dsp-chart-projecao"></canvas></div>
+                <div id="dsp-projecao-insight" style="margin-top:12px;font-size:11px;color:#6b7280;line-height:1.5;"></div>
+            </div>
+        </div>
+
+        <!-- Tabela completa de disponibilidade -->
+        <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 20px rgba(105,65,198,.08);margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:700;color:#2d1b69;margin-bottom:14px;">Disponibilidade detalhada — todos os licenciados ativos</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <thead>
+                    <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                        <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;">Licenciado</th>
+                        <th style="padding:9px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Nível</th>
+                        <th style="padding:9px 8px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">UF</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">m² Total</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">% Ocupado</th>
+                        <th style="padding:9px 8px;text-align:right;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">m² Disponível</th>
+                        <th style="padding:9px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Status Cap.</th>
+                    </tr>
+                </thead>
+                <tbody id="dsp-tabela-tbody"></tbody>
+            </table>
+        </div>
+
     </div>
 </div>
 
@@ -9253,7 +9404,7 @@ function abrirFormLead(id, returnTo) {
     }
 
     // Esconde todas as views antes de exibir o formulário
-    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard','lic-view-auditoria'].forEach(id => {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard','lic-view-auditoria','lic-view-disponibilidade'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
@@ -10131,6 +10282,344 @@ async function abrirLicAuditoria() {
 function fecharLicAuditoria() {
     document.getElementById('lic-view-auditoria').style.display='none';
     document.getElementById('lic-view-tabela').style.display='';
+}
+
+// ── Painel de Disponibilidade Comercial ──────────────────────────
+
+let _dspCharts   = {};
+let _dspProjecaoMeses = 3;
+
+const REGIOES_DISP = {
+    Sul:['PR','SC','RS'], Sudeste:['SP','RJ','MG','ES'],
+    'Centro-Oeste':['MT','MS','GO','DF'],
+    Nordeste:['MA','PI','CE','RN','PB','PE','AL','SE','BA'],
+    Norte:['AM','RR','AP','PA','TO','RO','AC'],
+};
+const REGIOES_CORES = ['#6941c6','#2563eb','#d97706','#16a34a','#0891b2'];
+
+function getM2Disponivel(lead) {
+    const total = parseFloat(lead.area_total_m2) || 0;
+    const perf  = getLicUltimoPeriodo(lead.id);
+    const util  = perf?.utilizacao_capacidade;
+    if (total === 0) return { total:0, disponivel:null, utilPct:null };
+    if (util === null || util === undefined) return { total, disponivel:null, utilPct:null };
+    const disponivel = Math.max(0, total * (1 - parseFloat(util) / 100));
+    return { total, disponivel: Math.round(disponivel), utilPct: parseFloat(util) };
+}
+
+function capStatusInfo(utilPct) {
+    if (utilPct === null) return { label:'Sem dados', cor:'#9b8cc0', bg:'#f9f7ff', border:'#e0d9f5', icon:'—' };
+    if (utilPct > 90)     return { label:'Crítico',   cor:'#dc2626', bg:'#fef2f2', border:'#fca5a5', icon:'🔴' };
+    if (utilPct > 70)     return { label:'Atenção',   cor:'#d97706', bg:'#fffbeb', border:'#fcd34d', icon:'⚠️' };
+    if (utilPct > 50)     return { label:'Moderado',  cor:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', icon:'🔵' };
+    return                        { label:'Disponível',cor:'#16a34a', bg:'#f0fdf4', border:'#86efac', icon:'🟢' };
+}
+
+async function abrirLicDisponibilidade() {
+    ['lic-view-tabela','lic-view-mapa','lic-view-kanban','lic-view-capacidade','lic-view-scorecard','lic-view-auditoria'].forEach(id=>{
+        const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+    document.getElementById('lic-view-disponibilidade').style.display='flex';
+    if (Object.keys(_licPerfData).length === 0) await carregarLicPerformance();
+    renderizarLicDisponibilidade();
+}
+
+function fecharLicDisponibilidade() {
+    document.getElementById('lic-view-disponibilidade').style.display='none';
+    document.getElementById('lic-view-tabela').style.display='';
+}
+
+function renderizarLicDisponibilidade() {
+    const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
+    const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+' Mi':n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+
+    let totalDisp=0, comEspaco=0, alertas=0, semDados=0;
+    ativos.forEach(l=>{
+        const { total, disponivel, utilPct } = getM2Disponivel(l);
+        if (disponivel === null) { semDados++; return; }
+        totalDisp += disponivel;
+        if (utilPct <= 70) comEspaco++;
+        if (utilPct > 70)  alertas++;
+    });
+    const totalM2 = ativos.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const pct = totalM2>0?Math.round((totalDisp/totalM2)*100):0;
+
+    document.getElementById('dsp-kpi-disponivel').textContent  = totalDisp > 0 ? fmt(totalDisp)+' m²' : '—';
+    document.getElementById('dsp-kpi-disp-pct').textContent    = totalM2 > 0 ? pct+'% da capacidade total' : 'sem dados';
+    document.getElementById('dsp-kpi-com-espaco').textContent  = comEspaco;
+    document.getElementById('dsp-kpi-alertas').textContent     = alertas;
+    document.getElementById('dsp-kpi-sem-dados').textContent   = semDados;
+
+    // Destruir charts antigos
+    Object.values(_dspCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+    _dspCharts={};
+
+    const gc='rgba(105,65,198,.06)'; const tc='#9b8cc0';
+
+    // Chart: disponível por região
+    const regDisp = Object.keys(REGIOES_DISP).map((r,ri)=>{
+        const leadsReg = ativos.filter(l=>REGIOES_DISP[r].includes(l.uf));
+        let dispReg=0, totalReg=0;
+        leadsReg.forEach(l=>{ const {total,disponivel}=getM2Disponivel(l); totalReg+=total; if(disponivel!==null)dispReg+=disponivel; });
+        return { reg:r, total:totalReg, disp:dispReg, ocup:Math.max(0,totalReg-dispReg), cor:REGIOES_CORES[ri] };
+    });
+    _dspCharts.regioes = new Chart(document.getElementById('dsp-chart-regioes'),{
+        type:'bar',
+        data:{
+            labels:regDisp.map(r=>r.reg),
+            datasets:[
+                { label:'m² Disponível',  data:regDisp.map(r=>r.disp), backgroundColor:regDisp.map(r=>r.cor+'99'), borderColor:regDisp.map(r=>r.cor), borderWidth:1.5, borderRadius:6, stack:'s' },
+                { label:'m² Ocupado',     data:regDisp.map(r=>r.ocup), backgroundColor:regDisp.map(r=>'rgba(0,0,0,.1)'), borderColor:'transparent', borderRadius:6, stack:'s' },
+            ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,
+            plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},datalabels:{display:false},
+                tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw)} m²`}}},
+            scales:{x:{stacked:true,grid:{display:false},ticks:{color:tc,font:{size:10}}},
+                y:{stacked:true,grid:{color:gc},ticks:{callback:v=>v>=1e3?(v/1e3).toFixed(0)+'K':v,color:tc,font:{size:10}},beginAtZero:true}}
+        }
+    });
+
+    // Alertas de capacidade
+    const listaAlertas = ativos.map(l=>{
+        const {total,disponivel,utilPct}=getM2Disponivel(l);
+        return {l,total,disponivel,utilPct};
+    }).filter(x=>x.utilPct>70||x.utilPct===null).sort((a,b)=>(b.utilPct||0)-(a.utilPct||0));
+
+    const alertasEl = document.getElementById('dsp-alertas-list');
+    if (listaAlertas.length===0) {
+        alertasEl.innerHTML=`<div style="text-align:center;padding:24px;color:#16a34a;font-size:13px;font-weight:600;">🟢 Todos os licenciados com dados estão abaixo de 70% de ocupação!</div>`;
+    } else {
+        alertasEl.innerHTML = listaAlertas.slice(0,6).map(({l,total,disponivel,utilPct})=>{
+            const st = capStatusInfo(utilPct);
+            const barW = utilPct ? Math.min(100,utilPct) : 0;
+            return `<div style="margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                    <span style="font-size:12px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">${l.razao_social||'—'}</span>
+                    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                        <span style="font-size:10px;font-weight:700;color:${st.cor};">${st.icon} ${utilPct!==null?utilPct+'%':'—'}</span>
+                        ${disponivel!==null?`<span style="font-size:10px;color:#9b8cc0;">${fmt(disponivel)} m² livre</span>`:''}
+                    </div>
+                </div>
+                <div style="height:6px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                    <div style="height:100%;width:${barW}%;background:${st.cor};border-radius:3px;transition:width .5s;"></div>
+                </div>
+                ${utilPct===null?`<div style="font-size:10px;color:#9b8cc0;margin-top:2px;">Lançar utilização no Scorecard</div>`:''}
+            </div>`;
+        }).join('');
+    }
+
+    // Por tipo de carga
+    const CARGO_DEFS = [
+        {key:'Paletizado seco',   icon:'📦', field:'cargas_geral'},
+        {key:'Refrigerado',        icon:'❄️', field:'cargas_especiais'},
+        {key:'Congelado',          icon:'🧊', field:'cargas_especiais'},
+        {key:'E-commerce',         icon:'🛒', field:'cargas_geral'},
+        {key:'Alto valor',         icon:'💎', field:'cargas_geral'},
+        {key:'Farmacêutico',       icon:'💊', field:'cargas_especiais'},
+        {key:'Agroquímicos',       icon:'🌿', field:'cargas_especiais'},
+        {key:'Granel sólido',      icon:'🏭', field:'cargas_geral'},
+    ];
+    const cargaEl = document.getElementById('dsp-carga-breakdown');
+    const maxCargo = ativos.length || 1;
+    cargaEl.innerHTML = CARGO_DEFS.map(cd=>{
+        const matches = ativos.filter(l=>{
+            const haystack = [(l.cargas_geral||''), (l.cargas_especiais||''), (l.cargas_perigosas||'')].join(',');
+            return haystack.toLowerCase().includes(cd.key.toLowerCase());
+        });
+        const dispM2 = matches.reduce((s,l)=>{const {disponivel}=getM2Disponivel(l);return s+(disponivel||0);},0);
+        const pctBar = Math.round((matches.length/maxCargo)*100);
+        return `<div style="margin-bottom:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                <span style="font-size:12px;color:#2d1b69;">${cd.icon} ${cd.key}</span>
+                <div style="display:flex;gap:8px;">
+                    <span style="font-size:11px;font-weight:700;background:#f0ebff;color:#6941c6;padding:2px 8px;border-radius:10px;">${matches.length} licenc.</span>
+                    ${dispM2>0?`<span style="font-size:10px;color:#16a34a;font-weight:600;">${fmt(dispM2)} m²</span>`:''}
+                </div>
+            </div>
+            <div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${pctBar}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:3px;"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Projeção
+    renderizarProjecao();
+
+    // Tabela
+    const tbody = document.getElementById('dsp-tabela-tbody');
+    const rows = [...ativos].map(l=>{
+        const {total,disponivel,utilPct}=getM2Disponivel(l);
+        const st = capStatusInfo(utilPct);
+        const t = getLicTier(l);
+        const pBg={Starter:'#f1f5f9',Pro:'#f0ebff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+        const pCol={Starter:'#475569',Pro:'#6941c6',Enterprise:'#166534',Custom:'#92400e'};
+        return { l, total, disponivel, utilPct, st, t, sortKey: disponivel !== null ? disponivel : -1 };
+    }).sort((a,b)=>b.sortKey-a.sortKey);
+
+    tbody.innerHTML = rows.map(({l,total,disponivel,utilPct,st,t})=>`
+        <tr style="border-bottom:1px solid #f5f3ff;">
+            <td style="padding:9px 12px;font-weight:600;color:#2d1b69;">${l.razao_social||'—'}</td>
+            <td style="padding:9px 8px;text-align:center;">${t?`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon}${t.name}</span>`:''}</td>
+            <td style="padding:9px 8px;font-size:12px;color:#6b7280;">${l.uf||'—'}</td>
+            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:12px;color:#374151;">${total>0?total.toLocaleString('pt-BR')+' m²':'—'}</td>
+            <td style="padding:9px 8px;text-align:right;">
+                ${utilPct!==null?`<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                    <div style="width:48px;height:5px;background:#f0ebff;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.min(100,utilPct)}%;background:${st.cor};border-radius:2px;"></div></div>
+                    <span style="font-size:12px;font-weight:700;color:${st.cor};">${utilPct}%</span>
+                </div>`:'<span style="font-size:11px;color:#c4b5e8;">—</span>'}
+            </td>
+            <td style="padding:9px 8px;text-align:right;font-family:'Courier New',monospace;font-size:13px;font-weight:800;color:${disponivel!==null?'#16a34a':'#9b8cc0'};">${disponivel!==null?disponivel.toLocaleString('pt-BR')+' m²':'—'}</td>
+            <td style="padding:9px 8px;text-align:center;"><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.cor};border:1px solid ${st.border};">${st.icon} ${st.label}</span></td>
+        </tr>`).join('');
+}
+
+function setDspProjecao(meses, btn) {
+    _dspProjecaoMeses = meses;
+    document.querySelectorAll('.dsp-proj-btn').forEach(b=>{
+        b.style.background='#faf8ff'; b.style.color='#9b8cc0'; b.style.borderColor='#e0d9f5'; b.style.fontWeight='600';
+    });
+    btn.style.background='#f0ebff'; btn.style.color='#6941c6'; btn.style.borderColor='#6941c6'; btn.style.fontWeight='700';
+    renderizarProjecao();
+}
+
+function renderizarProjecao() {
+    const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
+    const meses = _dspProjecaoMeses;
+    const gc='rgba(105,65,198,.06)'; const tc='#9b8cc0';
+
+    // Calcula tendência de utilização por licenciado
+    const totalPorPeriodo = {};
+    ativos.forEach(lead=>{
+        const recs = (_licPerfData[String(lead.id)]||[]).slice(-4);
+        const total = parseFloat(lead.area_total_m2)||0;
+        recs.forEach(r=>{
+            if (!totalPorPeriodo[r.periodo]) totalPorPeriodo[r.periodo]={disp:0,total:0};
+            const util = parseFloat(r.utilizacao_capacidade)||0;
+            totalPorPeriodo[r.periodo].disp  += Math.max(0, total*(1-util/100));
+            totalPorPeriodo[r.periodo].total += total;
+        });
+    });
+
+    const periodos = Object.keys(totalPorPeriodo).sort();
+    const dispHist = periodos.map(p=>Math.round(totalPorPeriodo[p].disp));
+
+    // Calcula tendência (regressão simples)
+    let slope = 0;
+    if (dispHist.length >= 2) {
+        const n = dispHist.length;
+        const sumX = dispHist.reduce((_,__,i)=>_+i,0);
+        const sumY = dispHist.reduce((s,v)=>s+v,0);
+        const sumXY = dispHist.reduce((s,v,i)=>s+i*v,0);
+        const sumX2 = dispHist.reduce((s,_,i)=>s+i*i,0);
+        const d = n*sumX2-sumX*sumX;
+        if (d!==0) slope = (n*sumXY-sumX*sumY)/d;
+    }
+
+    // Gera projeção futura
+    const lastVal = dispHist.length>0?dispHist[dispHist.length-1]:0;
+    const projLabels = [];
+    const projBase=[], projOtimista=[], projPessimista=[];
+    const trimestres = ['Q1','Q2','Q3','Q4'];
+    const anoAtual = new Date().getFullYear();
+    const mesAtual = new Date().getMonth();
+    for (let i=1;i<=meses;i++) {
+        const futMes = (mesAtual+i)%12;
+        const futAno = anoAtual + Math.floor((mesAtual+i)/12);
+        const q = Math.ceil((futMes+1)/3);
+        const label = `${trimestres[q-1]} ${futAno}`;
+        projLabels.push(label);
+        const base = Math.max(0, Math.round(lastVal + slope * i));
+        projBase.push(base);
+        projOtimista.push(Math.max(0, Math.round(base * 1.05)));
+        projPessimista.push(Math.max(0, Math.round(base * 0.92)));
+    }
+
+    const allLabels = [...periodos, ...projLabels];
+    const histData  = [...dispHist, ...new Array(projLabels.length).fill(null)];
+    const baseData  = [...new Array(periodos.length).fill(null), ...projBase];
+
+    if (_dspCharts.projecao) { try{_dspCharts.projecao.destroy();}catch(e){} }
+    _dspCharts.projecao = new Chart(document.getElementById('dsp-chart-projecao'),{
+        type:'line',
+        data:{
+            labels: allLabels,
+            datasets:[
+                { label:'Histórico',     data:histData,    borderColor:'#6941c6', backgroundColor:'rgba(105,65,198,.1)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#6941c6', borderWidth:2.5 },
+                { label:'Projeção base', data:baseData,    borderColor:'#16a34a', backgroundColor:'rgba(22,163,74,.08)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#16a34a', borderWidth:2, borderDash:[6,3] },
+            ]
+        },
+        options:{responsive:true,maintainAspectRatio:false,
+            plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},datalabels:{display:false},
+                tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.raw||0)} m²`}}},
+            scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}},
+                y:{grid:{color:gc},ticks:{callback:v=>v>=1e3?(v/1e3).toFixed(0)+'K':v,color:tc,font:{size:10}},beginAtZero:true}}
+        }
+    });
+
+    const fmt = n=>n>=1e6?(n/1e6).toFixed(1)+' Mi m²':n>=1e3?(n/1e3).toFixed(0)+' Mil m²':n+' m²';
+    const insight = document.getElementById('dsp-projecao-insight');
+    if (insight) {
+        const tendencia = slope > 0 ? `⚠️ Tendência de <b>redução</b> de espaço disponível (ocupação crescendo)` : `✅ Tendência de <b>manutenção ou ampliação</b> do espaço disponível`;
+        const projecaoFinal = projBase.length > 0 ? projBase[projBase.length-1] : lastVal;
+        insight.innerHTML = `${tendencia}. Em ${meses} meses, projeção de <b>${fmt(projecaoFinal)}</b> disponíveis na rede.`;
+    }
+}
+
+function executarMatchComercial() {
+    const selEl  = document.getElementById('dsp-match-ufs');
+    const ufs    = [...(selEl?.selectedOptions||[])].map(o=>o.value).filter(Boolean);
+    const m2Min  = parseFloat(document.getElementById('dsp-match-m2')?.value)||0;
+    const carga  = document.getElementById('dsp-match-carga')?.value||'';
+    const fmt    = n=>n>=1e3?(n/1e3).toFixed(0)+' Mil':String(Math.round(n));
+
+    const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
+    const resultados = ativos.filter(l=>{
+        if (ufs.length>0 && !ufs.includes(l.uf)) return false;
+        const {disponivel} = getM2Disponivel(l);
+        if (disponivel !== null && disponivel < m2Min) return false;
+        if (disponivel === null && m2Min > 0) return false;
+        if (carga) {
+            const haystack=[(l.cargas_geral||''),(l.cargas_especiais||''),(l.cargas_perigosas||'')].join(',').toLowerCase();
+            if (!haystack.includes(carga.toLowerCase())) return false;
+        }
+        return true;
+    }).sort((a,b)=>{
+        const da=getM2Disponivel(a).disponivel||0; const db=getM2Disponivel(b).disponivel||0;
+        return db-da;
+    });
+
+    const result = document.getElementById('dsp-match-result');
+    const content = document.getElementById('dsp-match-content');
+    result.style.display='block';
+
+    if (resultados.length===0) {
+        content.innerHTML=`<div style="text-align:center;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;">Nenhum licenciado encontrado com os critérios informados.</div>`;
+        return;
+    }
+
+    const pBg={Starter:'#f1f5f9',Pro:'#eff6ff',Enterprise:'#f0fdf4',Custom:'#fffbeb'};
+    const pCol={Starter:'#475569',Pro:'#1e40af',Enterprise:'#166534',Custom:'#92400e'};
+    content.innerHTML=`<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:10px;">✅ ${resultados.length} licenciado${resultados.length!==1?'s':''} compatíve${resultados.length!==1?'is':'l'}:</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+        ${resultados.map(l=>{
+            const {total,disponivel,utilPct}=getM2Disponivel(l);
+            const t=getLicTier(l);
+            const st=capStatusInfo(utilPct);
+            return `<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(4px);">
+                <div style="flex:1;">
+                    <div style="font-size:13px;font-weight:800;color:#fff;">${l.razao_social||'—'}</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;">${l.uf||''}${l.polo_logistico?' · '+l.polo_logistico:''}</div>
+                </div>
+                ${t?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};">${t.icon}${t.name}</span>`:''}
+                <div style="text-align:right;">
+                    <div style="font-size:15px;font-weight:900;color:${disponivel!==null?'#a7f3d0':'rgba(255,255,255,.5)'};">${disponivel!==null?fmt(disponivel)+' m²':'—'}</div>
+                    <div style="font-size:10px;color:rgba(255,255,255,.5);">disponível</div>
+                </div>
+                <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;background:${st.bg};color:${st.cor};">${st.icon}</span>
+            </div>`;
+        }).join('')}
+    </div>`;
 }
 
 async function carregarLicAuditoria() {
