@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificação Funcional — Fase 2 · Regras, Fluxos e Telas · Pipeline Licenciamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#2d1b69;--accent:#6941c6;--accent-lt:#9b5de5;--green:#16a34a;--amber:#d97706;--red:#dc2626;--blue:#2563eb;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;--sidebar-w:280px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--gray-800);background:#fff;}
+@media print{.sidebar,.topbar,.print-btn,.no-print{display:none!important}.main{margin-left:0!important}body{font-size:12px}.page-break{page-break-before:always}h2{page-break-before:avoid}}
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#1a0f3d,#2d1b69);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:300;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.topbar-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:.04em;}
+.topbar-logo-sub{font-size:9px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;}
+.topbar-meta{display:flex;align-items:center;gap:10px;}
+.topbar-badge{font-size:10px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);padding:3px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.2);}
+.topbar-nav-btn{padding:5px 12px;border:1px solid rgba(255,255,255,.2);border-radius:7px;background:rgba(255,255,255,.08);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.75);cursor:pointer;text-decoration:none;transition:background .15s;}
+.topbar-nav-btn:hover{background:rgba(255,255,255,.18);}
+.print-btn{padding:6px 16px;border:1px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(255,255,255,.1);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;}
+.sidebar{position:fixed;top:52px;left:0;width:var(--sidebar-w);height:calc(100vh - 52px);background:var(--gray-50);border-right:1px solid var(--gray-200);overflow-y:auto;z-index:200;padding:16px 0;}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:10px 20px 5px;}
+.sidebar-item{display:block;padding:6px 20px;font-size:12px;color:var(--gray-600);text-decoration:none;border-left:2px solid transparent;transition:all .12s;cursor:pointer;}
+.sidebar-item:hover{background:rgba(105,65,198,.06);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item.active{background:rgba(105,65,198,.08);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+.sidebar-item.sub{padding-left:32px;font-size:11px;}
+.main{margin-left:var(--sidebar-w);padding-top:52px;min-height:100vh;}
+.cover{background:linear-gradient(145deg,#1a0f3d 0%,#2d1b69 40%,#6941c6 100%);padding:60px 60px 56px;position:relative;overflow:hidden;}
+.cover::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:rgba(255,255,255,.04);}
+.cover-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;color:rgba(255,255,255,.8);margin-bottom:20px;position:relative;}
+.cover-title{font-size:32px;font-weight:900;color:#fff;letter-spacing:-.6px;line-height:1.2;margin-bottom:8px;position:relative;}
+.cover-sub{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:32px;position:relative;}
+.cover-meta{display:flex;gap:16px;flex-wrap:wrap;position:relative;}
+.cover-meta-item{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:10px 16px;}
+.cover-meta-label{font-size:9px;color:rgba(255,255,255,.45);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
+.cover-meta-value{font-size:13px;font-weight:700;color:#fff;}
+.content{max-width:860px;margin:0 auto;padding:48px 48px 80px;}
+.section-divider{display:flex;align-items:center;gap:12px;margin:48px 0 24px;}
+.section-divider-bar{width:4px;height:26px;background:linear-gradient(135deg,var(--accent),var(--primary));border-radius:2px;flex-shrink:0;}
+.section-divider h2{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px;}
+.section-num{font-size:11px;font-weight:700;color:var(--accent);background:rgba(105,65,198,.08);padding:3px 10px;border-radius:20px;margin-left:4px;}
+h3{font-size:15px;font-weight:700;color:var(--primary);margin:26px 0 11px;}
+h4{font-size:13px;font-weight:700;color:var(--gray-800);margin:20px 0 9px;}
+p{margin-bottom:13px;color:var(--gray-600);line-height:1.75;}
+strong{color:var(--gray-800);}
+.callout{border-radius:10px;padding:13px 17px;margin:16px 0;display:flex;gap:12px;align-items:flex-start;}
+.callout.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.callout.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.callout.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.callout.danger{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.callout p{margin:0;font-size:12px;line-height:1.6;color:inherit;}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px;}
+thead tr{background:rgba(105,65,198,.06);}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);border-bottom:2px solid rgba(105,65,198,.15);}
+td{padding:9px 13px;border-bottom:1px solid var(--gray-100);color:var(--gray-600);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray-50);}
+td strong{color:var(--gray-800);}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;}
+.badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;}
+.badge-amber{background:#fffbeb;color:#b45309;border:1px solid #fcd34d;}
+.badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-gray{background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;}
+/* RN Card */
+.rn-card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:14px 0;}
+.rn-card-head{display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(105,65,198,.04);border-bottom:1px solid var(--gray-200);}
+.rn-num{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent);background:rgba(105,65,198,.1);padding:3px 9px;border-radius:6px;}
+.rn-title{font-size:13px;font-weight:700;color:var(--primary);}
+.rn-body{padding:14px 18px;}
+.rn-body p{font-size:12px;margin-bottom:7px;}
+.rn-field{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin:9px 0 4px;}
+.rn-body ul{padding-left:17px;margin:3px 0 9px;}
+.rn-body li{font-size:12px;color:var(--gray-600);margin-bottom:3px;line-height:1.5;}
+/* Flow */
+.flow-steps{display:flex;flex-direction:column;gap:0;margin:14px 0;}
+.flow-step{display:flex;gap:13px;padding-bottom:14px;}
+.flow-step:last-child{padding-bottom:0;}
+.flow-step-indicator{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.flow-step-circle{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.flow-step-line{width:2px;flex:1;background:var(--gray-200);margin-top:4px;}
+.flow-step-content{flex:1;padding-top:4px;}
+.flow-step-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
+.flow-step-desc{font-size:12px;color:var(--gray-600);line-height:1.5;}
+/* Screen spec */
+.screen-card{border:1px solid var(--gray-200);border-radius:14px;overflow:hidden;margin:18px 0;}
+.screen-card-head{padding:16px 20px;border-bottom:1px solid var(--gray-200);background:linear-gradient(135deg,rgba(105,65,198,.06),rgba(105,65,198,.02));}
+.screen-name{font-size:15px;font-weight:800;color:var(--primary);}
+.screen-path{font-size:11px;color:var(--gray-400);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.screen-body{padding:18px 20px;}
+.field-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;}
+.field-table th{padding:7px 10px;background:var(--gray-50);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray-400);border-bottom:1px solid var(--gray-200);}
+.field-table td{padding:7px 10px;border-bottom:1px solid var(--gray-100);color:var(--gray-600);}
+.field-table tr:last-child td{border-bottom:none;}
+/* UC */
+.uc-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:16px 0;}
+.uc-head{padding:13px 18px;background:rgba(37,99,235,.05);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:12px;}
+.uc-num{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--blue);background:rgba(37,99,235,.1);padding:3px 9px;border-radius:6px;}
+.uc-title{font-size:13px;font-weight:700;color:var(--primary);}
+.uc-body{padding:16px 18px;}
+.uc-body p,.uc-body li{font-size:12px;color:var(--gray-600);line-height:1.5;}
+.uc-body ul{padding-left:17px;margin:3px 0 8px;}
+.uc-field{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin:10px 0 4px;}
+/* Phase banner */
+.phase-banner{background:linear-gradient(135deg,#1a0f3d,#6941c6);border-radius:12px;padding:18px 22px;margin:26px 0;display:flex;align-items:center;justify-content:space-between;}
+.phase-banner-text{font-size:13px;font-weight:700;color:#fff;}
+.phase-banner-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px;}
+.phase-banner-badge{font-size:11px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);padding:4px 12px;border-radius:20px;font-weight:600;}
+/* Card grid */
+.card-grid{display:grid;gap:14px;margin:16px 0;}
+.card-grid-2{grid-template-columns:1fr 1fr;}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:12px;padding:16px 18px;}
+.card.accent{border-top:3px solid var(--accent);}
+.card.green{border-top:3px solid var(--green);}
+.card.amber{border-top:3px solid var(--amber);}
+.card.red{border-top:3px solid var(--red);}
+.card-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:5px;}
+.card-text{font-size:12px;color:var(--gray-600);line-height:1.6;}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:28px 16px}.card-grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">P</div>
+    <div>
+      <div class="topbar-logo-text">PIPELINE by Vendemmia</div>
+      <div class="topbar-logo-sub">Especificação Funcional · Fase 2 — Regras, Fluxos e Telas</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <a class="topbar-nav-btn no-print" href="especificacao-fase1.html">← Fase 1</a>
+    <span class="topbar-badge">Versão 1.0 — Fase 2/3</span>
+    <span class="topbar-badge">Maio 2026</span>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar no-print">
+  <div class="sidebar-section">Navegação</div>
+  <a class="sidebar-item" href="especificacao-fase1.html">← Fase 1 · Fundação</a>
+
+  <div class="sidebar-section">Seção 5</div>
+  <a class="sidebar-item" href="#regras">5. Regras de Negócio</a>
+  <a class="sidebar-item sub" href="#rn-cadastro">RN-001~010 · Cadastro</a>
+  <a class="sidebar-item sub" href="#rn-auditoria">RN-011~020 · Auditoria</a>
+  <a class="sidebar-item sub" href="#rn-scorecard">RN-021~030 · Scorecard</a>
+  <a class="sidebar-item sub" href="#rn-mapa">RN-031~040 · Mapa e Disponib.</a>
+
+  <div class="sidebar-section">Seção 6</div>
+  <a class="sidebar-item" href="#fluxos">6. Fluxos Operacionais</a>
+  <a class="sidebar-item sub" href="#fluxo-prospeccao">6.1 Prospecção de lead</a>
+  <a class="sidebar-item sub" href="#fluxo-portal">6.2 Portal público</a>
+  <a class="sidebar-item sub" href="#fluxo-auditoria">6.3 Auditoria completa</a>
+  <a class="sidebar-item sub" href="#fluxo-scorecard">6.4 Lançamento de KPIs</a>
+  <a class="sidebar-item sub" href="#fluxo-match">6.5 Match comercial</a>
+  <a class="sidebar-item sub" href="#fluxo-alerta">6.6 Gestão de alertas</a>
+
+  <div class="sidebar-section">Seção 7</div>
+  <a class="sidebar-item" href="#telas">7. Telas do Sistema</a>
+  <a class="sidebar-item sub" href="#tela-dashboard">7.1 Dashboard principal</a>
+  <a class="sidebar-item sub" href="#tela-formulario">7.2 Formulário do lead</a>
+  <a class="sidebar-item sub" href="#tela-auditoria">7.3 Pipeline de auditoria</a>
+  <a class="sidebar-item sub" href="#tela-scorecard">7.4 Scorecard</a>
+  <a class="sidebar-item sub" href="#tela-mapa">7.5 Mapa interativo</a>
+  <a class="sidebar-item sub" href="#tela-disponibilidade">7.6 Disponibilidade comercial</a>
+  <a class="sidebar-item sub" href="#tela-portal">7.7 Portal público</a>
+
+  <div class="sidebar-section">Seção 8</div>
+  <a class="sidebar-item" href="#casos-de-uso">8. Casos de Uso</a>
+  <a class="sidebar-item sub" href="#uc001">UC-001 · Cadastrar lead</a>
+  <a class="sidebar-item sub" href="#uc002">UC-002 · Gerar link portal</a>
+  <a class="sidebar-item sub" href="#uc003">UC-003 · Avançar auditoria</a>
+  <a class="sidebar-item sub" href="#uc004">UC-004 · Match comercial</a>
+  <a class="sidebar-item sub" href="#uc005">UC-005 · Emitir certificado</a>
+
+  <div class="sidebar-section" style="color:var(--accent);">Próxima Fase</div>
+  <a class="sidebar-item" style="color:var(--gray-400);">Fase 3 · Validações e Aceite</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+<!-- CAPA -->
+<div class="cover">
+  <div class="cover-tag">📋 EF-LIC-2026-001 · Fase 2 de 3</div>
+  <h1 class="cover-title">Regras de Negócio, Fluxos<br>Operacionais e Telas do Sistema</h1>
+  <div class="cover-sub">Módulo de Licenciamento · Sistema Pipeline · Vendemmia</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><div class="cover-meta-label">Documento</div><div class="cover-meta-value">EF-LIC-2026-001</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Fase</div><div class="cover-meta-value">2 de 3</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Seções</div><div class="cover-meta-value">5 · 6 · 7 · 8</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">Maio 2026</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- SEÇÃO 5: REGRAS DE NEGÓCIO -->
+<div class="section-divider" id="regras">
+  <div class="section-divider-bar"></div>
+  <h2>5. Regras de Negócio <span class="section-num">Seção 5</span></h2>
+</div>
+<p>As regras de negócio definem as restrições, fórmulas, automações e validações que governam o comportamento do sistema independentemente da interface.</p>
+
+<h3 id="rn-cadastro">5.1 Cadastro e Gestão de Leads (RN-001 a RN-010)</h3>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-001</span><span class="rn-title">Status permitidos e transições de estado</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>Um lead de licenciamento pode assumir apenas três status: <strong>Ativo</strong>, <strong>Convertido</strong> ou <strong>Perdido</strong>. As transições são restritas conforme a tabela abaixo:</p>
+    <table><thead><tr><th>De</th><th>Para</th><th>Quem pode</th><th>Efeito colateral</th></tr></thead>
+    <tbody>
+      <tr><td>Ativo</td><td>Convertido</td><td>Diretor / Comercial</td><td>Licenciado aparece no mapa, scorecard e painel de capacidade. Emissão de certificado obrigatória.</td></tr>
+      <tr><td>Ativo</td><td>Perdido</td><td>Comercial</td><td>Exige preenchimento obrigatório do campo "Motivo da perda". Lead sai do kanban para coluna "Perdido".</td></tr>
+      <tr><td>Convertido</td><td>Ativo</td><td>Diretor apenas</td><td>Licenciado removido da rede ativa. KPIs e certificado mantidos como histórico.</td></tr>
+      <tr><td>Perdido</td><td>Ativo</td><td>Comercial</td><td>Motivo da perda mantido no histórico. Lead retorna ao kanban na etapa em que estava.</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-002</span><span class="rn-title">Unicidade do token de formulário</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>Cada lead possui no máximo <strong>um token de formulário ativo</strong> por vez. Ao gerar um novo link, o token anterior é substituído e o link antigo deixa de funcionar. O token tem 32 caracteres hexadecimais gerados por <code>crypto.getRandomValues()</code>.</p>
+    <div class="rn-field">Implicação</div>
+    <ul><li>Links compartilhados anteriormente ficam inválidos após a regeneração</li><li>O sistema exibe aviso claro sobre isso no modal de geração de link</li></ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-003</span><span class="rn-title">Cálculo de m² disponível</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <div class="rn-field">Fórmula</div>
+    <p style="font-family:'JetBrains Mono',monospace;background:var(--gray-50);padding:10px 14px;border-radius:8px;border-left:3px solid var(--accent);font-size:12px;">m² Disponível = area_total_m2 × (1 − utilizacao_capacidade / 100)</p>
+    <div class="rn-field">Regras</div>
+    <ul>
+      <li>O resultado nunca pode ser negativo — se o cálculo resultar em valor negativo, exibe <strong>0 m²</strong></li>
+      <li>Licenciados sem <code>utilizacao_capacidade</code> registrada no Scorecard são marcados como "Sem dados" — não aparecem como 100% disponíveis</li>
+      <li>O campo <code>area_total_m2</code> é consolidado automaticamente como a soma das áreas de todos os armazéns cadastrados no lead</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-004</span><span class="rn-title">Geocodificação e prioridade de coordenadas</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Hierarquia de precisão</div>
+    <table><thead><tr><th>Prioridade</th><th>Fonte</th><th>Precisão</th><th>Condição</th></tr></thead>
+    <tbody>
+      <tr><td>1ª</td><td>BrasilAPI (CEP)</td><td>Endereço exato (rua)</td><td>CEP informado e válido</td></tr>
+      <tr><td>2ª</td><td>Dicionário interno (80+ cidades)</td><td>Centro da cidade</td><td>polo_logistico reconhecido</td></tr>
+      <tr><td>3ª</td><td>Capital do estado</td><td>Capital da UF</td><td>Apenas UF informada</td></tr>
+    </tbody></table>
+    <p style="font-size:12px;color:var(--gray-600);margin-top:8px;">Quando coordenadas GPS são obtidas via CEP, é adicionado um offset aleatório de ±0,04° para evitar sobreposição exata de múltiplos pontos no mesmo endereço.</p>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-005</span><span class="rn-title">Cálculo e renovação do Score de Qualidade (Tier)</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <div class="rn-field">Recálculo</div>
+    <p>O score é <strong>calculado dinamicamente no frontend</strong> a cada carregamento, não é armazenado no banco. Isso garante que qualquer atualização nos dados do lead (ex.: nova certificação) reflita imediatamente no score sem processamento batch.</p>
+    <div class="rn-field">Reclassificação</div>
+    <ul>
+      <li>O tier pode melhorar (ex.: Bronze → Prata) quando o licenciado lança novos KPIs acima dos thresholds</li>
+      <li>Downgrade (ex.: Ouro → Prata) ocorre quando KPIs registrados ficam abaixo dos mínimos</li>
+      <li>Alerta automático "Risco de downgrade" é disparado quando OTIF cai &gt;3% ou acuracidade cai &gt;2% entre dois períodos consecutivos</li>
+    </ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-006</span><span class="rn-title">Vinculação de fotos por armazém</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>Fotos de armazéns são armazenadas com <strong>tipo composto</strong> (<code>foto_armazem_1</code>, <code>foto_armazem_2</code>...) na tabela <code>lic_anexos</code>. Esta convenção garante rastreabilidade de qual foto pertence a qual armazém, mesmo que os armazéns sejam renomeados posteriormente.</p>
+    <div class="rn-field">Implicação</div>
+    <ul><li>A deleção de um armazém do formulário não remove as fotos vinculadas — elas permanecem no histórico</li><li>O campo de preview no mapa usa a primeira foto do tipo <code>foto_armazem_%</code> encontrada</li></ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-007</span><span class="rn-title">Registro automático de eventos no histórico</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>O sistema registra automaticamente os seguintes eventos na tabela <code>lic_historico</code>, sem intervenção do usuário:</p>
+    <table><thead><tr><th>Evento</th><th>Gatilho</th><th>Tipo registrado</th></tr></thead>
+    <tbody>
+      <tr><td>Mudança de etapa no Kanban</td><td>Função <code>_licKbMoverEtapa()</code></td><td>etapa_kanban</td></tr>
+      <tr><td>Avanço de auditoria</td><td>Função <code>audAvancarEtapa()</code></td><td>auditoria_avanco</td></tr>
+      <tr><td>Emissão de certificado</td><td>Função <code>emitirCertificado()</code></td><td>certificado_emitido</td></tr>
+      <tr><td>Lançamento de KPIs</td><td>Função <code>salvarLicKpi()</code></td><td>kpi_lancado</td></tr>
+      <tr><td>Geração de link</td><td>Função <code>licGerarLinkForm()</code></td><td>link_gerado</td></tr>
+      <tr><td>Formulário preenchido</td><td>Mudança de <code>form_status → 'concluido'</code></td><td>formulario_preench</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-008</span><span class="rn-title">Projeção de disponibilidade (3 e 6 meses)</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Método de cálculo</div>
+    <p>A projeção usa <strong>regressão linear simples</strong> sobre os últimos 4 períodos registrados de m² disponível (calculado a partir de histórico de utilização no Scorecard). A fórmula extrai slope e intercept para projetar os próximos N meses.</p>
+    <div class="rn-field">Restrições</div>
+    <ul>
+      <li>Mínimo de 2 períodos registrados para ativar a projeção — com apenas 1 período, exibe linha plana</li>
+      <li>O resultado nunca pode ser negativo (m² disponível projetado ≥ 0)</li>
+      <li>A projeção é estritamente indicativa — não substitui análise de demanda real</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="rn-auditoria">5.2 Pipeline de Auditoria (RN-011 a RN-020)</h3>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-011</span><span class="rn-title">Bloqueio de avanço de etapa por checklist</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>O botão "Avançar para próxima etapa" permanece <strong>desabilitado</strong> enquanto existir qualquer item do checklist da etapa atual desmarcado. O bloqueio é implementado tanto via CSS (cursor:not-allowed, opacidade reduzida) quanto via validação JavaScript antes de chamar a API.</p>
+    <div class="rn-field">Exceção</div>
+    <ul><li>Diretores podem forçar o avanço desconsiderando o checklist — funcionalidade reservada para situações excepcionais documentadas</li></ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-012</span><span class="rn-title">Cálculo e exibição de SLA por etapa</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Cálculo</div>
+    <p style="font-family:'JetBrains Mono',monospace;background:var(--gray-50);padding:8px 12px;border-radius:8px;border-left:3px solid var(--accent);font-size:12px;">dias_na_etapa = floor((hoje - etapa_iniciada_em) / 86400000)</p>
+    <table><thead><tr><th>Status</th><th>Condição</th><th>Cor</th></tr></thead>
+    <tbody>
+      <tr><td>No prazo</td><td>dias_na_etapa ≤ sla_dias × 0.7</td><td><span class="badge badge-green">Verde</span></td></tr>
+      <tr><td>Atenção</td><td>dias_na_etapa &gt; sla_dias × 0.7</td><td><span class="badge badge-amber">Âmbar</span></td></tr>
+      <tr><td>Vencido</td><td>dias_na_etapa &gt; sla_dias</td><td><span class="badge badge-red">Vermelho</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-013</span><span class="rn-title">Relatório de visita técnica obrigatório na etapa 4</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>A etapa "Visita Técnica" inclui no checklist o item <em>"Relatório técnico elaborado e assinado"</em>. O sistema disponibiliza uma zona de upload de arquivo (PDF/DOC) integrada ao checklist. O auditor deve fazer upload do relatório para marcar este item como concluído.</p>
+    <div class="rn-field">Armazenamento</div>
+    <ul><li>Arquivo salvo em: <code>lic-anexos/leads/{id}/relatorio_visita/{timestamp}_{nome}</code></li><li>URL pública registrada em <code>lic_auditoria.relatorio_visita_url</code></li></ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-014</span><span class="rn-title">Emissão de certificado ativa o licenciado na rede</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>A emissão do certificado digital é o único mecanismo que altera o status do lead de <strong>Ativo → Convertido</strong> de forma automática. Nenhuma outra ação no sistema produz essa transição de status sem intervenção explícita do usuário.</p>
+    <div class="rn-field">Efeitos cascata</div>
+    <ul>
+      <li>Lead aparece no mapa como marcador verde (Convertido)</li>
+      <li>Lead entra no painel de Capacidade e Disponibilidade</li>
+      <li>Score de qualidade passa a ser calculado e exibido</li>
+      <li>KPIs podem ser lançados no Scorecard</li>
+      <li>Alertas de renovação de certificado passam a ser monitorados</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="rn-scorecard">5.3 Scorecard de Performance (RN-021 a RN-030)</h3>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-021</span><span class="rn-title">Ativação obrigatória do plano de remediação</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Condições de ativação</div>
+    <p>O bloco de Plano de Remediação é exibido automaticamente no modal de lançamento de KPIs quando pelo menos uma das seguintes condições for verdadeira:</p>
+    <ul>
+      <li>Qualquer KPI inserido resultar em classificação <span class="badge badge-red">Vermelho</span></li>
+      <li>O licenciado sendo avaliado for do nível <span class="badge badge-amber">Bronze</span></li>
+    </ul>
+    <div class="rn-field">Campos obrigatórios no plano</div>
+    <ul><li>Ações corretivas (texto livre)</li><li>Data de início do plano</li><li>Data prevista de resolução</li></ul>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-022</span><span class="rn-title">Não sobreposição de KPIs no mesmo período</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>O sistema permite múltiplos registros no mesmo período (Q1 2026, por exemplo) para o mesmo lead — não há restrição de unicidade por período/lead. Isso possibilita correções e atualizações dentro do mesmo trimestre. O scorecard sempre exibe o <strong>registro mais recente</strong> por período ao calcular saúde e tendência.</p>
+  </div>
+</div>
+
+<h3 id="rn-mapa">5.4 Mapa e Disponibilidade (RN-031 a RN-040)</h3>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-031</span><span class="rn-title">Alertas de capacidade e thresholds</span><span style="margin-left:auto"><span class="badge badge-red">Crítico</span></span></div>
+  <div class="rn-body">
+    <table><thead><tr><th>Condição</th><th>Alerta</th><th>Ação sugerida</th></tr></thead>
+    <tbody>
+      <tr><td>m² disponível &lt; 500</td><td><span class="badge badge-red">Crítico</span> — Capacidade mínima</td><td>Notificar diretoria; prospectar novo licenciado na região</td></tr>
+      <tr><td>Utilização &gt; 70%</td><td><span class="badge badge-amber">Atenção</span> — Alta ocupação</td><td>Monitorar; preparar alternativa regional</td></tr>
+      <tr><td>Utilização &gt; 90%</td><td><span class="badge badge-red">Crítico</span> — Capacidade esgotada</td><td>Não ofertar este licenciado para novos clientes</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="rn-card">
+  <div class="rn-card-head"><span class="rn-num">RN-032</span><span class="rn-title">Descarte de alertas via localStorage</span></div>
+  <div class="rn-body">
+    <div class="rn-field">Regra</div>
+    <p>Alertas descartados são salvos em <code>localStorage</code> com ID único no formato <code>{tipo}_{leadId}_{AAAA-MM}</code>. O sufixo <code>AAAA-MM</code> garante que o alerta <strong>reaparece no mês seguinte</strong> se a condição persistir — ou seja, o descarte é temporário (mensal), não permanente.</p>
+    <div class="rn-field">Exceção</div>
+    <ul><li>Alertas de tipo <code>FORM_PREENCHIDO</code> expiram naturalmente após 7 dias e não dependem de localStorage</li></ul>
+  </div>
+</div>
+
+<!-- SEÇÃO 6: FLUXOS OPERACIONAIS -->
+<div class="section-divider" id="fluxos">
+  <div class="section-divider-bar"></div>
+  <h2>6. Fluxos Operacionais <span class="section-num">Seção 6</span></h2>
+</div>
+
+<h3 id="fluxo-prospeccao">6.1 Fluxo: Prospecção e Cadastro de Lead</h3>
+
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">1</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Identificação do candidato</div><div class="flow-step-desc">Comercial identifica um operador logístico com espaço ocioso através de indicação, evento, prospecção ativa ou LinkedIn. Dados básicos são levantados informalmente.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">2</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Criação do lead no sistema</div><div class="flow-step-desc">Comercial acessa Pipeline → Licenciamento → "+ Novo Lead". Preenche minimamente: Razão Social (obrigatório) e e-mail do contato. Os demais campos podem ser preenchidos depois ou pelo próprio parceiro via portal.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">3</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Geração do link de portal (opcional)</div><div class="flow-step-desc">Comercial clica em "Gerar link" → Sistema gera token único → Modal exibe link + QR Code → Comercial compartilha via WhatsApp ou e-mail com o candidato.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">4</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Preenchimento pelo parceiro (se link gerado)</div><div class="flow-step-desc">Parceiro acessa portal.html?token=XXX → Tela de boas-vindas → Preenche 7 seções com auto-save → Faz upload de documentos → Clica "Enviar formulário" → Sistema registra form_status='concluido'. Alerta automático "Formulário preenchido" aparece para o Comercial.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">5</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Revisão e início da auditoria</div><div class="flow-step-desc">Comercial revisa os dados preenchidos, acessa Auditoria → "+ Iniciar Auditoria" → Seleciona o lead → Define auditor responsável → Lead entra na etapa "Prospectado" do kanban de auditoria.</div></div></div>
+</div>
+
+<div class="callout warning">
+  <div class="callout-icon">⚠️</div>
+  <p><strong>Fluxo alternativo — preenchimento interno:</strong> Se o comercial optar por preencher diretamente sem enviar link ao parceiro, todas as 11 seções do formulário interno podem ser preenchidas pela equipe Vendemmia. O fluxo segue do passo 5 sem o passo 3 e 4.</p>
+</div>
+
+<h3 id="fluxo-portal">6.2 Fluxo: Preenchimento no Portal Público</h3>
+
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">1</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Acesso ao link</div><div class="flow-step-desc">Parceiro abre o link: <code>pipelinevendemmia.com.br/portal.html?token=TOKEN</code>. Sistema valida o token no Supabase. Se inválido → tela de erro. Se já preenchido → tela de aviso com opção de editar.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">2</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Tela de boas-vindas</div><div class="flow-step-desc">Portal exibe nome da empresa (se já cadastrado), badge "Rede de Licenciamento Vendemmia", informações sobre o processo (10-15 min), badges de garantias (dados protegidos, salvo automaticamente, funciona no celular) e botão "Começar preenchimento".</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">3</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Preenchimento das 7 seções</div><div class="flow-step-desc">Parceiro navega pelas seções usando "Próximo →". A cada navegação, os dados são salvos automaticamente (form_status='preenchendo'). Barra de progresso atualiza em tempo real. CEP auto-preenche cidade, UF e endereço via BrasilAPI.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">4</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Upload de documentos</div><div class="flow-step-desc">Nas seções 1, 4 e 7, o parceiro pode arrastar ou selecionar arquivos para upload (Contrato Social, fotos dos armazéns por armazém, certificados). Arquivos ficam pendentes até o submit final.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">5</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Envio final</div><div class="flow-step-desc">Na seção 7, parceiro clica "✅ Enviar formulário". Sistema faz upload de todos os arquivos pendentes para o Storage, atualiza form_status='concluido' e form_filled_at no banco, exibe tela de agradecimento.</div></div></div>
+</div>
+
+<h3 id="fluxo-auditoria">6.3 Fluxo: Auditoria Completa (Prospectado → Ativo)</h3>
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:var(--gray-400);">P</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Prospectado — SLA: 7 dias</div><div class="flow-step-desc"><strong>Checklist:</strong> Contato inicial realizado; Informações básicas coletadas; Potencial de m² confirmado; Link do formulário enviado. <strong>Avançar quando:</strong> Todos 4 itens marcados.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:#6941c6;">F</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Formulário Enviado — SLA: 14 dias</div><div class="flow-step-desc"><strong>Checklist:</strong> Formulário preenchido; Contrato Social anexado; CNPJ validado; Capacidade de m² confirmada. <strong>Avançar quando:</strong> Todos 4 itens marcados.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:#2563eb;">D</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Análise Documental — SLA: 10 dias</div><div class="flow-step-desc"><strong>Checklist:</strong> Documentação jurídica aprovada; Certidões negativas OK; Situação fiscal regular; Certificações verificadas; Referências comerciais checadas. <strong>Avançar quando:</strong> Todos 5 itens marcados.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:#d97706;">V</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Visita Técnica — SLA: 21 dias</div><div class="flow-step-desc"><strong>Checklist:</strong> Visita agendada; Estrutura física aprovada; AVCB verificado; m² confirmado in loco; WMS verificado; Fotos registradas; Relatório elaborado e assinado. <strong>Upload obrigatório:</strong> Relatório de visita técnica em PDF/DOC. <strong>Avançar quando:</strong> Todos 7 itens marcados e arquivo uploadado.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:var(--green);">A</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Aprovação — SLA: 14 dias</div><div class="flow-step-desc"><strong>Checklist:</strong> Relatório aprovado pela diretoria; Plano de implantação definido; Contrato assinado; Número de licenciado atribuído. <strong>Avançar quando:</strong> Todos 4 itens marcados.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle" style="background:#7c3aed;">★</div></div><div class="flow-step-content"><div class="flow-step-title">Ativo na Rede — Emissão de Certificado</div><div class="flow-step-desc"><strong>Ação final:</strong> Usuário clica "Emitir Certificado" → Preenche número, data de emissão e validade → Sistema registra em <code>lic_auditoria</code>, altera lead para status "Convertido" e registra evento no histórico. Licenciado passa a aparecer em toda a rede.</div></div></div>
+</div>
+
+<h3 id="fluxo-scorecard">6.4 Fluxo: Lançamento Trimestral de KPIs</h3>
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">1</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Acesso ao Scorecard</div><div class="flow-step-desc">Gestor acessa Licenciamento → Scorecard. Visualiza cards de todos os licenciados com status de saúde atual. Identifica licenciados sem KPIs ou com alertas.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">2</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Início do lançamento</div><div class="flow-step-desc">Clica em "+ Lançar KPIs" no card do licenciado. Modal abre com período pré-selecionado (trimestre atual), valores do último período pré-preenchidos para facilitar atualização.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">3</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Preenchimento dos KPIs</div><div class="flow-step-desc">Preenche os 6 KPIs. A cada valor digitado, o sistema verifica o threshold em tempo real e muda a cor dos campos. Se qualquer KPI ficar vermelho ou licenciado for Bronze, bloco de Plano de Remediação aparece automaticamente.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">4</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Salvamento</div><div class="flow-step-desc">Clica "Salvar KPIs" → Sistema salva em <code>lic_performance</code> → Atualiza <code>otif_pct</code> e <code>acuracidade_pct</code> no lead → Registra evento no histórico → Fecha modal → Cards do scorecard recarregam com novos semáforos.</div></div></div>
+</div>
+
+<h3 id="fluxo-match">6.5 Fluxo: Match Comercial em Reunião de Vendas</h3>
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">1</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Necessidade do cliente identificada</div><div class="flow-step-desc">Durante reunião, cliente informa necessidade: ex. "Preciso de 3.000 m² refrigerados em SP e RS a partir de outubro".</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">2</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Acesso à ferramenta de Match</div><div class="flow-step-desc">Vendedor abre Pipeline → Licenciamento → Disponibilidade Comercial. Preenche: Estado(s) = SP + RS, m² mínimo = 3.000, tipo de carga = Refrigerado. Clica "Buscar".</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">3</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Resultado em tempo real</div><div class="flow-step-desc">Sistema exibe inline os licenciados compatíveis: nome, UF, polo logístico, m² disponível, tier badge e status de capacidade. Resultado ordenado por maior disponibilidade.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">4</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Apresentação e proposta</div><div class="flow-step-desc">Vendedor apresenta as opções ao cliente diretamente na tela ou gera Board Report PDF para formalizar a proposta de cobertura da rede.</div></div></div>
+</div>
+
+<h3 id="fluxo-alerta">6.6 Fluxo: Gestão de Alertas Proativos</h3>
+<div class="flow-steps">
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">1</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Detecção automática</div><div class="flow-step-desc">A cada carregamento da tela de Licenciamento, o sistema varre todos os leads e detecta condições de alerta (certificados vencendo, ocupação alta, etc.). O badge no botão "Alertas" é atualizado com a contagem.</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">2</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Visualização do painel</div><div class="flow-step-desc">Usuário clica em "Alertas" → Painel lateral desliza da direita → Alertas agrupados por prioridade (Crítico / Atenção / Informação). Cada alerta mostra empresa, condição detectada e botão "Ver →".</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">3</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Ação corretiva</div><div class="flow-step-desc">Usuário clica "Ver →" para navegar diretamente à tela relevante (Auditoria, Scorecard, Disponibilidade ou formulário do lead). Toma a ação corretiva (renovar certificado, lançar KPIs, etc.).</div></div></div>
+  <div class="flow-step"><div class="flow-step-indicator"><div class="flow-step-circle">4</div><div class="flow-step-line"></div></div><div class="flow-step-content"><div class="flow-step-title">Descarte do alerta</div><div class="flow-step-desc">Após resolver ou reconhecer o alerta, clica "Dispensar" → Alerta removido da lista e salvo em localStorage. O alerta reaparece automaticamente no mês seguinte se a condição persistir.</div></div></div>
+</div>
+
+<!-- SEÇÃO 7: TELAS -->
+<div class="section-divider" id="telas">
+  <div class="section-divider-bar"></div>
+  <h2>7. Telas do Sistema <span class="section-num">Seção 7</span></h2>
+</div>
+
+<div class="screen-card" id="tela-dashboard">
+  <div class="screen-card-head">
+    <div class="screen-name">7.1 Dashboard Principal (Tela Inicial)</div>
+    <div class="screen-path">Licenciamento → (tela inicial após navegar)</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Consolidar em uma única visão todos os indicadores da rede de licenciamento, substituindo o dashboard separado e oferecendo acesso rápido a todas as funcionalidades do módulo.</p>
+    <h4>Componentes da Tela</h4>
+    <table class="field-table"><thead><tr><th>Componente</th><th>Descrição</th><th>Dados</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Header de navegação</strong></td><td>Título + filtros de status (Todos/Ativo/Convertido/Perdido) + botões de módulo</td><td>Estático + contagem dinâmica</td></tr>
+      <tr><td><strong>4 KPI cards</strong></td><td>Total de leads, Em negociação, Convertidos, Fee/mês total</td><td>Calculado de baseLicLeads</td></tr>
+      <tr><td><strong>Evolução mensal</strong></td><td>Gráfico de barras com novos leads e linha de convertidos por mês</td><td>created_at dos leads</td></tr>
+      <tr><td><strong>Composição do pipeline</strong></td><td>Donut de distribuição por status (Ativo/Convertido/Perdido)</td><td>Status dos leads</td></tr>
+      <tr><td><strong>Funil de conversão</strong></td><td>Barras horizontais por etapa do kanban com taxa de avanço</td><td>Campo etapa dos leads</td></tr>
+      <tr><td><strong>Canal de origem</strong></td><td>Barras horizontais por origem do lead</td><td>Campo origem dos leads</td></tr>
+      <tr><td><strong>Mix de planos</strong></td><td>Donut com distribuição Starter/Pro/Enterprise/Custom</td><td>Campo plano dos convertidos</td></tr>
+      <tr><td><strong>Perdas por etapa</strong></td><td>Barras de leads perdidos por etapa do kanban</td><td>Status + etapa</td></tr>
+      <tr><td><strong>Motivos de perda</strong></td><td>Ranking com barras de progresso</td><td>motivo_perda dos leads</td></tr>
+      <tr><td><strong>m² por UF</strong></td><td>Barras por estado</td><td>area_total_m2 dos convertidos</td></tr>
+      <tr><td><strong>Receita projetada</strong></td><td>Linha acumulada de 60 meses baseada no fee total atual</td><td>fee_mensal dos convertidos</td></tr>
+      <tr><td><strong>Tabela de leads</strong></td><td>Listagem com colunas: Empresa, UF, Plano, Etapa, m², Fee/mês, Responsável, Status, Nível, Ações</td><td>baseLicLeads filtrado</td></tr>
+    </tbody></table>
+    <h4>Ações disponíveis</h4>
+    <ul style="font-size:12px;padding-left:18px;color:var(--gray-600);">
+      <li>Filtrar leads por status (chips Todos/Ativo/Convertido/Perdido)</li>
+      <li>Abrir Mapa / Kanban / Capacidade / Disponibilidade / Scorecard / Auditoria / Board Report / Alertas</li>
+      <li>Gerar link de formulário para qualquer lead</li>
+      <li>Criar novo lead</li>
+      <li>Editar (✏️), Gerar PDF (📄) e Excluir (🗑) qualquer lead da tabela</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-formulario">
+  <div class="screen-card-head">
+    <div class="screen-name">7.2 Formulário Interno do Lead (11 Seções)</div>
+    <div class="screen-path">Licenciamento → + Novo Lead / ✏️ Editar</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Coletar e editar todos os dados de um candidato a licenciado, com navegação por stepper e auto-save a cada seção. Suporta criação e edição com pré-carregamento de dados existentes.</p>
+    <h4>Estrutura do Formulário</h4>
+    <table class="field-table"><thead><tr><th>#</th><th>Seção</th><th>Campos Principais</th><th>Obrigatório</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Dados da empresa</td><td>Razão social, CNPJ, website, faturamento, segmentos, Contrato Social (upload)</td><td>Razão social</td></tr>
+      <tr><td>2</td><td>Contato principal</td><td>Nome, cargo, e-mail, telefone, decisor</td><td>Nome + e-mail</td></tr>
+      <tr><td>3</td><td>Localização</td><td>CEP (geocod. automática), UF, polo logístico, logradouro, bairro, exclusividade</td><td>UF + polo</td></tr>
+      <tr><td>4</td><td>Capacidade instalada</td><td>Múltiplos armazéns (add/remove) + upload de fotos por armazém</td><td>—</td></tr>
+      <tr><td>5</td><td>Tipos de carga</td><td>Carga geral, perigosa (IMDG), temperatura, licenças, observações</td><td>—</td></tr>
+      <tr><td>6</td><td>Maturidade tecnológica</td><td>WMS, ERP, sistemas integrados, nível de maturidade</td><td>—</td></tr>
+      <tr><td>7</td><td>Certificações</td><td>Certificações, OTIF, acuracidade, upload de certificados</td><td>—</td></tr>
+      <tr><td>8</td><td>Planos comerciais</td><td>Seleção de plano (cards visuais), fee mensal, status, motivo de perda</td><td>—</td></tr>
+      <tr><td>9</td><td>Implantação WMS</td><td>Toggle Sim/Não + opções Senior ou API (com valores)</td><td>—</td></tr>
+      <tr><td>10</td><td>Funil de etapas</td><td>Seleção da etapa atual (6 opções de Prospecção a Onboarding)</td><td>—</td></tr>
+      <tr><td>11</td><td>Acompanhamento</td><td>Origem, datas de contato, próxima ação, responsável, observações</td><td>Responsável</td></tr>
+    </tbody></table>
+    <h4>Comportamentos</h4>
+    <ul style="font-size:12px;padding-left:18px;color:var(--gray-600);">
+      <li>Barra de progresso de preenchimento atualiza dinamicamente no header</li>
+      <li>Stepper no topo mostra etapas concluídas (verde ✓) e ativa (roxo com glow)</li>
+      <li>Na etapa 11 o botão "Próximo" muda para "✅ Salvar lead" (verde)</li>
+      <li>Botão "📄 Gerar PDF" aparece apenas no modo de edição (lead existente)</li>
+      <li>Ao salvar, qualquer arquivo pendente é enviado ao Supabase Storage</li>
+    </ul>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-auditoria">
+  <div class="screen-card-head">
+    <div class="screen-name">7.3 Pipeline de Auditoria e Homologação</div>
+    <div class="screen-path">Licenciamento → Auditoria</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Gerenciar o processo formal de homologação de candidatos a licenciados, com kanban visual de 6 etapas, checklists obrigatórios por etapa e SLA monitorado.</p>
+    <h4>Componentes</h4>
+    <table class="field-table"><thead><tr><th>Componente</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Header escuro</strong></td><td>Gradiente roxo com contagem de leads por etapa em mini-badges</td></tr>
+      <tr><td><strong>Kanban de 6 colunas</strong></td><td>Uma coluna por etapa; cards com: nome da empresa, tier badge, dias na etapa, barra de progresso do checklist, auditor responsável</td></tr>
+      <tr><td><strong>Card de auditoria</strong></td><td>Clicável → abre painel lateral. Exibe: semáforo de SLA (verde/âmbar/vermelho), progresso checklist (X/Y ✓)</td></tr>
+      <tr><td><strong>Painel lateral</strong></td><td>Stepper de 6 etapas; checklist interativo com persistência em tempo real; Upload de relatório (etapa 4); Notas livres; Botão "Avançar" (bloqueado até checklist completo); Seção de certificado (etapa 6)</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-scorecard">
+  <div class="screen-card-head">
+    <div class="screen-name">7.4 Scorecard de Performance</div>
+    <div class="screen-path">Licenciamento → Scorecard</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Monitorar a saúde operacional de cada licenciado ativo através de KPIs trimestrais com semáforos visuais, histórico de evolução e gestão de planos de remediação.</p>
+    <h4>Componentes</h4>
+    <table class="field-table"><thead><tr><th>Componente</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Banner de saúde da rede</strong></td><td>Chips contando licenciados por categoria: ✅ Saudável · ⚠️ Atenção · 🔴 Crítico · ⚪ Sem dados</td></tr>
+      <tr><td><strong>Filtros</strong></td><td>Por nível (Platina/Ouro/Prata/Bronze) e por status de saúde</td></tr>
+      <tr><td><strong>Grid de cards</strong></td><td>Um card por licenciado com: 6 linhas de KPI com semáforo (🟢🟡🔴), tier badge, score visual, indicador de remediação ativa se aplicável</td></tr>
+      <tr><td><strong>Modal de lançamento</strong></td><td>Seletor de período (trimestre + ano), 6 campos numéricos com meta exibida, bloco de remediação condicional</td></tr>
+      <tr><td><strong>Painel de histórico</strong></td><td>Gráfico de linhas (OTIF + Acuracidade + NPS por período), tabela de todos os registros com semáforos, plano de remediação ativo</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-mapa">
+  <div class="screen-card-head">
+    <div class="screen-name">7.5 Mapa Interativo da Rede</div>
+    <div class="screen-path">Licenciamento → Mapa</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Visualizar geograficamente a cobertura da rede de licenciados com informações de disponibilidade, histórico e documentos acessíveis diretamente pelo mapa.</p>
+    <h4>Componentes</h4>
+    <table class="field-table"><thead><tr><th>Componente</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mapa base</strong></td><td>CartoDB Voyager (colorido), zoom 3–14, controles posicionados no canto inferior direito</td></tr>
+      <tr><td><strong>Choropleth de estados</strong></td><td>5 tons de roxo por intensidade de m². Clique no estado dá zoom na região</td></tr>
+      <tr><td><strong>Marcadores (tags)</strong></td><td>Tags retangulares com m² e UF; verde=Convertido, roxo=Ativo, vermelho=Perdido. Hover exibe popup com foto, dados e hint de clique</td></tr>
+      <tr><td><strong>Hover popup</strong></td><td>Foto do armazém (ou placeholder), nome, localização, m² disponível, fee/mês, badges de nível e status, hint "Clique para ver detalhes →"</td></tr>
+      <tr><td><strong>Side panel (3 abas)</strong></td><td><strong>Dados:</strong> todos os campos do lead + armazéns + certificações. <strong>Histórico:</strong> timeline CRM completa. <strong>Documentos:</strong> lista de anexos com download</td></tr>
+      <tr><td><strong>Barra de busca</strong></td><td>Texto livre + filtros por UF, Plano e Status. Contador de resultados dinâmico</td></tr>
+      <tr><td><strong>Gap Analysis</strong></td><td>Modo alternativo: choropleth tricolor (verde/âmbar/vermelho) + painel com lista de estados sem cobertura</td></tr>
+      <tr><td><strong>Painel lateral esquerdo</strong></td><td>Totais da rede, m² por região (barras), top estados, legenda</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-disponibilidade">
+  <div class="screen-card-head">
+    <div class="screen-name">7.6 Disponibilidade Comercial</div>
+    <div class="screen-path">Licenciamento → Disponibilidade</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Responder em segundos à pergunta "o que posso oferecer a um cliente agora?", com dados de disponibilidade real calculados a partir da utilização registrada no Scorecard.</p>
+    <h4>Componentes</h4>
+    <table class="field-table"><thead><tr><th>Componente</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Hero escuro</strong></td><td>4 KPIs: m² Disponível Agora · Licenciados com espaço · Alertas de capacidade · Sem dados de utilização</td></tr>
+      <tr><td><strong>Match comercial</strong></td><td>Formulário de busca: estados (multi-select), m² mínimo, tipo de carga → resultado inline com licenciados compatíveis</td></tr>
+      <tr><td><strong>m² por região</strong></td><td>Gráfico de barras empilhadas (disponível vs. ocupado) por região geográfica</td></tr>
+      <tr><td><strong>Alertas de capacidade</strong></td><td>Lista de licenciados com &gt;70% de ocupação, com barra visual e nível de criticidade</td></tr>
+      <tr><td><strong>Por tipo de carga</strong></td><td>Ranking de tipos de carga por número de licenciados habilitados e m² disponíveis</td></tr>
+      <tr><td><strong>Projeção 3/6 meses</strong></td><td>Gráfico de linha com histórico e projeção via regressão linear. Toggle 3/6 meses. Insight textual automático</td></tr>
+      <tr><td><strong>Tabela detalhada</strong></td><td>Todos os licenciados com m² total, % ocupado (barra visual), m² disponível, status de capacidade</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<div class="screen-card" id="tela-portal">
+  <div class="screen-card-head">
+    <div class="screen-name">7.7 Portal Público de Preenchimento</div>
+    <div class="screen-path">pipelinevendemmia.com.br/portal.html?token=TOKEN</div>
+  </div>
+  <div class="screen-body">
+    <h4>Objetivo</h4>
+    <p>Oferecer ao candidato a licenciado uma interface exclusiva, sem autenticação, para preenchimento autônomo de dados operacionais. Funciona como onboarding digital do parceiro.</p>
+    <h4>Telas do Portal</h4>
+    <table class="field-table"><thead><tr><th>Estado</th><th>Condição</th><th>Conteúdo exibido</th></tr></thead>
+    <tbody>
+      <tr><td>Carregando</td><td>Sempre (validação do token)</td><td>Spinner animado em fundo gradiente roxo</td></tr>
+      <tr><td>Link inválido</td><td>Token não encontrado no banco</td><td>Card branco com mensagem e instrução para contatar o comercial Vendemmia</td></tr>
+      <tr><td>Já preenchido</td><td>form_status = 'concluido'</td><td>Card informativo com botão "Atualizar dados"</td></tr>
+      <tr><td>Boas-vindas</td><td>Token válido</td><td>Fundo escuro com orbs animados, badge Vendemmia, título, badges de garantias, botão CTA</td></tr>
+      <tr><td>Formulário</td><td>Após "Começar"</td><td>Topbar com logo + stepper 7 etapas + progresso + formulário centralizado (max-width 720px)</td></tr>
+      <tr><td>Agradecimento</td><td>Após submit final</td><td>Card branco com ícone ✅, mensagem personalizada com nome da empresa, badge de aguardar contato</td></tr>
+    </tbody></table>
+    <h4>Recursos de UX</h4>
+    <ul style="font-size:12px;padding-left:18px;color:var(--gray-600);">
+      <li>Responsivo e funcional em smartphones</li>
+      <li>CEP com auto-preenchimento (BrasilAPI + ViaCEP como fallback)</li>
+      <li>Armazéns dinâmicos (add/remove) com upload de fotos individualizadas</li>
+      <li>Progresso salvo automaticamente a cada etapa avançada</li>
+      <li>Indicador de progresso de preenchimento na topbar</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SEÇÃO 8: CASOS DE USO -->
+<div class="section-divider" id="casos-de-uso">
+  <div class="section-divider-bar"></div>
+  <h2>8. Casos de Uso <span class="section-num">Seção 8</span></h2>
+</div>
+
+<div class="uc-card" id="uc001">
+  <div class="uc-head"><span class="uc-num">UC-001</span><span class="uc-title">Cadastrar e qualificar novo lead de licenciamento</span></div>
+  <div class="uc-body">
+    <div class="uc-field">Objetivo</div>
+    <p>Registrar um candidato a licenciado no sistema e iniciar o processo de qualificação com todas as informações operacionais necessárias.</p>
+    <div class="uc-field">Atores</div>
+    <ul><li>Ator primário: Comercial Vendemmia</li><li>Ator secundário: Candidato a licenciado (opcional — via portal)</li></ul>
+    <div class="uc-field">Pré-condições</div>
+    <ul><li>Usuário autenticado com acesso ao módulo Licenciamento</li><li>Candidato identificado e contato inicial realizado</li></ul>
+    <div class="uc-field">Fluxo principal</div>
+    <ul>
+      <li>1. Comercial acessa Licenciamento → clica "+ Novo Lead"</li>
+      <li>2. Preenche Seção 1: Razão Social (obrigatório) e demais campos disponíveis</li>
+      <li>3. Navega pelas 11 seções preenchendo dados conhecidos</li>
+      <li>4. Na Seção 8, define o Plano estimado e fee mensal</li>
+      <li>5. Na Seção 11, registra a data de primeiro contato e responsável</li>
+      <li>6. Clica "✅ Salvar lead" — sistema salva e retorna à tela principal</li>
+      <li>7. Lead aparece na tabela com status "Ativo"</li>
+    </ul>
+    <div class="uc-field">Fluxos alternativos</div>
+    <ul>
+      <li><strong>FA-1 — Parceiro preenche via portal:</strong> Após passo 2, Comercial clica "Gerar link" e envia o link ao candidato. Candidato preenche via portal. Comercial revisa e completa campos comerciais (passo 4-5) que o parceiro não preenche.</li>
+      <li><strong>FA-2 — Salvar sem campos obrigatórios:</strong> Sistema exibe toast de erro e mantém o formulário aberto na seção com o campo obrigatório ausente.</li>
+    </ul>
+    <div class="uc-field">Pós-condições</div>
+    <ul><li>Lead registrado em <code>lic_leads</code> com todos os dados informados</li><li>Evento "Prospecção iniciada" registrado em <code>lic_historico</code></li><li>Lead visível na tabela, no kanban e no mapa (se com coordenadas)</li></ul>
+  </div>
+</div>
+
+<div class="uc-card" id="uc002">
+  <div class="uc-head"><span class="uc-num">UC-002</span><span class="uc-title">Gerar e enviar link de preenchimento ao parceiro</span></div>
+  <div class="uc-body">
+    <div class="uc-field">Objetivo</div>
+    <p>Criar um link exclusivo para que o candidato a licenciado preencha seus próprios dados operacionais sem intervenção da equipe Vendemmia.</p>
+    <div class="uc-field">Atores</div>
+    <ul><li>Ator primário: Comercial Vendemmia</li><li>Ator beneficiário: Candidato a licenciado</li></ul>
+    <div class="uc-field">Pré-condições</div>
+    <ul><li>Lead já cadastrado no sistema (pode ser com apenas o nome)</li><li>Usuário autenticado com acesso ao módulo</li></ul>
+    <div class="uc-field">Fluxo principal</div>
+    <ul>
+      <li>1. Comercial clica em "🔗 Gerar link" (header) ou ícone 🔗 na linha do lead na tabela</li>
+      <li>2. Se via header: modal abre → seleciona lead existente OU digita nome para criar lead novo → clica "Gerar link agora"</li>
+      <li>3. Sistema gera token único (32 hex chars) via <code>crypto.getRandomValues()</code></li>
+      <li>4. Token salvo em <code>lic_leads.form_token</code>; form_status definido como 'pendente'</li>
+      <li>5. Modal exibe: link copiável, QR Code (200×200), botão WhatsApp e botão E-mail</li>
+      <li>6. Comercial copia o link ou clica "WhatsApp" para compartilhar diretamente</li>
+    </ul>
+    <div class="uc-field">Pós-condições</div>
+    <ul><li>Token único registrado no banco; link anterior (se existia) invalidado</li><li>Evento "Link compartilhado" registrado no histórico do lead</li></ul>
+  </div>
+</div>
+
+<div class="uc-card" id="uc003">
+  <div class="uc-head"><span class="uc-num">UC-003</span><span class="uc-title">Avançar etapa no Pipeline de Auditoria</span></div>
+  <div class="uc-body">
+    <div class="uc-field">Objetivo</div>
+    <p>Mover um lead de uma etapa do pipeline de auditoria para a próxima, após conclusão de todos os itens do checklist obrigatório.</p>
+    <div class="uc-field">Atores</div>
+    <ul><li>Ator primário: Auditor / Comercial</li></ul>
+    <div class="uc-field">Pré-condições</div>
+    <ul><li>Lead com processo de auditoria aberto em <code>lic_auditoria</code></li><li>Usuário autenticado</li></ul>
+    <div class="uc-field">Fluxo principal</div>
+    <ul>
+      <li>1. Auditor acessa Auditoria → clica no card do lead</li>
+      <li>2. Painel lateral abre com checklist da etapa atual</li>
+      <li>3. Auditor marca cada item — cada marcação salva automaticamente no Supabase</li>
+      <li>4. Ao marcar o último item, botão "Avançar" fica habilitado e muda de cor</li>
+      <li>5. (Etapa 4 — Visita Técnica) Auditor faz upload do relatório antes de avançar</li>
+      <li>6. Auditor clica "Avançar para [próxima etapa]"</li>
+      <li>7. Sistema registra conclusão da etapa atual no histórico, define nova etapa e reinicia o contador de SLA</li>
+      <li>8. Painel fecha, kanban recarrega com lead na nova coluna</li>
+    </ul>
+    <div class="uc-field">Fluxo alternativo</div>
+    <ul><li><strong>FA-1:</strong> Tentativa de avançar com checklist incompleto → botão permanece desabilitado; mensagem exibe quantos itens faltam</li></ul>
+    <div class="uc-field">Pós-condições</div>
+    <ul><li>Campo <code>estagio_atual</code> atualizado em <code>lic_auditoria</code></li><li>Histórico do lead atualizado com evento "Auditoria avançou"</li><li>Card do lead exibido na nova coluna do kanban</li></ul>
+  </div>
+</div>
+
+<div class="uc-card" id="uc004">
+  <div class="uc-head"><span class="uc-num">UC-004</span><span class="uc-title">Realizar match comercial para cliente em reunião</span></div>
+  <div class="uc-body">
+    <div class="uc-field">Objetivo</div>
+    <p>Identificar em tempo real quais licenciados da rede atendem aos requisitos de espaço, localização e tipo de carga de um cliente durante uma negociação.</p>
+    <div class="uc-field">Atores</div>
+    <ul><li>Ator primário: Comercial Vendemmia</li></ul>
+    <div class="uc-field">Pré-condições</div>
+    <ul><li>Pelo menos 1 licenciado ativo (Convertido) com dados de utilização no Scorecard</li><li>Usuário autenticado</li></ul>
+    <div class="uc-field">Fluxo principal</div>
+    <ul>
+      <li>1. Comercial acessa Disponibilidade Comercial → seção "Buscar disponibilidade"</li>
+      <li>2. Seleciona estados necessários (Ctrl+clique para múltiplos)</li>
+      <li>3. Informa m² mínimo e tipo de carga necessário</li>
+      <li>4. Clica "🔍 Buscar"</li>
+      <li>5. Sistema filtra licenciados convertidos com m² disponível ≥ ao mínimo e que atendem ao tipo de carga</li>
+      <li>6. Resultado exibido inline: nome, UF, m² disponível, tier badge, status de capacidade</li>
+      <li>7. Comercial apresenta opções ao cliente ou gera Board Report para formalizar proposta</li>
+    </ul>
+    <div class="uc-field">Pós-condições</div>
+    <ul><li>Nenhuma alteração no banco — match é operação de leitura</li><li>Comercial tem insumos para elaborar proposta comercial</li></ul>
+  </div>
+</div>
+
+<div class="uc-card" id="uc005">
+  <div class="uc-head"><span class="uc-num">UC-005</span><span class="uc-title">Emitir certificado digital e ativar licenciado na rede</span></div>
+  <div class="uc-body">
+    <div class="uc-field">Objetivo</div>
+    <p>Formalizar a aprovação final de um candidato homologado emitindo o certificado digital Vendemmia e ativando-o como licenciado oficial da rede.</p>
+    <div class="uc-field">Atores</div>
+    <ul><li>Ator primário: Diretor ou Comercial autorizado</li></ul>
+    <div class="uc-field">Pré-condições</div>
+    <ul><li>Lead com processo de auditoria na etapa "Ativo na Rede"</li><li>Todos os itens do checklist da etapa 6 marcados</li></ul>
+    <div class="uc-field">Fluxo principal</div>
+    <ul>
+      <li>1. Usuário abre painel do lead na etapa "Ativo na Rede"</li>
+      <li>2. Clica "🏆 Emitir Certificado e Ativar"</li>
+      <li>3. Modal abre solicitando: número do certificado, data de emissão, data de validade</li>
+      <li>4. Usuário preenche e confirma</li>
+      <li>5. Sistema atualiza <code>lic_auditoria</code> com dados do certificado</li>
+      <li>6. Sistema altera <code>lic_leads.status</code> para "Convertido"</li>
+      <li>7. Evento "Certificado emitido: VDM-2026-XXX" registrado no histórico</li>
+      <li>8. Lead passa a ser exibido como licenciado ativo em: Mapa, Capacidade, Disponibilidade, Scorecard, Board Report</li>
+    </ul>
+    <div class="uc-field">Pós-condições</div>
+    <ul><li>Licenciado ativo em toda a rede Vendemmia</li><li>Alerta automático de renovação de certificado monitorado para os próximos 24 meses</li></ul>
+  </div>
+</div>
+
+<!-- PHASE BANNER -->
+<div class="phase-banner">
+  <div>
+    <div class="phase-banner-text">✅ Fase 2 concluída — Regras de Negócio, Fluxos Operacionais, Telas e Casos de Uso</div>
+    <div class="phase-banner-sub">Continue com a Fase 3: Validações por campo, Relatórios, Notificações, Critérios de Aceite e Requisitos Não-Funcionais</div>
+  </div>
+  <span class="phase-banner-badge">Fase 3 → Qualidade e Aceite</span>
+</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top:56px;padding-top:22px;border-top:2px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:13px;font-weight:800;color:var(--primary);">PIPELINE by Vendemmia</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;">Especificação Funcional EF-LIC-2026-001 · Versão 1.0 · Fase 2 de 3</div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-400);text-align:right;">
+    <div>Confidencial — Vendemmia Comércio Internacional Ltda.</div>
+    <div style="margin-top:2px;">pipelinevendemmia.com.br · Maio 2026</div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+const items=document.querySelectorAll('.sidebar-item[href^="#"]');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){items.forEach(i=>i.classList.remove('active'));const l=document.querySelector('.sidebar-item[href="#'+e.target.id+'"]');if(l)l.classList.add('active');}});},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('[id]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
