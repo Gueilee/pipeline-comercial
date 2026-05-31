@@ -2689,7 +2689,8 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
         </div>
         <div style="display:flex;gap:10px;">
             <button onclick="_licMapFitAll()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;"><i class="ti ti-focus-2"></i> Ver todo Brasil</button>
-            <button id="lic-map-gap-btn" onclick="toggleLicGapAnalysis()" style="padding:7px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;transition:all .15s;"><i class="ti ti-map-search"></i> Gap Analysis</button>
+            <button id="lic-map-gap-btn" onclick="toggleLicGapAnalysis()" style="padding:7px 14px;border:1.5px solid #dc2626;border-radius:8px;background:#fef2f2;font-family:inherit;font-size:12px;font-weight:600;color:#dc2626;cursor:pointer;transition:all .15s;"><i class="ti ti-map-search"></i> Gap Analysis</button>
+            <button id="lic-map-fs-btn" onclick="toggleLicMapaFullscreen()" title="Tela cheia" style="padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;display:flex;align-items:center;gap:5px;"><i class="ti ti-arrows-maximize"></i> Tela cheia</button>
             <button onclick="abrirFormLead(null,'mapa')" style="padding:8px 18px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
     </div>
@@ -13219,7 +13220,29 @@ async function abrirLicMapa() {
     setTimeout(() => { _licInicializarMapa(); }, 120);
 }
 
+let _licMapaFullscreen = false;
+
+function toggleLicMapaFullscreen() {
+    const viewMapa = document.getElementById('lic-view-mapa');
+    const btn = document.getElementById('lic-map-fs-btn');
+    _licMapaFullscreen = !_licMapaFullscreen;
+    if (_licMapaFullscreen) {
+        viewMapa.style.position = 'fixed';
+        viewMapa.style.inset = '0';
+        viewMapa.style.zIndex = '999';
+        viewMapa.style.display = 'flex';
+        if (btn) btn.innerHTML = '<i class="ti ti-arrows-minimize"></i> Sair da tela cheia';
+    } else {
+        viewMapa.style.position = 'absolute';
+        viewMapa.style.inset = '0';
+        viewMapa.style.zIndex = '';
+        if (btn) btn.innerHTML = '<i class="ti ti-arrows-maximize"></i> Tela cheia';
+    }
+    setTimeout(() => { if (_licMap) _licMap.invalidateSize(); }, 120);
+}
+
 function fecharLicMapa() {
+    if (_licMapaFullscreen) { toggleLicMapaFullscreen(); }
     document.getElementById('lic-view-mapa').style.display = 'none';
     document.getElementById('lic-view-tabela').style.display = '';
     if (_licMap) { _licMap.remove(); _licMap = null; }
@@ -13228,15 +13251,25 @@ function fecharLicMapa() {
 function _licInicializarMapa() {
     if (_licMap) { _licMap.remove(); _licMap = null; }
     _licMap = L.map('lic-mapa-container', { center:[-15,-52], zoom:4, zoomControl:false, scrollWheelZoom:true, minZoom:3, maxZoom:14 });
-    // Voyager tiles — mais colorido (estradas, água, parques)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // Mapa base cinza claro — deixa os estados coloridos do choropleth se destacar
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
         attribution:'©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>', maxZoom:19,
     }).addTo(_licMap);
+    // Labels por cima (cidades, nomes) — camada separada para ficar acima do choropleth
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+        attribution:'', maxZoom:19, pane:'overlayPane',
+    }).addTo(_licMap);
     L.control.zoom({ position:'bottomright' }).addTo(_licMap);
-    // Fecha hover popup ao mover o mapa
     _licMap.on('movestart', () => _licMapEsconderHover());
     fetch('https://raw.githubusercontent.com/giuliano-macedo/geodata-br-states/main/geojson/br_states.json')
-        .then(r=>r.json()).then(data=>{ _licGeoJsonData=data; _licAtualizarChoropleth(); _licAtualizarMarkers(); })
+        .then(r=>r.json()).then(data=>{
+            _licGeoJsonData = data;
+            // Ativa Gap Analysis por padrão ao abrir o mapa
+            _licGapMode = true;
+            _licSincronizarBotaoGap();
+            renderizarLicGapAnalysis();
+            _licAtualizarMarkers();
+        })
         .catch(()=>{ _licAtualizarMarkers(); });
 }
 
@@ -13877,15 +13910,10 @@ let _licGapMode = false;
 
 function toggleLicGapAnalysis() {
     _licGapMode = !_licGapMode;
-    const btn = document.getElementById('lic-map-gap-btn');
-    if (btn) {
-        btn.style.background = _licGapMode ? '#fef2f2' : '#faf8ff';
-        btn.style.color = _licGapMode ? '#dc2626' : '#6941c6';
-        btn.style.borderColor = _licGapMode ? '#fca5a5' : '#e0d9f5';
-        btn.innerHTML = _licGapMode ? '✕ Sair do Gap Analysis' : '<i class="ti ti-map-search"></i> Gap Analysis';
-    }
+    _licSincronizarBotaoGap();
     if (_licGapMode) {
         renderizarLicGapAnalysis();
+        _licAtualizarMarkers();
     } else {
         _licAtualizarChoropleth();
         _licAtualizarMarkers();
@@ -13893,81 +13921,143 @@ function toggleLicGapAnalysis() {
     }
 }
 
+const _LIC_UF_NOMES = { AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins' };
+const _LIC_TODAS_UFS = Object.keys(_LIC_UF_NOMES);
+
+function _licSincronizarBotaoGap() {
+    const btn = document.getElementById('lic-map-gap-btn');
+    if (!btn) return;
+    if (_licGapMode) {
+        btn.style.background = '#fef2f2'; btn.style.color = '#dc2626'; btn.style.borderColor = '#fca5a5';
+        btn.innerHTML = '<i class="ti ti-map-search"></i> Gap Analysis <span style="font-size:10px;font-weight:900;background:#dc2626;color:#fff;border-radius:4px;padding:1px 5px;margin-left:4px;">ON</span>';
+    } else {
+        btn.style.background = '#faf8ff'; btn.style.color = '#6941c6'; btn.style.borderColor = '#e0d9f5';
+        btn.innerHTML = '<i class="ti ti-map-search"></i> Gap Analysis';
+    }
+}
+
 function renderizarLicGapAnalysis() {
     if (!_licMap || !_licGeoJsonData) return;
     if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
 
-    const ativos = baseLicLeads.filter(l=>l.status==='Convertido');
-    const prosp  = baseLicLeads.filter(l=>l.status==='Ativo');
-    const ufsAtivas = new Set(ativos.map(l=>l.uf).filter(Boolean));
-    const ufsProsp  = new Set(prosp.map(l=>l.uf).filter(Boolean));
+    const conv   = baseLicLeads.filter(l=>l.status==='Convertido');
+    const ativos = baseLicLeads.filter(l=>l.status==='Ativo');
+    const ufsConv   = new Set(conv.map(l=>l.uf).filter(Boolean).map(u=>u.toUpperCase()));
+    const ufsProsp  = new Set(ativos.map(l=>l.uf).filter(Boolean).map(u=>u.toUpperCase()));
 
-    function getCor(uf) {
-        if (ufsAtivas.has(uf)) return '#16a34a'; // verde = tem licenciado ativo
-        if (ufsProsp.has(uf))  return '#f59e0b'; // âmbar = em prospecção
-        return '#dc2626';                          // vermelho = sem cobertura
-    }
-    function getOpacity(uf) {
-        return ufsAtivas.has(uf) ? .5 : ufsProsp.has(uf) ? .4 : .35;
+    // m² por UF para tooltip enriquecido
+    const m2ByUF = {};
+    conv.forEach(l=>{ if(l.uf) m2ByUF[l.uf.toUpperCase()]=(m2ByUF[l.uf.toUpperCase()]||0)+(parseFloat(l.area_total_m2)||0); });
+
+    function getEstilo(uf) {
+        if (ufsConv.has(uf))  return { fillColor:'#16a34a', weight:2.5, color:'#0d7a34', fillOpacity:.75 };
+        if (ufsProsp.has(uf)) return { fillColor:'#f59e0b', weight:2,   color:'#b45309', fillOpacity:.65 };
+        return                         { fillColor:'#ef4444', weight:1.5, color:'#b91c1c', fillOpacity:.55 };
     }
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f => ({ fillColor:getCor(f.properties.sigla), weight:1.5, color:'#fff', fillOpacity:getOpacity(f.properties.sigla) }),
+        style: f => getEstilo(f.properties.sigla),
         onEachFeature: (feature, layer) => {
-            const uf=feature.properties.sigla; const nome=feature.properties.name;
-            const hasAtivo=ufsAtivas.has(uf); const hasProsp=ufsProsp.has(uf);
-            const status = hasAtivo ? '✅ Coberto — licenciado ativo' : hasProsp ? '🟡 Em prospecção' : '🔴 Sem cobertura — oportunidade';
-            layer.bindTooltip(`<b>${nome} (${uf})</b><br>${status}`,{className:'lic-map-tooltip',sticky:true});
-            layer.on('mouseover',e=>{e.target.setStyle({fillOpacity:.7,weight:2});e.target.bringToFront();});
-            layer.on('mouseout',e=>{_licGeoJsonLayer.resetStyle(e.target);});
+            const uf   = feature.properties.sigla;
+            const nome = _LIC_UF_NOMES[uf] || feature.properties.name || uf;
+            const hasCov  = ufsConv.has(uf);
+            const hasPros = ufsProsp.has(uf);
+            const m2 = m2ByUF[uf] || 0;
+            const m2str = m2 >= 1e6 ? (m2/1e6).toFixed(1)+' Mi m²' : m2 >= 1e3 ? (m2/1e3).toFixed(0)+'K m²' : m2 > 0 ? m2+' m²' : '';
+            let statusHtml;
+            if (hasCov)  statusHtml = `<span style="color:#16a34a;font-weight:700;">✔ Licenciado ativo</span>${m2str?'<br>'+m2str:''}`;
+            else if (hasPros) statusHtml = `<span style="color:#f59e0b;font-weight:700;">◑ Em prospecção</span>`;
+            else statusHtml = `<span style="color:#ef4444;font-weight:700;">✕ Sem cobertura</span>`;
+            layer.bindTooltip(`<div style="min-width:130px;"><div style="font-size:13px;font-weight:800;color:#2d1b69;margin-bottom:4px;">${nome}</div><div style="font-size:11px;">${statusHtml}</div></div>`, {className:'lic-map-tooltip', sticky:true});
+            layer.on('mouseover', e => { e.target.setStyle({fillOpacity:.9, weight:3}); e.target.bringToFront(); });
+            layer.on('mouseout',  e => { _licGeoJsonLayer.resetStyle(e.target); });
+            layer.on('click', e => {
+                const b = e.target.getBounds();
+                _licMap.fitBounds(b, {padding:[30,30]});
+                if (!hasCov && !hasPros) {
+                    // Destaca como oportunidade no painel
+                    const chip = document.getElementById('gap-uf-'+uf);
+                    if (chip) { chip.style.background='#dc2626'; chip.style.color='#fff'; setTimeout(()=>{ chip.style.background=''; chip.style.color=''; },1500); }
+                }
+            });
         }
     }).addTo(_licMap);
 
-    // Atualiza painel lateral com análise de gaps
+    // ── Painel lateral rico ──
     const totalUFs = 27;
-    const cobertas = ufsAtivas.size;
-    const emPros   = [...ufsProsp].filter(u=>!ufsAtivas.has(u)).length;
+    const cobertas = ufsConv.size;
+    const emPros   = [...ufsProsp].filter(u=>!ufsConv.has(u)).length;
     const semCob   = totalUFs - cobertas - emPros;
-    const semCobList = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].filter(u=>!ufsAtivas.has(u)&&!ufsProsp.has(u));
+    const semCobList = _LIC_TODAS_UFS.filter(u=>!ufsConv.has(u)&&!ufsProsp.has(u));
+    const emProsList = _LIC_TODAS_UFS.filter(u=>!ufsConv.has(u)&&ufsProsp.has(u));
+    const pctCob = Math.round((cobertas/totalUFs)*100);
 
     document.getElementById('lic-mapa-panel').innerHTML = `
-        <div style="background:linear-gradient(135deg,#1a0f3d,#dc2626);border-radius:14px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
-            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Gap Analysis</div>
-            <div style="font-size:13px;font-weight:800;color:#fff;margin-bottom:10px;">Cobertura da Rede Vendemmia</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;">
-                <div style="background:rgba(22,163,74,.25);border-radius:8px;padding:8px;text-align:center;">
-                    <div style="font-size:9px;color:rgba(134,239,172,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Cobertos</div>
-                    <div style="font-size:20px;font-weight:900;color:#fff;">${cobertas}</div>
+        <!-- Card cobertura -->
+        <div style="background:linear-gradient(135deg,#1a0f3d 0%,#7c3aed 100%);border-radius:14px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;">
+            <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;"></div>
+            <div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Cobertura da rede</div>
+            <div style="font-size:26px;font-weight:900;color:#fff;font-family:'Courier New',monospace;">${pctCob}%</div>
+            <div style="height:6px;background:rgba(255,255,255,.15);border-radius:3px;margin:8px 0;overflow:hidden;">
+                <div style="height:100%;width:${pctCob}%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:3px;"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+                <div style="background:rgba(22,163,74,.3);border-radius:8px;padding:7px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(134,239,172,.8);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Cobertos</div>
+                    <div style="font-size:18px;font-weight:900;color:#fff;">${cobertas}</div>
                 </div>
-                <div style="background:rgba(245,158,11,.25);border-radius:8px;padding:8px;text-align:center;">
-                    <div style="font-size:9px;color:rgba(253,230,138,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Prospecção</div>
-                    <div style="font-size:20px;font-weight:900;color:#fff;">${emPros}</div>
+                <div style="background:rgba(245,158,11,.25);border-radius:8px;padding:7px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(253,230,138,.8);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Prospecto</div>
+                    <div style="font-size:18px;font-weight:900;color:#fff;">${emPros}</div>
                 </div>
-                <div style="background:rgba(220,38,38,.25);border-radius:8px;padding:8px;text-align:center;">
-                    <div style="font-size:9px;color:rgba(252,165,165,.8);font-weight:700;text-transform:uppercase;margin-bottom:3px;">Sem cob.</div>
-                    <div style="font-size:20px;font-weight:900;color:#fff;">${semCob}</div>
+                <div style="background:rgba(239,68,68,.3);border-radius:8px;padding:7px;text-align:center;">
+                    <div style="font-size:9px;color:rgba(252,165,165,.8);font-weight:700;text-transform:uppercase;margin-bottom:2px;">Gap</div>
+                    <div style="font-size:18px;font-weight:900;color:#fff;">${semCob}</div>
                 </div>
             </div>
         </div>
 
-        <div style="margin-bottom:14px;">
+        <!-- Legenda visual -->
+        <div style="margin-bottom:14px;background:#f9f7ff;border-radius:10px;padding:10px 12px;">
             <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div>
-            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;">
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#16a34a;"></div>Licenciado ativo (${cobertas} UFs)</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#f59e0b;"></div>Em prospecção (${emPros} UFs)</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:14px;height:10px;border-radius:3px;background:#dc2626;"></div>Sem cobertura (${semCob} UFs)</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:11px;color:#374151;">
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:12px;border-radius:3px;background:#16a34a;border:2px solid #0d7a34;"></div><span><b>Verde</b> — Licenciado ativo (${cobertas} UF${cobertas!==1?'s':''})</span></div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:12px;border-radius:3px;background:#f59e0b;border:2px solid #b45309;"></div><span><b>Amarelo</b> — Em prospecção (${emPros} UF${emPros!==1?'s':''})</span></div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:12px;border-radius:3px;background:#ef4444;border:2px solid #b91c1c;"></div><span><b>Vermelho</b> — Sem cobertura (${semCob} UF${semCob!==1?'s':''})</span></div>
             </div>
         </div>
+
+        ${emProsList.length > 0 ? `
+        <!-- Em prospecção -->
+        <div style="margin-bottom:12px;">
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#b45309;margin-bottom:7px;">◑ Em prospecção</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                ${emProsList.map(u=>`<span onclick="_licMapFocarUF('${u}')" id="gap-uf-${u}" style="background:#fffbeb;color:#92400e;border:1.5px solid #fcd34d;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;" title="${_LIC_UF_NOMES[u]||u}">${u}</span>`).join('')}
+            </div>
+        </div>` : ''}
 
         ${semCobList.length > 0 ? `
+        <!-- Oportunidades -->
         <div>
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#dc2626;margin-bottom:8px;">🎯 Oportunidades prioritárias</div>
-            <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">Estados sem nenhum licenciado ou prospecção ativa:</div>
-            <div style="display:flex;flex-wrap:wrap;gap:5px;">
-                ${semCobList.map(u=>`<span style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;">${u}</span>`).join('')}
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#b91c1c;margin-bottom:5px;">🎯 Oportunidades — sem prospecção</div>
+            <div style="font-size:10px;color:#9b8cc0;margin-bottom:8px;">Clique no estado para centralizar no mapa</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                ${semCobList.map(u=>`<span onclick="_licMapFocarUF('${u}')" id="gap-uf-${u}" style="background:#fef2f2;color:#b91c1c;border:1.5px solid #fca5a5;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;" title="${_LIC_UF_NOMES[u]||u}" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">${u}</span>`).join('')}
             </div>
-        </div>` : `<div style="background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;font-size:12px;font-weight:700;color:#16a34a;">🎉 Rede com cobertura em todos os estados!</div>`}
+        </div>
+        ` : `<div style="background:#f0fdf4;border-radius:10px;padding:14px;text-align:center;font-size:12px;font-weight:700;color:#16a34a;">🎉 Rede com cobertura em todos os estados!</div>`}
     `;
+}
+
+function _licMapFocarUF(uf) {
+    if (!_licGeoJsonLayer || !_licMap) return;
+    _licGeoJsonLayer.eachLayer(layer => {
+        if ((layer.feature?.properties?.sigla || '').toUpperCase() === uf.toUpperCase()) {
+            _licMap.fitBounds(layer.getBounds(), {padding:[30,30]});
+            layer.setStyle({fillOpacity:.95, weight:4});
+            setTimeout(() => { _licGeoJsonLayer.resetStyle(layer); }, 1800);
+        }
+    });
 }
 
 function renderizarLicKanban() {
