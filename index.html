@@ -9804,7 +9804,16 @@ async function salvarLicLead() {
             if (inserted) savedLeadId = inserted.id;
         }
         if (error) throw error;
-        if (savedLeadId) await licSalvarTodosAnexos(savedLeadId);
+        if (savedLeadId) {
+            await licSalvarTodosAnexos(savedLeadId);
+            // Registra automaticamente criação do lead no histórico
+            if (!_licEditId) {
+                await registrarLicHistorico(savedLeadId, 'prospeccao_iniciada',
+                    'Lead cadastrado no pipeline',
+                    `Origem: ${data.origem||'—'} · Responsável: ${data.responsavel||'—'}`,
+                    { autor: EMAIL_USUARIO_LOGADO });
+            }
+        }
         showToast(_licEditId ? `Lead "${data.razao_social}" atualizado!` : `Lead "${data.razao_social}" cadastrado!`, 'success');
         await carregarLicLeads();
         fecharFormLead();
@@ -11046,7 +11055,7 @@ async function salvarEventoHistorico() {
     fecharModalHist();
     // Recarrega painel do mapa se estiver aberto
     const fvPanel=document.getElementById('lic-map-fullview');
-    if(fvPanel?.style.display==='flex') _licMapAtualizarHistTab(_histModalLeadId);
+    if(fvPanel?.style.display==='block') _lfvCarregarHistorico(_histModalLeadId);
     showToast('Evento registrado no histórico!','success');
     if(btn){btn.disabled=false;btn.innerHTML='💾 Registrar evento';}
 }
@@ -12951,6 +12960,15 @@ function _licMapAbrirFullView(lead) {
         <div style="font-size:13px;color:#6b7280;line-height:1.6;background:#f9f7ff;border-radius:10px;padding:12px 14px;border-left:3px solid #6941c6;">${lead.observacoes}</div>
         `:''}
 
+        <!-- Histórico completo do lead — carregado de forma assíncrona -->
+        <div class="lfv-section-title" style="margin-top:28px;">📅 Histórico completo do lead</div>
+        <div id="lfv-hist-section" style="min-height:60px;">
+            <div style="display:flex;align-items:center;gap:8px;color:#c4b5e8;font-size:13px;padding:16px 0;">
+                <div style="width:16px;height:16px;border-radius:50%;border:2px solid #c4b5e8;border-top-color:#6941c6;animation:spin .7s linear infinite;flex-shrink:0;"></div>
+                Carregando histórico...
+            </div>
+        </div>
+
         <!-- Documentos e Anexos — carregados de forma assíncrona -->
         <div class="lfv-section-title" style="margin-top:28px;">📎 Documentos e Anexos</div>
         <div id="lfv-docs-section" style="min-height:60px;">
@@ -13033,7 +13051,69 @@ function _licMapAbrirFullView(lead) {
     _lfvCarregarAnexos(lead.id);
 }
 
+async function _lfvCarregarHistorico(leadId) {
+    const el = document.getElementById('lfv-hist-section');
+    if (!el) return;
+    try {
+        const recs = await carregarLicHistorico(leadId);
+        if (!recs || recs.length === 0) {
+            el.innerHTML = `<div style="text-align:center;padding:24px 0;">
+                <div style="font-size:36px;margin-bottom:8px;opacity:.3;">📅</div>
+                <div style="font-size:13px;color:#c4b5e8;">Nenhum evento registrado ainda.<br>
+                <span style="font-size:11px;">Use o botão "+ Evento" nos cards do Kanban para registrar reuniões, contatos e anotações.</span></div>
+            </div>`;
+            return;
+        }
+
+        // Ordena do mais antigo para o mais recente (leitura cronológica)
+        const ordenados = [...recs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+
+        el.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <span style="font-size:11px;color:#9b8cc0;">${ordenados.length} evento${ordenados.length!==1?'s':''} registrado${ordenados.length!==1?'s':''}</span>
+                <button onclick="abrirModalHist('${leadId}')" style="padding:5px 12px;border:1.5px solid #e0d9f5;border-radius:7px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:700;color:#6941c6;cursor:pointer;">+ Registrar evento</button>
+            </div>
+            <div style="position:relative;">
+                <!-- Linha vertical do timeline -->
+                <div style="position:absolute;left:15px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#e0d9f5,#f0ebff);z-index:0;"></div>
+                ${ordenados.map((r, i) => {
+                    const t = LIC_HIST[r.tipo] || { icon:'<i class="ti ti-pin"></i>', cor:'#6b7280', bg:'#f9fafb', label:r.tipo };
+                    const dt = new Date(r.created_at);
+                    const dtStr = dt.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+                    const hrStr = dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+                    const isLast = i === ordenados.length - 1;
+                    const etapasHtml = r.etapa_anterior && r.etapa_nova
+                        ? `<div style="margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                            <span style="background:#f0ebff;color:#6941c6;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;">${r.etapa_anterior}</span>
+                            <span style="font-size:12px;color:#c4b5e8;">→</span>
+                            <span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;">${r.etapa_nova}</span>
+                           </div>` : '';
+                    return `
+                    <div style="display:flex;gap:12px;padding-bottom:${isLast?'0':'18px'};position:relative;z-index:1;">
+                        <!-- Bolinha colorida -->
+                        <div style="width:32px;height:32px;border-radius:50%;background:${t.bg};border:2.5px solid ${t.cor}33;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;box-shadow:0 0 0 4px #fff;">${t.icon}</div>
+                        <!-- Conteúdo -->
+                        <div style="flex:1;background:#fff;border:1px solid #f0ebff;border-radius:10px;padding:11px 14px;margin-top:2px;">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:3px;">
+                                <span style="font-size:12px;font-weight:800;color:#2d1b69;line-height:1.2;">${r.titulo || t.label || '—'}</span>
+                                <span style="font-size:10px;color:#c4b5e8;white-space:nowrap;flex-shrink:0;">${dtStr} · ${hrStr}</span>
+                            </div>
+                            ${r.descricao ? `<div style="font-size:11px;color:#6b7280;line-height:1.5;margin-bottom:3px;">${r.descricao}</div>` : ''}
+                            ${etapasHtml}
+                            ${r.autor ? `<div style="font-size:10px;color:#c4b5e8;margin-top:4px;">por ${r.autor}</div>` : ''}
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+    } catch(e) {
+        if (el) el.innerHTML = '<div style="font-size:12px;color:#9b8cc0;padding:12px 0;">Erro ao carregar histórico.</div>';
+        console.warn('_lfvCarregarHistorico error:', e);
+    }
+}
+
 async function _lfvCarregarAnexos(leadId) {
+    // Carrega histórico e documentos em paralelo
+    _lfvCarregarHistorico(leadId);
     try {
         const { data } = await supabaseClient
             .from('lic_anexos')
