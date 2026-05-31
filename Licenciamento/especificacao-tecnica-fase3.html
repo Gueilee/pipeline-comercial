@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especificação Técnica — Fase 3 · Código, Performance, DevOps e Evolução · Pipeline Licenciamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#0f172a;--accent:#0ea5e9;--accent-dark:#0284c7;--green:#16a34a;--amber:#d97706;--red:#dc2626;--purple:#7c3aed;--gray-50:#f8fafc;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;--sidebar-w:290px;}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.7;color:var(--gray-800);background:#fff;}
+@media print{.sidebar,.topbar,.print-btn,.no-print{display:none!important}.main{margin-left:0!important}body{font-size:11px}}
+.topbar{position:fixed;top:0;left:0;right:0;height:52px;background:linear-gradient(135deg,#0c1a2e,#0f172a);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:300;box-shadow:0 2px 16px rgba(0,0,0,.4);}
+.topbar-logo{display:flex;align-items:center;gap:12px;}
+.topbar-logo-icon{width:30px;height:30px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;}
+.topbar-logo-text{font-size:14px;font-weight:800;color:#fff;letter-spacing:.04em;}
+.topbar-logo-sub{font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;}
+.topbar-meta{display:flex;align-items:center;gap:10px;}
+.topbar-badge{font-size:10px;background:rgba(14,165,233,.2);color:rgba(14,165,233,.9);padding:3px 10px;border-radius:20px;border:1px solid rgba(14,165,233,.3);}
+.topbar-nav-btn{padding:5px 12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.06);font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.65);cursor:pointer;text-decoration:none;}
+.print-btn{padding:6px 16px;border:1px solid rgba(14,165,233,.4);border-radius:8px;background:rgba(14,165,233,.15);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#38bdf8;cursor:pointer;}
+.sidebar{position:fixed;top:52px;left:0;width:var(--sidebar-w);height:calc(100vh - 52px);background:#f8fafc;border-right:1px solid var(--gray-200);overflow-y:auto;z-index:200;padding:16px 0;}
+.sidebar-section{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--gray-400);padding:10px 20px 5px;}
+.sidebar-item{display:block;padding:6px 20px;font-size:12px;color:var(--gray-600);text-decoration:none;border-left:2px solid transparent;transition:all .12s;}
+.sidebar-item:hover{background:rgba(14,165,233,.06);color:var(--accent);border-left-color:var(--accent);}
+.sidebar-item.active{background:rgba(14,165,233,.08);color:var(--accent);border-left-color:var(--accent);font-weight:600;}
+.sidebar-item.sub{padding-left:32px;font-size:11px;}
+.main{margin-left:var(--sidebar-w);padding-top:52px;}
+.cover{background:linear-gradient(145deg,#060d1a 0%,#0c1a2e 35%,#16a34a22 70%,#0ea5e922 100%);padding:60px 60px 56px;position:relative;overflow:hidden;min-height:320px;border-bottom:2px solid rgba(14,165,233,.2);}
+.cover::before{content:'';position:absolute;top:-80px;right:-80px;width:400px;height:400px;border-radius:50%;background:rgba(14,165,233,.05);}
+.cover-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(22,163,74,.2);border:1px solid rgba(22,163,74,.4);border-radius:20px;padding:5px 16px;font-size:11px;font-weight:700;color:#4ade80;margin-bottom:20px;position:relative;font-family:'JetBrains Mono',monospace;}
+.cover-title{font-size:32px;font-weight:900;color:#fff;letter-spacing:-.7px;line-height:1.2;margin-bottom:8px;position:relative;}
+.cover-sub{font-size:15px;color:rgba(255,255,255,.5);margin-bottom:30px;position:relative;}
+.cover-meta{display:flex;gap:12px;flex-wrap:wrap;position:relative;}
+.cover-meta-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 16px;}
+.cover-meta-label{font-size:8px;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.cover-meta-value{font-size:12px;font-weight:700;color:#fff;}
+.content{max-width:880px;margin:0 auto;padding:48px 48px 80px;}
+.section-divider{display:flex;align-items:center;gap:12px;margin:48px 0 20px;}
+.section-divider-bar{width:4px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent-dark));border-radius:2px;flex-shrink:0;}
+.section-divider h2{font-size:21px;font-weight:800;color:var(--primary);letter-spacing:-.3px;}
+.section-num{font-size:10px;font-weight:700;color:var(--accent);background:rgba(14,165,233,.08);padding:3px 10px;border-radius:20px;margin-left:4px;font-family:'JetBrains Mono',monospace;}
+h3{font-size:15px;font-weight:700;color:var(--primary);margin:24px 0 10px;}
+h4{font-size:13px;font-weight:700;color:var(--gray-800);margin:18px 0 8px;}
+p{margin-bottom:12px;color:var(--gray-600);line-height:1.75;}
+strong{color:var(--gray-800);}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#f1f5f9;padding:2px 6px;border-radius:4px;color:#0284c7;}
+pre{background:#0f172a;border-radius:12px;padding:18px 20px;margin:14px 0;overflow-x:auto;}
+pre code{background:none;padding:0;color:#e2e8f0;font-size:12px;line-height:1.65;}
+.hl-key{color:#7dd3fc;} .hl-str{color:#86efac;} .hl-cmt{color:#64748b;font-style:italic;} .hl-num{color:#fbbf24;} .hl-type{color:#c4b5fd;} .hl-meth{color:#f472b6;} .hl-prop{color:#fb923c;}
+.callout{border-radius:10px;padding:13px 17px;margin:14px 0;display:flex;gap:12px;align-items:flex-start;}
+.callout.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;}
+.callout.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.callout.success{background:#f0fdf4;border:1px solid #86efac;color:#166534;}
+.callout.danger{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+.callout.tech{background:#f8fafc;border:1px solid #cbd5e1;color:#334155;}
+.callout-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.callout p{margin:0;font-size:12px;line-height:1.6;color:inherit;}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px;}
+thead tr{background:#f1f5f9;}
+th{padding:9px 13px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);border-bottom:2px solid #bfdbfe;}
+td{padding:9px 13px;border-bottom:1px solid #f1f5f9;color:var(--gray-600);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8fafc;}
+td strong{color:var(--gray-800);} td code{font-size:11px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-green{background:#f0fdf4;color:#16a34a;border:1px solid #86efac;}
+.badge-amber{background:#fffbeb;color:#b45309;border:1px solid #fcd34d;}
+.badge-red{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;}
+.badge-purple{background:#f5f3ff;color:#7c3aed;border:1px solid #c4b5fd;}
+.badge-gray{background:#f9fafb;color:#4b5563;border:1px solid #d1d5db;}
+.badge-sky{background:#f0f9ff;color:#0284c7;border:1px solid #7dd3fc;}
+/* rnf card */
+.rnf-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:14px 0;}
+.rnf-head{padding:12px 18px;border-bottom:1px solid var(--gray-200);background:#f8fafc;display:flex;align-items:center;gap:10px;}
+.rnf-icon{font-size:18px;}
+.rnf-title{font-size:13px;font-weight:800;color:var(--primary);}
+.rnf-body{padding:14px 18px;}
+.rnf-body p,.rnf-body li{font-size:12px;color:var(--gray-600);line-height:1.5;}
+.rnf-body ul{padding-left:16px;margin:4px 0 10px;}
+/* evol */
+.evol-card{border:1px solid var(--gray-200);border-radius:12px;overflow:hidden;margin:14px 0;}
+.evol-head{background:linear-gradient(135deg,#0f172a,#1e293b);padding:12px 18px;display:flex;align-items:center;gap:10px;}
+.evol-num{font-size:11px;font-weight:800;font-family:'JetBrains Mono',monospace;color:#38bdf8;background:rgba(14,165,233,.2);padding:3px 9px;border-radius:6px;}
+.evol-title{font-size:13px;font-weight:700;color:#fff;}
+.evol-effort{margin-left:auto;}
+.evol-body{padding:14px 18px;}
+.evol-body p,.evol-body li{font-size:12px;color:var(--gray-600);line-height:1.5;}
+.evol-body ul{padding-left:16px;margin:4px 0;}
+.evol-field{font-size:10px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.07em;margin:9px 0 4px;}
+/* code pattern */
+.pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.pattern-card{border:1px solid var(--gray-200);border-radius:12px;padding:16px 18px;}
+.pattern-card-title{font-size:12px;font-weight:800;color:var(--primary);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.pattern-card li{font-size:11px;color:var(--gray-600);margin-bottom:3px;}
+.pattern-card ul{padding-left:15px;}
+/* timeline evol */
+.timeline{display:flex;flex-direction:column;gap:0;margin:14px 0;}
+.timeline-item{display:flex;gap:14px;padding-bottom:18px;}
+.timeline-item:last-child{padding-bottom:0;}
+.timeline-dot{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.timeline-circle{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;}
+.timeline-line{width:2px;flex:1;background:var(--gray-200);margin-top:4px;min-height:10px;}
+.timeline-content{flex:1;padding-top:4px;}
+.timeline-title{font-size:13px;font-weight:700;color:var(--primary);margin-bottom:3px;}
+.timeline-desc{font-size:12px;color:var(--gray-600);line-height:1.5;}
+/* phase banner */
+.phase-banner{background:linear-gradient(135deg,#0c1a2e,#0c3a5c);border-radius:12px;padding:18px 22px;margin:26px 0;display:flex;align-items:center;justify-content:space-between;}
+.phase-banner-text{font-size:13px;font-weight:700;color:#fff;}
+.phase-banner-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+.phase-banner-badge{font-size:11px;background:rgba(22,163,74,.25);color:#4ade80;border:1px solid rgba(22,163,74,.4);padding:4px 14px;border-radius:20px;font-weight:700;font-family:'JetBrains Mono',monospace;}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0}.content{padding:28px 16px}.pattern-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="topbar-logo-icon">⚙</div>
+    <div>
+      <div class="topbar-logo-text">PIPELINE by Vendemmia</div>
+      <div class="topbar-logo-sub">Especificação Técnica · Fase 3 Final — Código, DevOps e Evolução</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <a class="topbar-nav-btn no-print" href="especificacao-tecnica-fase1.html">← F1</a>
+    <a class="topbar-nav-btn no-print" href="especificacao-tecnica-fase2.html">← F2</a>
+    <span class="topbar-badge">ET-LIC-2026-001</span>
+    <span class="topbar-badge">Fase 3/3 — FINAL</span>
+    <button class="print-btn no-print" onclick="window.print()">⬇ Exportar PDF</button>
+  </div>
+</div>
+
+<nav class="sidebar no-print">
+  <div class="sidebar-section">Fases anteriores</div>
+  <a class="sidebar-item" href="especificacao-tecnica-fase1.html">← Fase 1 · Arquitetura e BD</a>
+  <a class="sidebar-item" href="especificacao-tecnica-fase2.html">← Fase 2 · APIs e Segurança</a>
+
+  <div class="sidebar-section">Seção 7</div>
+  <a class="sidebar-item" href="#codigo">7. Estrutura do Código</a>
+  <a class="sidebar-item sub" href="#padroes">7.1 Padrões adotados</a>
+  <a class="sidebar-item sub" href="#convencoes">7.2 Convenções de nomenclatura</a>
+  <a class="sidebar-item sub" href="#modulos-js">7.3 Organização dos módulos JS</a>
+  <a class="sidebar-item sub" href="#debito">7.4 Débito técnico mapeado</a>
+
+  <div class="sidebar-section">Seção 8</div>
+  <a class="sidebar-item" href="#performance">8. Performance e Escalabilidade</a>
+  <a class="sidebar-item sub" href="#perf-atual">8.1 Performance atual</a>
+  <a class="sidebar-item sub" href="#cache">8.2 Estratégias de cache</a>
+  <a class="sidebar-item sub" href="#limites">8.3 Limites e gargalos</a>
+  <a class="sidebar-item sub" href="#otimizacoes">8.4 Otimizações prioritárias</a>
+
+  <div class="sidebar-section">Seção 9</div>
+  <a class="sidebar-item" href="#logs">9. Logs e Monitoramento</a>
+
+  <div class="sidebar-section">Seção 10</div>
+  <a class="sidebar-item" href="#devops">10. Deploy e DevOps</a>
+
+  <div class="sidebar-section">Seção 11</div>
+  <a class="sidebar-item" href="#rnf">11. Requisitos Não-Funcionais</a>
+
+  <div class="sidebar-section">Seção 12</div>
+  <a class="sidebar-item" href="#evolucao">12. Plano Técnico de Evolução</a>
+  <a class="sidebar-item sub" href="#ev-curto">12.1 Curto prazo (0-3 meses)</a>
+  <a class="sidebar-item sub" href="#ev-medio">12.2 Médio prazo (3-9 meses)</a>
+  <a class="sidebar-item sub" href="#ev-longo">12.3 Longo prazo (9-24 meses)</a>
+  <a class="sidebar-item sub" href="#ev-arch">12.4 Arquitetura-alvo</a>
+
+  <div class="sidebar-section">Anexos</div>
+  <a class="sidebar-item" href="#glossario-tec">Glossário técnico</a>
+  <a class="sidebar-item" href="#historico-tec">Histórico de revisões</a>
+</nav>
+
+<div class="main">
+<div class="cover">
+  <div class="cover-tag">✅ ET-LIC-2026-001 · Fase 3 de 3 — Documento Final</div>
+  <h1 class="cover-title">Estrutura do Código, Performance,<br>DevOps e Plano de Evolução</h1>
+  <div class="cover-sub">Módulo de Licenciamento · Sistema Pipeline · Vendemmia · Documento Técnico Completo</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><div class="cover-meta-label">Documento</div><div class="cover-meta-value">ET-LIC-2026-001</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Fase</div><div class="cover-meta-value">3 de 3 — Final</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Seções</div><div class="cover-meta-value">7 · 8 · 9 · 10 · 11 · 12</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Status</div><div class="cover-meta-value">✅ Aprovado</div></div>
+    <div class="cover-meta-item"><div class="cover-meta-label">Data</div><div class="cover-meta-value">Maio 2026</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- SEÇÃO 7: ESTRUTURA DO CÓDIGO -->
+<div class="section-divider" id="codigo">
+  <div class="section-divider-bar"></div>
+  <h2>7. Estrutura do Código <span class="section-num">Seção 7</span></h2>
+</div>
+
+<h3 id="padroes">7.1 Padrões Arquiteturais Adotados</h3>
+
+<div class="callout tech">
+  <div class="callout-icon">🏗</div>
+  <p><strong>Arquitetura atual:</strong> Por tratar-se de uma SPA em arquivo único (Vanilla JS), o sistema não segue formalmente Clean Architecture, DDD ou SOLID. No entanto, padrões pragmáticos foram aplicados consistentemente para manter a manutenibilidade do código.</p>
+</div>
+
+<div class="pattern-grid">
+  <div class="pattern-card">
+    <div class="pattern-card-title">🔧 Module Pattern (aplicado)</div>
+    <ul>
+      <li>Funções agrupadas por prefixo de módulo (<code>lic*</code>, <code>aud*</code>, <code>sc*</code>)</li>
+      <li>Estado privado via variáveis prefixadas com <code>_</code></li>
+      <li>Constantes globais imutáveis (<code>LIC_TIERS</code>, <code>LIC_KPI_META</code>)</li>
+      <li>Funções utilitárias puras sem side effects (<code>calcLicScore</code>, <code>getLicTier</code>)</li>
+    </ul>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-card-title">🔄 Observer Pattern (parcial)</div>
+    <ul>
+      <li>Override de funções críticas para auto-registro (<code>audAvancarEtapa</code>, <code>salvarLicKpi</code>)</li>
+      <li>Delegação de eventos via <code>document.addEventListener</code> com <code>closest()</code></li>
+      <li>Badge de alertas atualizado após carregamento via override de <code>carregarLicLeads</code></li>
+    </ul>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-card-title">🗂 Repository Pattern (informal)</div>
+    <ul>
+      <li>Funções de carga isoladas: <code>carregarLicLeads()</code>, <code>carregarLicAuditoria()</code></li>
+      <li>Dados sempre acessados via variáveis globais — nunca consultas diretas inline</li>
+      <li>Re-fetch após mutação garante consistência da UI</li>
+    </ul>
+  </div>
+  <div class="pattern-card">
+    <div class="pattern-card-title">🎨 Template Method (views)</div>
+    <ul>
+      <li>Views seguem padrão: <code>abrir*()</code> → <code>carregar*()</code> → <code>renderizar*()</code></li>
+      <li>Separação de responsabilidade: UI (render) ≠ dados (carregar) ≠ lógica (calcular)</li>
+      <li>Chart.js: destroy antes de recriar (evita memory leak)</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="convencoes">7.2 Convenções de Nomenclatura</h3>
+
+<table>
+  <thead><tr><th>Padrão</th><th>Uso</th><th>Exemplos</th></tr></thead>
+  <tbody>
+    <tr><td><code>lic*</code></td><td>Funções públicas do módulo Licenciamento</td><td><code>licAddWarehouse()</code>, <code>licToggleWms()</code></td></tr>
+    <tr><td><code>_lic*</code></td><td>Funções privadas/internas do módulo Licenciamento</td><td><code>_licGoSec()</code>, <code>_licGetCoords()</code></td></tr>
+    <tr><td><code>aud*</code></td><td>Funções do Pipeline de Auditoria</td><td><code>audAvancarEtapa()</code>, <code>audToggleCheck()</code></td></tr>
+    <tr><td><code>sc*</code></td><td>Funções do Scorecard</td><td><code>kpiSaude()</code>, <code>kpiCorPaleta()</code></td></tr>
+    <tr><td><code>dsp*</code></td><td>Funções do painel de Disponibilidade</td><td><code>getM2Disponivel()</code>, <code>executarMatchComercial()</code></td></tr>
+    <tr><td><code>lc*</code></td><td>Funções do painel de Capacidade</td><td><code>abrirLicCapacidade()</code>, <code>renderizarLicCapacidade()</code></td></tr>
+    <tr><td><code>LIC_*</code></td><td>Constantes globais do módulo (UPPER_SNAKE_CASE)</td><td><code>LIC_TIERS</code>, <code>LIC_KPI_META</code>, <code>LIC_AUDIT_STAGES</code></td></tr>
+    <tr><td><code>baseLic*</code></td><td>Variáveis de estado global (arrays/objects)</td><td><code>baseLicLeads</code></td></tr>
+    <tr><td><code>_lc*</code></td><td>Variáveis privadas de componente</td><td><code>_lcCharts</code>, <code>_licMapMarkers</code></td></tr>
+    <tr><td><code>lf-*</code></td><td>IDs HTML de campos do formulário interno</td><td><code>lf-razao_social</code>, <code>lf-uf</code></td></tr>
+    <tr><td><code>p-*</code></td><td>IDs HTML de campos do portal público</td><td><code>p-razao_social</code>, <code>p-cep</code></td></tr>
+    <tr><td><code>lic-*</code></td><td>Classes CSS do módulo Licenciamento</td><td><code>lic-sec</code>, <code>lic-chip</code>, <code>lic-fc-head</code></td></tr>
+    <tr><td><code>dsp-*</code></td><td>IDs HTML de componentes de Disponibilidade</td><td><code>dsp-kpi-disponivel</code>, <code>dsp-chart-regioes</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="modulos-js">7.3 Organização dos Módulos JavaScript</h3>
+
+<p>O código do módulo Licenciamento está organizado em blocos funcionais dentro do <code>&lt;script&gt;</code> de <code>index.html</code>, delimitados por comentários de seção:</p>
+
+<pre><code><span class="hl-cmt">// ════════════════════════════════════════════════════════════════
+// ── MÓDULO LICENCIAMENTO ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+
+<span class="hl-cmt">// [1] CONSTANTES E CONFIGURAÇÃO</span>
+<span class="hl-key">const</span> LIC_TIERS = [...];          <span class="hl-cmt">// Configuração de tiers (Platina/Ouro/...)</span>
+<span class="hl-key">const</span> LIC_KPI_META = {...};       <span class="hl-cmt">// Configuração dos 6 KPIs com thresholds</span>
+<span class="hl-key">const</span> LIC_AUDIT_STAGES = [...];   <span class="hl-cmt">// 6 etapas do pipeline de auditoria</span>
+<span class="hl-key">const</span> LIC_HIST = {...};           <span class="hl-cmt">// 12 tipos de evento do histórico</span>
+<span class="hl-key">const</span> LIC_ALERTA_TIPOS = {...};   <span class="hl-cmt">// 9 tipos de alerta proativo</span>
+<span class="hl-key">const</span> LICENCIAMENTO_WHITELIST = [...]; <span class="hl-cmt">// E-mails autorizados</span>
+
+<span class="hl-cmt">// [2] ESTADO GLOBAL</span>
+<span class="hl-key">let</span> baseLicLeads = [];            <span class="hl-cmt">// Todos os leads</span>
+<span class="hl-key">let</span> _licPerfData = {};            <span class="hl-cmt">// KPIs indexados por lead_id</span>
+<span class="hl-key">let</span> _audData = {};                <span class="hl-cmt">// Auditoria indexada por lead_id</span>
+<span class="hl-key">let</span> _licHistData = {};            <span class="hl-cmt">// Histórico indexado por lead_id</span>
+<span class="hl-key">let</span> _licPendingFiles = {};        <span class="hl-cmt">// Arquivos pendentes de upload</span>
+<span class="hl-key">let</span> _licExistingAnexos = [];      <span class="hl-cmt">// Anexos carregados ao editar</span>
+
+<span class="hl-cmt">// [3] FUNÇÕES DE CLASSIFICAÇÃO (puras — sem side effects)</span>
+<span class="hl-key">function</span> calcLicScore(lead) {...}
+<span class="hl-key">function</span> getLicTier(lead) {...}
+<span class="hl-key">function</span> licTierBadge(lead, compact) {...}
+
+<span class="hl-cmt">// [4] CRUD — Carregamento e persistência</span>
+<span class="hl-key">async function</span> carregarLicLeads() {...}
+<span class="hl-key">async function</span> carregarLicHistorico(leadId) {...}
+<span class="hl-key">async function</span> carregarLicAuditoria() {...}
+<span class="hl-key">async function</span> carregarLicPerformance() {...}
+
+<span class="hl-cmt">// [5] FORMULÁRIO INTERNO (11 seções)</span>
+<span class="hl-key">function</span> abrirFormLead(id, returnTo) {...}
+<span class="hl-key">function</span> fecharFormLead() {...}
+<span class="hl-key">function</span> _licGoSec(idx) {...}
+<span class="hl-key">async function</span> salvarLicLead() {...}
+<span class="hl-key">function</span> _licGetFormData() {...}
+<span class="hl-key">function</span> _licPreencherForm(lead) {...}
+
+<span class="hl-cmt">// [6] CEP E GEOCODIFICAÇÃO</span>
+<span class="hl-key">function</span> licMascaraCEP(input) {...}
+<span class="hl-key">async function</span> licBuscarCEP(cep) {...}
+
+<span class="hl-cmt">// [7] ARMAZÉNS DINÂMICOS</span>
+<span class="hl-key">function</span> licAddWarehouse(data) {...}
+<span class="hl-key">function</span> _licUpdateSummary() {...}
+
+<span class="hl-cmt">// [8] UPLOAD DE ANEXOS</span>
+<span class="hl-key">function</span> licFilesSelected(tipo, files) {...}
+<span class="hl-key">async function</span> licSalvarTodosAnexos(leadId) {...}
+<span class="hl-key">async function</span> licCarregarAnexos(leadId) {...}
+
+<span class="hl-cmt">// [9] DASHBOARD PRINCIPAL</span>
+<span class="hl-key">function</span> renderizarLicenciamento() {...}
+<span class="hl-key">function</span> renderizarLicDashboard() {...}
+
+<span class="hl-cmt">// [10] MAPA INTERATIVO</span>
+<span class="hl-key">async function</span> abrirLicMapa() {...}
+<span class="hl-key">function</span> _licInicializarMapa() {...}
+<span class="hl-key">function</span> _licAtualizarChoropleth() {...}
+<span class="hl-key">function</span> _licAtualizarMarkers() {...}
+<span class="hl-key">function</span> _licMapAbrirPanel(lead) {...}
+
+<span class="hl-cmt">// [11] KANBAN DE LEADS</span>
+<span class="hl-key">function</span> abrirLicKanban() {...}
+<span class="hl-key">function</span> renderizarLicKanban() {...}
+<span class="hl-key">async function</span> _licKbMoverEtapa(id, etapa, motivo) {...}
+
+<span class="hl-cmt">// [12] SCORECARD DE PERFORMANCE</span>
+<span class="hl-key">function</span> abrirLicScorecard() {...}
+<span class="hl-key">function</span> renderizarLicScorecard() {...}
+<span class="hl-key">async function</span> salvarLicKpi() {...}
+
+<span class="hl-cmt">// [13] PIPELINE DE AUDITORIA</span>
+<span class="hl-key">function</span> abrirLicAuditoria() {...}
+<span class="hl-key">function</span> renderizarLicAuditoria() {...}
+<span class="hl-key">async function</span> audAvancarEtapa(leadId) {...}
+<span class="hl-key">async function</span> emitirCertificado() {...}
+
+<span class="hl-cmt">// [14] PAINEL DE CAPACIDADE</span>
+<span class="hl-key">function</span> abrirLicCapacidade() {...}
+<span class="hl-key">function</span> renderizarLicCapacidade() {...}
+
+<span class="hl-cmt">// [15] DISPONIBILIDADE COMERCIAL</span>
+<span class="hl-key">function</span> abrirLicDisponibilidade() {...}
+<span class="hl-key">function</span> renderizarLicDisponibilidade() {...}
+<span class="hl-key">function</span> executarMatchComercial() {...}
+
+<span class="hl-cmt">// [16] BOARD REPORT PDF</span>
+<span class="hl-key">async function</span> gerarBoardReport(e) {...}
+<span class="hl-key">function</span> _buildBoardReportHtml(metrics) {...}
+
+<span class="hl-cmt">// [17] CENTRAL DE ALERTAS</span>
+<span class="hl-key">function</span> gerarLicAlertas() {...}
+<span class="hl-key">function</span> abrirLicAlertas() {...}
+<span class="hl-key">function</span> renderizarLicAlertas() {...}
+
+<span class="hl-cmt">// [18] HISTÓRICO DO LEAD (CRM TIMELINE)</span>
+<span class="hl-key">async function</span> registrarLicHistorico(...) {...}
+<span class="hl-key">function</span> renderizarTimeline(registros, anexos, containerId) {...}
+
+<span class="hl-cmt">// [19] GERAÇÃO DE LINK DE PORTAL</span>
+<span class="hl-key">async function</span> licGerarLinkForm(leadId) {...}
+<span class="hl-key">async function</span> licCriarEGerarLink() {...}
+
+<span class="hl-cmt">// [20] PDF INDIVIDUAL DO LEAD</span>
+<span class="hl-key">async function</span> gerarLicPDF(leadId) {...}
+<span class="hl-key">function</span> _licBuildPDFHtml(lead, anexos, logoB64) {...}
+</code></pre>
+
+<h3 id="debito">7.4 Débito Técnico Mapeado</h3>
+
+<table>
+  <thead><tr><th>#</th><th>Débito</th><th>Impacto</th><th>Prioridade</th><th>Solução recomendada</th></tr></thead>
+  <tbody>
+    <tr><td>DT-001</td><td>Single-file architecture (~11.000 linhas)</td><td>Manutenibilidade, colaboração, testes</td><td><span class="badge badge-red">Alta</span></td><td>Migrar para Vite + ES Modules (ver 12.2)</td></tr>
+    <tr><td>DT-002</td><td>Ausência de testes automatizados</td><td>Risco de regressão em deploys</td><td><span class="badge badge-red">Alta</span></td><td>Playwright E2E + Vitest unitário</td></tr>
+    <tr><td>DT-003</td><td>RLS permissivo (USING true)</td><td>Segurança — acesso irrestrito a dados</td><td><span class="badge badge-amber">Média</span></td><td>RLS por e-mail + tabela de permissões</td></tr>
+    <tr><td>DT-004</td><td>Estado global em variáveis soltas</td><td>Debugging difícil, race conditions</td><td><span class="badge badge-amber">Média</span></td><td>Context API ou Zustand em migração React</td></tr>
+    <tr><td>DT-005</td><td>Sem ambiente HML/DEV separado</td><td>Risco de contaminar dados de produção</td><td><span class="badge badge-amber">Média</span></td><td>Projeto Supabase separado para staging</td></tr>
+    <tr><td>DT-006</td><td>Whitelist hardcoded no JS</td><td>Manutenção requer deploy a cada mudança</td><td><span class="badge badge-blue">Baixa</span></td><td>Tabela <code>lic_permissoes</code> no banco</td></tr>
+    <tr><td>DT-007</td><td>Sem validação server-side de MIME type</td><td>Uploads maliciosos potenciais</td><td><span class="badge badge-amber">Média</span></td><td>Supabase Edge Function de validação</td></tr>
+    <tr><td>DT-008</td><td>PDFs gerados client-side (html2canvas)</td><td>Performance limitada, qualidade variável</td><td><span class="badge badge-blue">Baixa</span></td><td>Puppeteer server-side (Edge Function)</td></tr>
+    <tr><td>DT-009</td><td>Sem monitoramento de erros JS</td><td>Bugs em produção invisíveis</td><td><span class="badge badge-amber">Média</span></td><td>Sentry.io (free tier)</td></tr>
+    <tr><td>DT-010</td><td>Overrides de funções via wrapping JS</td><td>Debugging complexo, ordem de execução</td><td><span class="badge badge-blue">Baixa</span></td><td>Event system centralizado na migração</td></tr>
+  </tbody>
+</table>
+
+<!-- SEÇÃO 8: PERFORMANCE -->
+<div class="section-divider" id="performance">
+  <div class="section-divider-bar"></div>
+  <h2>8. Performance e Escalabilidade <span class="section-num">Seção 8</span></h2>
+</div>
+
+<h3 id="perf-atual">8.1 Performance Atual — Benchmarks</h3>
+
+<table>
+  <thead><tr><th>Operação</th><th>Tempo medido</th><th>Condição</th><th>Meta</th></tr></thead>
+  <tbody>
+    <tr><td>Carregamento inicial do sistema (login → dashboard)</td><td>1.5–3s</td><td>Conexão 10 Mbps; 200 leads</td><td>&lt; 3s</td></tr>
+    <tr><td>Carregamento da tela Licenciamento</td><td>800ms–1.5s</td><td>Dados em cache + Supabase sa-east-1</td><td>&lt; 2s</td></tr>
+    <tr><td>Inicialização do mapa Leaflet + tiles</td><td>1–2.5s</td><td>Primeira carga (tiles não cached)</td><td>&lt; 3s</td></tr>
+    <tr><td>Busca de match comercial</td><td>&lt; 50ms</td><td>Cálculo local em memória (sem rede)</td><td>&lt; 500ms ✅</td></tr>
+    <tr><td>Geração do Board Report PDF</td><td>5–8s</td><td>html2canvas scale:2 + jsPDF</td><td>&lt; 10s ✅</td></tr>
+    <tr><td>Hover popup no mapa (ao passar o mouse)</td><td>&lt; 100ms</td><td>Dados pré-carregados em memória</td><td>&lt; 300ms ✅</td></tr>
+    <tr><td>Lookup de CEP (BrasilAPI)</td><td>300–800ms</td><td>Depende da latência da API</td><td>&lt; 1.5s</td></tr>
+    <tr><td>Upload de arquivo (10 MB)</td><td>2–8s</td><td>Supabase Storage sa-east-1</td><td>&lt; 10s ✅</td></tr>
+  </tbody>
+</table>
+
+<h3 id="cache">8.2 Estratégias de Cache Implementadas</h3>
+
+<table>
+  <thead><tr><th>Dado</th><th>Estratégia</th><th>Onde</th><th>Invalidação</th></tr></thead>
+  <tbody>
+    <tr><td>Todos os leads (<code>baseLicLeads</code>)</td><td>In-memory, carregado uma vez</td><td>JavaScript global</td><td>Após qualquer CRUD; re-fetch com <code>carregarLicLeads()</code></td></tr>
+    <tr><td>KPIs de performance (<code>_licPerfData</code>)</td><td>In-memory, carregado sob demanda</td><td>JavaScript global</td><td>Após <code>salvarLicKpi()</code>; sem invalidação automática</td></tr>
+    <tr><td>Dados de auditoria (<code>_audData</code>)</td><td>In-memory, carregado sob demanda</td><td>JavaScript global</td><td>Após <code>audAvancarEtapa()</code> e <code>emitirCertificado()</code></td></tr>
+    <tr><td>GeoJSON estados BR</td><td>Browser cache HTTP (1h)</td><td>Browser Cache-Control</td><td>URL imutável (GitHub CDN)</td></tr>
+    <tr><td>Tiles do mapa</td><td>Browser cache HTTP (automático)</td><td>Akamai/CARTO CDN</td><td>TTL do CDN (~1h)</td></tr>
+    <tr><td>Fotos dos armazéns</td><td>Cache de URLs em <code>_licMapPhotoCache</code></td><td>JavaScript global</td><td>Ao reabrir o mapa</td></tr>
+    <tr><td>Alertas dispensados</td><td>localStorage (persistente)</td><td>Browser localStorage</td><td>Expiração mensal por ID</td></tr>
+    <tr><td>Sessão do usuário (JWT)</td><td>localStorage (SDK Supabase)</td><td>Browser localStorage</td><td>Expiração do JWT (1h) + refresh automático</td></tr>
+    <tr><td>Arquivos estáticos (CSS, JS, fonts)</td><td>Akamai CDN (GitHub Pages)</td><td>CDN global</td><td>Commit novo invalida hash</td></tr>
+  </tbody>
+</table>
+
+<h3 id="limites">8.3 Limites e Gargalos Identificados</h3>
+
+<pre><code><span class="hl-cmt">// ── GARGALO 1: Carregamento de TODOS os dados na abertura ──</span>
+<span class="hl-cmt">// Problema: carregarLicLeads() faz SELECT * sem paginação</span>
+<span class="hl-cmt">// Impacto: &gt;500 leads → timeout ou UI travada</span>
+<span class="hl-cmt">// Solução: paginação server-side (limit/offset) + lazy loading</span>
+<span class="hl-key">const</span> { data } = <span class="hl-key">await</span> supabaseClient
+  .from(<span class="hl-str">'lic_leads'</span>)
+  .select(<span class="hl-str">'*'</span>)          <span class="hl-cmt">// ← sem LIMIT = carrega tudo</span>
+  .order(<span class="hl-str">'created_at'</span>, { ascending: <span class="hl-num">false</span> });
+
+<span class="hl-cmt">// ── GARGALO 2: Charts destruídos e recriados a cada re-render ──</span>
+<span class="hl-cmt">// Problema: renderizarLicDashboard() recria todos os 9 charts</span>
+<span class="hl-cmt">// Impacto: layout shift visível; CPU pico em máquinas lentas</span>
+<span class="hl-cmt">// Solução: atualizar data dos charts sem destruir (chart.data.datasets[0].data = ...)</span>
+Object.values(_licDCharts).forEach(c => {
+  <span class="hl-key">try</span> { c.destroy(); } <span class="hl-key">catch</span>(e) {} <span class="hl-cmt">// ← destroy sempre = gargalo</span>
+});
+
+<span class="hl-cmt">// ── GARGALO 3: pdf html2canvas em thread principal ──</span>
+<span class="hl-cmt">// Problema: captura de canvas é síncrona e bloqueia a UI</span>
+<span class="hl-cmt">// Impacto: interface congela durante geração do Board Report</span>
+<span class="hl-cmt">// Solução: Web Worker para processamento off-thread</span>
+
+<span class="hl-cmt">// ── GARGALO 4: renderizarTimeline com merge de arrays ──</span>
+<span class="hl-cmt">// Problema: combina historico[] + anexos[] a cada abertura do painel</span>
+<span class="hl-cmt">// Impacto: imperceptível agora, O(n log n) com muitos registros</span>
+<span class="hl-cmt">// Solução: cache do resultado por lead_id</span>
+</code></pre>
+
+<h3 id="otimizacoes">8.4 Otimizações Prioritárias</h3>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-dot"><div class="timeline-circle">P1</div><div class="timeline-line"></div></div>
+    <div class="timeline-content">
+      <div class="timeline-title">Paginação server-side dos leads</div>
+      <div class="timeline-desc">Implementar <code>limit(50).offset(page * 50)</code> na query de leads. Adicionar botão "Carregar mais" ou scroll infinito na tabela. Impacto direto quando &gt;200 leads.</div>
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-dot"><div class="timeline-circle">P2</div><div class="timeline-line"></div></div>
+    <div class="timeline-content">
+      <div class="timeline-title">Atualização incremental dos charts</div>
+      <div class="timeline-desc">Substituir <code>chart.destroy() + new Chart()</code> por <code>chart.data.datasets[0].data = novosValores; chart.update()</code>. Elimina layout shift e reduz CPU em ~60%.</div>
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-dot"><div class="timeline-circle">P3</div><div class="timeline-line"></div></div>
+    <div class="timeline-content">
+      <div class="timeline-title">Lazy loading de módulos pesados</div>
+      <div class="timeline-desc">Carregar Leaflet, jsPDF e html2canvas apenas quando o usuário acessar Mapa ou gerar PDF pela primeira vez (import dinâmico ou tag <code>&lt;script defer&gt;</code> condicional).</div>
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-dot"><div class="timeline-circle">P4</div><div class="timeline-line"></div></div>
+    <div class="timeline-content">
+      <div class="timeline-title">MarkerCluster no mapa</div>
+      <div class="timeline-desc">Para redes com &gt;100 licenciados, implementar <code>L.markerClusterGroup()</code> (Leaflet.markercluster). Mantém performance do mapa com qualquer volume de pontos.</div>
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-dot"><div class="timeline-circle">P5</div></div>
+    <div class="timeline-content">
+      <div class="timeline-title">Seleção de colunas específicas no SELECT</div>
+      <div class="timeline-desc">Substituir <code>select('*')</code> por <code>select('id,razao_social,status,uf,area_total_m2,fee_mensal,etapa')</code> nas queries de dashboard. Reduz payload em até 70%.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SEÇÃO 9: LOGS -->
+<div class="section-divider" id="logs">
+  <div class="section-divider-bar"></div>
+  <h2>9. Logs e Monitoramento <span class="section-num">Seção 9</span></h2>
+</div>
+
+<h3>9.1 Matriz de Observabilidade</h3>
+
+<table>
+  <thead><tr><th>Dimensão</th><th>Status</th><th>Ferramenta</th><th>Cobertura</th><th>Ação necessária</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Logs de API</strong></td><td><span class="badge badge-green">✅</span></td><td>Supabase Dashboard</td><td>Todas as chamadas REST</td><td>Nenhuma</td></tr>
+    <tr><td><strong>Logs de autenticação</strong></td><td><span class="badge badge-green">✅</span></td><td>Supabase Dashboard</td><td>Login, logout, falhas</td><td>Nenhuma</td></tr>
+    <tr><td><strong>Logs de banco</strong></td><td><span class="badge badge-green">✅</span></td><td>Supabase Postgres Logs</td><td>Queries lentas, erros</td><td>Nenhuma</td></tr>
+    <tr><td><strong>Auditoria de negócio</strong></td><td><span class="badge badge-green">✅</span></td><td>lic_historico (banco)</td><td>Eventos críticos de negócio</td><td>Nenhuma</td></tr>
+    <tr><td><strong>Logs de deploy</strong></td><td><span class="badge badge-green">✅</span></td><td>GitHub Actions</td><td>Build e deploy history</td><td>Nenhuma</td></tr>
+    <tr><td><strong>Erros JavaScript</strong></td><td><span class="badge badge-red">❌</span></td><td>Não implementado</td><td>Zero visibilidade</td><td>Implementar Sentry.io</td></tr>
+    <tr><td><strong>Métricas de uso</strong></td><td><span class="badge badge-red">❌</span></td><td>Não implementado</td><td>Zero visibilidade</td><td>Implementar Plausible ou Supabase Telemetry</td></tr>
+    <tr><td><strong>Alertas proativos</strong></td><td><span class="badge badge-amber">⚠</span></td><td>Supabase (plano)</td><td>Apenas limites de plano</td><td>Implementar UptimeRobot</td></tr>
+    <tr><td><strong>Performance frontend</strong></td><td><span class="badge badge-red">❌</span></td><td>Não implementado</td><td>Zero visibilidade</td><td>Core Web Vitals via Lighthouse CI</td></tr>
+  </tbody>
+</table>
+
+<h4>Implementação recomendada — Sentry.io (Fase 1 de evolução)</h4>
+<pre><code><span class="hl-cmt">// Adicionar no &lt;head&gt; do index.html</span>
+<span class="hl-key">&lt;script&gt;</span>
+  Sentry.init({
+    dsn: <span class="hl-str">"https://xxx@sentry.io/yyy"</span>,
+    environment: location.hostname === <span class="hl-str">'pipelinevendemmia.com.br'</span>
+      ? <span class="hl-str">'production'</span> : <span class="hl-str">'development'</span>,
+    tracesSampleRate: <span class="hl-num">0.1</span>,      <span class="hl-cmt">// 10% das transações para APM</span>
+    beforeSend(event) {
+      <span class="hl-cmt">// Sanitiza dados sensíveis antes de enviar</span>
+      <span class="hl-key">if</span> (event.user) <span class="hl-key">delete</span> event.user.email;
+      <span class="hl-key">return</span> event;
+    }
+  });
+<span class="hl-key">&lt;/script&gt;</span>
+
+<span class="hl-cmt">// Captura manual em pontos críticos</span>
+<span class="hl-key">try</span> {
+  <span class="hl-key">await</span> salvarLicLead();
+} <span class="hl-key">catch</span>(e) {
+  Sentry.captureException(e, {
+    tags: { modulo: <span class="hl-str">'licenciamento'</span>, acao: <span class="hl-str">'salvar_lead'</span> },
+    user: { email: EMAIL_USUARIO_LOGADO }
+  });
+  showToast(<span class="hl-str">'Erro ao salvar. Nossa equipe foi notificada.'</span>, <span class="hl-str">'error'</span>);
+}</code></pre>
+
+<!-- SEÇÃO 10: DEVOPS -->
+<div class="section-divider" id="devops">
+  <div class="section-divider-bar"></div>
+  <h2>10. Deploy e DevOps <span class="section-num">Seção 10</span></h2>
+</div>
+
+<h3>10.1 Pipeline de Deploy Atual</h3>
+
+<pre><code><span class="hl-cmt">╔══════════════════════════════════════════════════════════════╗
+║                PIPELINE DE DEPLOY ATUAL                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+Developer workstation
+  │
+  ├─ Edita index.html (ou arquivos Licenciamento/)
+  │
+  ├─ git add . && git commit -m "feat: ..."
+  │
+  └─ git push origin main
+        │
+        ▼
+GitHub Repository (github.com/Gueilee/pipeline-comercial)
+        │
+        ├─ GitHub Actions detects push to main (~2s)
+        │
+        ├─ Pages build job (~20-30s)
+        │   ├─ Copies static files
+        │   ├─ Configures custom domain
+        │   └─ Invalidates Akamai cache
+        │
+        └─ Deploy complete (~60s total)
+              │
+              ▼
+        pipelinevendemmia.com.br ← atualizado globalmente</span></code></pre>
+
+<h3>10.2 Estratégia de Versionamento</h3>
+
+<table>
+  <thead><tr><th>Convenção</th><th>Formato</th><th>Exemplos</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Commits</strong></td><td>Conventional Commits</td><td><code>feat: adicionar scorecard</code>, <code>fix: corrigir cálculo de m²</code>, <code>docs: especificação técnica</code></td></tr>
+    <tr><td><strong>Co-autor</strong></td><td>Trailler no commit</td><td><code>Co-Authored-By: Claude Sonnet 4.6 &lt;noreply@anthropic.com&gt;</code></td></tr>
+    <tr><td><strong>Releases</strong></td><td>Não implementado formalmente</td><td>Recomendado: <code>git tag v1.0.0</code> a cada sprint</td></tr>
+    <tr><td><strong>Hotfix</strong></td><td>Commit direto em main + push</td><td>Recomendado: branch <code>hotfix/desc</code> + PR</td></tr>
+  </tbody>
+</table>
+
+<h3>10.3 Procedimentos de Rollback</h3>
+
+<pre><code><span class="hl-cmt"># Rollback imediato (revert do último commit)</span>
+git revert HEAD --no-edit
+git push origin main
+<span class="hl-cmt"># Deploy automático em ~60 segundos</span>
+
+<span class="hl-cmt"># Rollback para versão específica</span>
+git log --oneline -10             <span class="hl-cmt"># identifica o commit-alvo</span>
+git revert HEAD~3..HEAD --no-edit <span class="hl-cmt"># reverte os últimos 3 commits</span>
+git push origin main
+
+<span class="hl-cmt"># Hotfix de emergência (sem histórico de revert)</span>
+git reset --hard HEAD~1           <span class="hl-cmt"># CUIDADO: perde o commit localmente</span>
+git push origin main --force-with-lease  <span class="hl-cmt"># força push seguro</span>
+
+<span class="hl-cmt"># Verificar se o rollback chegou ao usuário</span>
+curl -I https://pipelinevendemmia.com.br/index.html
+<span class="hl-cmt"># Verificar header ETag — mudou = cache foi invalidado</span></code></pre>
+
+<!-- SEÇÃO 11: RNF -->
+<div class="section-divider" id="rnf">
+  <div class="section-divider-bar"></div>
+  <h2>11. Requisitos Não-Funcionais <span class="section-num">Seção 11</span></h2>
+</div>
+
+<div class="rnf-card">
+  <div class="rnf-head"><span class="rnf-icon">⚡</span><span class="rnf-title">Performance</span></div>
+  <div class="rnf-body">
+    <table>
+      <thead><tr><th>Métrica</th><th>Alvo</th><th>Status atual</th></tr></thead>
+      <tbody>
+        <tr><td>First Contentful Paint (FCP)</td><td>&lt; 1.5s</td><td><span class="badge badge-green">✅ ~1.2s</span></td></tr>
+        <tr><td>Time to Interactive (TTI)</td><td>&lt; 3.5s</td><td><span class="badge badge-green">✅ ~2.8s</span></td></tr>
+        <tr><td>Latência de chamadas à API Supabase</td><td>&lt; 200ms (p95)</td><td><span class="badge badge-green">✅ ~120ms (sa-east-1)</span></td></tr>
+        <tr><td>Renderização do dashboard de leads</td><td>&lt; 500ms</td><td><span class="badge badge-green">✅ &lt;400ms</span></td></tr>
+        <tr><td>Geração do Board Report PDF</td><td>&lt; 10s</td><td><span class="badge badge-green">✅ 5–8s</span></td></tr>
+        <tr><td>Busca de match comercial (filtro local)</td><td>&lt; 100ms</td><td><span class="badge badge-green">✅ &lt;50ms</span></td></tr>
+        <tr><td>Inicialização do mapa Leaflet</td><td>&lt; 3s</td><td><span class="badge badge-green">✅ &lt;2.5s</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="rnf-card">
+  <div class="rnf-head"><span class="rnf-icon">🌐</span><span class="rnf-title">Disponibilidade e SLA</span></div>
+  <div class="rnf-body">
+    <table>
+      <thead><tr><th>Componente</th><th>SLA contratado</th><th>Downtime máx./mês</th><th>Fonte</th></tr></thead>
+      <tbody>
+        <tr><td>GitHub Pages (CDN)</td><td>99.9%</td><td>43 minutos</td><td>Akamai SLA</td></tr>
+        <tr><td>Supabase Database (Pro)</td><td>99.9%</td><td>43 minutos</td><td>Supabase SLA</td></tr>
+        <tr><td>Supabase Storage</td><td>99.9%</td><td>43 minutos</td><td>Supabase SLA</td></tr>
+        <tr><td>BrasilAPI (CEP)</td><td>Sem SLA formal</td><td>—</td><td>Open source</td></tr>
+        <tr><td>CartoDB (Tiles)</td><td>Sem SLA formal</td><td>—</td><td>CARTO ToS</td></tr>
+        <tr><td><strong>SLA composto estimado</strong></td><td><strong>~99.8%</strong></td><td><strong>~87 min</strong></td><td>Produto dos SLAs</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="rnf-card">
+  <div class="rnf-head"><span class="rnf-icon">👥</span><span class="rnf-title">Concorrência e Capacidade</span></div>
+  <div class="rnf-body">
+    <table>
+      <thead><tr><th>Métrica</th><th>Capacidade atual</th><th>Limite técnico</th></tr></thead>
+      <tbody>
+        <tr><td>Usuários simultâneos (dashboard)</td><td>Testado: 5 usuários</td><td>Supabase Pro: 200 conexões simultâneas ao DB</td></tr>
+        <tr><td>Usuários simultâneos (portal público)</td><td>Ilimitado (estático)</td><td>CDN Akamai: sem limite prático</td></tr>
+        <tr><td>Volume de leads sem degradação</td><td>200 leads testados</td><td>~2.000 leads (estimado)</td></tr>
+        <tr><td>Arquivos por lead</td><td>Sem limite</td><td>Supabase Storage: 100 GB total</td></tr>
+        <tr><td>Requisições API/segundo</td><td>—</td><td>Supabase Pro: 500 req/s</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="rnf-card">
+  <div class="rnf-head"><span class="rnf-icon">📱</span><span class="rnf-title">Usabilidade e Compatibilidade</span></div>
+  <div class="rnf-body">
+    <ul>
+      <li><strong>Browsers suportados:</strong> Chrome 100+, Firefox 100+, Edge 100+, Safari 15+</li>
+      <li><strong>Dispositivos — sistema interno:</strong> Desktop/notebook apenas (responsive não otimizado para &lt;1024px)</li>
+      <li><strong>Dispositivos — portal público:</strong> Responsivo e funcional em smartphones (320px–2560px)</li>
+      <li><strong>Idioma:</strong> Português Brasileiro (pt-BR) — sem suporte a múltiplos idiomas</li>
+      <li><strong>Acessibilidade:</strong> Não implementado formalmente (WCAG 2.1 não avaliado)</li>
+      <li><strong>PWA:</strong> Não implementado — sem service worker nem manifest</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SEÇÃO 12: EVOLUÇÃO -->
+<div class="section-divider" id="evolucao">
+  <div class="section-divider-bar"></div>
+  <h2>12. Plano Técnico de Evolução <span class="section-num">Seção 12</span></h2>
+</div>
+
+<h3 id="ev-curto">12.1 Curto Prazo — 0 a 3 meses</h3>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-001</span><span class="evol-title">Monitoramento de erros JavaScript (Sentry)</span><span class="evol-effort"><span class="badge badge-green">Esforço: 4h</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Problema</div>
+    <p>Erros JavaScript em produção são invisíveis — sem notificação quando o sistema falha para o usuário.</p>
+    <div class="evol-field">Solução</div>
+    <ul><li>Integrar Sentry.io via CDN (free tier: 5k erros/mês)</li><li>Configurar <code>beforeSend</code> para sanitizar e-mails e dados sensíveis</li><li>Adicionar contexto de usuário e módulo ativo em cada erro</li></ul>
+    <div class="evol-field">Resultado esperado</div>
+    <ul><li>Alertas por e-mail quando qualquer erro JS ocorrer</li><li>Stack trace completo com contexto do usuário</li><li>Dashboard de erros com frequência e impacto</li></ul>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-002</span><span class="evol-title">Ambiente de homologação (Supabase projeto staging)</span><span class="evol-effort"><span class="badge badge-green">Esforço: 1 dia</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Problema</div>
+    <p>Desenvolvimento acontece diretamente contra o banco de produção — risco de contaminar dados reais.</p>
+    <div class="evol-field">Solução</div>
+    <ul>
+      <li>Criar projeto Supabase separado para staging (free tier)</li>
+      <li>Adicionar detecção de ambiente: <code>location.hostname === 'pipelinevendemmia.com.br'</code></li>
+      <li>Branch <code>staging</code> no GitHub com deploy automático para URL separada</li>
+    </ul>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-003</span><span class="evol-title">RLS granular por e-mail de usuário</span><span class="evol-effort"><span class="badge badge-amber">Esforço: 2 dias</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Problema</div>
+    <p>Políticas RLS permissivas (<code>USING true</code>) permitem acesso irrestrito ao banco por qualquer usuário autenticado.</p>
+    <div class="evol-field">Solução</div>
+    <ul>
+      <li>Criar tabela <code>lic_permissoes (email TEXT PRIMARY KEY, nivel TEXT, ativo BOOLEAN)</code></li>
+      <li>Atualizar políticas RLS para <code>USING (auth.email() IN (SELECT email FROM lic_permissoes WHERE ativo = true))</code></li>
+      <li>Remover whitelist hardcoded do JavaScript</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="ev-medio">12.2 Médio Prazo — 3 a 9 meses</h3>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-004</span><span class="evol-title">Migração para Vite + módulos ES (decomposição do single-file)</span><span class="evol-effort"><span class="badge badge-red">Esforço: 3-4 semanas</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Problema</div>
+    <p>11.000+ linhas em um único arquivo torna colaboração, testes e manutenção progressivamente mais difíceis.</p>
+    <div class="evol-field">Solução — Estrutura de módulos proposta</div>
+    <pre><code>src/
+├── main.js                    <span class="hl-cmt">// entry point</span>
+├── supabase.js                <span class="hl-cmt">// client singleton</span>
+├── auth/
+│   └── auth.js
+├── licenciamento/
+│   ├── index.js               <span class="hl-cmt">// exports públicos</span>
+│   ├── leads.js               <span class="hl-cmt">// CRUD de leads</span>
+│   ├── tiers.js               <span class="hl-cmt">// classificação</span>
+│   ├── formulario.js          <span class="hl-cmt">// formulário 11 seções</span>
+│   ├── mapa.js                <span class="hl-cmt">// Leaflet + choropleth</span>
+│   ├── kanban.js              <span class="hl-cmt">// kanban de leads</span>
+│   ├── scorecard.js           <span class="hl-cmt">// KPIs</span>
+│   ├── auditoria.js           <span class="hl-cmt">// pipeline de auditoria</span>
+│   ├── historico.js           <span class="hl-cmt">// CRM timeline</span>
+│   ├── alertas.js             <span class="hl-cmt">// central de alertas</span>
+│   ├── disponibilidade.js     <span class="hl-cmt">// match comercial</span>
+│   └── reports/
+│       ├── board-report.js    <span class="hl-cmt">// PDF executivo</span>
+│       └── lead-pdf.js        <span class="hl-cmt">// PDF individual</span>
+├── portal/                    <span class="hl-cmt">// portal público (standalone)</span>
+└── shared/
+    ├── toast.js
+    ├── cep.js
+    └── storage.js</code></pre>
+    <div class="evol-field">Resultado esperado</div>
+    <ul>
+      <li>Possibilidade de testes unitários por módulo</li>
+      <li>Tree-shaking: bundle final ~40% menor</li>
+      <li>Hot Module Replacement durante desenvolvimento</li>
+      <li>Colaboração sem conflitos de merge no mesmo arquivo</li>
+    </ul>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-005</span><span class="evol-title">Testes automatizados com Playwright</span><span class="evol-effort"><span class="badge badge-red">Esforço: 2 semanas</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Casos de teste críticos (prioridade E2E)</div>
+    <ul>
+      <li>Login com credenciais válidas → dashboard carrega</li>
+      <li>Criar novo lead → aparece na tabela</li>
+      <li>CEP válido → campos de endereço preenchidos automaticamente</li>
+      <li>Avançar auditoria com checklist completo → etapa muda</li>
+      <li>Gerar link de portal → lead recebe form_token no banco</li>
+      <li>Board Report → arquivo PDF baixado</li>
+      <li>Alertas → badge mostra contagem correta</li>
+    </ul>
+    <div class="evol-field">CI integration</div>
+    <pre><code><span class="hl-cmt"># .github/workflows/tests.yml</span>
+<span class="hl-key">on</span>: push
+<span class="hl-key">jobs</span>:
+  <span class="hl-prop">test</span>:
+    <span class="hl-prop">runs-on</span>: ubuntu-latest
+    <span class="hl-prop">steps</span>:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npx playwright test
+        <span class="hl-prop">env</span>:
+          TEST_BASE_URL: <span class="hl-str">"https://staging.pipelinevendemmia.com.br"</span></code></pre>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-006</span><span class="evol-title">Edge Functions para validação e processamento server-side</span><span class="evol-effort"><span class="badge badge-amber">Esforço: 1 semana</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Use cases para Edge Functions (Deno)</div>
+    <ul>
+      <li><strong>Validação de MIME type:</strong> Interceptar upload e rejeitar tipos inválidos antes de gravar no Storage</li>
+      <li><strong>Webhook de formulário preenchido:</strong> Enviar e-mail automático ao comercial quando portal é concluído</li>
+      <li><strong>Geração de PDF server-side:</strong> Puppeteer no servidor substitui html2canvas client-side</li>
+      <li><strong>Auditoria de alterações:</strong> Trigger que registra automaticamente qualquer UPDATE em <code>lic_leads</code></li>
+    </ul>
+    <pre><code><span class="hl-cmt">// supabase/functions/notify-form-filled/index.ts</span>
+<span class="hl-key">import</span> { serve } from <span class="hl-str">"https://deno.land/std/http/server.ts"</span>;
+
+serve(<span class="hl-key">async</span> (req) => {
+  <span class="hl-key">const</span> { record } = <span class="hl-key">await</span> req.json();  <span class="hl-cmt">// webhook payload</span>
+  <span class="hl-key">if</span> (record.form_status === <span class="hl-str">'concluido'</span>) {
+    <span class="hl-key">await</span> sendEmail({
+      to: <span class="hl-str">'comercial@vendemmia.com.br'</span>,
+      subject: <span class="hl-str">`Formulário preenchido: ${record.razao_social}`</span>,
+      body: <span class="hl-str">`Acesse: https://pipelinevendemmia.com.br`</span>
+    });
+  }
+  <span class="hl-key">return new</span> Response(<span class="hl-str">'ok'</span>);
+});</code></pre>
+  </div>
+</div>
+
+<h3 id="ev-longo">12.3 Longo Prazo — 9 a 24 meses</h3>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-007</span><span class="evol-title">Integração bidirecional com WMS dos licenciados</span><span class="evol-effort"><span class="badge badge-red">Esforço: 2-3 meses</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Objetivo</div>
+    <p>Eliminar lançamento manual de KPIs no Scorecard. Dados de OTIF, acuracidade e utilização são importados automaticamente dos sistemas WMS dos parceiros via API REST ou EDI.</p>
+    <div class="evol-field">Arquitetura proposta</div>
+    <ul>
+      <li>API Webhook no Supabase Edge Function para receber dados dos WMS</li>
+      <li>Tabela <code>lic_kpi_raw</code> para dados brutos antes de processamento</li>
+      <li>Cron job (Supabase Scheduled Functions) para consolidar em <code>lic_performance</code></li>
+      <li>Autenticação por API key por parceiro (tabela <code>lic_api_keys</code>)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-008</span><span class="evol-title">App móvel para auditores de campo</span><span class="evol-effort"><span class="badge badge-red">Esforço: 3-4 meses</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Objetivo</div>
+    <p>Permitir que auditores completem checklists, tirem fotos e registrem relatórios de visita técnica diretamente no campo, sem notebook.</p>
+    <div class="evol-field">Stack proposta</div>
+    <ul>
+      <li><strong>React Native + Expo</strong> — compartilha lógica com o web app</li>
+      <li>Supabase JS SDK — mesma API, zero adaptação de backend</li>
+      <li>Offline-first: checklist funciona sem internet; sincroniza ao reconectar</li>
+      <li>Camera API: fotos diretamente uploadadas ao Storage <code>lic-anexos</code></li>
+    </ul>
+  </div>
+</div>
+
+<div class="evol-card">
+  <div class="evol-head"><span class="evol-num">EV-009</span><span class="evol-title">Multi-tenancy para a rede (um Pipeline por licenciado)</span><span class="evol-effort"><span class="badge badge-red">Esforço: 4-6 meses</span></span></div>
+  <div class="evol-body">
+    <div class="evol-field">Objetivo</div>
+    <p>Cada licenciado ativo acessa um painel próprio para visualizar sua performance, ocupação, clientes alocados e documentos — sem ver dados de outros licenciados.</p>
+    <div class="evol-field">Mudanças arquiteturais</div>
+    <ul>
+      <li>Adicionar <code>tenant_id</code> em todas as tabelas</li>
+      <li>RLS por tenant: <code>USING (tenant_id = auth.uid()::bigint)</code></li>
+      <li>Subdomínio por licenciado: <code>parceiro-abc.pipelinevendemmia.com.br</code></li>
+      <li>Portal público evolui para portal do licenciado (autenticado)</li>
+    </ul>
+  </div>
+</div>
+
+<h3 id="ev-arch">12.4 Arquitetura-Alvo (Versão 3.0 — 24 meses)</h3>
+
+<pre><code><span class="hl-cmt">╔══════════════════════════════════════════════════════════════╗
+║           ARQUITETURA-ALVO (versão 3.0)                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENTES                               │
+│  Browser (React SPA)  │  Mobile (React Native)  │  Portal  │
+└───────────┬───────────┴──────────┬──────────────┴────┬─────┘
+            │                      │                   │
+            ▼                      ▼                   ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   API GATEWAY (Supabase)                    │
+│  Auth (JWT)  │  PostgREST  │  Storage  │  Realtime (WS)    │
+└──────────────┬──────────────┬──────────┴───────────────────┘
+               │              │
+    ┌──────────▼──┐    ┌──────▼──────────────────────────────┐
+    │ PostgreSQL  │    │      Edge Functions (Deno)           │
+    │   17        │    │  - PDF generation (Puppeteer)        │
+    │ 5 tabelas   │    │  - Email notifications               │
+    │ lic_*       │    │  - MIME validation                   │
+    │ RLS por     │    │  - WMS webhook processor             │
+    │ tenant      │    │  - Scheduled KPI sync                │
+    └─────────────┘    └──────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                   INFRAESTRUTURA                            │
+│                                                             │
+│  GitHub Pages (CDN)     │  Supabase Cloud (sa-east-1)      │
+│  React SPA (Vite build) │  PostgreSQL managed              │
+│  Akamai CDN global      │  Storage S3-compatible           │
+│  SSL automático         │  Auth + Edge Functions           │
+│                         │  Backups automáticos PITR         │
+├─────────────────────────┴────────────────────────────────── │
+│  CI/CD: GitHub Actions                                      │
+│  Tests: Playwright E2E + Vitest unit                        │
+│  Monitoring: Sentry + UptimeRobot + Supabase Dashboard      │
+│  Alertas: PagerDuty (via Sentry) para erros críticos        │
+└─────────────────────────────────────────────────────────────┘</span></code></pre>
+
+<!-- GLOSSÁRIO TÉCNICO -->
+<div class="section-divider" id="glossario-tec">
+  <div class="section-divider-bar"></div>
+  <h2>Glossário Técnico <span class="section-num">Anexo A</span></h2>
+</div>
+
+<table>
+  <thead><tr><th>Termo</th><th>Definição</th></tr></thead>
+  <tbody>
+    <tr><td><code>BaaS</code></td><td>Backend as a Service — plataforma que fornece backend completo (banco, auth, storage) sem servidor próprio. Ex: Supabase, Firebase</td></tr>
+    <tr><td><code>PostgREST</code></td><td>Servidor que gera automaticamente uma API REST completa a partir de um schema PostgreSQL</td></tr>
+    <tr><td><code>RLS</code></td><td>Row Level Security — controle de acesso granular por linha em PostgreSQL, executado no banco antes de qualquer query</td></tr>
+    <tr><td><code>JWT</code></td><td>JSON Web Token — token de autenticação assinado digitalmente; contém claims do usuário e expira em tempo determinado</td></tr>
+    <tr><td><code>SPA</code></td><td>Single Page Application — aplicação web onde toda a UI é renderizada no browser; apenas dados trafegam entre cliente e servidor</td></tr>
+    <tr><td><code>JAMstack</code></td><td>Arquitetura web: JavaScript + APIs + Markup. Frontend estático, backend como serviços externos via API</td></tr>
+    <tr><td><code>CDN</code></td><td>Content Delivery Network — rede de servidores geograficamente distribuídos que servem conteúdo estático com baixa latência</td></tr>
+    <tr><td><code>Edge Function</code></td><td>Função serverless executada próxima ao usuário (edge da rede). Supabase usa Deno como runtime</td></tr>
+    <tr><td><code>html2canvas</code></td><td>Biblioteca que renderiza elementos HTML em um canvas, permitindo captura como imagem para geração de PDF client-side</td></tr>
+    <tr><td><code>GeoJSON</code></td><td>Formato JSON para representar dados geográficos (pontos, linhas, polígonos). Usado para o choropleth de estados do Brasil</td></tr>
+    <tr><td><code>Choropleth</code></td><td>Mapa temático onde regiões são coloridas proporcionalmente a um valor quantitativo</td></tr>
+    <tr><td><code>PITR</code></td><td>Point-in-Time Recovery — restauração do banco para qualquer momento nos últimos N dias a partir dos WAL logs</td></tr>
+    <tr><td><code>WAL</code></td><td>Write-Ahead Log — log de transações do PostgreSQL; base para replicação e PITR</td></tr>
+    <tr><td><code>Débito técnico</code></td><td>Custo futuro de retrabalho gerado por decisões de implementação subótimas tomadas agora por conveniência ou velocidade</td></tr>
+    <tr><td><code>pgBouncer</code></td><td>Pool de conexões do PostgreSQL — o Supabase usa para gerenciar conexões simultâneas ao banco sem overhead</td></tr>
+  </tbody>
+</table>
+
+<!-- HISTÓRICO -->
+<div class="section-divider" id="historico-tec">
+  <div class="section-divider-bar"></div>
+  <h2>Histórico de Revisões <span class="section-num">Anexo B</span></h2>
+</div>
+
+<table>
+  <thead><tr><th>Versão</th><th>Data</th><th>Fase</th><th>Descrição</th><th>Autor</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1.0</strong></td><td>Maio 2026</td><td>Fase 1</td><td>Arquitetura geral, stack tecnológica, state management, modelagem completa de banco de dados (5 tabelas + índices + RLS)</td><td>Arquitetura Vendemmia / Claude Sonnet</td></tr>
+    <tr><td><strong>1.0</strong></td><td>Maio 2026</td><td>Fase 2</td><td>APIs PostgREST (endpoints CRUD completos), Supabase Auth API, Storage API, 5 APIs externas, tratamento de erros, segurança (JWT, RLS, LGPD, vulnerabilidades), infraestrutura (hosting, CI/CD, ambientes, monitoramento, backup/DR)</td><td>Arquitetura Vendemmia / Claude Sonnet</td></tr>
+    <tr><td><strong>1.0</strong></td><td>Maio 2026</td><td>Fase 3</td><td>Estrutura do código (17 módulos + convenções), 10 débitos técnicos mapeados, benchmarks de performance, estratégias de cache, 5 gargalos identificados, observabilidade, pipeline de deploy, RNF (SLA, concorrência, compatibilidade), plano de evolução (9 itens em 3 horizontes) e arquitetura-alvo versão 3.0</td><td>Arquitetura Vendemmia / Claude Sonnet</td></tr>
+  </tbody>
+</table>
+
+<!-- PHASE BANNER FINAL -->
+<div class="phase-banner">
+  <div>
+    <div class="phase-banner-text">✅ Especificação Técnica ET-LIC-2026-001 — Documento Completo (3 fases)</div>
+    <div class="phase-banner-sub">Fase 1 · Fase 2 · Fase 3 — Módulo de Licenciamento · Pipeline Vendemmia · Versão 1.0 · Maio 2026</div>
+  </div>
+  <span class="phase-banner-badge">APROVADO PARA PRODUÇÃO</span>
+</div>
+
+<!-- RODAPÉ -->
+<div style="margin-top:52px;padding-top:22px;border-top:2px solid var(--gray-200);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div style="font-size:13px;font-weight:800;color:var(--primary);">PIPELINE by Vendemmia</div>
+    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;font-family:'JetBrains Mono',monospace;">ET-LIC-2026-001 · Versão 1.0 · Fase 3/3 — DOCUMENTO TÉCNICO FINAL</div>
+  </div>
+  <div style="font-size:11px;color:var(--gray-400);text-align:right;">
+    <div>Confidencial — Vendemmia Comércio Internacional Ltda.</div>
+    <div style="margin-top:2px;">pipelinevendemmia.com.br · Maio 2026</div>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+const items=document.querySelectorAll('.sidebar-item[href^="#"]');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){items.forEach(i=>i.classList.remove('active'));const l=document.querySelector('.sidebar-item[href="#'+e.target.id+'"]');if(l)l.classList.add('active');}});},{rootMargin:'-15% 0px -70% 0px'});
+document.querySelectorAll('[id]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
