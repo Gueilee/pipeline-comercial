@@ -2720,7 +2720,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     <div style="flex:1;display:flex;overflow:hidden;position:relative;">
 
         <!-- Painel lateral esquerdo (resumo) -->
-        <div style="width:240px;flex-shrink:0;background:#fff;border-right:1px solid #ede8f8;overflow-y:auto;padding:16px 14px;">
+        <div style="width:240px;flex-shrink:0;background:#fff;border-right:1px solid #ede8f8;overflow-y:auto;padding:16px 14px;min-height:0;">
             <div id="lic-mapa-panel">
                 <div style="text-align:center;padding:40px 0;color:#c4b5e8;font-size:13px;">Carregando...</div>
             </div>
@@ -2733,10 +2733,6 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             <!-- Hover popup (posicionado via JS) -->
             <div id="lic-map-hover-popup" class="lic-map-hover"></div>
 
-            <!-- Botão escape de tela cheia — sempre acessível mesmo que o header fique coberto -->
-            <div id="lic-map-fs-escape" onclick="toggleLicMapaFullscreen()" style="display:none;position:fixed;top:16px;right:16px;z-index:10002;align-items:center;gap:8px;padding:10px 18px;background:rgba(45,27,105,.92);backdrop-filter:blur(8px);color:#fff;border:none;border-radius:50px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.35);">
-                <i class="ti ti-arrows-minimize" style="font-size:15px;"></i> Sair da tela cheia
-            </div>
 
             <!-- FULL VIEW — Página completa com scroll natural -->
             <div id="lic-map-fullview" style="display:none;position:fixed;inset:0;z-index:901;background:#f5f3ff;overflow-y:auto;">
@@ -13143,6 +13139,7 @@ let _licMapMarkers = [];
 let _licGeoJsonLayer = null;
 let _licGeoJsonData = null;
 let _licUFBounds = {};
+const _licNormUF = u => (u || '').toString().trim().toUpperCase();
 let _licMapFiltro = 'todos';
 let _licMapPhotoCache = {};        // leadId → URL da primeira foto
 let _licMapAllAnexos  = [];        // todos os anexos carregados
@@ -13199,9 +13196,13 @@ function _licMapFiltrarAplicar() {
         document.getElementById('lic-map-status')?.value);
     const clearBtn = document.getElementById('lic-map-clear-btn');
     if (clearBtn) clearBtn.style.display = hasFiltro ? '' : 'none';
-    _licAtualizarChoropleth();
+    if (_licGapMode) {
+        renderizarLicGapAnalysis();
+    } else {
+        _licAtualizarChoropleth();
+        renderizarLicMapaPanel();
+    }
     _licAtualizarMarkers();
-    renderizarLicMapaPanel();
 }
 
 function _licMapLimparFiltros() {
@@ -13229,24 +13230,23 @@ async function abrirLicMapa() {
 let _licMapaFullscreen = false;
 
 function toggleLicMapaFullscreen() {
-    const viewMapa = document.getElementById('lic-view-mapa');
-    const btn      = document.getElementById('lic-map-fs-btn');
-    const fsEsc    = document.getElementById('lic-map-fs-escape');
+    const viewMapa  = document.getElementById('lic-view-mapa');
+    const btn       = document.getElementById('lic-map-fs-btn');
     const appHeader = document.querySelector('header');
     _licMapaFullscreen = !_licMapaFullscreen;
     if (_licMapaFullscreen) {
-        // z-index 10001 — acima do <header> sticky (z-index:1000) e modais (9999)
-        viewMapa.style.cssText += ';position:fixed!important;inset:0!important;z-index:10001!important;display:flex!important;';
+        // z-index 10001 — acima do <header> sticky (z-index 1000) e modais (9999)
+        viewMapa.style.position = 'fixed';
+        viewMapa.style.inset    = '0';
+        viewMapa.style.zIndex   = '10001';
         if (appHeader) appHeader.style.visibility = 'hidden';
-        if (btn)   btn.innerHTML = '<i class="ti ti-arrows-minimize"></i> Sair';
-        if (fsEsc) fsEsc.style.display = 'flex';
+        if (btn) btn.innerHTML = '<i class="ti ti-arrows-minimize"></i> Sair da tela cheia';
     } else {
         viewMapa.style.position = '';
         viewMapa.style.inset    = '';
         viewMapa.style.zIndex   = '';
         if (appHeader) appHeader.style.visibility = '';
-        if (btn)   btn.innerHTML = '<i class="ti ti-arrows-maximize"></i> Tela cheia';
-        if (fsEsc) fsEsc.style.display = 'none';
+        if (btn) btn.innerHTML = '<i class="ti ti-arrows-maximize"></i> Tela cheia';
     }
     setTimeout(() => { if (_licMap) _licMap.invalidateSize(); }, 150);
 }
@@ -13274,6 +13274,13 @@ function _licInicializarMapa() {
     fetch('https://raw.githubusercontent.com/giuliano-macedo/geodata-br-states/main/geojson/br_states.json')
         .then(r=>r.json()).then(data=>{
             _licGeoJsonData = data;
+            // Pré-computa bounds por UF a partir do GeoJSON bruto (não depende de layers)
+            _licUFBounds = {};
+            (data.features || []).forEach(feature => {
+                const uf = _licNormUF(feature.properties?.sigla);
+                if (!uf) return;
+                try { _licUFBounds[uf] = L.geoJSON(feature).getBounds(); } catch(e) {}
+            });
             // Ativa Gap Analysis por padrão ao abrir o mapa
             _licGapMode = true;
             _licSincronizarBotaoGap();
@@ -13943,74 +13950,57 @@ function renderizarLicGapAnalysis() {
     if (!_licMap || !_licGeoJsonData) return;
     if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
 
-    // Normaliza UF: trim + uppercase para evitar divergências
-    const normUF = u => (u || '').toString().trim().toUpperCase();
-
     const conv   = baseLicLeads.filter(l=>l.status==='Convertido');
     const ativos = baseLicLeads.filter(l=>l.status==='Ativo');
-    const ufsConv  = new Set(conv.map(l=>normUF(l.uf)).filter(Boolean));
-    const ufsProsp = new Set(ativos.map(l=>normUF(l.uf)).filter(Boolean));
+    const ufsConv  = new Set(conv.map(l=>_licNormUF(l.uf)).filter(Boolean));
+    const ufsProsp = new Set(ativos.map(l=>_licNormUF(l.uf)).filter(Boolean));
 
-    // m² por UF para tooltip
     const m2ByUF = {};
-    conv.forEach(l=>{ const u=normUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
+    conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // Cores claras mas visíveis — opacity balanceada para ver cor + ler labels
+    // Fills bem visíveis mas suaves — borda fina, fill médio
     function getEstilo(rawUF) {
-        const uf = normUF(rawUF);
-        if (!uf) return { fillColor:'#e5e7eb', weight:0.5, color:'#d1d5db', fillOpacity:.15 };
-        if (ufsConv.has(uf))  return { fillColor:'#22c55e', weight:1.5, color:'#16a34a', fillOpacity:.42 };
-        if (ufsProsp.has(uf)) return { fillColor:'#facc15', weight:1.5, color:'#ca8a04', fillOpacity:.40 };
-        return                         { fillColor:'#f87171', weight:1,   color:'#ef4444', fillOpacity:.35 };
+        const uf = _licNormUF(rawUF);
+        if (!uf) return { fillColor:'transparent', weight:0, color:'transparent', fillOpacity:0 };
+        if (ufsConv.has(uf))  return { fillColor:'#4ade80', weight:1, color:'#22c55e', fillOpacity:.55 };
+        if (ufsProsp.has(uf)) return { fillColor:'#fde047', weight:1, color:'#facc15', fillOpacity:.52 };
+        return                         { fillColor:'#fca5a5', weight:1, color:'#f87171', fillOpacity:.48 };
     }
     function getEstiloHover(rawUF) {
-        const uf = normUF(rawUF);
-        if (ufsConv.has(uf))  return { fillOpacity:.65, weight:2.5, color:'#15803d' };
-        if (ufsProsp.has(uf)) return { fillOpacity:.60, weight:2.5, color:'#a16207' };
-        return                         { fillOpacity:.55, weight:2,   color:'#dc2626' };
+        const uf = _licNormUF(rawUF);
+        if (ufsConv.has(uf))  return { fillOpacity:.78, weight:2, color:'#16a34a' };
+        if (ufsProsp.has(uf)) return { fillOpacity:.74, weight:2, color:'#ca8a04' };
+        return                         { fillOpacity:.70, weight:2, color:'#ef4444' };
     }
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f => getEstilo(f.properties.sigla),
+        style: f => getEstilo(f.properties?.sigla),
         onEachFeature: (feature, layer) => {
-            const rawUF = feature.properties.sigla || '';
-            const uf    = normUF(rawUF);
-            const nome  = _LIC_UF_NOMES[uf] || feature.properties.name || uf || 'Estado';
+            const rawUF = feature.properties?.sigla || '';
+            const uf    = _licNormUF(rawUF);
+            if (!uf) return;
+            const nome  = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
             const hasCov  = ufsConv.has(uf);
             const hasPros = ufsProsp.has(uf);
             const m2 = m2ByUF[uf] || 0;
             const m2str = m2 >= 1e6 ? (m2/1e6).toFixed(1)+' Mi m²' : m2 >= 1e3 ? (m2/1e3).toFixed(0)+'K m²' : m2 > 0 ? m2+' m²' : '';
             let statusHtml;
-            if (hasCov)       statusHtml = `<span style="color:#15803d;font-weight:700;">✔ Licenciado ativo</span>${m2str?'&nbsp;· '+m2str:''}`;
+            if (hasCov)       statusHtml = `<span style="color:#15803d;font-weight:700;">✔ Licenciado ativo</span>${m2str?' · '+m2str:''}`;
             else if (hasPros) statusHtml = `<span style="color:#a16207;font-weight:700;">◑ Em prospecção</span>`;
-            else              statusHtml = `<span style="color:#dc2626;font-weight:700;">✕ Sem cobertura</span>`;
-            if (uf) layer.bindTooltip(
-                `<div style="min-width:140px;padding:2px 0;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
+            else              statusHtml = `<span style="color:#b91c1c;font-weight:700;">✕ Sem cobertura</span>`;
+            layer.bindTooltip(
+                `<div style="min-width:140px;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
                 {className:'lic-map-tooltip', sticky:true}
             );
-            layer.on('mouseover', e => {
-                e.target.setStyle(getEstiloHover(rawUF));
-                e.target.bringToFront();
-            });
+            layer.on('mouseover', e => { e.target.setStyle(getEstiloHover(rawUF)); e.target.bringToFront(); });
             layer.on('mouseout',  e => { _licGeoJsonLayer.resetStyle(e.target); });
             layer.on('click', e => {
                 _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]});
                 const chip = document.getElementById('gap-uf-'+uf);
-                if (chip) {
-                    chip.scrollIntoView({behavior:'smooth', block:'nearest'});
-                    chip.style.outline = '2px solid #6941c6';
-                    setTimeout(()=>{ chip.style.outline=''; }, 1600);
-                }
+                if (chip) { chip.scrollIntoView({behavior:'smooth',block:'nearest'}); chip.style.outline='2px solid #6941c6'; setTimeout(()=>{ chip.style.outline=''; },1600); }
             });
         }
     }).addTo(_licMap);
-
-    // Armazena bounds por UF para o focar rápido nos chips
-    _licUFBounds = {};
-    _licGeoJsonLayer.eachLayer(layer => {
-        const uf = normUF(layer.feature?.properties?.sigla);
-        if (uf) try { _licUFBounds[uf] = layer.getBounds(); } catch(e){}
-    });
 
     // ── Painel lateral ──
     const totalUFs = 27;
@@ -14085,21 +14075,21 @@ function renderizarLicGapAnalysis() {
 
 function _licMapFocarUF(uf) {
     if (!_licMap) return;
-    const UF = (uf || '').trim().toUpperCase();
+    const UF = _licNormUF(uf);
     const bounds = _licUFBounds[UF];
     if (bounds) {
         _licMap.fitBounds(bounds, {padding:[40,40]});
-        // Pisca o estado
+        // Pisca o estado no choropleth
         if (_licGeoJsonLayer) {
             _licGeoJsonLayer.eachLayer(layer => {
-                if ((layer.feature?.properties?.sigla || '').trim().toUpperCase() === UF) {
-                    layer.setStyle({fillOpacity:.75, weight:3});
-                    setTimeout(() => { if (_licGeoJsonLayer) _licGeoJsonLayer.resetStyle(layer); }, 1600);
+                if (_licNormUF(layer.feature?.properties?.sigla) === UF) {
+                    const orig = layer.options;
+                    layer.setStyle({fillOpacity:.85, weight:3});
+                    setTimeout(() => { if (_licGeoJsonLayer) _licGeoJsonLayer.resetStyle(layer); }, 1400);
                 }
             });
         }
     } else {
-        // Fallback: fitBounds no Brasil inteiro se UF não encontrada
         _licMap.setView([-15,-52], 4);
     }
 }
