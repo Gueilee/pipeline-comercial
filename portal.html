@@ -95,8 +95,8 @@ body{font-family:'DM Sans',sans-serif;background:#f5f3ff;color:#1a1a2e;font-size
 .form-line.done{background:#16a34a;}
 .form-line.active{background:#6941c6;}
 
-/* Section card */
-.p-sec{display:none;}
+/* Section card — scroll único, todas visíveis */
+.p-sec{display:block;}
 .p-sec.active{display:block;}
 .p-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(105,65,198,.08);overflow:hidden;margin-bottom:20px;}
 .p-hero{background:linear-gradient(135deg,#2d1b69,#6941c6);padding:22px 24px;position:relative;overflow:hidden;}
@@ -258,28 +258,26 @@ textarea.p-input:focus{border-color:#6941c6;}
 
 <!-- FORMULÁRIO -->
 <div id="screen-form" class="screen">
-    <div class="form-topbar">
-        <div style="display:inline-flex;align-items:center;gap:9px;">
-            <div style="width:26px;height:26px;background:linear-gradient(135deg,#9b5de5,#6941c6);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="6" height="10" rx="1.5" fill="rgba(255,255,255,.9)"/><rect x="9" y="4" width="6" height="13" rx="1.5" fill="rgba(255,255,255,.7)"/><rect x="16" y="2" width="6" height="15" rx="1.5" fill="rgba(255,255,255,.5)"/></svg>
+    <!-- Header simplificado do portal -->
+    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:11px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:28px;height:28px;background:linear-gradient(135deg,#6941c6,#2d1b69);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2.5"><rect x="2" y="7" width="6" height="10" rx="1.5"/><rect x="9" y="4" width="6" height="13" rx="1.5"/><rect x="16" y="2" width="6" height="15" rx="1.5"/></svg>
             </div>
-            <span style="font-size:14px;font-weight:900;color:#2d1b69;letter-spacing:.06em;">PIPELINE</span>
-            <span style="font-size:9px;font-weight:600;color:#9b8cc0;letter-spacing:.08em;text-transform:uppercase;">by vendemmia</span>
+            <div>
+                <div style="font-size:13px;font-weight:800;color:#2d1b69;">Formulário de Parceria</div>
+                <div style="font-size:10px;color:#9b8cc0;">Rede de Licenciamento Vendemmia</div>
+            </div>
         </div>
-        <div id="form-step-info" class="form-step-info">Etapa 1 de 7</div>
-    </div>
-    <div class="form-progress-wrap">
-        <div id="form-progress-bar" class="form-progress-bar" style="width:14%;"></div>
+        <span id="lic-form-status-pill" style="font-size:11px;padding:4px 12px;border-radius:20px;font-weight:500;background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;">Em preenchimento</span>
     </div>
     <div class="form-body">
-        <!-- Stepper -->
-        <div class="form-stepper" id="form-stepper"></div>
 
         <!-- Auto-save status -->
         <div class="autosave-pill"><div class="autosave-dot"></div><span id="autosave-label">Progresso salvo automaticamente</span></div>
 
         <!-- SEÇÃO 1: EMPRESA -->
-        <div class="p-sec active" id="psec-empresa">
+        <div class="p-sec" id="psec-empresa">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -328,11 +326,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     </div>
                 </div>
             </div>
-            <div class="form-nav"><button class="btn-next" onclick="pNext()">Próximo →</button></div>
         </div>
 
         <!-- SEÇÃO 2: CONTATO -->
-        <div class="p-sec" id="psec-contato">
+        <div class="p-sec" id="psec-contato" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -357,14 +354,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     <div class="p-field"><label class="p-label">Nome e cargo do decisor (se diferente)</label><input class="p-input" id="p-decisor_info" placeholder="Ex.: Maria Silva — CEO"></div>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-next" onclick="pNext()">Próximo →</button>
-            </div>
         </div>
 
         <!-- SEÇÃO 3: LOCALIZAÇÃO -->
-        <div class="p-sec" id="psec-localizacao">
+        <div class="p-sec" id="psec-localizacao" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -399,14 +392,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     <div class="p-field"><label class="p-label">Outras UFs em que opera</label><input class="p-input" id="p-outras_ufs" placeholder="Se opera em outros estados, informar quais"></div>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-next" onclick="pNext()">Próximo →</button>
-            </div>
         </div>
 
         <!-- SEÇÃO 4: CAPACIDADE -->
-        <div class="p-sec" id="psec-capacidade">
+        <div class="p-sec" id="psec-capacidade" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -424,14 +413,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     </div>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-next" onclick="pNext()">Próximo →</button>
-            </div>
         </div>
 
         <!-- SEÇÃO 5: CARGA -->
-        <div class="p-sec" id="psec-carga">
+        <div class="p-sec" id="psec-carga" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -476,14 +461,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     <textarea class="p-input" id="p-obs_cargas" rows="3" placeholder="Restrições, volumes máximos, condições específicas…"></textarea>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-next" onclick="pNext()">Próximo →</button>
-            </div>
         </div>
 
         <!-- SEÇÃO 6: TECNOLOGIA -->
-        <div class="p-sec" id="psec-tecnologia">
+        <div class="p-sec" id="psec-tecnologia" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -517,14 +498,10 @@ textarea.p-input:focus{border-color:#6941c6;}
                     </div>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-next" onclick="pNext()">Próximo →</button>
-            </div>
         </div>
 
         <!-- SEÇÃO 7: CERTIFICAÇÕES -->
-        <div class="p-sec" id="psec-certificacoes">
+        <div class="p-sec" id="psec-certificacoes" style="margin-top:20px;">
             <div class="p-card">
                 <div class="p-hero">
                     <div style="display:flex;align-items:center;gap:14px;position:relative;">
@@ -566,9 +543,8 @@ textarea.p-input:focus{border-color:#6941c6;}
                     <textarea class="p-input" id="p-observacoes" rows="4" placeholder="Informações adicionais, diferenciais competitivos, expectativas da parceria…"></textarea>
                 </div>
             </div>
-            <div class="form-nav">
-                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
-                <button class="btn-submit" id="btn-submit" onclick="portalSubmeter()">✅ Enviar formulário</button>
+            <div style="margin-top:20px;">
+                <button onclick="portalSubmeter()" id="btn-submit" style="width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,.35);">✅ Enviar formulário completo</button>
             </div>
         </div>
 
@@ -640,10 +616,21 @@ function forcarEdicao() {
 }
 
 function iniciarForm() {
-    buildStepper();
-    goSec(0);
+    // Mostrar todas as seções ao iniciar o formulário (scroll único)
+    SECTIONS.forEach(s => {
+        const el = document.getElementById('psec-' + s);
+        if (el) el.style.display = '';
+    });
+    updateProgress();
     showScreen('form');
 }
+
+// Auto-save a cada 30 segundos
+setInterval(async () => {
+    if (leadId && document.getElementById('screen-form').classList.contains('active')) {
+        await autoSave();
+    }
+}, 30000);
 
 // ── Pré-preenche o form com dados existentes ───────────────────
 
@@ -682,38 +669,32 @@ function preencherForm(d) {
     set('p-observacoes', d.observacoes);
 }
 
-// ── Navegação ──────────────────────────────────────────────────
+// ── Navegação (scroll único — sem stepper) ──────────────────────
 
-function buildStepper() {
-    const st = document.getElementById('form-stepper');
-    st.innerHTML = SECTIONS.map((s, i) => {
-        const state = i < curSec ? 'done' : (i === curSec ? 'active' : 'future');
-        const bg = state==='done'?'#16a34a': state==='active'?'#6941c6':'#e8e0f5';
-        const col = state==='future'?'#9b8cc0':'#fff';
-        const line = i > 0 ? `<div class="form-line ${i<=curSec?(i<curSec?'done':'active'):'future'}"></div>` : '';
-        return `${line}<div class="form-dot ${state}" onclick="pJump(${i})" title="Seção ${i+1}" style="background:${bg};color:${col};">${state==='done'?'✓':(i+1)}</div>`;
-    }).join('');
-}
+function buildStepper() { /* scroll único — sem stepper */ }
 
 function goSec(idx) {
     curSec = idx;
-    SECTIONS.forEach((s, i) => {
+    SECTIONS.forEach(s => {
         const el = document.getElementById('psec-' + s);
-        if (el) el.classList.toggle('active', i === idx);
+        if (el) el.style.display = '';
     });
-    const pct = Math.round(((idx + 1) / SECTIONS.length) * 100);
-    document.getElementById('form-progress-bar').style.width = pct + '%';
-    document.getElementById('form-step-info').textContent = `Etapa ${idx + 1} de ${SECTIONS.length}`;
-    buildStepper();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updateProgress();
 }
 
-async function pNext() {
-    await autoSave();
-    if (curSec < SECTIONS.length - 1) goSec(curSec + 1);
+function pNext() { /* sem navegação por etapas — scroll único */ }
+function pPrev() { /* sem navegação por etapas — scroll único */ }
+function pJump(idx) { /* sem navegação por etapas — scroll único */ }
+
+function updateProgress() {
+    const uniqueRadios = new Set([...document.querySelectorAll('.lic-tracked[type=radio]:checked')].map(el=>el.name));
+    const totalRadios = new Set([...document.querySelectorAll('.lic-tracked[type=radio]')].map(el=>el.name)).size;
+    const textFilled = [...document.querySelectorAll('.lic-tracked:not([type=radio]):not([type=checkbox])')].filter(el=>el.value.trim()).length;
+    const textTotal = document.querySelectorAll('.lic-tracked:not([type=radio]):not([type=checkbox])').length;
+    const pct = Math.round(((uniqueRadios.size+textFilled)/Math.max(1,totalRadios+textTotal))*100);
+    const pill = document.getElementById('lic-form-status-pill');
+    if(pill) { pill.textContent = pct >= 100 ? '✓ Completo' : pct+'% preenchido'; pill.style.color=pct>=100?'#16a34a':'#6941c6'; }
 }
-function pPrev() { if (curSec > 0) goSec(curSec - 1); }
-function pJump(idx) { if (idx <= curSec + 1) goSec(idx); }
 
 // ── Auto-save ──────────────────────────────────────────────────
 

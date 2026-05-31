@@ -1819,19 +1819,19 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
 
             <!-- ── VISÃO FORMULÁRIO ── -->
-            <div id="lic-view-form" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;">
+            <div id="lic-view-form" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
 
-                <!-- HEADER com stepper -->
-                <div id="lic-form-header">
-                    <button onclick="fecharFormLead()" style="padding:6px 14px;background:#f5f0ff;border:1.5px solid #e0d9f5;border-radius:8px;color:#6941c6;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">← Leads</button>
-                    <div id="lic-stepper" style="display:flex;align-items:center;flex:1;min-width:0;overflow:hidden;padding:0 12px;"></div>
-                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
-                        <span id="lic-form-status-pill" style="font-size:11px;padding:4px 12px;border-radius:20px;font-weight:600;background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;">Em preenchimento</span>
-                        <button onclick="salvarLicLead()" class="lic-btn-save">Salvar lead</button>
+                <!-- Header simplificado — sem stepper -->
+                <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <button onclick="fecharFormLead()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">← Leads</button>
+                        <div id="lic-form-title" style="font-size:14px;font-weight:700;color:#2d1b69;">Novo Lead — Formulário completo</div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <span id="lic-form-status-pill" style="font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500;background:#f0ebff;color:#6941c6;border:1px solid #d4b8f5;">0% preenchido</span>
+                        <button onclick="salvarLicLead()" style="padding:7px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(22,163,74,.3);">💾 Salvar lead</button>
                     </div>
                 </div>
-                <!-- Barra de progresso -->
-                <div id="lic-progress-bar-wrap"><div id="lic-progress-bar" style="width:0%;"></div></div>
                 <!-- Hidden nav container (mantém compatibilidade JS) -->
                 <div id="lic-sec-nav" style="display:none;"></div>
 
@@ -1906,7 +1906,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 2. CONTATO -->
-                        <div class="lic-sec" id="lic-sec-contato" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-contato" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -1952,7 +1952,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 3. LOCALIZAÇÃO -->
-                        <div class="lic-sec" id="lic-sec-localizacao" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-localizacao" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2029,7 +2029,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 4. CAPACIDADE -->
-                        <div class="lic-sec" id="lic-sec-capacidade" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-capacidade" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2054,7 +2054,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 5. CARGA -->
-                        <div class="lic-sec" id="lic-sec-carga" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-carga" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2108,7 +2108,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 6. TECNOLOGIA -->
-                        <div class="lic-sec" id="lic-sec-tecnologia" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-tecnologia" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2155,7 +2155,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 7. CERTIFICAÇÕES -->
-                        <div class="lic-sec" id="lic-sec-certificacoes" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-certificacoes" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2207,7 +2207,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 8. PLANOS -->
-                        <div class="lic-sec" id="lic-sec-planos" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-planos" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2304,7 +2304,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 9. WMS -->
-                        <div class="lic-sec" id="lic-sec-wms" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-wms" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2346,7 +2346,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 10. FUNIL -->
-                        <div class="lic-sec" id="lic-sec-funil" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-funil" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2369,7 +2369,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         </div>
 
                         <!-- 11. ACOMPANHAMENTO -->
-                        <div class="lic-sec" id="lic-sec-acompanhamento" style="display:none;">
+                        <div class="lic-sec" id="lic-sec-acompanhamento" style="margin-top:20px;">
                             <div class="lic-sec-card">
                                 <div class="lic-sec-hero">
                                     <div style="display:flex;align-items:center;gap:16px;">
@@ -2419,14 +2419,9 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     </div><!-- /lic-form-content inner -->
                 </div><!-- /lic-form-scroll -->
 
-                <!-- FOOTER com navegação -->
-                <div id="lic-form-footer">
-                    <div style="font-size:12px;color:#9b8cc0;font-weight:500;" id="lic-footer-label">Dados da empresa &bull; Etapa 1 de 11</div>
-                    <div style="display:flex;gap:10px;">
-                        <button onclick="gerarLicPDF(_licEditId)" id="lic-btn-pdf" style="display:none;padding:8px 16px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:13px;font-weight:600;color:#6941c6;cursor:pointer;">📄 Gerar PDF</button>
-                        <button onclick="prevLicSec()" class="lic-btn-nav lic-btn-prev">← Anterior</button>
-                        <button id="lic-btn-proximo" onclick="nextLicSec()" class="lic-btn-nav lic-btn-next">Próximo →</button>
-                    </div>
+                <!-- Botão salvar no final do scroll -->
+                <div style="background:#fff;border-top:2px solid #ede8f8;padding:18px 28px;display:flex;justify-content:flex-end;flex-shrink:0;">
+                    <button onclick="salvarLicLead()" style="padding:12px 36px;border:none;border-radius:12px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:inherit;font-size:15px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(22,163,74,.35);">💾 Salvar lead</button>
                 </div>
 
             </div><!-- /lic-view-form -->
@@ -9411,8 +9406,14 @@ function abrirFormLead(id, returnTo) {
     _licEditId  = id || null;
     _licSection = 0;
     _licLimparForm();
-    _licBuildStepper();
-    _licGoSec(0);
+
+    // Mostra TODAS as seções de uma vez (scroll único)
+    LIC_SECS.forEach(s => {
+        const sec = document.getElementById('lic-sec-' + s.id);
+        if (sec) sec.style.display = '';
+    });
+    document.getElementById('lic-form-title').textContent =
+        id ? 'Editar Lead — Formulário completo' : 'Novo Lead — Formulário completo';
 
     if (id) {
         const lead = baseLicLeads.find(l => String(l.id) === String(id));
@@ -9441,83 +9442,26 @@ function fecharFormLead() {
     }
 }
 
-function _licBuildStepper() {
-    const el = document.getElementById('lic-stepper');
-    if (!el) return;
-    el.innerHTML = LIC_SECS.map((s, i) => {
-        const done   = i < _licSection;
-        const active = i === _licSection;
-        const bg  = done ? '#16a34a' : (active ? '#6941c6' : '#e8e0f5');
-        const col = (done || active) ? '#fff' : '#a78bda';
-        const glow = active ? 'box-shadow:0 0 0 4px rgba(105,65,198,.2);' : '';
-        const content = done ? '&#10003;' : (i + 1);
-        const line = i > 0 ? `<div style="flex:1;height:2px;background:${i <= _licSection ? (i < _licSection ? '#16a34a' : '#6941c6') : '#e8e0f5'};margin:0 3px;transition:background .3s;min-width:4px;"></div>` : '';
-        return `${line}<div onclick="licNavTo(${i})" title="${s.label}" style="width:26px;height:26px;border-radius:50%;background:${bg};color:${col};font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .25s;${glow}">${content}</div>`;
-    }).join('');
-}
+function _licBuildStepper() { /* scroll único — sem stepper */ }
 
-/* Mantido para compatibilidade — redireciona para _licBuildStepper */
+/* Mantido para compatibilidade */
 function _licBuildNav() { _licBuildStepper(); }
 
-function licNavTo(idx) {
-    _licGoSec(idx);
-}
+function licNavTo(idx) { _licGoSec(idx); }
 
 function _licGoSec(idx) {
     _licSection = idx;
-    LIC_SECS.forEach((s, i) => {
+    LIC_SECS.forEach(s => {
         const sec = document.getElementById('lic-sec-' + s.id);
-        if (sec) sec.style.display = i === idx ? '' : 'none';
-        const nav = document.getElementById('lic-nav-' + i);
-        if (nav) nav.classList.toggle('active', i === idx);
+        if (sec) sec.style.display = '';
     });
-    /* Atualiza título interno da seção */
-    const titleEl = document.getElementById('lic-form-title');
-    if (titleEl) titleEl.textContent = LIC_SECS[idx].label;
-    /* Progress bar horizontal */
-    const pb = document.getElementById('lic-progress-bar');
-    if (pb) pb.style.width = ((idx / (LIC_SECS.length - 1)) * 100) + '%';
-    /* Rótulo do footer */
-    const fl = document.getElementById('lic-footer-label');
-    if (fl) fl.innerHTML = LIC_SECS[idx].label + ' &bull; Etapa ' + (idx + 1) + ' de ' + LIC_SECS.length;
-    /* Stepper */
-    _licBuildStepper();
-    /* Scroll ao topo */
-    const scroll = document.getElementById('lic-form-scroll');
-    if (scroll) scroll.scrollTop = 0;
     _licUpdateProgress();
-
-    // Botão Próximo → vira "Salvar lead" na última etapa
-    const btnProx = document.getElementById('lic-btn-proximo');
-    if (btnProx) {
-        const isLast = idx === LIC_SECS.length - 1;
-        if (isLast) {
-            btnProx.textContent  = '✅ Salvar lead';
-            btnProx.onclick      = salvarLicLead;
-            btnProx.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-            btnProx.style.borderColor = '#16a34a';
-        } else {
-            btnProx.textContent  = 'Próximo →';
-            btnProx.onclick      = nextLicSec;
-            btnProx.style.background = '';
-            btnProx.style.borderColor = '';
-        }
-    }
-    // Mostrar botão PDF só se for edição de lead existente
-    const btnPdf = document.getElementById('lic-btn-pdf');
-    if (btnPdf) btnPdf.style.display = _licEditId ? '' : 'none';
 }
 
-function nextLicSec() { if (_licSection < LIC_SECS.length - 1) _licGoSec(_licSection + 1); }
-function prevLicSec() { if (_licSection > 0) _licGoSec(_licSection - 1); }
+function nextLicSec() { /* sem navegação por etapas — scroll único */ }
+function prevLicSec() { /* sem navegação por etapas — scroll único */ }
 
 function _licUpdateProgress() {
-    const tracked = document.querySelectorAll('#lic-form-content .lic-tracked');
-    let filled = 0;
-    tracked.forEach(el => {
-        if (el.type === 'radio' || el.type === 'checkbox') { if (el.checked) filled++; }
-        else if (el.value && el.value.trim()) filled++;
-    });
     const uniqueRadios = new Set([...document.querySelectorAll('#lic-form-content .lic-tracked[type=radio]:checked')].map(el => el.name));
     const totalRadioGroups = new Set([...document.querySelectorAll('#lic-form-content .lic-tracked[type=radio]')].map(el => el.name)).size;
     const textFilled = [...document.querySelectorAll('#lic-form-content .lic-tracked:not([type=radio]):not([type=checkbox])')].filter(el => el.value.trim()).length;
@@ -9530,16 +9474,10 @@ function _licUpdateProgress() {
     if (spPct) spPct.textContent = pct + '%';
     /* Pill de status */
     const pill = document.getElementById('lic-form-status-pill');
-    if (!pill) return;
-    if (pct >= 100) {
-        pill.textContent = '&#10003; Completo';
-        pill.style.background = '#f0fdf4'; pill.style.color = '#16a34a'; pill.style.borderColor = '#86efac';
-    } else if (pct > 0) {
-        pill.textContent = pct + '% preenchido';
-        pill.style.background = '#f0ebff'; pill.style.color = '#6941c6'; pill.style.borderColor = '#d4b8f5';
-    } else {
-        pill.textContent = 'Em preenchimento';
-        pill.style.background = '#f0ebff'; pill.style.color = '#6941c6'; pill.style.borderColor = '#d4b8f5';
+    if (pill) {
+        if (pct >= 100) { pill.textContent = '✓ Completo'; pill.style.background='#f0fdf4'; pill.style.color='#16a34a'; pill.style.borderColor='#86efac'; }
+        else if (pct > 0) { pill.textContent = pct + '% preenchido'; pill.style.background='#f0ebff'; pill.style.color='#6941c6'; pill.style.borderColor='#d4b8f5'; }
+        else { pill.textContent = 'Em preenchimento'; pill.style.background='#f0ebff'; pill.style.color='#6941c6'; pill.style.borderColor='#d4b8f5'; }
     }
 }
 
