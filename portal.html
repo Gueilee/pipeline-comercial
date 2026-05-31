@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Formulário de Parceria — Vendemmia Rede de Licenciamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#f5f3ff;color:#1a1a2e;font-size:14px;min-height:100vh;}
+
+/* ── TELAS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── LOADING ── */
+#screen-loading{align-items:center;justify-content:center;background:linear-gradient(135deg,#1a0f3d,#2d1b69,#6941c6);}
+.loading-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:20px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ERRO / INVÁLIDO ── */
+#screen-invalid,#screen-filled{align-items:center;justify-content:center;background:linear-gradient(135deg,#1a0f3d,#2d1b69);}
+.error-card{background:#fff;border-radius:20px;padding:40px;text-align:center;max-width:460px;margin:24px;}
+
+/* ── WELCOME ── */
+#screen-welcome{background:linear-gradient(145deg,#1a0f3d 0%,#2d1b69 35%,#6941c6 100%);}
+.welcome-inner{max-width:680px;margin:0 auto;padding:48px 28px;text-align:center;position:relative;}
+.welcome-logo{height:40px;margin-bottom:32px;filter:brightness(0) invert(1);}
+.welcome-title{font-size:32px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:12px;letter-spacing:-.5px;}
+.welcome-sub{font-size:15px;color:rgba(255,255,255,.7);margin-bottom:36px;line-height:1.6;}
+.welcome-company{font-size:18px;font-weight:800;color:#fde68a;margin-bottom:8px;}
+.welcome-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:28px 0;}
+.welcome-badge{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 18px;color:#fff;font-size:13px;font-weight:600;}
+.btn-start{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#2d1b69;border:none;border-radius:14px;padding:16px 36px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.2);transition:transform .15s,box-shadow .15s;}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.28);}
+.welcome-footer{margin-top:40px;font-size:11px;color:rgba(255,255,255,.35);}
+
+/* ── FORM ── */
+#screen-form{background:#f5f3ff;}
+.form-topbar{background:#fff;border-bottom:1px solid #ede8f8;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.form-logo{height:28px;}
+.form-step-info{font-size:12px;font-weight:700;color:#6941c6;}
+.form-progress-wrap{height:3px;background:#e8e0f5;position:sticky;top:57px;z-index:99;}
+.form-progress-bar{height:100%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;transition:width .5s;}
+
+.form-body{max-width:720px;margin:0 auto;padding:28px 20px 80px;}
+
+/* Stepper dots */
+.form-stepper{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px;padding:0 8px;}
+.form-dot{width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s;}
+.form-dot.done{background:#16a34a;color:#fff;}
+.form-dot.active{background:#6941c6;color:#fff;box-shadow:0 0 0 4px rgba(105,65,198,.2);}
+.form-dot.future{background:#e8e0f5;color:#9b8cc0;}
+.form-line{flex:1;height:2px;background:#e8e0f5;min-width:6px;}
+.form-line.done{background:#16a34a;}
+.form-line.active{background:#6941c6;}
+
+/* Section card */
+.p-sec{display:none;}
+.p-sec.active{display:block;}
+.p-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(105,65,198,.08);overflow:hidden;margin-bottom:20px;}
+.p-hero{background:linear-gradient(135deg,#2d1b69,#6941c6);padding:22px 24px;position:relative;overflow:hidden;}
+.p-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.05);}
+.p-hero-num{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:#fff;flex-shrink:0;font-family:'DM Mono',monospace;}
+.p-hero-title{font-size:19px;font-weight:800;color:#fff;line-height:1.2;}
+.p-hero-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:3px;}
+.p-body{padding:24px;}
+
+/* Fields */
+.p-field{margin-bottom:20px;}
+.p-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+.p-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin-bottom:8px;}
+.p-input{width:100%;border:none;border-bottom:2px solid #e8e0f5;background:transparent;font-family:'DM Sans',sans-serif;font-size:14px;color:#2d1b69;outline:none;padding:9px 0;transition:border-color .2s;box-sizing:border-box;}
+.p-input:focus{border-bottom-color:#6941c6;}
+.p-input::placeholder{color:#c4b5e8;font-size:13px;}
+select.p-input{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239b8cc0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;}
+textarea.p-input{border:1.5px solid #e8e0f5;border-radius:10px;padding:11px 13px;resize:vertical;min-height:80px;}
+textarea.p-input:focus{border-color:#6941c6;}
+
+/* Chips */
+.p-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.p-chip{display:inline-flex;align-items:center;padding:8px 16px;border:1.5px solid #e0d9f5;border-radius:24px;cursor:pointer;font-size:12px;color:#6941c6;background:#faf8ff;user-select:none;transition:all .15s;font-weight:500;}
+.p-chip:has(input:checked){background:#6941c6;border-color:#6941c6;color:#fff;}
+.p-chip input{display:none;}
+
+/* Radio cards */
+.p-radio-card{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1.5px solid #e8e0f5;border-radius:12px;cursor:pointer;background:#faf8ff;transition:all .15s;margin-bottom:8px;}
+.p-radio-card:has(input:checked){border-color:#6941c6;background:#f0ebff;}
+.p-radio-card input{display:none;}
+.p-radio-dot{width:18px;height:18px;border-radius:50%;border:2px solid #d0c4f0;flex-shrink:0;margin-top:2px;transition:all .15s;}
+.p-radio-card:has(input:checked) .p-radio-dot{border-color:#6941c6;background:#6941c6;}
+.p-radio-title{font-size:13px;font-weight:700;color:#2d1b69;}
+.p-radio-sub{font-size:11px;color:#9b8cc0;margin-top:2px;}
+.p-radio-card:has(input:checked) .p-radio-title{color:#6941c6;}
+
+/* Section divider */
+.p-divider{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#9b8cc0;margin:22px 0 12px;border-bottom:1px solid #f0ebff;padding-bottom:8px;}
+
+/* CEP block */
+.p-cep-block{background:linear-gradient(135deg,#f5f3ff,#ede8f8);border-radius:14px;padding:16px;margin-bottom:22px;border:1.5px solid #e0d9f5;}
+.p-cep-row{display:flex;gap:10px;align-items:flex-end;}
+.p-cep-btn{padding:10px 18px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 3px 10px rgba(105,65,198,.3);}
+.p-cep-preview{display:none;margin-top:10px;padding:10px 12px;background:#fff;border-radius:10px;border-left:3px solid #16a34a;font-size:12px;color:#2d1b69;line-height:1.5;}
+
+/* Warehouse */
+.p-wh{border:1.5px solid #e8e0f5;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.p-wh-head{display:flex;align-items:center;gap:10px;padding:11px 14px;background:linear-gradient(135deg,#f0ebff,#e8dff8);cursor:pointer;}
+.p-wh-body{padding:18px;}
+.p-add-wh{width:100%;padding:11px;border:2px dashed #d4b8f5;border-radius:10px;background:transparent;color:#7c5cbf;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s;margin-bottom:18px;}
+
+/* Nav buttons */
+.form-nav{display:flex;gap:10px;margin-top:8px;}
+.btn-prev{padding:12px 22px;border:1.5px solid #e0d9f5;border-radius:12px;background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:#6941c6;cursor:pointer;}
+.btn-next{flex:1;padding:12px 22px;border:none;border-radius:12px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(105,65,198,.3);transition:opacity .15s;}
+.btn-next:disabled{opacity:.6;cursor:not-allowed;}
+.btn-submit{flex:1;padding:14px 22px;border:none;border-radius:12px;background:linear-gradient(135deg,#16a34a,#15803d);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 20px rgba(22,163,74,.35);transition:opacity .15s;}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+
+/* Auto-save indicator */
+.autosave-pill{font-size:11px;color:#9b8cc0;display:flex;align-items:center;gap:6px;margin-bottom:16px;}
+.autosave-dot{width:6px;height:6px;border-radius:50%;background:#16a34a;animation:pulse-save 2s infinite;}
+@keyframes pulse-save{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── AGRADECIMENTO ── */
+#screen-thanks{background:linear-gradient(145deg,#1a0f3d 0%,#2d1b69 35%,#6941c6 100%);align-items:center;justify-content:center;}
+.thanks-card{background:#fff;border-radius:24px;padding:48px 40px;text-align:center;max-width:520px;margin:24px;box-shadow:0 24px 80px rgba(0,0,0,.25);}
+.thanks-icon{width:80px;height:80px;background:linear-gradient(135deg,#16a34a,#15803d);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 24px;}
+.thanks-title{font-size:26px;font-weight:900;color:#2d1b69;margin-bottom:12px;}
+.thanks-sub{font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:24px;}
+.thanks-badge{display:inline-flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:#166534;}
+
+/* Responsive */
+@media(max-width:600px){
+    .p-row{grid-template-columns:1fr;}
+    .welcome-title{font-size:24px;}
+    .p-body{padding:18px;}
+    .form-body{padding:18px 14px 80px;}
+    .thanks-card{padding:32px 24px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="screen-loading" class="screen active">
+    <div class="loading-spinner"></div>
+    <p style="color:rgba(255,255,255,.7);font-size:14px;">Verificando link...</p>
+</div>
+
+<!-- INVÁLIDO -->
+<div id="screen-invalid" class="screen">
+    <div class="error-card">
+        <div style="font-size:48px;margin-bottom:16px;">🔗</div>
+        <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-bottom:8px;">Link inválido ou expirado</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;">Este link não existe ou foi desativado. Entre em contato com o responsável comercial da Vendemmia para solicitar um novo link.</div>
+        <div style="margin-top:24px;"><img src="Pipeline.png" style="height:28px;" onerror="this.style.display='none'"></div>
+    </div>
+</div>
+
+<!-- JÁ PREENCHIDO -->
+<div id="screen-filled" class="screen">
+    <div class="error-card">
+        <div style="font-size:48px;margin-bottom:16px;">✅</div>
+        <div style="font-size:20px;font-weight:800;color:#2d1b69;margin-bottom:8px;">Formulário já enviado</div>
+        <div style="font-size:13px;color:#6b7280;line-height:1.6;margin-bottom:20px;">Seus dados já foram recebidos pela equipe Vendemmia. Em caso de alterações, clique abaixo.</div>
+        <button onclick="forcarEdicao()" style="padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Atualizar dados</button>
+    </div>
+</div>
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen">
+    <div class="welcome-inner">
+        <img src="Pipeline.png" class="welcome-logo" onerror="this.style.display='none'">
+        <div id="welcome-company" class="welcome-company"></div>
+        <h1 class="welcome-title">Formulário de Cadastro<br>de Parceiro Logístico</h1>
+        <p class="welcome-sub">Preencha as informações da sua empresa para que nossa equipe possa avaliar a parceria com a <strong style="color:#fde68a;">Rede de Licenciamento Vendemmia</strong>.</p>
+        <div class="welcome-badges">
+            <div class="welcome-badge"><span>🔒</span> Dados protegidos</div>
+            <div class="welcome-badge"><span>💾</span> Salvo automaticamente</div>
+            <div class="welcome-badge"><span>⏱</span> ~10–15 minutos</div>
+            <div class="welcome-badge"><span>📱</span> Funciona no celular</div>
+        </div>
+        <button class="btn-start" onclick="iniciarForm()">
+            <span>Começar preenchimento</span>
+            <span>→</span>
+        </button>
+        <div class="welcome-footer">Vendemmia Comércio Internacional Ltda · pipelinevendemmia.com.br</div>
+    </div>
+</div>
+
+<!-- FORMULÁRIO -->
+<div id="screen-form" class="screen">
+    <div class="form-topbar">
+        <img src="Pipeline.png" class="form-logo" onerror="this.style.display='none'">
+        <div id="form-step-info" class="form-step-info">Etapa 1 de 7</div>
+    </div>
+    <div class="form-progress-wrap">
+        <div id="form-progress-bar" class="form-progress-bar" style="width:14%;"></div>
+    </div>
+    <div class="form-body">
+        <!-- Stepper -->
+        <div class="form-stepper" id="form-stepper"></div>
+
+        <!-- Auto-save status -->
+        <div class="autosave-pill"><div class="autosave-dot"></div><span id="autosave-label">Progresso salvo automaticamente</span></div>
+
+        <!-- SEÇÃO 1: EMPRESA -->
+        <div class="p-sec active" id="psec-empresa">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">01</div>
+                        <div><div class="p-hero-title">Dados da empresa</div><div class="p-hero-sub">Informações básicas sobre a sua organização</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-field"><label class="p-label">Razão social *</label><input class="p-input" id="p-razao_social" placeholder="Ex.: Logística ABC Ltda." required></div>
+                    <div class="p-row">
+                        <div><label class="p-label">CNPJ *</label><input class="p-input" id="p-cnpj" placeholder="00.000.000/0001-00"></div>
+                        <div><label class="p-label">Ano de fundação</label><input class="p-input" id="p-ano_fundacao" type="number" placeholder="Ex.: 2005"></div>
+                    </div>
+                    <div class="p-field"><label class="p-label">Website</label><input class="p-input" id="p-website" placeholder="www.empresa.com.br"></div>
+                    <div class="p-field">
+                        <label class="p-label">Faturamento anual *</label>
+                        <select class="p-input" id="p-faturamento_faixa">
+                            <option value="">Selecione a faixa</option>
+                            <option>Até R$ 5 milhões</option><option>R$ 5M – R$ 20M</option>
+                            <option>R$ 20M – R$ 50M</option><option>R$ 50M – R$ 100M</option><option>Acima de R$ 100M</option>
+                        </select>
+                    </div>
+                    <div class="p-divider">Segmentos atendidos</div>
+                    <div class="p-chips" id="p-segmentos">
+                        <label class="p-chip"><input type="checkbox" value="Armazenagem"><span>Armazenagem</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Transporte"><span>Transporte</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Distribuição"><span>Distribuição</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Comex / importação"><span>Comex / importação</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Cross-docking"><span>Cross-docking</span></label>
+                        <label class="p-chip"><input type="checkbox" value="E-commerce"><span>E-commerce</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Refrigerado"><span>Refrigerado</span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-nav"><button class="btn-next" onclick="pNext()">Próximo →</button></div>
+        </div>
+
+        <!-- SEÇÃO 2: CONTATO -->
+        <div class="p-sec" id="psec-contato">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">02</div>
+                        <div><div class="p-hero-title">Contato principal</div><div class="p-hero-sub">Quem será o nosso ponto de contato</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-row">
+                        <div><label class="p-label">Nome completo *</label><input class="p-input" id="p-contato_nome" placeholder="Ex.: João Silva"></div>
+                        <div><label class="p-label">Cargo *</label><input class="p-input" id="p-contato_cargo" placeholder="Ex.: Diretor de Operações"></div>
+                    </div>
+                    <div class="p-row">
+                        <div><label class="p-label">E-mail *</label><input class="p-input" id="p-contato_email" type="email" placeholder="joao@empresa.com.br"></div>
+                        <div><label class="p-label">WhatsApp / telefone *</label><input class="p-input" id="p-contato_telefone" placeholder="(11) 99999-9999"></div>
+                    </div>
+                    <div class="p-divider">Decisor final</div>
+                    <div class="p-chips" style="margin-bottom:16px;">
+                        <label class="p-chip"><input type="radio" name="p-decisor" value="Este contato"><span>Este contato é o decisor</span></label>
+                        <label class="p-chip"><input type="radio" name="p-decisor" value="Outro"><span>Há outro decisor</span></label>
+                    </div>
+                    <div class="p-field"><label class="p-label">Nome e cargo do decisor (se diferente)</label><input class="p-input" id="p-decisor_info" placeholder="Ex.: Maria Silva — CEO"></div>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-next" onclick="pNext()">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 3: LOCALIZAÇÃO -->
+        <div class="p-sec" id="psec-localizacao">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">03</div>
+                        <div><div class="p-hero-title">Localização</div><div class="p-hero-sub">Onde está concentrada a operação</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-cep-block">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:16px;">📍</span><div><div style="font-size:12px;font-weight:800;color:#2d1b69;">Localização exata</div><div style="font-size:11px;color:#9b8cc0;">Digite o CEP para preencher automaticamente</div></div></div>
+                        <div class="p-cep-row">
+                            <div style="flex:1;"><label class="p-label" style="margin-bottom:8px;">CEP</label><input class="p-input" id="p-cep" placeholder="00000-000" maxlength="9" oninput="portalMascaraCEP(this)" style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;letter-spacing:2px;"></div>
+                            <button class="p-cep-btn" id="p-cep-btn" onclick="portalBuscarCEP(document.getElementById('p-cep').value)">🔍 Buscar</button>
+                        </div>
+                        <div class="p-cep-preview" id="p-cep-preview"></div>
+                        <div id="p-addr-fields" style="display:none;margin-top:14px;">
+                            <div class="p-row">
+                                <div><label class="p-label" style="margin-bottom:8px;">LOGRADOURO</label><input class="p-input" id="p-endereco_logradouro" placeholder="Rua, Av., Rodovia..."></div>
+                                <div><label class="p-label" style="margin-bottom:8px;">BAIRRO</label><input class="p-input" id="p-endereco_bairro" placeholder="Bairro"></div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="p-lat"><input type="hidden" id="p-lng">
+                    </div>
+                    <div class="p-row">
+                        <div>
+                            <label class="p-label">UF principal *</label>
+                            <select class="p-input" id="p-uf"><option value="">Selecione</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select>
+                        </div>
+                        <div><label class="p-label">Cidade / polo logístico *</label><input class="p-input" id="p-polo_logistico" placeholder="Ex.: Campinas, Guarulhos"></div>
+                    </div>
+                    <div class="p-field"><label class="p-label">Região de exclusividade pretendida</label><input class="p-input" id="p-regiao_exclusividade" placeholder="Ex.: Grande São Paulo, Baixada Santista"></div>
+                    <div class="p-field"><label class="p-label">Outras UFs em que opera</label><input class="p-input" id="p-outras_ufs" placeholder="Se opera em outros estados, informar quais"></div>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-next" onclick="pNext()">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 4: CAPACIDADE -->
+        <div class="p-sec" id="psec-capacidade">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">04</div>
+                        <div><div class="p-hero-title">Capacidade instalada</div><div class="p-hero-sub">Armazéns, infraestrutura e disponibilidade de espaço</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div id="p-wh-container"></div>
+                    <button class="p-add-wh" onclick="portalAddWh()">+ Adicionar armazém</button>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-top:2px solid #6941c6;border-radius:0 0 8px 8px;overflow:hidden;">
+                        <div style="padding:10px 12px;background:#eff6ff;border-right:1px solid #bfdbfe;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#1e40af;margin-bottom:3px;">Área total</div><div style="font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:#1a3c6e;" id="p-sum-area">—</div></div>
+                        <div style="padding:10px 12px;background:#eff6ff;border-right:1px solid #bfdbfe;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#1e40af;margin-bottom:3px;">Docas</div><div style="font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:#1a3c6e;" id="p-sum-docas">—</div></div>
+                        <div style="padding:10px 12px;background:#eff6ff;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#1e40af;margin-bottom:3px;">Ocupação</div><div style="font-size:15px;font-weight:800;font-family:'DM Mono',monospace;color:#1a3c6e;" id="p-sum-ocup">—</div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-next" onclick="pNext()">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 5: CARGA -->
+        <div class="p-sec" id="psec-carga">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">05</div>
+                        <div><div class="p-hero-title">Tipos de carga</div><div class="p-hero-sub">Capacidades operacionais e licenças ativas</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-divider">Carga geral</div>
+                    <div class="p-chips" id="p-cargas_geral">
+                        <label class="p-chip"><input type="checkbox" value="Paletizado seco"><span>Paletizado seco</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Granel sólido"><span>Granel sólido</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Carga fracionada"><span>Carga fracionada</span></label>
+                        <label class="p-chip"><input type="checkbox" value="E-commerce"><span>E-commerce</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Alto valor"><span>Alto valor</span></label>
+                    </div>
+                    <div class="p-divider">Temperatura controlada / especial</div>
+                    <div class="p-chips" id="p-cargas_especiais">
+                        <label class="p-chip"><input type="checkbox" value="Resfriado (2°C–8°C)"><span>Resfriado</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Congelado (–18°C)"><span>Congelado</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Farmacêutico / GDP"><span>Farmacêutico</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Agroquímicos"><span>Agroquímicos</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Eletrônicos de alto valor"><span>Eletrônicos</span></label>
+                    </div>
+                    <div class="p-divider">Carga perigosa (IMDG)</div>
+                    <div class="p-chips" id="p-cargas_perigosas">
+                        <label class="p-chip"><input type="checkbox" value="Líquidos inflamáveis (Cl.3)"><span>Líquidos inflamáveis</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Gases (Cl.2)"><span>Gases</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Tóxicos (Cl.6)"><span>Tóxicos</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Corrosivos (Cl.8)"><span>Corrosivos</span></label>
+                    </div>
+                    <div class="p-divider">Licenças ativas</div>
+                    <div class="p-chips" id="p-licencas">
+                        <label class="p-chip"><input type="checkbox" value="ANTT"><span>ANTT</span></label>
+                        <label class="p-chip"><input type="checkbox" value="ANVISA"><span>ANVISA</span></label>
+                        <label class="p-chip"><input type="checkbox" value="IBAMA"><span>IBAMA</span></label>
+                        <label class="p-chip"><input type="checkbox" value="AVCB"><span>AVCB</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Licença ambiental"><span>Licença ambiental</span></label>
+                        <label class="p-chip"><input type="checkbox" value="OEA"><span>OEA</span></label>
+                    </div>
+                    <div class="p-divider">Observações sobre cargas</div>
+                    <textarea class="p-input" id="p-obs_cargas" rows="3" placeholder="Restrições, volumes máximos, condições específicas…"></textarea>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-next" onclick="pNext()">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 6: TECNOLOGIA -->
+        <div class="p-sec" id="psec-tecnologia">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">06</div>
+                        <div><div class="p-hero-title">Maturidade tecnológica</div><div class="p-hero-sub">Sistemas e integrações utilizados</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-row">
+                        <div><label class="p-label">WMS utilizado</label><input class="p-input" id="p-wms_atual" placeholder="Ex.: TOTVS WMS, SAP EWM, próprio…"></div>
+                        <div><label class="p-label">ERP utilizado</label><input class="p-input" id="p-erp_atual" placeholder="Ex.: SAP B1, TOTVS Protheus…"></div>
+                    </div>
+                    <div class="p-divider">Sistemas integrados</div>
+                    <div class="p-chips" id="p-sistemas_integrados">
+                        <label class="p-chip"><input type="checkbox" value="TMS"><span>TMS</span></label>
+                        <label class="p-chip"><input type="checkbox" value="BI / dashboard"><span>BI / Dashboard</span></label>
+                        <label class="p-chip"><input type="checkbox" value="API REST / JSON"><span>API REST</span></label>
+                        <label class="p-chip"><input type="checkbox" value="EDI"><span>EDI</span></label>
+                        <label class="p-chip"><input type="checkbox" value="E-commerce / marketplace"><span>E-commerce</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Portal do cliente"><span>Portal do cliente</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Rastreamento"><span>Rastreamento</span></label>
+                        <label class="p-chip"><input type="checkbox" value="NF-e / SPED fiscal"><span>NF-e / SPED</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Nenhum"><span>Nenhum</span></label>
+                    </div>
+                    <div class="p-divider">Nível de maturidade tecnológica</div>
+                    <div id="p-nivel_maturidade">
+                        <label class="p-radio-card"><input type="radio" name="p-maturidade" value="Básico"><div class="p-radio-dot"></div><div><div class="p-radio-title">Básico</div><div class="p-radio-sub">Operação manual, planilhas, sem integração</div></div></label>
+                        <label class="p-radio-card"><input type="radio" name="p-maturidade" value="Em desenvolvimento"><div class="p-radio-dot"></div><div><div class="p-radio-title">Em desenvolvimento</div><div class="p-radio-sub">Sistemas isolados, integrações pontuais</div></div></label>
+                        <label class="p-radio-card"><input type="radio" name="p-maturidade" value="Intermediário"><div class="p-radio-dot"></div><div><div class="p-radio-title">Intermediário</div><div class="p-radio-sub">ERP e WMS ativos com alguma integração</div></div></label>
+                        <label class="p-radio-card"><input type="radio" name="p-maturidade" value="Avançado"><div class="p-radio-dot"></div><div><div class="p-radio-title">Avançado</div><div class="p-radio-sub">Sistemas integrados via API, visibilidade em tempo real</div></div></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-next" onclick="pNext()">Próximo →</button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 7: CERTIFICAÇÕES -->
+        <div class="p-sec" id="psec-certificacoes">
+            <div class="p-card">
+                <div class="p-hero">
+                    <div style="display:flex;align-items:center;gap:14px;position:relative;">
+                        <div class="p-hero-num">07</div>
+                        <div><div class="p-hero-title">Certificações e qualidade</div><div class="p-hero-sub">Reconhecimentos e indicadores de performance</div></div>
+                    </div>
+                </div>
+                <div class="p-body">
+                    <div class="p-divider">Certificações ativas</div>
+                    <div class="p-chips" id="p-certificacoes">
+                        <label class="p-chip"><input type="checkbox" value="ISO 9001"><span>ISO 9001</span></label>
+                        <label class="p-chip"><input type="checkbox" value="ISO 14001"><span>ISO 14001</span></label>
+                        <label class="p-chip"><input type="checkbox" value="OEA"><span>OEA</span></label>
+                        <label class="p-chip"><input type="checkbox" value="ANVISA"><span>ANVISA</span></label>
+                        <label class="p-chip"><input type="checkbox" value="INMETRO"><span>INMETRO</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Balanço auditado"><span>Balanço auditado</span></label>
+                        <label class="p-chip"><input type="checkbox" value="Nenhuma"><span>Nenhuma</span></label>
+                    </div>
+                    <div class="p-divider">Indicadores de performance</div>
+                    <div class="p-row">
+                        <div><label class="p-label">OTIF médio atual (%)</label><input class="p-input" id="p-otif_pct" type="number" min="0" max="100" placeholder="Ex.: 96"></div>
+                        <div><label class="p-label">Acuracidade de inventário (%)</label><input class="p-input" id="p-acuracidade_pct" type="number" min="0" max="100" placeholder="Ex.: 99"></div>
+                    </div>
+                    <div class="p-divider">Mensagem para a equipe Vendemmia (opcional)</div>
+                    <textarea class="p-input" id="p-observacoes" rows="4" placeholder="Informações adicionais, diferenciais competitivos, expectativas da parceria…"></textarea>
+                </div>
+            </div>
+            <div class="form-nav">
+                <button class="btn-prev" onclick="pPrev()">← Anterior</button>
+                <button class="btn-submit" id="btn-submit" onclick="portalSubmeter()">✅ Enviar formulário</button>
+            </div>
+        </div>
+
+    </div><!-- /form-body -->
+</div><!-- /screen-form -->
+
+<!-- OBRIGADO -->
+<div id="screen-thanks" class="screen">
+    <div class="thanks-card">
+        <div class="thanks-icon">✅</div>
+        <div class="thanks-title">Formulário enviado!</div>
+        <div class="thanks-sub" id="thanks-msg">Suas informações foram recebidas pela equipe Vendemmia. Em breve entraremos em contato para dar continuidade ao processo de parceria.</div>
+        <div class="thanks-badge"><span>🤝</span> Aguarde o contato da nossa equipe</div>
+        <div style="margin-top:28px;"><img src="Pipeline.png" style="height:24px;opacity:.6;" onerror="this.style.display='none'"></div>
+        <div style="margin-top:8px;font-size:11px;color:#9ca3af;">Vendemmia Comércio Internacional Ltda.</div>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const SECTIONS = ['empresa','contato','localizacao','capacidade','carga','tecnologia','certificacoes'];
+let curSec = 0;
+let leadId = null;
+let whCount = 0;
+const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+
+// ── Inicialização ──────────────────────────────────────────────
+
+async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token');
+    if (!token) { showScreen('invalid'); return; }
+
+    try {
+        const { data, error } = await sb.from('lic_leads').select('*').eq('form_token', token).single();
+        if (error || !data) { showScreen('invalid'); return; }
+
+        leadId = data.id;
+        window._leadData = data;
+
+        // Welcome: mostrar nome da empresa
+        if (data.razao_social) {
+            document.getElementById('welcome-company').textContent = data.razao_social;
+        }
+
+        if (data.form_status === 'concluido') {
+            showScreen('filled');
+        } else {
+            preencherForm(data);
+            showScreen('welcome');
+        }
+    } catch(e) {
+        showScreen('invalid');
+    }
+}
+
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+}
+
+function forcarEdicao() {
+    preencherForm(window._leadData);
+    iniciarForm();
+}
+
+function iniciarForm() {
+    buildStepper();
+    goSec(0);
+    showScreen('form');
+}
+
+// ── Pré-preenche o form com dados existentes ───────────────────
+
+function preencherForm(d) {
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val !== null && val !== undefined) el.value = val; };
+    const setChk = (cid, csv) => { if (!csv) return; const vals = csv.split(', '); document.querySelectorAll(`#${cid} input`).forEach(el => { el.checked = vals.includes(el.value); }); };
+    const setRad = (name, val) => { const el = document.querySelector(`input[name="${name}"][value="${val}"]`); if (el) el.checked = true; };
+
+    set('p-razao_social', d.razao_social); set('p-cnpj', d.cnpj); set('p-website', d.website);
+    set('p-ano_fundacao', d.ano_fundacao); set('p-faturamento_faixa', d.faturamento_faixa);
+    setChk('p-segmentos', d.segmentos);
+    set('p-contato_nome', d.contato_nome); set('p-contato_cargo', d.contato_cargo);
+    set('p-contato_email', d.contato_email); set('p-contato_telefone', d.contato_telefone);
+    setRad('p-decisor', d.decisor); set('p-decisor_info', d.decisor_info);
+    set('p-cep', d.cep); set('p-lat', d.lat||''); set('p-lng', d.lng||'');
+    set('p-endereco_logradouro', d.endereco_logradouro); set('p-endereco_bairro', d.endereco_bairro);
+    set('p-uf', d.uf); set('p-polo_logistico', d.polo_logistico);
+    set('p-regiao_exclusividade', d.regiao_exclusividade); set('p-outras_ufs', d.outras_ufs);
+    if (d.cep) { document.getElementById('p-addr-fields').style.display=''; const pr=document.getElementById('p-cep-preview'); if(pr){pr.style.display='';pr.style.borderLeftColor='#6941c6';pr.innerHTML=`<span style="font-size:11px;color:#6941c6;font-weight:600;">📍 ${d.cep} · ${d.polo_logistico||''} ${d.uf?'— '+d.uf:''} ${d.lat?'· GPS ✓':''}</span>`;} }
+
+    if (Array.isArray(d.armazens) && d.armazens.length > 0) {
+        document.getElementById('p-wh-container').innerHTML = ''; whCount = 0;
+        d.armazens.forEach(wh => portalAddWh(wh));
+    } else if (document.querySelectorAll('#p-wh-container .p-wh').length === 0) {
+        portalAddWh();
+    }
+
+    setChk('p-cargas_geral', d.cargas_geral); setChk('p-cargas_especiais', d.cargas_especiais);
+    setChk('p-cargas_perigosas', d.cargas_perigosas); setChk('p-licencas', d.licencas);
+    set('p-obs_cargas', d.obs_cargas);
+    set('p-wms_atual', d.wms_atual); set('p-erp_atual', d.erp_atual);
+    setChk('p-sistemas_integrados', d.sistemas_integrados);
+    setRad('p-maturidade', d.nivel_maturidade);
+    setChk('p-certificacoes', d.certificacoes);
+    set('p-otif_pct', d.otif_pct); set('p-acuracidade_pct', d.acuracidade_pct);
+    set('p-observacoes', d.observacoes);
+}
+
+// ── Navegação ──────────────────────────────────────────────────
+
+function buildStepper() {
+    const st = document.getElementById('form-stepper');
+    st.innerHTML = SECTIONS.map((s, i) => {
+        const state = i < curSec ? 'done' : (i === curSec ? 'active' : 'future');
+        const bg = state==='done'?'#16a34a': state==='active'?'#6941c6':'#e8e0f5';
+        const col = state==='future'?'#9b8cc0':'#fff';
+        const line = i > 0 ? `<div class="form-line ${i<=curSec?(i<curSec?'done':'active'):'future'}"></div>` : '';
+        return `${line}<div class="form-dot ${state}" onclick="pJump(${i})" title="Seção ${i+1}" style="background:${bg};color:${col};">${state==='done'?'✓':(i+1)}</div>`;
+    }).join('');
+}
+
+function goSec(idx) {
+    curSec = idx;
+    SECTIONS.forEach((s, i) => {
+        const el = document.getElementById('psec-' + s);
+        if (el) el.classList.toggle('active', i === idx);
+    });
+    const pct = Math.round(((idx + 1) / SECTIONS.length) * 100);
+    document.getElementById('form-progress-bar').style.width = pct + '%';
+    document.getElementById('form-step-info').textContent = `Etapa ${idx + 1} de ${SECTIONS.length}`;
+    buildStepper();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function pNext() {
+    await autoSave();
+    if (curSec < SECTIONS.length - 1) goSec(curSec + 1);
+}
+function pPrev() { if (curSec > 0) goSec(curSec - 1); }
+function pJump(idx) { if (idx <= curSec + 1) goSec(idx); }
+
+// ── Auto-save ──────────────────────────────────────────────────
+
+async function autoSave() {
+    if (!leadId) return;
+    const data = getFormData();
+    data.form_status = 'preenchendo';
+    const lbl = document.getElementById('autosave-label');
+    if (lbl) lbl.textContent = 'Salvando...';
+    try {
+        await sb.from('lic_leads').update(data).eq('id', leadId);
+        if (lbl) lbl.textContent = 'Salvo às ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    } catch(e) {
+        if (lbl) lbl.textContent = 'Erro ao salvar — verifique sua conexão';
+    }
+}
+
+// ── Submit final ───────────────────────────────────────────────
+
+async function portalSubmeter() {
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true; btn.textContent = '⏳ Enviando...';
+    try {
+        const data = getFormData();
+        data.form_status = 'concluido';
+        data.form_filled_at = new Date().toISOString();
+        const { error } = await sb.from('lic_leads').update(data).eq('id', leadId);
+        if (error) throw error;
+        const name = document.getElementById('p-razao_social')?.value || '';
+        if (name) {
+            document.getElementById('thanks-msg').textContent =
+                `Obrigado, ${name}! Seus dados foram recebidos pela equipe Vendemmia. Em breve entraremos em contato para dar continuidade ao processo de parceria.`;
+        }
+        showScreen('thanks');
+    } catch(e) {
+        alert('Erro ao enviar: ' + e.message + '\nTente novamente.');
+        btn.disabled = false; btn.textContent = '✅ Enviar formulário';
+    }
+}
+
+// ── Coleta os dados do form ────────────────────────────────────
+
+function getFormData() {
+    const g = id => { const el=document.getElementById(id); return el?el.value.trim():''; };
+    const gr = name => { const el=document.querySelector(`input[name="${name}"]:checked`); return el?el.value:''; };
+    const gchk = cid => [...document.querySelectorAll(`#${cid} input:checked`)].map(e=>e.value).join(', ');
+    const armazens = [...document.querySelectorAll('#p-wh-container .p-wh')].map(b => ({
+        nome:  b.querySelector('.pwh-nome')?.value||'',
+        uf:    b.querySelector('.pwh-uf')?.value||'',
+        cidade:b.querySelector('.pwh-cidade')?.value||'',
+        area_m2: parseFloat(b.querySelector('.pwh-area')?.value)||0,
+        docas:   parseFloat(b.querySelector('.pwh-docas')?.value)||0,
+        ocupacao:parseFloat(b.querySelector('.pwh-ocup')?.value)||0,
+        paletes: b.querySelector('.pwh-paletes')?.value||'',
+        pe_direito: b.querySelector('.pwh-pe')?.value||'',
+    }));
+    return {
+        razao_social:g('p-razao_social'), cnpj:g('p-cnpj'), website:g('p-website'),
+        ano_fundacao:parseInt(g('p-ano_fundacao'))||null, faturamento_faixa:g('p-faturamento_faixa'),
+        segmentos:gchk('p-segmentos'),
+        contato_nome:g('p-contato_nome'), contato_cargo:g('p-contato_cargo'),
+        contato_email:g('p-contato_email'), contato_telefone:g('p-contato_telefone'),
+        decisor:gr('p-decisor'), decisor_info:g('p-decisor_info'),
+        cep:g('p-cep'), lat:parseFloat(g('p-lat'))||null, lng:parseFloat(g('p-lng'))||null,
+        endereco_logradouro:g('p-endereco_logradouro'), endereco_bairro:g('p-endereco_bairro'),
+        uf:g('p-uf'), polo_logistico:g('p-polo_logistico'),
+        regiao_exclusividade:g('p-regiao_exclusividade'), outras_ufs:g('p-outras_ufs'),
+        armazens, area_total_m2: armazens.reduce((s,w)=>s+(w.area_m2||0),0),
+        cargas_geral:gchk('p-cargas_geral'), cargas_perigosas:gchk('p-cargas_perigosas'),
+        cargas_especiais:gchk('p-cargas_especiais'), licencas:gchk('p-licencas'), obs_cargas:g('p-obs_cargas'),
+        wms_atual:g('p-wms_atual'), erp_atual:g('p-erp_atual'),
+        sistemas_integrados:gchk('p-sistemas_integrados'), nivel_maturidade:gr('p-maturidade'),
+        certificacoes:gchk('p-certificacoes'),
+        otif_pct:parseFloat(g('p-otif_pct'))||null, acuracidade_pct:parseFloat(g('p-acuracidade_pct'))||null,
+        observacoes:g('p-observacoes'), updated_at:new Date().toISOString(),
+    };
+}
+
+// ── CEP ────────────────────────────────────────────────────────
+
+function portalMascaraCEP(input) {
+    let v = input.value.replace(/\D/g,'').substring(0,8);
+    if (v.length > 5) v = v.substring(0,5)+'-'+v.substring(5);
+    input.value = v;
+    if (v.replace(/\D/g,'').length === 8) portalBuscarCEP(v);
+}
+
+async function portalBuscarCEP(cep) {
+    const raw = (cep||'').replace(/\D/g,'');
+    if (raw.length !== 8) return;
+    const btn = document.getElementById('p-cep-btn');
+    const preview = document.getElementById('p-cep-preview');
+    const fields  = document.getElementById('p-addr-fields');
+    if (btn) { btn.disabled=true; btn.textContent='⏳'; }
+    const set = (id,val) => { const el=document.getElementById(id); if(el&&val) el.value=val; };
+    try {
+        const resp = await fetch(`https://brasilapi.com.br/api/cep/v2/${raw}`);
+        if (!resp.ok) throw new Error();
+        const d = await resp.json();
+        if (d.error) throw new Error();
+        set('p-uf', d.state); set('p-polo_logistico', d.city);
+        set('p-endereco_logradouro', d.street||''); set('p-endereco_bairro', d.neighborhood||'');
+        const lat = d.location?.coordinates?.latitude;
+        const lng = d.location?.coordinates?.longitude;
+        set('p-lat', lat||''); set('p-lng', lng||'');
+        if (fields) fields.style.display='';
+        if (preview) {
+            preview.style.display=''; preview.style.borderLeftColor='#16a34a';
+            preview.innerHTML=`<span style="font-size:11px;color:#166534;font-weight:700;">✅ ${raw.substring(0,5)}-${raw.substring(5)} · ${d.city} — ${d.state}</span>${d.street?`<br><span style="font-size:11px;color:#6b7280;">${d.street}${d.neighborhood?', '+d.neighborhood:''}</span>`:''}${lat?'<br><span style="font-size:10px;color:#6941c6;font-weight:600;">📍 Localização GPS encontrada</span>':''}`;
+        }
+    } catch(e) {
+        try {
+            const r2 = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+            const d2 = await r2.json();
+            if (d2.erro) throw new Error();
+            set('p-uf',d2.uf); set('p-polo_logistico',d2.localidade);
+            set('p-endereco_logradouro',d2.logradouro||''); set('p-endereco_bairro',d2.bairro||'');
+            if(fields) fields.style.display='';
+            if(preview){preview.style.display='';preview.style.borderLeftColor='#d97706';preview.innerHTML=`<span style="font-size:11px;color:#92400e;font-weight:700;">⚠ ${raw.substring(0,5)}-${raw.substring(5)} · ${d2.localidade} — ${d2.uf}</span>`;}
+        } catch(e2){
+            if(preview){preview.style.display='';preview.style.borderLeftColor='#dc2626';preview.innerHTML='<span style="font-size:11px;color:#991b1b;font-weight:600;">❌ CEP não encontrado</span>';}
+        }
+    } finally {
+        if(btn){btn.disabled=false;btn.innerHTML='🔍 Buscar';}
+    }
+}
+
+// ── Armazéns ───────────────────────────────────────────────────
+
+function portalAddWh(d) {
+    whCount++;
+    const n = whCount; const id = 'pwh'+n; const dd = d||{};
+    const ufOpts = UFS.map(u=>`<option${u===dd.uf?' selected':''}>${u}</option>`).join('');
+    const div = document.createElement('div'); div.className='p-wh'; div.id=id;
+    div.innerHTML=`
+        <div class="p-wh-head" onclick="togglePWh('${id}')">
+            <div style="width:22px;height:22px;border-radius:50%;background:#6941c6;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${n}</div>
+            <div style="font-size:13px;font-weight:700;color:#2d1b69;flex:1;">${dd.nome||'Armazém '+n}</div>
+            ${n>1?`<button onclick="event.stopPropagation();document.getElementById('${id}').remove();portalUpdateSummary()" style="font-size:11px;padding:3px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;color:#991b1b;cursor:pointer;font-family:inherit;">Remover</button>`:''}
+        </div>
+        <div class="p-wh-body" id="${id}-body">
+            <div class="p-row" style="margin-bottom:14px;">
+                <div><label class="p-label" style="margin-bottom:6px;">Nome / apelido</label><input class="p-input pwh-nome" placeholder="Ex.: CD Campinas" value="${dd.nome||''}" oninput="document.querySelector('#${id} .p-wh-head div:nth-child(2)').textContent=this.value||'Armazém ${n}'"></div>
+                <div><label class="p-label" style="margin-bottom:6px;">UF</label><select class="p-input pwh-uf"><option value="">Selecione</option>${ufOpts}</select></div>
+            </div>
+            <div class="p-row" style="margin-bottom:14px;">
+                <div><label class="p-label" style="margin-bottom:6px;">Cidade</label><input class="p-input pwh-cidade" placeholder="Ex.: Campinas" value="${dd.cidade||''}"></div>
+                <div><label class="p-label" style="margin-bottom:6px;">Área total (m²) *</label><input class="p-input pwh-area" type="number" placeholder="Ex.: 8000" value="${dd.area_m2||''}" oninput="portalUpdateSummary()"></div>
+            </div>
+            <div class="p-row">
+                <div><label class="p-label" style="margin-bottom:6px;">Número de docas</label><input class="p-input pwh-docas" type="number" placeholder="Ex.: 6" value="${dd.docas||''}" oninput="portalUpdateSummary()"></div>
+                <div><label class="p-label" style="margin-bottom:6px;">Ocupação atual (%)</label><input class="p-input pwh-ocup" type="number" min="0" max="100" placeholder="Ex.: 70" value="${dd.ocupacao||''}" oninput="portalUpdateSummary()"></div>
+            </div>
+            <div class="p-row">
+                <div><label class="p-label" style="margin-bottom:6px;">Capacidade de páletes</label><input class="p-input pwh-paletes" type="number" placeholder="Ex.: 3000" value="${dd.paletes||''}"></div>
+                <div><label class="p-label" style="margin-bottom:6px;">Pé-direito (m)</label><input class="p-input pwh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${dd.pe_direito||''}"></div>
+            </div>
+        </div>`;
+    document.getElementById('p-wh-container').appendChild(div);
+    portalUpdateSummary();
+}
+
+function togglePWh(id) {
+    const b=document.getElementById(id+'-body'); if(b) b.style.display=b.style.display==='none'?'':'none';
+}
+
+function portalUpdateSummary() {
+    let area=0,docas=0,ocups=[];
+    document.querySelectorAll('#p-wh-container .p-wh').forEach(b=>{
+        area  += parseFloat(b.querySelector('.pwh-area')?.value)||0;
+        docas += parseFloat(b.querySelector('.pwh-docas')?.value)||0;
+        const o=parseFloat(b.querySelector('.pwh-ocup')?.value); if(!isNaN(o)) ocups.push(o);
+    });
+    const avg=ocups.length?Math.round(ocups.reduce((a,b)=>a+b,0)/ocups.length):null;
+    const sa=document.getElementById('p-sum-area'); if(sa) sa.textContent=area>0?area.toLocaleString('pt-BR')+' m²':'—';
+    const sd=document.getElementById('p-sum-docas'); if(sd) sd.textContent=docas>0?docas:'—';
+    const so=document.getElementById('p-sum-ocup'); if(so) so.textContent=avg!==null?avg+'%':'—';
+}
+
+// ── Init ────────────────────────────────────────────────────────
+init();
+// Adiciona 1 armazém padrão se nenhum existir
+if (document.querySelectorAll('#p-wh-container .p-wh').length === 0) portalAddWh();
+</script>
+</body>
+</html>
