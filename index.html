@@ -740,6 +740,15 @@ header {
 .lic-chip-on,.lic-chip:hover{background:#6941c6;border-color:#6941c6;color:#fff;}
 .lic-kpi-card{background:#fff;border:1px solid #e8e0f5;border-radius:10px;padding:14px 16px;}
 
+/* Choropleth — classes diretas nos paths SVG do Leaflet */
+.lic-choro-covered  { fill:#86efac !important; fill-opacity:0.72 !important; stroke:#16a34a !important; stroke-width:1.5px !important; }
+.lic-choro-prosp    { fill:#fde68a !important; fill-opacity:0.68 !important; stroke:#ca8a04 !important; stroke-width:1.5px !important; }
+.lic-choro-gap      { fill:#fca5a5 !important; fill-opacity:0.65 !important; stroke:#ef4444 !important; stroke-width:1.5px !important; }
+.lic-choro-neutral  { fill:#a78bfa !important; fill-opacity:0.08 !important; stroke:#c4b5fd !important; stroke-width:1px   !important; }
+.lic-choro-covered:hover  { fill-opacity:0.88 !important; }
+.lic-choro-gap:hover      { fill-opacity:0.82 !important; }
+.lic-choro-prosp:hover    { fill-opacity:0.84 !important; }
+
 /* FORM NOVO — paleta roxa */
 .lic-field-label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c5cbf;margin-bottom:8px;}
 .lic-in{width:100%;border:none;border-bottom:2px solid #e8e0f5;background:transparent;font-family:inherit;font-size:14px;color:#2d1b69;outline:none;padding:10px 0;transition:border-color .2s;box-sizing:border-box;}
@@ -13289,9 +13298,11 @@ function _licInicializarMapa() {
 function _licAtualizarChoropleth() {
     if (!_licMap || !_licGeoJsonData) return;
     if (_licGeoJsonLayer) { _licMap.removeLayer(_licGeoJsonLayer); _licGeoJsonLayer=null; }
-    // Modo sem Gap Analysis: contorno neutro apenas (sem fill)
+    // Modo sem Gap Analysis: contorno neutro apenas
+    const _normRenderer = L.svg({ padding: 0.5 });
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: () => ({ fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.08 }),
+        renderer: _normRenderer,
+        style: () => ({ className:'lic-choro-neutral', fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.08 }),
         onEachFeature:(feature,layer)=>{
             const uf  = _licNormUF(feature.properties?.sigla);
             const nome = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
@@ -13345,7 +13356,7 @@ function _licAtualizarMarkers() {
         bounds.push(coords);
     });
 
-    if(bounds.length>0) { try { _licMap.fitBounds(bounds,{padding:[50,50],maxZoom:8}); } catch(e){} }
+    // Não faz auto-zoom — usuário controla o zoom manualmente
 }
 
 function _licMapMostrarHover(event, leadId) {
@@ -13954,26 +13965,30 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // Cores suaves mas definitivamente visíveis no basemap light
+    // className para cada categoria — garante fill via CSS !important
+    function getClassName(uf) {
+        if (ufsConv.has(uf))  return 'lic-choro-covered';
+        if (ufsProsp.has(uf)) return 'lic-choro-prosp';
+        return 'lic-choro-gap';
+    }
+    // Inline style como fallback (belt-and-suspenders)
     function getEstilo(rawUF) {
         const uf = _licNormUF(rawUF);
-        if (!uf) return { fillColor:'#e5e7eb', weight:0.5, color:'#d1d5db', fillOpacity:.2 };
-        if (ufsConv.has(uf))  return { fillColor:'#86efac', weight:1.5, color:'#16a34a', fillOpacity:.72 };
-        if (ufsProsp.has(uf)) return { fillColor:'#fde68a', weight:1.5, color:'#ca8a04', fillOpacity:.68 };
-        return                         { fillColor:'#fca5a5', weight:1.5, color:'#ef4444', fillOpacity:.65 };
-    }
-    function getEstiloHover(rawUF) {
-        const uf = _licNormUF(rawUF);
-        if (ufsConv.has(uf))  return { fillOpacity:.88, weight:2.5, color:'#15803d' };
-        if (ufsProsp.has(uf)) return { fillOpacity:.84, weight:2.5, color:'#92400e' };
-        return                         { fillOpacity:.82, weight:2.5, color:'#b91c1c' };
+        if (!uf) return { className:'lic-choro-neutral', fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.08 };
+        const cls = getClassName(uf);
+        if (ufsConv.has(uf))  return { className: cls, fillColor:'#86efac', weight:1.5, color:'#16a34a', fillOpacity:.72 };
+        if (ufsProsp.has(uf)) return { className: cls, fillColor:'#fde68a', weight:1.5, color:'#ca8a04', fillOpacity:.68 };
+        return                         { className: cls, fillColor:'#fca5a5', weight:1.5, color:'#ef4444', fillOpacity:.65 };
     }
 
+    // Renderer SVG explícito para este layer — evita conflito com outros layers
+    const _gapRenderer = L.svg({ padding: 0.5 });
+
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f => getEstilo(f.properties?.sigla),
+        renderer: _gapRenderer,
+        style: f => getEstilo(_licNormUF(f.properties?.sigla)),
         onEachFeature: (feature, layer) => {
-            const rawUF = feature.properties?.sigla || '';
-            const uf    = _licNormUF(rawUF);
+            const uf    = _licNormUF(feature.properties?.sigla || '');
             if (!uf) return;
             const nome  = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
             const hasCov  = ufsConv.has(uf);
@@ -13988,8 +14003,15 @@ function renderizarLicGapAnalysis() {
                 `<div style="min-width:140px;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
                 {className:'lic-map-tooltip', sticky:true}
             );
-            layer.on('mouseover', e => { e.target.setStyle(getEstiloHover(rawUF)); e.target.bringToFront(); });
-            layer.on('mouseout',  e => { _licGeoJsonLayer.resetStyle(e.target); });
+            layer.on('mouseover', e => {
+                e.target.setStyle(hasCov
+                    ? { fillOpacity:.88, weight:2.5, color:'#15803d' }
+                    : hasPros
+                        ? { fillOpacity:.84, weight:2.5, color:'#92400e' }
+                        : { fillOpacity:.82, weight:2.5, color:'#b91c1c' });
+                e.target.bringToFront();
+            });
+            layer.on('mouseout', e => { _licGeoJsonLayer.resetStyle(e.target); });
             layer.on('click', e => {
                 _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]});
                 const chip = document.getElementById('gap-uf-'+uf);
