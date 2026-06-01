@@ -13644,39 +13644,58 @@ function _licMapAbrirFullView(lead) {
     _lfvCarregarAnexos(lead.id);
 }
 
-async function _lfvExcluirAnexo(id, storagePath, leadId) {
+// Atualiza galeria imediatamente com os dados disponíveis, sem esperar nova query
+function _lfvGaleriaAtualizarDireto() {
+    _lfvRenderGaleria();
+    // Também atualiza a miniatura principal no lfv-main-photo para garantir
+    const mainEl = document.getElementById('lfv-main-photo');
+    if (mainEl && _lfvPhotos.length > 0 && !mainEl.querySelector('img')) {
+        mainEl.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
+    }
+}
+
+async function _lfvExcluirAnexo(id, storagePath, urlFotoEnc, leadId) {
     if (!confirm('Excluir este arquivo definitivamente?')) return;
+    const urlFoto = decodeURIComponent(urlFotoEnc || '');
     const card = document.getElementById('lfv-card-'+id);
     if (card) { card.style.opacity='0.4'; card.style.pointerEvents='none'; }
     try {
         if (storagePath) await supabaseClient.storage.from('lic-anexos').remove([storagePath]);
         await supabaseClient.from('lic_anexos').delete().eq('id', id);
+        // Remove da galeria imediatamente
+        if (urlFoto) _lfvPhotos = _lfvPhotos.filter(u => u !== urlFoto);
+        _lfvGaleriaAtualizarDireto();
+        // Remove o card do DOM
+        if (card) card.remove();
         showToast('Arquivo excluído.', 'info');
-        _lfvCarregarAnexos(leadId);
     } catch(e) {
         if (card) { card.style.opacity=''; card.style.pointerEvents=''; }
         showToast('Erro ao excluir: ' + e.message, 'error');
     }
 }
 
-async function _lfvTrocarFoto(id, storagePath, tipo, leadId, files) {
+async function _lfvTrocarFoto(id, storagePath, urlAntigaEnc, tipo, leadId, files) {
+    const urlAntiga = decodeURIComponent(urlAntigaEnc || '');
     if (!files || !files[0]) return;
     const file = files[0];
     if (file.size > 10*1024*1024) { showToast('Arquivo excede 10 MB.', 'error'); return; }
     const card = document.getElementById('lfv-card-'+id);
     if (card) { card.style.opacity='0.5'; card.style.pointerEvents='none'; }
     try {
-        // Upload novo arquivo
         const { path, url, nome, tamanho } = await _licUploadFile(file, tipo, leadId);
         await supabaseClient.from('lic_anexos').insert([{
             lead_id: leadId, tipo, nome_arquivo: nome, url,
             storage_path: path, tamanho_bytes: tamanho,
             criado_por: EMAIL_USUARIO_LOGADO
         }]);
-        // Remove o antigo
         if (storagePath) await supabaseClient.storage.from('lic-anexos').remove([storagePath]);
         await supabaseClient.from('lic_anexos').delete().eq('id', id);
+        // Substitui na galeria imediatamente
+        const idx = urlAntiga ? _lfvPhotos.indexOf(urlAntiga) : -1;
+        if (idx >= 0) _lfvPhotos[idx] = url; else _lfvPhotos.push(url);
+        _lfvGaleriaAtualizarDireto();
         showToast('Foto substituída com sucesso!', 'success');
+        // Recarrega cards em background para atualizar thumbnail e nome
         _lfvCarregarAnexos(leadId);
     } catch(e) {
         if (card) { card.style.opacity=''; card.style.pointerEvents=''; }
@@ -13693,7 +13712,7 @@ async function _lfvAdicionarFotos(tipo, leadId, files) {
     });
     if (!validos.length) return;
     showToast(`Enviando ${validos.length} foto${validos.length>1?'s':''}…`, 'info');
-    let ok = 0;
+    const novasUrls = [];
     for (const file of validos) {
         try {
             const { path, url, nome, tamanho } = await _licUploadFile(file, tipo, leadId);
@@ -13702,13 +13721,17 @@ async function _lfvAdicionarFotos(tipo, leadId, files) {
                 storage_path: path, tamanho_bytes: tamanho,
                 criado_por: EMAIL_USUARIO_LOGADO
             }]);
-            ok++;
+            novasUrls.push(url);
+            // Atualiza galeria a cada foto enviada (não espera todas)
+            _lfvPhotos.push(url);
+            _lfvGaleriaAtualizarDireto();
         } catch(e) {
             showToast(`Erro ao enviar "${file.name}": ${e.message}`, 'error');
         }
     }
-    if (ok > 0) {
-        showToast(`${ok} foto${ok>1?'s adicionadas':' adicionada'} com sucesso!`, 'success');
+    if (novasUrls.length > 0) {
+        showToast(`${novasUrls.length} foto${novasUrls.length>1?'s adicionadas':' adicionada'} com sucesso!`, 'success');
+        // Recarrega cards em background para mostrar miniaturas e botões
         _lfvCarregarAnexos(leadId);
     }
 }
@@ -13858,9 +13881,9 @@ async function _lfvCarregarAnexos(leadId) {
                                 ${isFoto(a.tipo) ? `<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;color:#6941c6;font-size:11px;font-weight:700;cursor:pointer;" title="Substituir foto">
                                     <i class="ti ti-replace"></i> Trocar
                                     <input type="file" accept=".jpg,.jpeg,.png,.heic,.webp" style="display:none;"
-                                        onchange="_lfvTrocarFoto(${a.id},'${a.storage_path||''}','${a.tipo}','${leadId}',this.files)">
+                                        onchange="_lfvTrocarFoto(${a.id},'${a.storage_path||''}','${(a.url||'').replace(/'/g,'%27')}','${a.tipo}','${leadId}',this.files)">
                                 </label>` : ''}
-                                <button onclick="_lfvExcluirAnexo(${a.id},'${a.storage_path||''}','${leadId}')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1.5px solid #fca5a5;border-radius:8px;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;" title="Excluir">
+                                <button onclick="_lfvExcluirAnexo(${a.id},'${a.storage_path||''}','${(a.url||'').replace(/'/g,'%27')}','${leadId}')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1.5px solid #fca5a5;border-radius:8px;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;" title="Excluir">
                                     <i class="ti ti-trash"></i>
                                 </button>
                             </div>
