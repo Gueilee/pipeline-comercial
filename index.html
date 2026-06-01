@@ -3318,6 +3318,23 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
         </div><!-- /page-licenciamento -->
 
+<!-- ── Modal de confirmação customizado (substitui confirm() nativo) ── -->
+<div id="lic-confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.5);z-index:10500;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)_licConfirmCancel()">
+    <div style="background:#fff;border-radius:20px;padding:32px 28px;width:420px;max-width:92vw;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:licModalIn .18s ease;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div id="lic-confirm-icon" style="width:48px;height:48px;border-radius:14px;background:#fef2f2;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🗑️</div>
+            <div>
+                <div id="lic-confirm-title" style="font-size:16px;font-weight:800;color:#2d1b69;margin-bottom:3px;">Excluir arquivo</div>
+                <div id="lic-confirm-msg" style="font-size:13px;color:#6b7280;line-height:1.4;">Tem certeza que deseja excluir este arquivo? Esta ação não pode ser desfeita.</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="_licConfirmCancel()" style="padding:10px 22px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:600;color:#6941c6;cursor:pointer;">Cancelar</button>
+            <button id="lic-confirm-ok" style="padding:10px 24px;border:none;border-radius:10px;background:linear-gradient(135deg,#dc2626,#b91c1c);font-family:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(220,38,38,.3);">Excluir</button>
+        </div>
+    </div>
+</div>
+
     </div>
 </div>
 
@@ -13688,6 +13705,31 @@ function _licMapAbrirFullView(lead) {
     _lfvCarregarAnexos(lead.id);
 }
 
+// ── Modal de confirmação customizado ─────────────────────────────
+let _licConfirmCallback = null;
+function _licConfirm(titulo, mensagem, icone, labelOk, corOk, callback) {
+    const modal   = document.getElementById('lic-confirm-modal');
+    const titleEl = document.getElementById('lic-confirm-title');
+    const msgEl   = document.getElementById('lic-confirm-msg');
+    const iconEl  = document.getElementById('lic-confirm-icon');
+    const okBtn   = document.getElementById('lic-confirm-ok');
+    if (!modal) { if (confirm(mensagem)) callback(); return; } // fallback
+    titleEl.textContent = titulo || 'Confirmar';
+    msgEl.textContent   = mensagem || 'Tem certeza?';
+    iconEl.textContent  = icone || '⚠️';
+    okBtn.textContent   = labelOk || 'Confirmar';
+    okBtn.style.background = corOk || 'linear-gradient(135deg,#dc2626,#b91c1c)';
+    okBtn.onclick = () => { _licConfirmFechar(); callback(); };
+    _licConfirmCallback = callback;
+    modal.style.display = 'flex';
+}
+function _licConfirmCancel() { _licConfirmFechar(); }
+function _licConfirmFechar() {
+    const modal = document.getElementById('lic-confirm-modal');
+    if (modal) modal.style.display = 'none';
+    _licConfirmCallback = null;
+}
+
 // Atualiza galeria imediatamente com os dados disponíveis, sem esperar nova query
 function _lfvGaleriaAtualizarDireto() {
     _lfvRenderGaleria();
@@ -13699,8 +13741,15 @@ function _lfvGaleriaAtualizarDireto() {
 }
 
 async function _lfvExcluirAnexo(id, storagePath, urlFotoEnc, leadId) {
-    if (!confirm('Excluir este arquivo definitivamente?')) return;
     const urlFoto = decodeURIComponent(urlFotoEnc || '');
+    _licConfirm(
+        'Excluir arquivo',
+        'Tem certeza que deseja excluir este arquivo? Esta ação não pode ser desfeita.',
+        '🗑️', 'Excluir', 'linear-gradient(135deg,#dc2626,#b91c1c)',
+        () => _lfvExcluirAnexoConfirmado(id, storagePath, urlFoto, leadId)
+    );
+}
+async function _lfvExcluirAnexoConfirmado(id, storagePath, urlFoto, leadId) {
     const card = document.getElementById('lfv-card-'+id);
     if (card) { card.style.opacity='0.4'; card.style.pointerEvents='none'; }
     try {
