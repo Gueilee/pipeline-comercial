@@ -9902,22 +9902,29 @@ function renderizarLicenciamento() {
         return true;
     });
 
-    // Clear button + contador
-    const anyFilter = fUf || fTier || fRegiao || fPlano;
+    // Clear button + contador (inclui filtro de status no critério)
+    const anyFilter = _licFiltro || fUf || fTier || fRegiao || fPlano;
     const clearBtn = document.getElementById('lic-f-clear');
     const countEl  = document.getElementById('lic-f-count');
     if (clearBtn) clearBtn.style.display = anyFilter ? '' : 'none';
-    if (countEl) countEl.textContent = anyFilter ? `${leads.length} lead${leads.length !== 1 ? 's' : ''} filtrado${leads.length !== 1 ? 's' : ''}` : '';
+    if (countEl) {
+        if (anyFilter) {
+            const total = baseLicLeads.length;
+            countEl.textContent = `${leads.length} de ${total} lead${total !== 1 ? 's' : ''}`;
+        } else {
+            countEl.textContent = '';
+        }
+    }
 
-    // KPIs (6 cards)
-    const total    = baseLicLeads.length;
-    const ativos   = baseLicLeads.filter(l => l.status === 'Ativo').length;
-    const conv     = baseLicLeads.filter(l => l.status === 'Convertido').length;
-    const perdidos = baseLicLeads.filter(l => l.status === 'Perdido').length;
-    const m2Total  = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.area_total_m2) || 0), 0);
-    const feeTotal = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.fee_mensal) || 0), 0);
-    const estados  = new Set(baseLicLeads.filter(l => l.status === 'Convertido' && l.uf).map(l => l.uf.toUpperCase())).size;
-    const m2Disp   = baseLicLeads.filter(l => l.status === 'Convertido').reduce((s,l) => {
+    // KPIs — usam `leads` (filtrado) para refletir os filtros ativos
+    const total    = leads.length;
+    const ativos   = leads.filter(l => l.status === 'Ativo').length;
+    const conv     = leads.filter(l => l.status === 'Convertido').length;
+    const perdidos = leads.filter(l => l.status === 'Perdido').length;
+    const m2Total  = leads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.area_total_m2) || 0), 0);
+    const feeTotal = leads.filter(l => l.status === 'Convertido').reduce((s,l) => s + (parseFloat(l.fee_mensal) || 0), 0);
+    const estados  = new Set(leads.filter(l => l.status === 'Convertido' && l.uf).map(l => l.uf.toUpperCase())).size;
+    const m2Disp   = leads.filter(l => l.status === 'Convertido').reduce((s,l) => {
         const tot  = parseFloat(l.area_total_m2) || 0;
         const ocup = parseFloat(l.ocupacao_percentual) || 0;
         return s + tot * (1 - ocup / 100);
@@ -9980,7 +9987,7 @@ function renderizarLicenciamento() {
         : '';
     document.getElementById('lic-leads-tbody').innerHTML = rows || vazio;
 
-    renderizarLicDashboard();
+    renderizarLicDashboard(leads);
     renderizarLicDashboardRede(leads);
     atualizarBadgeAlertas();
 }
@@ -15658,8 +15665,8 @@ async function confirmarLicPerdido() {
 // ── Dashboard de Licenciamento ─────────────────────────────────────
 let _licDCharts = {};
 
-function renderizarLicDashboard() {
-    const leads   = baseLicLeads;
+function renderizarLicDashboard(leads) {
+    if (!leads) leads = baseLicLeads; // fallback para chamadas diretas sem parâmetro
     const conv    = leads.filter(l => l.status === 'Convertido');
     const ativos  = leads.filter(l => l.status === 'Ativo');
     const perdidos= leads.filter(l => l.status === 'Perdido');
