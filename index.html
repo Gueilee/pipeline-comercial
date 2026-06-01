@@ -2939,44 +2939,109 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 <!-- ── VISÃO SCORECARD ── -->
 <div id="lic-view-scorecard" style="display:none;position:absolute;inset:0;flex-direction:column;background:#f5f3ff;overflow:hidden;">
 
-    <!-- Header -->
-    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-        <div style="display:flex;align-items:center;gap:14px;">
+    <!-- Header redesenhado -->
+    <div style="background:#fff;border-bottom:1px solid #ede8f8;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:12px;">
             <button onclick="fecharLicScorecard()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">← Leads</button>
             <div>
-                <div style="font-size:15px;font-weight:800;color:#2d1b69;">🎯 Scorecard de Performance</div>
-                <div style="font-size:11px;color:#9b8cc0;margin-top:1px;">Acompanhamento de KPIs dos licenciados ativos</div>
+                <div style="font-size:15px;font-weight:800;color:#2d1b69;"><i class="ti ti-target"></i> Scorecard de Performance</div>
+                <div id="sc-rede-health" style="font-size:11px;color:#9b8cc0;margin-top:1px;">Acompanhamento de KPIs dos licenciados ativos</div>
             </div>
         </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-            <div id="sc-rede-health" style="font-size:12px;color:#9b8cc0;"></div>
-            <select id="sc-filtro-tier" onchange="renderizarLicScorecard()" style="padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <!-- Navegação de período -->
+            <div style="display:flex;align-items:center;gap:4px;background:#f5f3ff;border-radius:8px;padding:4px;">
+                <button onclick="_scNavPeriodo(-1)" style="padding:5px 10px;border:none;background:none;cursor:pointer;color:#6941c6;font-size:14px;border-radius:6px;" title="Período anterior">‹</button>
+                <span id="sc-periodo-label" style="font-size:12px;font-weight:700;color:#2d1b69;min-width:60px;text-align:center;"></span>
+                <button onclick="_scNavPeriodo(1)" style="padding:5px 10px;border:none;background:none;cursor:pointer;color:#6941c6;font-size:14px;border-radius:6px;" title="Próximo período">›</button>
+            </div>
+            <select id="sc-filtro-tier" onchange="renderizarLicScorecard()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
                 <option value="">Todos os níveis</option>
                 <option>Platina</option><option>Ouro</option><option>Prata</option><option>Bronze</option>
             </select>
-            <select id="sc-filtro-health" onchange="renderizarLicScorecard()" style="padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
+            <select id="sc-filtro-health" onchange="renderizarLicScorecard()" style="padding:6px 10px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#6941c6;background:#faf8ff;outline:none;cursor:pointer;">
                 <option value="">Todos os status</option>
-                <option value="verde">✅ Saudável</option>
-                <option value="amarelo">⚠️ Atenção</option>
-                <option value="vermelho">🔴 Crítico</option>
-                <option value="sem-dados">— Sem KPIs</option>
+                <option value="verde">Saudável</option>
+                <option value="amarelo">Atenção</option>
+                <option value="vermelho">Crítico</option>
+                <option value="sem-dados">Sem KPIs</option>
             </select>
+            <button onclick="_scLancarEmMassa()" style="padding:7px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;"><i class="ti ti-table-import"></i> Lançar em massa</button>
         </div>
     </div>
 
     <!-- Resumo da rede -->
-    <div id="sc-rede-banner" style="flex-shrink:0;padding:12px 24px 0;"></div>
+    <div id="sc-rede-banner" style="flex-shrink:0;padding:10px 24px 0;"></div>
 
-    <!-- Grid de licenciados -->
-    <div style="flex:1;overflow-y:auto;padding:16px 24px;">
-        <div id="sc-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+    <!-- Tabela de licenciados -->
+    <div style="flex:1;overflow-y:auto;padding:12px 24px 24px;">
+        <div style="background:#fff;border-radius:14px;box-shadow:0 2px 16px rgba(105,65,198,.08);overflow:hidden;">
+            <div style="overflow-x:auto;">
+                <table id="sc-tabela" style="width:100%;border-collapse:collapse;font-size:12px;min-width:900px;">
+                    <thead>
+                        <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                            <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;">Licenciado</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Tier</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">UF</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">OTIF %</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Acurac. %</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Dock (h)</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Util. %</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">NPS</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Onboard (d)</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Status</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">Tendência</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sc-tbody"><tr><td colspan="12" style="text-align:center;padding:48px;color:#c4b5e8;">Carregando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Painel lateral de detalhes -->
-    <div id="sc-side-panel" style="position:absolute;right:-500px;top:0;height:100%;width:480px;background:#fff;z-index:200;overflow-y:auto;box-shadow:-4px 0 30px rgba(45,27,105,.12);transition:right .3s cubic-bezier(.16,1,.3,1);">
+    <!-- Painel lateral: histórico de evolução -->
+    <div id="sc-side-panel" style="position:absolute;right:-560px;top:0;height:100%;width:540px;background:#fff;z-index:200;overflow-y:auto;box-shadow:-4px 0 30px rgba(45,27,105,.15);transition:right .3s cubic-bezier(.16,1,.3,1);">
         <div id="sc-side-content"></div>
     </div>
-    <div id="sc-overlay" style="display:none;position:absolute;inset:0;background:rgba(45,27,105,.08);z-index:100;" onclick="fecharScSidePanel()"></div>
+    <div id="sc-overlay" style="display:none;position:absolute;inset:0;background:rgba(45,27,105,.1);z-index:100;" onclick="fecharScSidePanel()"></div>
+</div>
+
+<!-- Modal: Lançar KPIs em massa -->
+<div id="sc-massa-modal" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:900;align-items:flex-start;justify-content:center;backdrop-filter:blur(6px);overflow-y:auto;padding:24px 0;">
+    <div style="background:#fff;border-radius:20px;width:95vw;max-width:1100px;box-shadow:0 24px 80px rgba(0,0,0,.25);margin:auto;">
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);padding:20px 28px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:16px;font-weight:800;color:#fff;"><i class="ti ti-table-import"></i> Lançar KPIs em Massa</div>
+                <div id="sc-massa-periodo-label" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">Preencha os indicadores de cada licenciado</div>
+            </div>
+            <button onclick="_scFecharMassa()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:20px;cursor:pointer;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <div style="padding:20px 24px;">
+            <div style="font-size:11px;color:#9b8cc0;margin-bottom:14px;background:#f5f3ff;border-radius:8px;padding:8px 12px;"><i class="ti ti-info-circle"></i> Preencha apenas os licenciados que têm dados no período. Campos em branco não serão salvos. Campos em <span style="color:#dc2626;font-weight:700;">vermelho</span> indicam KPI fora da meta.</div>
+            <div style="overflow-x:auto;">
+                <table id="sc-massa-tabela" style="width:100%;border-collapse:collapse;font-size:12px;">
+                    <thead>
+                        <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                            <th style="padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;min-width:180px;">Licenciado</th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">OTIF %<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≥97%</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">Acurac. %<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≥98%</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">Dock h<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≤24h</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">Util. %<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≤85%</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">NPS pts<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≥50</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:80px;">Onboard d<br><span style="font-weight:400;color:#9b8cc0;font-size:9px;">meta ≤20d</span></th>
+                            <th style="padding:10px 8px;text-align:center;font-size:10px;font-weight:700;color:#7c5cbf;text-transform:uppercase;min-width:60px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sc-massa-tbody"></tbody>
+                </table>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:16px;border-top:1px solid #ede8f8;">
+                <button onclick="_scFecharMassa()" style="padding:10px 22px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:600;color:#6941c6;cursor:pointer;">Cancelar</button>
+                <button onclick="_scSalvarMassa()" id="sc-massa-save-btn" style="padding:10px 28px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(105,65,198,.3);"><i class="ti ti-device-floppy"></i> Salvar todos</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Modal: Lançar KPIs -->
@@ -12432,14 +12497,63 @@ function getLicUltimoPeriodo(leadId) {
     return recs.length > 0 ? recs[recs.length - 1] : null;
 }
 
+// ── Scorecard: período de navegação ────────────────────────────
+let _scQ = Math.ceil((new Date().getMonth()+1)/3); // Q atual
+let _scAno = new Date().getFullYear();
+
+function _scPeriodoLabel() { return `Q${_scQ} ${_scAno}`; }
+function _scPeriodoPrev() {
+    let q=_scQ-1, a=_scAno; if(q<1){q=4;a--;} return `Q${q} ${a}`;
+}
+function _scNavPeriodo(dir) {
+    _scQ += dir;
+    if (_scQ > 4) { _scQ=1; _scAno++; }
+    if (_scQ < 1) { _scQ=4; _scAno--; }
+    const lbl = document.getElementById('sc-periodo-label');
+    if (lbl) lbl.textContent = _scPeriodoLabel();
+    renderizarLicScorecard();
+}
+function _scGetPeriodoRec(leadId, periodo) {
+    const recs = _licPerfData[leadId] || [];
+    return recs.find(r => r.periodo === periodo) || null;
+}
+
+// Tendência: compara atual com período anterior para um KPI
+function _scTendenciaKpi(leadId, kpiKey) {
+    const atual = _scGetPeriodoRec(leadId, _scPeriodoLabel())?.[kpiKey];
+    const prev  = _scGetPeriodoRec(leadId, _scPeriodoPrev())?.[kpiKey];
+    if (atual == null || prev == null) return '';
+    const meta = LIC_KPI_META[kpiKey];
+    const melhorou = meta.up ? (atual > prev) : (atual < prev);
+    const piorou   = meta.up ? (atual < prev) : (atual > prev);
+    if (melhorou) return `<span style="color:#16a34a;font-weight:800;font-size:13px;" title="Melhorou vs ${_scPeriodoPrev()}">↑</span>`;
+    if (piorou)   return `<span style="color:#dc2626;font-weight:800;font-size:13px;" title="Piorou vs ${_scPeriodoPrev()}">↓</span>`;
+    return `<span style="color:#9b8cc0;font-size:13px;" title="Estável">→</span>`;
+}
+
+// Célula de KPI colorida
+function _scKpiCell(k, val) {
+    if (val == null) return `<td style="padding:10px 8px;text-align:center;color:#d1d5db;font-size:12px;">—</td>`;
+    const s = kpiSaude(k, val);
+    const cor = s==='verde'?'#16a34a':s==='amarelo'?'#d97706':'#dc2626';
+    const bg  = s==='verde'?'#f0fdf4':s==='amarelo'?'#fffbeb':'#fef2f2';
+    const m = LIC_KPI_META[k];
+    return `<td style="padding:10px 8px;text-align:center;">
+        <span style="display:inline-block;min-width:44px;padding:3px 8px;border-radius:20px;background:${bg};color:${cor};font-size:11px;font-weight:700;border:1px solid ${cor}33;">${val}${m.unit}</span>
+    </td>`;
+}
+
 function renderizarLicScorecard() {
+    const periodo      = _scPeriodoLabel();
     const tierFiltro   = document.getElementById('sc-filtro-tier')?.value   || '';
     const healthFiltro = document.getElementById('sc-filtro-health')?.value || '';
+    const lbl = document.getElementById('sc-periodo-label');
+    if (lbl) lbl.textContent = periodo;
 
     const ativos = baseLicLeads.filter(l => l.status === 'Convertido');
     const filtrados = ativos.filter(l => {
-        if (tierFiltro   && getLicTier(l)?.name !== tierFiltro) return false;
-        const perf = getLicUltimoPeriodo(l.id);
+        if (tierFiltro && getLicTier(l)?.name !== tierFiltro) return false;
+        const perf = _scGetPeriodoRec(l.id, periodo);
         if (healthFiltro) {
             const sg = kpiSaudeGeral(perf);
             if (healthFiltro === 'sem-dados' && sg !== 'sem-dados') return false;
@@ -12448,86 +12562,291 @@ function renderizarLicScorecard() {
         return true;
     });
 
-    // Banner de saúde da rede
-    const verde    = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'verde').length;
-    const amarelo  = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'amarelo').length;
-    const vermelho = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'vermelho').length;
-    const semDados = ativos.filter(l => kpiSaudeGeral(getLicUltimoPeriodo(l.id)) === 'sem-dados').length;
+    // Banner de saúde
+    const _sg = l => kpiSaudeGeral(_scGetPeriodoRec(l.id, periodo));
+    const verde=ativos.filter(l=>_sg(l)==='verde').length, amarelo=ativos.filter(l=>_sg(l)==='amarelo').length;
+    const vermelho=ativos.filter(l=>_sg(l)==='vermelho').length, semDados=ativos.filter(l=>_sg(l)==='sem-dados').length;
     const banner = document.getElementById('sc-rede-banner');
-    if (banner) banner.innerHTML = `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#16a34a;display:flex;align-items:center;gap:6px;">🟢 Saudável: ${verde}</div>
-        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#d97706;display:flex;align-items:center;gap:6px;">🟡 Atenção: ${amarelo}</div>
-        <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;color:#dc2626;display:flex;align-items:center;gap:6px;">🔴 Crítico: ${vermelho}</div>
-        <div style="background:#f9f7ff;border:1px solid #e0d9f5;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:600;color:#9b8cc0;display:flex;align-items:center;gap:6px;">⚪ Sem KPIs: ${semDados}</div>
+    if (banner) banner.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+        <span style="background:#f0fdf4;border:1px solid #86efac;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:#16a34a;">● Saudável: ${verde}</span>
+        <span style="background:#fffbeb;border:1px solid #fcd34d;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:#d97706;">● Atenção: ${amarelo}</span>
+        <span style="background:#fef2f2;border:1px solid #fca5a5;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:#dc2626;">● Crítico: ${vermelho}</span>
+        <span style="background:#f9f7ff;border:1px solid #e0d9f5;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:#9b8cc0;">○ Sem KPIs: ${semDados}</span>
+        <span style="font-size:11px;color:#9b8cc0;margin-left:4px;">${filtrados.length} licenciado${filtrados.length!==1?'s':''} exibido${filtrados.length!==1?'s':''}</span>
     </div>`;
 
-    const health = document.getElementById('sc-rede-health');
-    if (health) health.textContent = `${filtrados.length} licenciado${filtrados.length!==1?'s':''}`;
-
-    // Grid de cards
-    const grid = document.getElementById('sc-grid');
-    if (!grid) return;
+    const tbody = document.getElementById('sc-tbody');
+    if (!tbody) return;
     if (filtrados.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:#c4b5e8;font-size:14px;">
-            ${ativos.length === 0 ? 'Nenhum licenciado ativo. Converta leads para ver o scorecard.' : 'Nenhum resultado com os filtros aplicados.'}
-        </div>`;
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:48px;color:#c4b5e8;font-size:13px;">${ativos.length===0?'Nenhum licenciado ativo ainda.':'Nenhum resultado para os filtros aplicados.'}</td></tr>`;
         return;
     }
 
-    grid.innerHTML = filtrados.sort((a,b) => {
-        const sa = kpiSaudeGeral(getLicUltimoPeriodo(a.id));
-        const sb = kpiSaudeGeral(getLicUltimoPeriodo(b.id));
-        const ordem = { vermelho:0, amarelo:1, verde:2, 'sem-dados':3 };
-        return (ordem[sa]||4) - (ordem[sb]||4);
-    }).map(lead => {
-        const t = getLicTier(lead);
-        const perf = getLicUltimoPeriodo(lead.id);
-        const sg = kpiSaudeGeral(perf);
-        const sgCor = sg==='verde'?'#16a34a':sg==='amarelo'?'#d97706':sg==='vermelho'?'#dc2626':'#9b8cc0';
-        const sgBg  = sg==='verde'?'#f0fdf4':sg==='amarelo'?'#fffbeb':sg==='vermelho'?'#fef2f2':'#f9f7ff';
-        const sgTxt = sg==='verde'?'✅ Saudável':sg==='amarelo'?'⚠️ Atenção':sg==='vermelho'?'🔴 Crítico':'— Sem KPIs';
-        const periodo = perf?.periodo || '—';
-        const area = parseFloat(lead.area_total_m2)||0;
-        const emRem = perf?.em_remediacao;
-
-        return `<div style="background:#fff;border-radius:16px;padding:0;box-shadow:0 2px 20px rgba(105,65,198,.08);overflow:hidden;border-top:3px solid ${sgCor};">
-            <div style="padding:16px 18px;">
-                <!-- Header do card -->
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
-                    <div style="flex:1;padding-right:8px;">
-                        <div style="font-size:13px;font-weight:800;color:#2d1b69;line-height:1.2;margin-bottom:5px;">${lead.razao_social||'—'}</div>
-                        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-                            ${t ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};">${t.icon} ${t.name}</span>` : ''}
-                            <span style="font-size:10px;color:#9b8cc0;">${lead.uf||''}${lead.polo_logistico?' · '+lead.polo_logistico:''}</span>
-                        </div>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <div style="font-size:11px;font-weight:700;color:${sgCor};background:${sgBg};padding:4px 10px;border-radius:10px;">${sgTxt}</div>
-                        <div style="font-size:10px;color:#9b8cc0;margin-top:3px;">Ref: ${periodo}</div>
-                    </div>
+    const ordem = { vermelho:0, amarelo:1, verde:2, 'sem-dados':3 };
+    tbody.innerHTML = filtrados.sort((a,b) => (ordem[_sg(a)]||4)-(ordem[_sg(b)]||4)).map((lead,idx) => {
+        const t    = getLicTier(lead);
+        const perf = _scGetPeriodoRec(lead.id, periodo);
+        const sg   = kpiSaudeGeral(perf);
+        const sgCor= sg==='verde'?'#16a34a':sg==='amarelo'?'#d97706':sg==='vermelho'?'#dc2626':'#9b8cc0';
+        const sgBg = sg==='verde'?'#f0fdf4':sg==='amarelo'?'#fffbeb':sg==='vermelho'?'#fef2f2':'#f9f7ff';
+        const sgTxt= sg==='verde'?'Saudável':sg==='amarelo'?'Atenção':sg==='vermelho'?'Crítico':'Sem KPIs';
+        const rowBg = idx%2===0 ? '#fff' : '#fdfcff';
+        // Tendência geral: % de KPIs que melhoraram
+        const kpiKeys = Object.keys(LIC_KPI_META);
+        const trendCells = kpiKeys.map(k => _scTendenciaKpi(lead.id, k));
+        const nMelh = trendCells.filter(t=>t.includes('↑')).length;
+        const nPior = trendCells.filter(t=>t.includes('↓')).length;
+        let trendGeral = '—';
+        if (nMelh > 0 || nPior > 0) {
+            if (nMelh > nPior) trendGeral = `<span style="color:#16a34a;font-weight:700;">↑ ${nMelh} melhoraram</span>`;
+            else if (nPior > nMelh) trendGeral = `<span style="color:#dc2626;font-weight:700;">↓ ${nPior} pioraram</span>`;
+            else trendGeral = `<span style="color:#9b8cc0;">estável</span>`;
+        }
+        return `<tr style="background:${rowBg};border-bottom:1px solid #f5f3ff;cursor:pointer;" onclick="abrirScDetalhe('${lead.id}')">
+            <td style="padding:10px 14px;">
+                <div style="font-size:12px;font-weight:700;color:#2d1b69;">${lead.razao_social||'—'}</div>
+                <div style="font-size:10px;color:#9b8cc0;margin-top:1px;">${lead.polo_logistico||''}</div>
+            </td>
+            <td style="padding:10px 8px;text-align:center;">
+                ${t?`<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${t.bg};color:${t.color};border:1px solid ${t.border};white-space:nowrap;">${t.icon} ${t.name}</span>`:'<span style="color:#d1d5db;font-size:12px;">—</span>'}
+            </td>
+            <td style="padding:10px 8px;text-align:center;font-size:12px;color:#6b7280;font-weight:600;">${lead.uf||'—'}</td>
+            ${_scKpiCell('otif_pct', perf?.otif_pct??null)}
+            ${_scKpiCell('acuracidade_inventario', perf?.acuracidade_inventario??null)}
+            ${_scKpiCell('dock_to_stock_hrs', perf?.dock_to_stock_hrs??null)}
+            ${_scKpiCell('utilizacao_capacidade', perf?.utilizacao_capacidade??null)}
+            ${_scKpiCell('nps_score', perf?.nps_score??null)}
+            ${_scKpiCell('tempo_onboarding_dias', perf?.tempo_onboarding_dias??null)}
+            <td style="padding:10px 8px;text-align:center;">
+                <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:${sgBg};color:${sgCor};white-space:nowrap;">${sgTxt}</span>
+            </td>
+            <td style="padding:10px 8px;text-align:center;font-size:11px;">${trendGeral}</td>
+            <td style="padding:10px 8px;text-align:center;" onclick="event.stopPropagation()">
+                <div style="display:flex;gap:5px;justify-content:center;">
+                    <button onclick="abrirScDetalhe('${lead.id}')" style="padding:5px 10px;border:1.5px solid #e0d9f5;border-radius:6px;background:#faf8ff;font-family:inherit;font-size:11px;font-weight:600;color:#6941c6;cursor:pointer;white-space:nowrap;"><i class="ti ti-chart-line"></i> Histórico</button>
+                    <button onclick="abrirModalKpi('${lead.id}')" style="padding:5px 10px;border:none;border-radius:6px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:11px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;"><i class="ti ti-plus"></i> KPIs</button>
                 </div>
-
-                <!-- KPI linhas -->
-                <div style="margin-bottom:12px;">
-                    ${Object.keys(LIC_KPI_META).map(k => kpiLinhaCard(k, perf?.[k]??null)).join('')}
-                </div>
-
-                ${emRem ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px;color:#c2410c;font-weight:600;">⚠️ Em plano de remediação${perf.data_prevista_resolucao?' · Prev.: '+new Date(perf.data_prevista_resolucao+'T00:00:00').toLocaleDateString('pt-BR'):''}</div>` : ''}
-
-                <!-- Métricas secundárias -->
-                <div style="display:flex;gap:10px;font-size:10px;color:#9b8cc0;margin-bottom:14px;">
-                    ${area>0?`<span>📐 ${area.toLocaleString('pt-BR')} m²</span>`:''}
-                    ${lead.plano?`<span>💼 ${lead.plano}</span>`:''}
-                    ${t?`<span>🏅 Score ${t.score}/100</span>`:''}
-                </div>
-            </div>
-            <!-- Ações do card -->
-            <div style="border-top:1px solid #f0ebff;padding:10px 18px;display:flex;gap:8px;background:#faf8ff;">
-                <button onclick="abrirScDetalhe('${lead.id}')" style="flex:1;padding:8px;border:1.5px solid #e0d9f5;border-radius:8px;background:#fff;font-family:inherit;font-size:12px;font-weight:600;color:#6941c6;cursor:pointer;">📈 Ver histórico</button>
-                <button onclick="abrirModalKpi('${lead.id}')" style="flex:1;padding:8px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);font-family:inherit;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">+ Lançar KPIs</button>
-            </div>
-        </div>`;
+            </td>
+        </tr>`;
     }).join('');
+}
+
+// ── Lançar KPIs em massa ────────────────────────────────────────
+function _scLancarEmMassa() {
+    const periodo = _scPeriodoLabel();
+    document.getElementById('sc-massa-periodo-label').textContent = `Período: ${periodo}`;
+    const ativos = baseLicLeads.filter(l => l.status === 'Convertido');
+    const tbody = document.getElementById('sc-massa-tbody');
+    const kpiKeys = ['otif_pct','acuracidade_inventario','dock_to_stock_hrs','utilizacao_capacidade','nps_score','tempo_onboarding_dias'];
+    const fieldIds = ['otif','acur','dock','util','nps','onb'];
+
+    tbody.innerHTML = ativos.map(lead => {
+        const perf = _scGetPeriodoRec(lead.id, periodo);
+        const inputs = kpiKeys.map((k,i) => {
+            const val = perf?.[k] != null ? perf[k] : '';
+            const m = LIC_KPI_META[k];
+            return `<td style="padding:6px 4px;text-align:center;">
+                <input type="number" step="0.1" min="0" placeholder="—"
+                    id="sm-${lead.id}-${fieldIds[i]}"
+                    value="${val}"
+                    oninput="_scMassaCor(this,'${k}')"
+                    style="width:70px;padding:5px 6px;border:1.5px solid #e0d9f5;border-radius:6px;font-family:inherit;font-size:12px;text-align:center;outline:none;background:#faf8ff;">
+            </td>`;
+        }).join('');
+        const sg = kpiSaudeGeral(perf);
+        const sgCor= sg==='verde'?'#16a34a':sg==='amarelo'?'#d97706':sg==='vermelho'?'#dc2626':'#9b8cc0';
+        const sgTxt= sg==='verde'?'✓':sg==='amarelo'?'!':sg==='vermelho'?'✕':'—';
+        return `<tr style="border-bottom:1px solid #f5f3ff;" id="sm-row-${lead.id}">
+            <td style="padding:8px 12px;font-size:12px;font-weight:600;color:#2d1b69;white-space:nowrap;">${lead.razao_social||'—'}<br><span style="font-size:10px;color:#9b8cc0;font-weight:400;">${lead.uf||''}</span></td>
+            ${inputs}
+            <td style="padding:6px 8px;text-align:center;" id="sm-status-${lead.id}">
+                <span style="font-size:13px;font-weight:700;color:${sgCor};">${sgTxt}</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    // Aplica cores iniciais
+    ativos.forEach(lead => {
+        kpiKeys.forEach((k,i) => {
+            const el = document.getElementById(`sm-${lead.id}-${fieldIds[i]}`);
+            if (el && el.value) _scMassaCor(el, k);
+        });
+    });
+
+    document.getElementById('sc-massa-modal').style.display = 'flex';
+}
+
+function _scMassaCor(input, kpiKey) {
+    const val = parseFloat(input.value);
+    if (isNaN(val)) { input.style.borderColor='#e0d9f5'; input.style.background='#faf8ff'; return; }
+    const s = kpiSaude(kpiKey, val);
+    input.style.borderColor = s==='verde'?'#86efac':s==='amarelo'?'#fcd34d':'#fca5a5';
+    input.style.background  = s==='verde'?'#f0fdf4':s==='amarelo'?'#fffbeb':'#fef2f2';
+}
+
+function _scFecharMassa() {
+    document.getElementById('sc-massa-modal').style.display = 'none';
+}
+
+async function _scSalvarMassa() {
+    const periodo = _scPeriodoLabel();
+    const btn = document.getElementById('sc-massa-save-btn');
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Salvando...'; }
+    const ativos = baseLicLeads.filter(l => l.status === 'Convertido');
+    const kpiKeys = ['otif_pct','acuracidade_inventario','dock_to_stock_hrs','utilizacao_capacidade','nps_score','tempo_onboarding_dias'];
+    const fieldIds= ['otif','acur','dock','util','nps','onb'];
+    const meses   = {Q1:'01',Q2:'04',Q3:'07',Q4:'10'};
+    const periodo_ref = `${_scAno}-${meses['Q'+_scQ]||'01'}-01`;
+    let salvos=0, erros=0;
+
+    for (const lead of ativos) {
+        const vals = {};
+        let temValor = false;
+        kpiKeys.forEach((k,i) => {
+            const el = document.getElementById(`sm-${lead.id}-${fieldIds[i]}`);
+            const v = el?.value !== '' && el?.value != null ? parseFloat(el.value) : null;
+            vals[k] = isNaN(v) ? null : v;
+            if (vals[k] !== null) temValor = true;
+        });
+        if (!temValor) continue;
+        try {
+            await supabaseClient.from('lic_performance').insert([{
+                lead_id: parseInt(lead.id), periodo, periodo_ref,
+                ...vals,
+                em_remediacao: false, criado_por: EMAIL_USUARIO_LOGADO
+            }]);
+            salvos++;
+        } catch(e) { erros++; }
+    }
+
+    await carregarLicPerformance();
+    renderizarLicScorecard();
+    _scFecharMassa();
+    if (btn) { btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar todos'; }
+    showToast(`${salvos} registro${salvos!==1?'s':''} salvo${salvos!==1?'s':''}${erros>0?' ('+erros+' erro(s))':''}!`, salvos>0?'success':'error');
+}
+
+// ── Histórico / Evolução ────────────────────────────────────────
+async function abrirScDetalhe(leadId) {
+    const lead = baseLicLeads.find(l => String(l.id) === String(leadId));
+    if (!lead) return;
+    const panel  = document.getElementById('sc-side-panel');
+    const overlay= document.getElementById('sc-overlay');
+    const content= document.getElementById('sc-side-content');
+    if (!panel || !content) return;
+
+    content.innerHTML = `<div style="padding:24px;"><div style="color:#c4b5e8;font-size:13px;text-align:center;margin-top:40px;">Carregando histórico...</div></div>`;
+    panel.style.right = '0';
+    if (overlay) overlay.style.display = 'block';
+
+    // Busca todos os registros históricos do lead
+    let recs = (_licPerfData[leadId] || []).slice();
+    if (!recs.length) {
+        try {
+            const { data } = await supabaseClient.from('lic_performance')
+                .select('*').eq('lead_id', leadId).order('periodo_ref', {ascending:true});
+            recs = data || [];
+        } catch(e) {}
+    } else {
+        recs = recs.slice().sort((a,b) => (a.periodo_ref||'') < (b.periodo_ref||'') ? -1 : 1);
+    }
+
+    const kpiKeys = Object.keys(LIC_KPI_META);
+    const periodos = recs.map(r => r.periodo);
+
+    // Tabela histórica
+    const tabelaRows = recs.map(r => {
+        const sg = kpiSaudeGeral(r);
+        const sgCor= sg==='verde'?'#16a34a':sg==='amarelo'?'#d97706':sg==='vermelho'?'#dc2626':'#9b8cc0';
+        const cells = kpiKeys.map(k => {
+            const v = r[k]; if (v==null) return `<td style="padding:7px 6px;text-align:center;color:#d1d5db;font-size:11px;">—</td>`;
+            const s=kpiSaude(k,v); const cor=s==='verde'?'#16a34a':s==='amarelo'?'#d97706':'#dc2626';
+            const bg=s==='verde'?'#f0fdf4':s==='amarelo'?'#fffbeb':'#fef2f2';
+            return `<td style="padding:7px 6px;text-align:center;"><span style="background:${bg};color:${cor};padding:2px 7px;border-radius:12px;font-size:11px;font-weight:700;">${v}${LIC_KPI_META[k].unit}</span></td>`;
+        }).join('');
+        return `<tr style="border-bottom:1px solid #f5f3ff;">
+            <td style="padding:7px 10px;font-size:11px;font-weight:700;color:#2d1b69;white-space:nowrap;">${r.periodo}</td>
+            ${cells}
+            <td style="padding:7px 6px;text-align:center;"><span style="font-size:11px;font-weight:700;color:${sgCor};">${sg==='verde'?'✓':sg==='amarelo'?'!':sg==='vermelho'?'✕':'—'}</span></td>
+        </tr>`;
+    }).join('');
+
+    const t = getLicTier(lead);
+    content.innerHTML = `
+        <div style="background:linear-gradient(135deg,#2d1b69,#6941c6);padding:20px 22px;display:flex;align-items:flex-start;justify-content:space-between;">
+            <div>
+                <div style="font-size:14px;font-weight:800;color:#fff;margin-bottom:4px;">${lead.razao_social||'—'}</div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    ${t?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:${t.bg};color:${t.color};">${t.icon} ${t.name}</span>`:''}
+                    <span style="font-size:11px;color:rgba(255,255,255,.6);">${lead.uf||''}</span>
+                </div>
+            </div>
+            <button onclick="fecharScSidePanel()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:18px;cursor:pointer;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+
+        <div style="padding:18px 20px;">
+            ${recs.length === 0 ? `
+                <div style="text-align:center;padding:40px 0;color:#c4b5e8;">
+                    <div style="font-size:36px;margin-bottom:8px;">📊</div>
+                    <div style="font-size:13px;">Nenhum KPI lançado ainda.<br>Use "+ KPIs" para registrar o primeiro período.</div>
+                    <button onclick="fecharScSidePanel();abrirModalKpi('${leadId}')" style="margin-top:16px;padding:9px 20px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">+ Lançar KPIs</button>
+                </div>
+            ` : `
+                <div style="font-size:12px;font-weight:700;color:#2d1b69;margin-bottom:12px;">
+                    <i class="ti ti-history"></i> Histórico — ${recs.length} período${recs.length!==1?'s':''}
+                    <span style="font-weight:400;color:#9b8cc0;">(${periodos[0]} → ${periodos[periodos.length-1]})</span>
+                </div>
+
+                <!-- Gráfico de evolução -->
+                <div style="background:#f9f7ff;border-radius:12px;padding:14px;margin-bottom:16px;">
+                    <div style="font-size:11px;font-weight:700;color:#7c5cbf;margin-bottom:10px;">Evolução dos KPIs por período</div>
+                    <canvas id="sc-hist-chart" height="180"></canvas>
+                </div>
+
+                <!-- Tabela histórica -->
+                <div style="overflow-x:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                        <thead>
+                            <tr style="background:#f9f7ff;border-bottom:2px solid #ede8f8;">
+                                <th style="padding:7px 10px;text-align:left;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">Período</th>
+                                ${kpiKeys.map(k=>`<th style="padding:7px 6px;text-align:center;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;white-space:nowrap;">${LIC_KPI_META[k].label}</th>`).join('')}
+                                <th style="padding:7px 6px;text-align:center;font-size:9px;font-weight:700;color:#7c5cbf;text-transform:uppercase;">OK?</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tabelaRows}</tbody>
+                    </table>
+                </div>
+
+                <button onclick="fecharScSidePanel();abrirModalKpi('${leadId}')" style="margin-top:14px;width:100%;padding:10px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">+ Lançar KPIs — ${_scPeriodoLabel()}</button>
+            `}
+        </div>`;
+
+    // Renderiza gráfico Chart.js se tiver dados
+    if (recs.length > 0) {
+        setTimeout(() => {
+            const ctx = document.getElementById('sc-hist-chart');
+            if (!ctx) return;
+            const cores = ['#6941c6','#16a34a','#dc2626','#f59e0b','#0ea5e9','#8b5cf6'];
+            if (_licScCharts['hist']) { try { _licScCharts['hist'].destroy(); } catch(e){} }
+            _licScCharts['hist'] = new Chart(ctx, {
+                type:'line',
+                data:{
+                    labels: periodos,
+                    datasets: kpiKeys.map((k,i) => ({
+                        label: LIC_KPI_META[k].label,
+                        data: recs.map(r => r[k] ?? null),
+                        borderColor: cores[i], backgroundColor: cores[i]+'22',
+                        borderWidth:2, pointRadius:4, pointHoverRadius:6,
+                        tension:0.3, fill:false, spanGaps:true
+                    }))
+                },
+                options:{ responsive:true, maintainAspectRatio:false,
+                    plugins:{ legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}, datalabels:{display:false} },
+                    scales:{ x:{grid:{display:false},ticks:{font:{size:10}}}, y:{grid:{color:'#f3f4f6'},ticks:{font:{size:10}}} }
+                }
+            });
+        }, 80);
+    }
 }
 
 // ── Modal de KPIs ──────────────────────────────────────────────────
