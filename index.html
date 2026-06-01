@@ -13965,31 +13965,36 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // className para cada categoria — garante fill via CSS !important
-    function getClassName(uf) {
-        if (ufsConv.has(uf))  return 'lic-choro-covered';
-        if (ufsProsp.has(uf)) return 'lic-choro-prosp';
-        return 'lic-choro-gap';
-    }
-    // Inline style como fallback (belt-and-suspenders)
-    function getEstilo(rawUF) {
-        const uf = _licNormUF(rawUF);
-        if (!uf) return { className:'lic-choro-neutral', fillColor:'#a78bfa', weight:1, color:'#c4b5fd', fillOpacity:.08 };
-        const cls = getClassName(uf);
-        if (ufsConv.has(uf))  return { className: cls, fillColor:'#86efac', weight:1.5, color:'#16a34a', fillOpacity:.72 };
-        if (ufsProsp.has(uf)) return { className: cls, fillColor:'#fde68a', weight:1.5, color:'#ca8a04', fillOpacity:.68 };
-        return                         { className: cls, fillColor:'#fca5a5', weight:1.5, color:'#ef4444', fillOpacity:.65 };
+    // Cores por categoria
+    function getFill(uf) {
+        if (ufsConv.has(uf))  return { color:'#86efac', opacity:'0.72', stroke:'#16a34a', hoverColor:'#4ade80', hoverOpacity:'0.88' };
+        if (ufsProsp.has(uf)) return { color:'#fde68a', opacity:'0.68', stroke:'#ca8a04', hoverColor:'#fbbf24', hoverOpacity:'0.84' };
+        return                         { color:'#fca5a5', opacity:'0.65', stroke:'#ef4444', hoverColor:'#f87171', hoverOpacity:'0.82' };
     }
 
-    // Renderer SVG explícito para este layer — evita conflito com outros layers
-    const _gapRenderer = L.svg({ padding: 0.5 });
+    // Aplica fill diretamente no elemento SVG path (único método 100% confiável)
+    function applyFillToLayer(layer, fillObj, isHover) {
+        const applyTo = (path) => {
+            if (!path) return;
+            path.style.fill = isHover ? fillObj.hoverColor : fillObj.color;
+            path.style.fillOpacity = isHover ? fillObj.hoverOpacity : fillObj.opacity;
+        };
+        if (layer._path) applyTo(layer._path);
+        // MultiPolygon cria sub-layers
+        if (layer._layers) Object.values(layer._layers).forEach(sub => applyTo(sub._path));
+    }
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        renderer: _gapRenderer,
-        style: f => getEstilo(_licNormUF(f.properties?.sigla)),
+        style: f => {
+            const uf = _licNormUF(f.properties?.sigla);
+            if (!uf) return { weight:0.5, color:'#d1d5db', fillOpacity:0, fill:false };
+            const fill = getFill(uf);
+            return { weight:1.5, color:fill.stroke, fillOpacity:0, fill:false };
+        },
         onEachFeature: (feature, layer) => {
-            const uf    = _licNormUF(feature.properties?.sigla || '');
+            const uf = _licNormUF(feature.properties?.sigla || '');
             if (!uf) return;
+            const fillObj = getFill(uf);
             const nome  = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
             const hasCov  = ufsConv.has(uf);
             const hasPros = ufsProsp.has(uf);
@@ -14003,15 +14008,8 @@ function renderizarLicGapAnalysis() {
                 `<div style="min-width:140px;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
                 {className:'lic-map-tooltip', sticky:true}
             );
-            layer.on('mouseover', e => {
-                e.target.setStyle(hasCov
-                    ? { fillOpacity:.88, weight:2.5, color:'#15803d' }
-                    : hasPros
-                        ? { fillOpacity:.84, weight:2.5, color:'#92400e' }
-                        : { fillOpacity:.82, weight:2.5, color:'#b91c1c' });
-                e.target.bringToFront();
-            });
-            layer.on('mouseout', e => { _licGeoJsonLayer.resetStyle(e.target); });
+            layer.on('mouseover', e => { applyFillToLayer(e.target, fillObj, true); e.target.setStyle({weight:2.5}); e.target.bringToFront(); });
+            layer.on('mouseout',  e => { applyFillToLayer(e.target, fillObj, false); e.target.setStyle({weight:1.5}); });
             layer.on('click', e => {
                 _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]});
                 const chip = document.getElementById('gap-uf-'+uf);
@@ -14019,6 +14017,13 @@ function renderizarLicGapAnalysis() {
             });
         }
     }).addTo(_licMap);
+
+    // Aplica fills via DOM após addTo (className no style function não funciona no Leaflet)
+    _licGeoJsonLayer.eachLayer(layer => {
+        const uf = _licNormUF(layer.feature?.properties?.sigla);
+        if (!uf) return;
+        applyFillToLayer(layer, getFill(uf), false);
+    });
 
     // ── Painel lateral ──
     const totalUFs = 27;
