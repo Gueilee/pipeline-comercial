@@ -9891,10 +9891,14 @@ function renderizarLicenciamento() {
 
     const leads = baseLicLeads.filter(l => {
         if (_licFiltro && l.status !== _licFiltro) return false;
-        if (fUf && (l.uf || '').toUpperCase() !== fUf.toUpperCase()) return false;
-        if (fTier && (l.tier_nivel || '') !== fTier) return false;
-        if (fRegiao && !ufsRegiao.includes((l.uf || '').toUpperCase())) return false;
-        if (fPlano && (l.plano || '') !== fPlano) return false;
+        if (fUf && (l.uf || '').trim().toUpperCase() !== fUf.trim().toUpperCase()) return false;
+        // Tier é calculado dinamicamente, não armazenado em campo
+        if (fTier) {
+            const tierCalc = getLicTier(l)?.name || '';
+            if (tierCalc !== fTier) return false;
+        }
+        if (fRegiao && !ufsRegiao.includes((l.uf || '').trim().toUpperCase())) return false;
+        if (fPlano && (l.plano || '').trim() !== fPlano.trim()) return false;
         return true;
     });
 
@@ -9943,30 +9947,38 @@ function renderizarLicenciamento() {
         'Perdido':'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;',
     };
 
-    const rows = leads.map(l => {
-        const m2 = parseFloat(l.area_total_m2) || 0;
-        const fee = parseFloat(l.fee_mensal) || 0;
-        const ec = etapaCor[l.etapa] || '#6b7280';
-        return `<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="abrirFormLead('${l.id}')">
-            <td style="padding:10px 14px;font-weight:600;color:#111827;">${l.razao_social || '—'} ${_licAlertaBadge(l)}</td>
-            <td style="padding:10px 8px;color:#6b7280;">${l.uf || '—'}</td>
-            <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${planoBg[l.plano]||'#f3f4f6'};color:${planoCor[l.plano]||'#374151'}">${l.plano || '—'}</span></td>
-            <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${ec}18;color:${ec};border:1px solid ${ec}44;">${l.etapa || '—'}</span></td>
-            <td style="padding:10px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${m2 > 0 ? m2.toLocaleString('pt-BR') + ' m²' : '—'}</td>
-            <td style="padding:10px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${fee > 0 ? 'R$'+fee.toLocaleString('pt-BR') : '—'}</td>
-            <td style="padding:10px 8px;color:#6b7280;font-size:12px;">${l.responsavel || '—'}</td>
-            <td style="padding:10px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${statusStyle[l.status]||''}">${l.status || '—'}</span></td>
-            <td style="padding:10px 8px;text-align:center;">${licTierBadge(l, true)}</td>
-            <td style="padding:10px 8px;text-align:center;" onclick="event.stopPropagation()">
-                <button onclick="licGerarLinkForm('${l.id}')" style="padding:3px 9px;border:1px solid #a7f3d0;border-radius:4px;background:#f0fdf4;color:#166534;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar link de preenchimento">🔗</button>
-                <button onclick="gerarLicPDF('${l.id}')" style="padding:3px 9px;border:1px solid #e0d9f5;border-radius:4px;background:#faf8ff;color:#6941c6;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar PDF">📄</button>
-                <button onclick="abrirFormLead('${l.id}')" style="padding:3px 9px;border:1px solid #dde5ff;border-radius:4px;background:#f0f4ff;color:#1e40af;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;">✏️</button>
-                <button onclick="deletarLicLead('${l.id}')" style="padding:3px 9px;border:1px solid #fca5a5;border-radius:4px;background:#fef2f2;color:#991b1b;font-size:11px;cursor:pointer;font-family:inherit;">🗑️</button>
-            </td>
-        </tr>`;
-    }).join('');
+    let rows = '';
+    try {
+        rows = leads.map(l => {
+            const m2 = parseFloat(l.area_total_m2) || 0;
+            const fee = parseFloat(l.fee_mensal) || 0;
+            const ec = etapaCor[l.etapa] || '#6b7280';
+            let alertaBadge = ''; try { alertaBadge = _licAlertaBadge(l); } catch(e) {}
+            let tierBadge   = ''; try { tierBadge   = licTierBadge(l, true); } catch(e) {}
+            return `<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="abrirFormLead('${l.id}')">
+                <td style="padding:10px 14px;font-weight:600;color:#111827;">${l.razao_social || '—'} ${alertaBadge}</td>
+                <td style="padding:10px 8px;color:#6b7280;">${l.uf || '—'}</td>
+                <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${planoBg[l.plano]||'#f3f4f6'};color:${planoCor[l.plano]||'#374151'}">${l.plano || '—'}</span></td>
+                <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${ec}18;color:${ec};border:1px solid ${ec}44;">${l.etapa || '—'}</span></td>
+                <td style="padding:10px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${m2 > 0 ? m2.toLocaleString('pt-BR') + ' m²' : '—'}</td>
+                <td style="padding:10px 8px;text-align:right;font-family:'Courier New',monospace;font-size:11px;color:#374151;">${fee > 0 ? 'R$'+fee.toLocaleString('pt-BR') : '—'}</td>
+                <td style="padding:10px 8px;color:#6b7280;font-size:12px;">${l.responsavel || '—'}</td>
+                <td style="padding:10px 8px;text-align:center;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;${statusStyle[l.status]||''}">${l.status || '—'}</span></td>
+                <td style="padding:10px 8px;text-align:center;">${tierBadge}</td>
+                <td style="padding:10px 8px;text-align:center;" onclick="event.stopPropagation()">
+                    <button onclick="licGerarLinkForm('${l.id}')" style="padding:3px 9px;border:1px solid #a7f3d0;border-radius:4px;background:#f0fdf4;color:#166534;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar link">🔗</button>
+                    <button onclick="gerarLicPDF('${l.id}')" style="padding:3px 9px;border:1px solid #e0d9f5;border-radius:4px;background:#faf8ff;color:#6941c6;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;" title="Gerar PDF">📄</button>
+                    <button onclick="abrirFormLead('${l.id}')" style="padding:3px 9px;border:1px solid #dde5ff;border-radius:4px;background:#f0f4ff;color:#1e40af;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;">✏️</button>
+                    <button onclick="deletarLicLead('${l.id}')" style="padding:3px 9px;border:1px solid #fca5a5;border-radius:4px;background:#fef2f2;color:#991b1b;font-size:11px;cursor:pointer;font-family:inherit;">🗑️</button>
+                </td>
+            </tr>`;
+        }).join('');
+    } catch(e) { console.error('[Lic] Erro linhas:', e); }
 
-    document.getElementById('lic-leads-tbody').innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">Nenhum lead cadastrado. Clique em "+ Novo Lead" para começar.</td></tr>';
+    const vazio = leads.length === 0
+        ? `<tr><td colspan="10" style="text-align:center;padding:48px;color:#bbb;font-size:13px;">${baseLicLeads.length > 0 ? 'Nenhum resultado para os filtros aplicados.' : 'Nenhum lead cadastrado.'}</td></tr>`
+        : '';
+    document.getElementById('lic-leads-tbody').innerHTML = rows || vazio;
 
     renderizarLicDashboard();
     renderizarLicDashboardRede(leads);
