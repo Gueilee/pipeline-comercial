@@ -13732,12 +13732,8 @@ function _licConfirmFechar() {
 
 // Atualiza galeria imediatamente com os dados disponíveis, sem esperar nova query
 function _lfvGaleriaAtualizarDireto() {
+    // _lfvRenderGaleria agora usa lfv-main-photo diretamente e sempre atualiza
     _lfvRenderGaleria();
-    // Também atualiza a miniatura principal no lfv-main-photo para garantir
-    const mainEl = document.getElementById('lfv-main-photo');
-    if (mainEl && _lfvPhotos.length > 0 && !mainEl.querySelector('img')) {
-        mainEl.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
-    }
 }
 
 async function _lfvExcluirAnexo(id, storagePath, urlFotoEnc, leadId) {
@@ -14028,21 +14024,26 @@ function fecharLicMapFullView() {
 }
 
 function _lfvRenderGaleria() {
-    const mainWrap = document.getElementById('lfv-main-inner');
+    // Usa lfv-main-photo como container único — lfv-main-inner é destruído após o 1º render
+    const mainEl   = document.getElementById('lfv-main-photo');
     const thumbsEl = document.getElementById('lfv-thumbs');
     const countEl  = document.getElementById('lfv-photo-count');
-    if (!mainWrap || !thumbsEl) return;
+    if (!mainEl || !thumbsEl) return;
 
     if (_lfvPhotos.length === 0) {
-        mainWrap.innerHTML = `<div style="font-size:52px;margin-bottom:10px;">🏗️</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.4);">Sem fotos cadastradas</div>`;
+        // Sem fotos — restaura estado vazio dentro do container principal
+        mainEl.innerHTML = `<div style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b69);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+            <div style="font-size:52px;opacity:.3;">🏗️</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.4);">Sem fotos cadastradas</div>
+        </div>`;
         thumbsEl.style.display = 'none';
-        if (countEl) countEl.style.display = 'none';
+        thumbsEl.innerHTML = '';
+        if (countEl) { countEl.style.display = 'none'; countEl.textContent = ''; }
         return;
     }
 
-    // Foto principal — contain: mostra a imagem completa sem cortar
-    const mainImg = document.getElementById('lfv-main-photo');
-    mainImg.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
+    // Foto principal (sempre atualiza — não verifica se já tem img)
+    mainEl.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
 
     // Thumbnails
     thumbsEl.style.display = 'flex';
@@ -14053,7 +14054,7 @@ function _lfvRenderGaleria() {
     // Contador
     if (countEl) {
         countEl.textContent = `📷 ${_lfvPhotos.length} foto${_lfvPhotos.length>1?'s':''}`;
-        countEl.style.display = '';
+        countEl.style.display = 'flex';
     }
 }
 
