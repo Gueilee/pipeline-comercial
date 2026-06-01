@@ -904,6 +904,22 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 .lic-file-link:hover{text-decoration:underline;}
 .lic-upload-uploading{opacity:.6;pointer-events:none;}
 
+/* ── BADGE SEGMENTO NO CARD KANBAN ── */
+.card-segmento {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #f0ebff;
+    color: #6941c6;
+    border: 1px solid #e0d9f5;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 /* ── BADGE DE PERFIL ── */
 .perfil-badge {
     display: flex; align-items: center; gap: 5px;
@@ -1037,6 +1053,20 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <div id="kanStatusItems"></div>
                 </div>
             </div>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanSegmento" onclick="toggleKanMs('Segmento')">
+                    <span id="labelKanSegmento">Segmento</span>
+                    <span class="multi-select-badge" id="badgeKanSegmento" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanSegmento" style="min-width:240px;">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Segmento',true)">Selecionar todos</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Segmento',false)">Limpar</button>
+                    </div>
+                    <div id="kanSegmentoItems"></div>
+                </div>
+            </div>
         </div>
 
         <div id="page-dashboard" class="active-page">
@@ -1076,6 +1106,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="">Status Fin.</option>
                     <option value="FATURADO">Faturado</option>
                     <option value="PEDIDOS EM CASA">Pedidos em Casa</option>
+                </select>
+                <div class="home-filter-sep"></div>
+                <select id="homeSegmento" onchange="renderizarHome()" style="min-width:160px; max-width:220px;">
+                    <option value="">Todos os Segmentos</option>
                 </select>
                 <div style="flex:1"></div>
                 <span id="homeAtualizado" style="font-size:11px; color:#bbb;"></span>
@@ -1250,6 +1284,33 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <p id="hFinMensalSub">—</p>
                     <canvas id="chartHomeFinMensal"></canvas>
                 </div>
+            </div>
+
+            <div class="home-connector" style="--c:#6941c6;"></div>
+
+            <!-- SEÇÃO 06: Por Segmento -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#6941c6;">06</div>
+                    <div class="hsh-text">
+                        <h3>Pipeline por Segmento de Mercado</h3>
+                        <p>Quais segmentos concentram mais oportunidades e valor no pipeline</p>
+                    </div>
+                </div>
+                <div class="home-grid-2">
+                    <div class="home-chart-card" style="height:380px;">
+                        <h5>Oportunidades por Segmento</h5>
+                        <p id="hSegQtdSub">Quantidade de oportunidades ativas por segmento</p>
+                        <canvas id="chartHomeSegQtd"></canvas>
+                    </div>
+                    <div class="home-chart-card" style="height:380px;">
+                        <h5>Valor Estimado (ano) por Segmento</h5>
+                        <p id="hSegValSub">R$ total do pipeline por segmento</p>
+                        <canvas id="chartHomeSegValor"></canvas>
+                    </div>
+                </div>
+                <!-- Top segmentos em destaque -->
+                <div id="homeSegTopCards" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
             </div>
 
         </div>
@@ -1506,6 +1567,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="PEDIDOS EM CASA">Pedidos em Casa</option>
                 </select>
 
+                <select id="filtroFinSegmento" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:160px;">
+                    <option value="">Todos os Segmentos</option>
+                </select>
+
                 <span class="periodo-badge" id="finFiltrosBadge" style="display:none"></span>
             </div>
 
@@ -1632,6 +1697,30 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             </thead>
                             <tbody id="tbClientesFinBody"></tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- ── SEÇÃO: Realizado por Segmento ── -->
+                <div style="margin-top:28px;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+                        <div style="width:8px; height:8px; border-radius:50%; background:#6941c6; flex-shrink:0;"></div>
+                        <div>
+                            <h3 style="margin:0; color:var(--lilas); font-size:16px; font-weight:700;">Realizado por Segmento de Mercado</h3>
+                            <p style="margin:3px 0 0 0; font-size:12px; color:#999;">Concentração de faturamento + carteira por segmento do cliente</p>
+                        </div>
+                    </div>
+                    <!-- Top cards de segmento -->
+                    <div id="finSegTopCards" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
+                    <!-- Gráficos -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <div class="chart-card" style="height:360px;">
+                            <h4>Faturado + Carteira por Segmento</h4>
+                            <canvas id="chartFinSegRealizado"></canvas>
+                        </div>
+                        <div class="chart-card" style="height:360px;">
+                            <h4>Plano vs Realizado por Segmento</h4>
+                            <canvas id="chartFinSegPlanoReal"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4213,6 +4302,12 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <div class="form-group" style="flex:1"><label>Vendedor</label><select id="op_vendedor" required></select></div>
                 <div class="form-group" style="flex:1"><label>Área</label><select id="op_area" required></select></div>
             </div>
+            <div class="form-group">
+                <label>Segmento <span style="color:#c0392b; font-size:11px;">*obrigatório</span></label>
+                <select id="op_segmento" required>
+                    <option value="">Selecione o segmento de mercado...</option>
+                </select>
+            </div>
             
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
@@ -5184,7 +5279,8 @@ function editarOportunidade(idParam) {
     document.getElementById('op_valor_mensal_recorrente').value = item.valor_mensal_recorrente || 0;
     document.getElementById('op_status').value = item.status || "";
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
-    document.getElementById('op_historico').value = item.historico || ""; 
+    document.getElementById('op_segmento').value = item.segmento || "";
+    document.getElementById('op_historico').value = item.historico || "";
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
     toggleMotivoPerda(); abrirModal('modalOportunidade');
@@ -5299,27 +5395,24 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
         historico_atual = `[${carimbo}] OPORTUNIDADE CRIADA NO SISTEMA`;
     }
 
-    const payload = { 
-    cliente: novo_cliente, 
-    tipo: novo_tipo, 
-    breve_descricao: nova_desc, 
-    vendedor: novo_vend, 
-    data_oportunidade: nova_data, 
-    previsao_fechamento: nova_prev || null, 
-    
-    // CORREÇÃO: O nome da variável deve ser igual ao que você declarou acima
+    const novo_segmento = document.getElementById('op_segmento').value || null;
+
+    const payload = {
+    cliente: novo_cliente,
+    tipo: novo_tipo,
+    breve_descricao: nova_desc,
+    vendedor: novo_vend,
+    data_oportunidade: nova_data,
+    previsao_fechamento: nova_prev || null,
     data_inicio_faturamento: nova_data_faturamento || null,
-    
-    valor_estimado_ano: novo_valor, 
-    valor_anualizado: novo_anualizado, // ESTA É A NOVA COLUNA (12 meses cheios)
-    
-    // CORREÇÃO: Pegar o valor mensal direto do campo, para respeitar o cálculo de 2026
+    valor_estimado_ano: novo_valor,
+    valor_anualizado: novo_anualizado,
     valor_mensal_recorrente: parseFloat(document.getElementById('op_valor_mensal_recorrente').value) || 0,
-    
-    status: novo_status, 
-    area: nova_area, 
-    motivo_perda: novo_motivo || null, 
-    historico: historico_atual 
+    status: novo_status,
+    area: nova_area,
+    segmento: novo_segmento,
+    motivo_perda: novo_motivo || null,
+    historico: historico_atual
 };
 
     let erroNoBanco = null;
@@ -6158,6 +6251,7 @@ function renderizarHome() {
     const catHome      = document.getElementById('homeCategoria')?.value || '';
     const tipoHome     = document.getElementById('homeTipo')?.value      || '';
     const statusFinHome= document.getElementById('homeStatusFin')?.value || '';
+    const segHome      = document.getElementById('homeSegmento')?.value  || '';
 
     const STATUS_CORES = {
         'AINDA FRIO':    '#17a2b8',
@@ -6173,7 +6267,8 @@ function renderizarHome() {
     // Sem filtro de cliente: usado nos gráficos de pipeline (Seções 01 e 02)
     const opsFiltradas = (base || []).filter(r =>
         (!buHome   || _getBUGroup(r.area) === buHome) &&
-        (!vendHome || r.vendedor          === vendHome)
+        (!vendHome || r.vendedor          === vendHome) &&
+        (!segHome  || r.segmento          === segHome)
     );
     // Com filtro de cliente: usado nos KPIs de pipeline e no financeiro (Seções 03+)
     const opsFiltCliente = clienteHome
@@ -6632,6 +6727,92 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
             }
         }
     });
+
+    // ── SEÇÃO 06: Por Segmento ──
+    const SEG_PALETTE = ['#6941c6','#422c76','#ff2f69','#17a2b8','#f39c12','#27ae60','#007bff','#8e44ad',
+        '#c0392b','#1abc9c','#e67e22','#2980b9','#d35400','#16a085','#8e44ad','#2c3e50'];
+    const segCont = {}, segValor = {};
+    opsFiltCliente.filter(r => r.status !== 'PERDIDO').forEach(r => {
+        const seg = r.segmento || '(sem segmento)';
+        segCont[seg]  = (segCont[seg]  || 0) + 1;
+        segValor[seg] = (segValor[seg] || 0) + (parseFloat(r.valor_estimado_ano)||0);
+    });
+    const segLabelsQtd   = Object.entries(segCont).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+    const segLabelsValor = Object.entries(segValor).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+    const _segCor = (lbl, i) => SEG_PALETTE[i % SEG_PALETTE.length];
+
+    // Top 5 cards de destaque
+    const topCards = document.getElementById('homeSegTopCards');
+    if (topCards) {
+        const top5 = segLabelsValor.slice(0,5);
+        topCards.innerHTML = top5.map((seg, i) => {
+            const qtd = segCont[seg] || 0;
+            const val = segValor[seg] || 0;
+            const cor = _segCor(seg, i);
+            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:180px;flex:1;">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:4px;">Segmento</div>
+                <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">${seg}</div>
+                <div style="display:flex;gap:14px;">
+                    <div><div style="font-size:18px;font-weight:900;color:${cor};">${qtd}</div><div style="font-size:10px;color:#999;">oportunidades</div></div>
+                    <div><div style="font-size:18px;font-weight:900;color:${cor};">${_fmtHome(val)}</div><div style="font-size:10px;color:#999;">estimado/ano</div></div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Gráfico 1: Qtd por segmento (bar horizontal)
+    if(charts.homeSegQtd) charts.homeSegQtd.destroy();
+    charts.homeSegQtd = new Chart(document.getElementById('chartHomeSegQtd'), {
+        type: 'bar',
+        data: {
+            labels: segLabelsQtd,
+            datasets: [{ data: segLabelsQtd.map(s=>segCont[s]),
+                backgroundColor: segLabelsQtd.map((_,i)=>SEG_PALETTE[i%SEG_PALETTE.length]),
+                borderRadius: 5, barThickness: 18 }]
+        },
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            layout: { padding: { right: 50 } },
+            plugins: {
+                legend: { display: false },
+                datalabels: { anchor:'end', align:'end', font:{size:11,weight:'700'}, color:'#555',
+                    formatter: v => v }
+            },
+            scales: {
+                x: { display: false, beginAtZero: true },
+                y: { grid: { display: false }, ticks: { font:{size:11,weight:'600'} } }
+            }
+        }
+    });
+
+    // Gráfico 2: Valor por segmento (bar horizontal)
+    if(charts.homeSegValor) charts.homeSegValor.destroy();
+    charts.homeSegValor = new Chart(document.getElementById('chartHomeSegValor'), {
+        type: 'bar',
+        data: {
+            labels: segLabelsValor,
+            datasets: [{ data: segLabelsValor.map(s=>segValor[s]),
+                backgroundColor: segLabelsValor.map((_,i)=>SEG_PALETTE[i%SEG_PALETTE.length]),
+                borderRadius: 5, barThickness: 18 }]
+        },
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            layout: { padding: { right: 70 } },
+            plugins: {
+                legend: { display: false },
+                datalabels: { anchor:'end', align:'end', font:{size:11,weight:'700'}, color:'#555',
+                    formatter: v => _fmtHome(v) }
+            },
+            scales: {
+                x: { display: false, beginAtZero: true },
+                y: { grid: { display: false }, ticks: { font:{size:11,weight:'600'} } }
+            }
+        }
+    });
+    document.getElementById('hSegQtdSub').innerText = `${opsFiltCliente.filter(r=>r.status!=='PERDIDO').length} oportunidades ativas em ${segLabelsQtd.length} segmentos`;
+    document.getElementById('hSegValSub').innerText = `Pipeline total estimado ${_fmtHome(Object.values(segValor).reduce((a,b)=>a+b,0))}`;
 }
 
 // ---- LOADS INICIAIS ----
@@ -6740,6 +6921,21 @@ async function carregarDados(){
             + tipos.map(t => `<option value="${t}">${t}</option>`).join('');
         homeTipo.value = valAtual;
     }
+
+    // Popular selects de Segmento (Home, Financeiro, modal op_segmento)
+    const segsOps = (base||[]).map(r => r.segmento).filter(Boolean);
+    const segsFin = (baseResMensais||[]).map(r => r.segmento).filter(Boolean);
+    const todosSegs = [...new Set([...segsOps, ...segsFin])].sort((a,b) => a.localeCompare(b, 'pt-BR'));
+    const _populateSegSelect = (id, placeholder) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const val = el.value;
+        el.innerHTML = `<option value="">${placeholder}</option>` + todosSegs.map(s => `<option value="${s}">${s}</option>`).join('');
+        if (val && todosSegs.includes(val)) el.value = val;
+    };
+    _populateSegSelect('homeSegmento', 'Todos os Segmentos');
+    _populateSegSelect('filtroFinSegmento', 'Todos os Segmentos');
+    _populateSegSelect('op_segmento', 'Selecione o segmento de mercado...');
 
     setLoading(false);
     _popularSelectsAno();
@@ -6987,15 +7183,17 @@ async function drop(ev, novoStatus) {
 }
 function renderizar(){
     const fC = document.getElementById('filtroCliente').value.toLowerCase();
-    const vendAtivo   = _allKanVendedores.length > 0 && _kanVendedores.size < _allKanVendedores.length;
-    const areaAtivo   = _allKanAreas.length      > 0 && _kanAreas.size      < _allKanAreas.length;
-    const tipoAtivo   = _kanTipos.size            < _allKanTipos.length;
-    const statusAtivo = _kanStatus.size           < _allKanStatus.length;
+    const vendAtivo     = _allKanVendedores.length > 0 && _kanVendedores.size < _allKanVendedores.length;
+    const areaAtivo     = _allKanAreas.length      > 0 && _kanAreas.size      < _allKanAreas.length;
+    const tipoAtivo     = _kanTipos.size            < _allKanTipos.length;
+    const statusAtivo   = _kanStatus.size           < _allKanStatus.length;
+    const segmentoAtivo = _allKanSegmentos.length   > 0 && _kanSegmentos.size < _allKanSegmentos.length;
     const filtrados = base.filter(r => {
         if (fC && !(r.cliente && r.cliente.toLowerCase().includes(fC))) return false;
-        if (vendAtivo   && !_kanVendedores.has(r.vendedor)) return false;
-        if (areaAtivo   && !_kanAreas.has(r.area))          return false;
-        if (statusAtivo && !_kanStatus.has(r.status))       return false;
+        if (vendAtivo     && !_kanVendedores.has(r.vendedor)) return false;
+        if (areaAtivo     && !_kanAreas.has(r.area))          return false;
+        if (statusAtivo   && !_kanStatus.has(r.status))       return false;
+        if (segmentoAtivo && !_kanSegmentos.has(r.segmento))  return false;
         if (tipoAtivo) {
             const t = (!r.tipo || r.tipo.trim() === '') ? 'NOVOS CLIENTES' : r.tipo.toUpperCase();
             const tNorm = (t === 'NOVO NEGÓCIO') ? 'NOVOS CLIENTES' : t;
@@ -7067,12 +7265,16 @@ function renderizar(){
             const _inicio   = _fmtDataCard(itemDaVez.data_inicio_faturamento);
             const _valAno   = _fmtKVal(itemDaVez.valor_estimado_ano);
             const _val12m   = _fmtKVal(itemDaVez.valor_anualizado);
+            const _segBadge = itemDaVez.segmento
+                ? `<span class="card-segmento" title="${itemDaVez.segmento}">${itemDaVez.segmento}</span>`
+                : '';
             let cardHTML = `<b>${itemDaVez.cliente}</b><span class="card-vend">${itemDaVez.vendedor || '—'}</span>`
                          + `<div class="card-mini">`
                          + `<div class="card-mini-item"><span class="cmi-label">Início</span><span class="cmi-val">${_inicio}</span></div>`
                          + `<div class="card-mini-item"><span class="cmi-label">Ano</span><span class="cmi-val">${_valAno}</span></div>`
                          + `<div class="card-mini-item"><span class="cmi-label">12m</span><span class="cmi-val">${_val12m}</span></div>`
-                         + `</div>`;
+                         + `</div>`
+                         + _segBadge;
 
 
             card.innerHTML = cardHTML;
@@ -7234,18 +7436,21 @@ function renderizarRadar() {
 // ──────────────────────────────────────────────────────────────
 let _allKanVendedores = [];
 let _allKanAreas      = [];
+let _allKanSegmentos  = [];
 const _allKanTipos    = ['UP-SELLING', 'CROSS-SELLING', 'NOVOS CLIENTES'];
 const _allKanStatus   = ['AINDA FRIO', 'FUP', 'MAIOR QUE 50%', 'EM FECHAMENTO', 'FECHADO', 'PERDIDO'];
 let _kanVendedores    = new Set();
 let _kanAreas         = new Set();
 let _kanTipos         = new Set();
 let _kanStatus        = new Set();
+let _kanSegmentos     = new Set();
 
 const _kanMsCfg = {
-    Vendedor: { allFn: ()=>_allKanVendedores, sel: ()=>_kanVendedores, label:'Vendedor',   labelId:'labelKanVendedor', badgeId:'badgeKanVendedor', itemsId:'kanVendedorItems', dropId:'dropdownKanVendedor', btnId:'btnKanVendedor' },
-    Area:     { allFn: ()=>_allKanAreas,      sel: ()=>_kanAreas,      label:'Área',        labelId:'labelKanArea',     badgeId:'badgeKanArea',     itemsId:'kanAreaItems',     dropId:'dropdownKanArea',     btnId:'btnKanArea'     },
-    Tipo:     { allFn: ()=>_allKanTipos,      sel: ()=>_kanTipos,      label:'Tipo (Todos)', labelId:'labelKanTipo',     badgeId:'badgeKanTipo',     itemsId:'kanTipoItems',     dropId:'dropdownKanTipo',     btnId:'btnKanTipo'     },
-    Status:   { allFn: ()=>_allKanStatus,     sel: ()=>_kanStatus,     label:'Status',      labelId:'labelKanStatus',   badgeId:'badgeKanStatus',   itemsId:'kanStatusItems',   dropId:'dropdownKanStatus',   btnId:'btnKanStatus'   },
+    Vendedor:  { allFn: ()=>_allKanVendedores, sel: ()=>_kanVendedores, label:'Vendedor',    labelId:'labelKanVendedor',  badgeId:'badgeKanVendedor',  itemsId:'kanVendedorItems',  dropId:'dropdownKanVendedor',  btnId:'btnKanVendedor'  },
+    Area:      { allFn: ()=>_allKanAreas,      sel: ()=>_kanAreas,      label:'Área',         labelId:'labelKanArea',      badgeId:'badgeKanArea',      itemsId:'kanAreaItems',      dropId:'dropdownKanArea',      btnId:'btnKanArea'      },
+    Tipo:      { allFn: ()=>_allKanTipos,      sel: ()=>_kanTipos,      label:'Tipo (Todos)', labelId:'labelKanTipo',      badgeId:'badgeKanTipo',      itemsId:'kanTipoItems',      dropId:'dropdownKanTipo',      btnId:'btnKanTipo'      },
+    Status:    { allFn: ()=>_allKanStatus,     sel: ()=>_kanStatus,     label:'Status',       labelId:'labelKanStatus',    badgeId:'badgeKanStatus',    itemsId:'kanStatusItems',    dropId:'dropdownKanStatus',    btnId:'btnKanStatus'    },
+    Segmento:  { allFn: ()=>_allKanSegmentos,  sel: ()=>_kanSegmentos,  label:'Segmento',     labelId:'labelKanSegmento',  badgeId:'badgeKanSegmento',  itemsId:'kanSegmentoItems',  dropId:'dropdownKanSegmento',  btnId:'btnKanSegmento'  },
 };
 
 function populateKanMultiSelect() {
@@ -7253,13 +7458,15 @@ function populateKanMultiSelect() {
         ...base.map(i => i.vendedor).filter(Boolean),
         ...Object.keys(METAS_MENSAIS)
     ])].sort();
-    _allKanAreas = [...new Set(base.map(i => i.area).filter(Boolean))].sort();
+    _allKanAreas      = [...new Set(base.map(i => i.area).filter(Boolean))].sort();
+    _allKanSegmentos  = [...new Set(base.map(i => i.segmento).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
     // Inicializa com tudo selecionado (= sem filtro ativo)
     _kanVendedores = new Set(_allKanVendedores);
     _kanAreas      = new Set(_allKanAreas);
     _kanTipos      = new Set(_allKanTipos);
     _kanStatus     = new Set(_allKanStatus);
-    ['Vendedor','Area','Tipo','Status'].forEach(_renderKanMs);
+    _kanSegmentos  = new Set(_allKanSegmentos);
+    ['Vendedor','Area','Tipo','Status','Segmento'].forEach(_renderKanMs);
 }
 
 function _renderKanMs(tipo) {
@@ -8765,9 +8972,16 @@ function renderizarFinanceiro() {
     const fFinTipo     = document.getElementById('filtroFinTipo').value.toUpperCase();
     const fFinQuatroPL = (document.getElementById('filtroFinQuatroPL')?.value || '').toUpperCase();
     const fFinStatus   = document.getElementById('filtroFinStatus').value.toUpperCase();
+    const fFinSegmento = (document.getElementById('filtroFinSegmento')?.value || '');
     const buFiltroAtivo  = _allFinBUs.length  > 0 && _finBUsSelecionadas.size  < _allFinBUs.length;
     const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
     const currentMonthIndex = new Date().getMonth(); // 0=Jan … 11=Dez
+
+    // Para gráficos de segmento: mapear cliente → segmento via resultados_mensais e oportunidades
+    const clienteSegMap = {};
+    (base||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
+    (baseResMensais||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
+    const segFin_plano = {}, segFin_fat = {}, segFin_ped = {};
 
     baseResMensais.forEach(rm => {
         let bu       = rm.bu       ? rm.bu.toUpperCase().replace(/\s+/g,' ').trim()       : 'OUTROS';
@@ -8776,6 +8990,7 @@ function renderizarFinanceiro() {
         const status = _statusEfetivo(rm);
         const tipo   = rm.tipo     ? rm.tipo.toUpperCase().replace(/\s+/g,' ').trim()     : '';
         const q4pl   = rm.quatro_pl ? rm.quatro_pl.toUpperCase().trim() : 'OUTROS';
+        const seg    = rm.segmento || clienteSegMap[rm.cliente] || '(sem segmento)';
 
         if (fFinCli      && !cliName.toLowerCase().includes(fFinCli)) return;
         if (buFiltroAtivo  && !_finBUsSelecionadas.has(bu))           return;
@@ -8783,6 +8998,7 @@ function renderizarFinanceiro() {
         if (fFinTipo     && tipo  !== fFinTipo)     return;
         if (fFinQuatroPL && q4pl  !== fFinQuatroPL) return;
         if (fFinStatus   && status !== fFinStatus)  return;
+        if (fFinSegmento && seg   !== fFinSegmento) return;
 
         const mesIdx  = (rm.mes_numero || 1) - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
@@ -8842,6 +9058,11 @@ function renderizarFinanceiro() {
             cliObjH._rows.push(rm);
             if (!cliObjH._vendedor && rm.vendedor) cliObjH._vendedor = rm.vendedor;
         }
+
+        // Acumula por segmento
+        segFin_plano[seg] = (segFin_plano[seg]||0) + valPlan;
+        if (isFat) segFin_fat[seg] = (segFin_fat[seg]||0) + valReal;
+        if (isPed) segFin_ped[seg] = (segFin_ped[seg]||0) + valReal;
     });
 
     // ── KPIs ──
@@ -9008,6 +9229,111 @@ function renderizarFinanceiro() {
     }
 
     renderTbClientesFin();
+
+    // ── Gráficos de Segmento ──
+    _renderizarGraficosSegFin(segFin_plano, segFin_fat, segFin_ped);
+}
+
+function _renderizarGraficosSegFin(segFin_plano, segFin_fat, segFin_ped) {
+    const SEG_PAL = ['#6941c6','#422c76','#ff2f69','#17a2b8','#f39c12','#27ae60','#007bff','#8e44ad',
+        '#c0392b','#1abc9c','#e67e22','#2980b9','#d35400','#16a085','#2c3e50','#e74c3c'];
+    const _fmtM = v => {
+        if(v >= 1e6) return 'R$' + (v/1e6).toFixed(1) + 'M';
+        if(v >= 1e3) return 'R$' + Math.round(v/1e3) + 'k';
+        return 'R$' + Math.round(v);
+    };
+    const allSegs = [...new Set([...Object.keys(segFin_fat), ...Object.keys(segFin_ped), ...Object.keys(segFin_plano)])];
+    const segLabels = allSegs.sort((a,b) => {
+        const ra = (segFin_fat[a]||0)+(segFin_ped[a]||0);
+        const rb = (segFin_fat[b]||0)+(segFin_ped[b]||0);
+        return rb - ra;
+    });
+
+    // Top cards
+    const topEl = document.getElementById('finSegTopCards');
+    if (topEl) {
+        topEl.innerHTML = segLabels.slice(0,5).map((seg, i) => {
+            const fat = segFin_fat[seg]||0, ped = segFin_ped[seg]||0, plano = segFin_plano[seg]||0;
+            const real = fat + ped;
+            const pct = plano > 0 ? ((real/plano)*100).toFixed(0) : '—';
+            const cor = SEG_PAL[i % SEG_PAL.length];
+            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:180px;flex:1;">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#999;margin-bottom:4px;">Segmento</div>
+                <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">${seg}</div>
+                <div style="display:flex;gap:14px;">
+                    <div><div style="font-size:16px;font-weight:900;color:#ff2f69;">${_fmtM(fat)}</div><div style="font-size:10px;color:#999;">faturado</div></div>
+                    <div><div style="font-size:16px;font-weight:900;color:#f39c12;">${_fmtM(ped)}</div><div style="font-size:10px;color:#999;">carteira</div></div>
+                    <div><div style="font-size:16px;font-weight:900;color:${cor};">${pct}%</div><div style="font-size:10px;color:#999;">atingimento</div></div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Gráfico 1: Faturado + Carteira por segmento (bar horizontal stacked)
+    if(charts.finSegRealizado) charts.finSegRealizado.destroy();
+    const cvs1 = document.getElementById('chartFinSegRealizado');
+    if (cvs1 && segLabels.length > 0) {
+        charts.finSegRealizado = new Chart(cvs1, {
+            type: 'bar',
+            data: {
+                labels: segLabels,
+                datasets: [
+                    { label:'Faturado', data: segLabels.map(s=>segFin_fat[s]||0), backgroundColor:'#ff2f69', borderRadius:4, stack:'r' },
+                    { label:'Pedidos em Casa', data: segLabels.map(s=>segFin_ped[s]||0), backgroundColor:'#f39c12', borderRadius:4, stack:'r' }
+                ]
+            },
+            options: {
+                indexAxis: 'y', maintainAspectRatio: false,
+                layout: { padding: { right: 70 } },
+                plugins: {
+                    legend: { position:'bottom', labels:{boxWidth:10,font:{size:11}} },
+                    datalabels: {
+                        anchor:'end', align:'end', font:{size:10,weight:'700'}, color:'#555',
+                        formatter:(v,ctx) => {
+                            if(ctx.datasetIndex !== 1) return '';
+                            const tot=(segFin_fat[ctx.chart.data.labels[ctx.dataIndex]]||0)+(segFin_ped[ctx.chart.data.labels[ctx.dataIndex]]||0);
+                            return tot>0?_fmtM(tot):'';
+                        }
+                    }
+                },
+                scales: {
+                    x: { stacked:true, display:false, beginAtZero:true },
+                    y: { stacked:true, grid:{display:false}, ticks:{font:{size:11,weight:'600'}} }
+                }
+            }
+        });
+    }
+
+    // Gráfico 2: Plano vs Realizado por segmento
+    if(charts.finSegPlanoReal) charts.finSegPlanoReal.destroy();
+    const cvs2 = document.getElementById('chartFinSegPlanoReal');
+    if (cvs2 && segLabels.length > 0) {
+        charts.finSegPlanoReal = new Chart(cvs2, {
+            type: 'bar',
+            data: {
+                labels: segLabels,
+                datasets: [
+                    { label:'Plano', data: segLabels.map(s=>segFin_plano[s]||0), backgroundColor:'#e0d9f5', borderRadius:4, barThickness:14 },
+                    { label:'Realizado', data: segLabels.map(s=>(segFin_fat[s]||0)+(segFin_ped[s]||0)), backgroundColor:'#6941c6', borderRadius:4, barThickness:14 }
+                ]
+            },
+            options: {
+                indexAxis: 'y', maintainAspectRatio: false,
+                layout: { padding: { right: 70 } },
+                plugins: {
+                    legend: { position:'bottom', labels:{boxWidth:10,font:{size:11}} },
+                    datalabels: {
+                        anchor:'end', align:'end', font:{size:10,weight:'700'}, color:'#555',
+                        formatter: v => v>0 ? _fmtM(v) : ''
+                    }
+                },
+                scales: {
+                    x: { display:false, beginAtZero:true },
+                    y: { grid:{display:false}, ticks:{font:{size:11,weight:'600'}} }
+                }
+            }
+        });
+    }
 }
 
 function renderTbClientesFin() {
