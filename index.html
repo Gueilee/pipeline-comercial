@@ -13644,6 +13644,75 @@ function _licMapAbrirFullView(lead) {
     _lfvCarregarAnexos(lead.id);
 }
 
+async function _lfvExcluirAnexo(id, storagePath, leadId) {
+    if (!confirm('Excluir este arquivo definitivamente?')) return;
+    const card = document.getElementById('lfv-card-'+id);
+    if (card) { card.style.opacity='0.4'; card.style.pointerEvents='none'; }
+    try {
+        if (storagePath) await supabaseClient.storage.from('lic-anexos').remove([storagePath]);
+        await supabaseClient.from('lic_anexos').delete().eq('id', id);
+        showToast('Arquivo excluído.', 'info');
+        _lfvCarregarAnexos(leadId);
+    } catch(e) {
+        if (card) { card.style.opacity=''; card.style.pointerEvents=''; }
+        showToast('Erro ao excluir: ' + e.message, 'error');
+    }
+}
+
+async function _lfvTrocarFoto(id, storagePath, tipo, leadId, files) {
+    if (!files || !files[0]) return;
+    const file = files[0];
+    if (file.size > 10*1024*1024) { showToast('Arquivo excede 10 MB.', 'error'); return; }
+    const card = document.getElementById('lfv-card-'+id);
+    if (card) { card.style.opacity='0.5'; card.style.pointerEvents='none'; }
+    try {
+        // Upload novo arquivo
+        const { path, url, nome, tamanho } = await _licUploadFile(file, tipo, leadId);
+        await supabaseClient.from('lic_anexos').insert([{
+            lead_id: leadId, tipo, nome_arquivo: nome, url,
+            storage_path: path, tamanho_bytes: tamanho,
+            criado_por: EMAIL_USUARIO_LOGADO
+        }]);
+        // Remove o antigo
+        if (storagePath) await supabaseClient.storage.from('lic-anexos').remove([storagePath]);
+        await supabaseClient.from('lic_anexos').delete().eq('id', id);
+        showToast('Foto substituída com sucesso!', 'success');
+        _lfvCarregarAnexos(leadId);
+    } catch(e) {
+        if (card) { card.style.opacity=''; card.style.pointerEvents=''; }
+        showToast('Erro ao trocar foto: ' + e.message, 'error');
+    }
+}
+
+async function _lfvAdicionarFotos(tipo, leadId, files) {
+    if (!files || files.length === 0) return;
+    const MAX = 10*1024*1024;
+    const validos = [...files].filter(f => {
+        if (f.size > MAX) { showToast(`"${f.name}" excede 10 MB.`, 'error'); return false; }
+        return true;
+    });
+    if (!validos.length) return;
+    showToast(`Enviando ${validos.length} foto${validos.length>1?'s':''}…`, 'info');
+    let ok = 0;
+    for (const file of validos) {
+        try {
+            const { path, url, nome, tamanho } = await _licUploadFile(file, tipo, leadId);
+            await supabaseClient.from('lic_anexos').insert([{
+                lead_id: leadId, tipo, nome_arquivo: nome, url,
+                storage_path: path, tamanho_bytes: tamanho,
+                criado_por: EMAIL_USUARIO_LOGADO
+            }]);
+            ok++;
+        } catch(e) {
+            showToast(`Erro ao enviar "${file.name}": ${e.message}`, 'error');
+        }
+    }
+    if (ok > 0) {
+        showToast(`${ok} foto${ok>1?'s adicionadas':' adicionada'} com sucesso!`, 'success');
+        _lfvCarregarAnexos(leadId);
+    }
+}
+
 async function _lfvCarregarHistorico(leadId) {
     const el = document.getElementById('lfv-hist-section');
     if (!el) return;
@@ -13755,22 +13824,57 @@ async function _lfvCarregarAnexos(leadId) {
 
         // Coluna esquerda: cards de documentos agrupados por tipo
         if (docsEl) {
-            docsEl.innerHTML = Object.entries(grupos).map(([label, items]) => `
+            const isFoto = tipo => tipo?.startsWith('foto_armazem_');
+            docsEl.innerHTML = Object.entries(grupos).map(([label, items]) => {
+                const tipo = items[0]?.tipo || '';
+                const addFotoBtn = isFoto(tipo) ? `
+                    <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px dashed #a78bfa;border-radius:8px;background:#f5f3ff;color:#6941c6;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;">
+                        <i class="ti ti-plus"></i> Adicionar fotos
+                        <input type="file" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;"
+                            onchange="_lfvAdicionarFotos('${tipo}','${leadId}',this.files)">
+                    </label>` : '';
+                return `
                 <div style="margin-bottom:16px;">
                     <div style="font-size:11px;font-weight:700;color:#7c5cbf;margin-bottom:8px;">${label}</div>
-                    <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="display:flex;flex-direction:column;gap:8px;" id="lfv-grupo-${tipo.replace(/[^a-z0-9]/g,'_')}">
                         ${items.map(a => `
-                        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1.5px solid #e8e0f5;border-radius:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='#6941c6'" onmouseout="this.style.borderColor='#e8e0f5'">
-                            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f5f3ff,#ede8f8);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${_tipoIcon(a)}</div>
+                        <div id="lfv-card-${a.id}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1.5px solid #e8e0f5;border-radius:12px;">
+                            ${isFoto(a.tipo) && a.url ? `<img src="${a.url}" style="width:56px;height:42px;border-radius:8px;object-fit:cover;flex-shrink:0;cursor:pointer;" onclick="window.open('${a.url}','_blank')" title="Ver foto">` :
+                            `<div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#f5f3ff,#ede8f8);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${_tipoIcon(a)}</div>`}
                             <div style="flex:1;min-width:0;">
                                 <div style="font-size:13px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.nome_arquivo||'Arquivo'}</div>
                                 <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">${_fmtBytes(a.tamanho_bytes)}</div>
                             </div>
-                            <a href="${a.url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">⬇ Download</a>
+                            <div style="display:flex;gap:6px;flex-shrink:0;">
+                                <a href="${a.url}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:none;border-radius:8px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-size:11px;font-weight:700;text-decoration:none;">⬇ Download</a>
+                                ${isFoto(a.tipo) ? `<label style="display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border:1.5px solid #e0d9f5;border-radius:8px;background:#faf8ff;color:#6941c6;font-size:11px;font-weight:700;cursor:pointer;" title="Substituir foto">
+                                    <i class="ti ti-replace"></i> Trocar
+                                    <input type="file" accept=".jpg,.jpeg,.png,.heic,.webp" style="display:none;"
+                                        onchange="_lfvTrocarFoto(${a.id},'${a.storage_path||''}','${a.tipo}','${leadId}',this.files)">
+                                </label>` : ''}
+                                <button onclick="_lfvExcluirAnexo(${a.id},'${a.storage_path||''}','${leadId}')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1.5px solid #fca5a5;border-radius:8px;background:#fef2f2;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;" title="Excluir">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            </div>
                         </div>`).join('')}
                     </div>
-                </div>`
-            ).join('');
+                    ${addFotoBtn}
+                </div>`;
+            }).join('');
+
+            // Zona para adicionar fotos por armazém extra (se houver grupos de foto já existentes)
+            const tiposFoto = [...new Set(anexos.filter(a=>isFoto(a.tipo)).map(a=>a.tipo))];
+            if (tiposFoto.length === 0) {
+                // Se não tem nenhuma foto ainda, mostra zona para qualquer armazém
+                docsEl.innerHTML += `<div style="margin-top:8px;">
+                    <div style="font-size:11px;font-weight:700;color:#7c5cbf;margin-bottom:6px;">Adicionar fotos do armazém</div>
+                    <label style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:2px dashed #c4b5fd;border-radius:12px;background:#f5f3ff;color:#6941c6;font-size:13px;font-weight:700;cursor:pointer;">
+                        <i class="ti ti-camera-plus"></i> Selecionar fotos
+                        <input type="file" accept=".jpg,.jpeg,.png,.heic,.webp" multiple style="display:none;"
+                            onchange="_lfvAdicionarFotos('foto_armazem_1','${leadId}',this.files)">
+                    </label>
+                </div>`;
+            }
         }
 
         // Sidebar direita: lista compacta de documentos (excluindo fotos)
