@@ -1298,15 +1298,19 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     </div>
                 </div>
                 <div class="home-grid-2">
-                    <div class="home-chart-card" style="height:380px;">
-                        <h5>Oportunidades por Segmento</h5>
+                    <div class="home-chart-card" style="height:420px;">
+                        <h5>Oportunidades por Segmento — Top 10</h5>
                         <p id="hSegQtdSub">Quantidade de oportunidades ativas por segmento</p>
-                        <canvas id="chartHomeSegQtd"></canvas>
+                        <div style="height:340px; position:relative;">
+                            <canvas id="chartHomeSegQtd"></canvas>
+                        </div>
                     </div>
-                    <div class="home-chart-card" style="height:380px;">
-                        <h5>Valor Estimado (ano) por Segmento</h5>
+                    <div class="home-chart-card" style="height:420px;">
+                        <h5>Valor Estimado (ano) por Segmento — Top 10</h5>
                         <p id="hSegValSub">R$ total do pipeline por segmento</p>
-                        <canvas id="chartHomeSegValor"></canvas>
+                        <div style="height:340px; position:relative;">
+                            <canvas id="chartHomeSegValor"></canvas>
+                        </div>
                     </div>
                 </div>
                 <!-- Top segmentos em destaque -->
@@ -1713,13 +1717,17 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <div id="finSegTopCards" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
                     <!-- Gráficos -->
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                        <div class="chart-card" style="height:360px;">
-                            <h4>Faturado + Carteira por Segmento</h4>
-                            <canvas id="chartFinSegRealizado"></canvas>
+                        <div class="chart-card" style="height:420px;">
+                            <h4>Faturado + Carteira por Segmento — Top 10</h4>
+                            <div style="height:340px; position:relative;">
+                                <canvas id="chartFinSegRealizado"></canvas>
+                            </div>
                         </div>
-                        <div class="chart-card" style="height:360px;">
-                            <h4>Plano vs Realizado por Segmento</h4>
-                            <canvas id="chartFinSegPlanoReal"></canvas>
+                        <div class="chart-card" style="height:420px;">
+                            <h4>Plano vs Realizado por Segmento — Top 10</h4>
+                            <div style="height:340px; position:relative;">
+                                <canvas id="chartFinSegPlanoReal"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -6730,89 +6738,88 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
 
     // ── SEÇÃO 06: Por Segmento ──
     const SEG_PALETTE = ['#6941c6','#422c76','#ff2f69','#17a2b8','#f39c12','#27ae60','#007bff','#8e44ad',
-        '#c0392b','#1abc9c','#e67e22','#2980b9','#d35400','#16a085','#8e44ad','#2c3e50'];
+        '#c0392b','#1abc9c'];
     const segCont = {}, segValor = {};
-    opsFiltCliente.filter(r => r.status !== 'PERDIDO').forEach(r => {
-        const seg = r.segmento || '(sem segmento)';
+    opsFiltCliente.filter(r => r.status !== 'PERDIDO' && r.segmento).forEach(r => {
+        const seg = r.segmento;
         segCont[seg]  = (segCont[seg]  || 0) + 1;
         segValor[seg] = (segValor[seg] || 0) + (parseFloat(r.valor_estimado_ano)||0);
     });
-    const segLabelsQtd   = Object.entries(segCont).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-    const segLabelsValor = Object.entries(segValor).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-    const _segCor = (lbl, i) => SEG_PALETTE[i % SEG_PALETTE.length];
+    // TOP 10 por qtd e por valor (excluindo sem segmento)
+    const top10Qtd   = Object.entries(segCont).sort((a,b)=>b[1]-a[1]).slice(0,10).map(e=>e[0]);
+    const top10Valor = Object.entries(segValor).sort((a,b)=>b[1]-a[1]).slice(0,10).map(e=>e[0]);
 
-    // Top 5 cards de destaque
+    // Top 5 cards (por valor, com segmento definido)
     const topCards = document.getElementById('homeSegTopCards');
     if (topCards) {
-        const top5 = segLabelsValor.slice(0,5);
-        topCards.innerHTML = top5.map((seg, i) => {
-            const qtd = segCont[seg] || 0;
-            const val = segValor[seg] || 0;
-            const cor = _segCor(seg, i);
-            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:180px;flex:1;">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:4px;">Segmento</div>
-                <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">${seg}</div>
-                <div style="display:flex;gap:14px;">
-                    <div><div style="font-size:18px;font-weight:900;color:${cor};">${qtd}</div><div style="font-size:10px;color:#999;">oportunidades</div></div>
-                    <div><div style="font-size:18px;font-weight:900;color:${cor};">${_fmtHome(val)}</div><div style="font-size:10px;color:#999;">estimado/ano</div></div>
+        topCards.innerHTML = top10Valor.slice(0,5).map((seg, i) => {
+            const cor = SEG_PALETTE[i];
+            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:160px;flex:1;">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">#${i+1} segmento</div>
+                <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:8px;line-height:1.3;">${seg}</div>
+                <div style="display:flex;gap:12px;">
+                    <div><div style="font-size:20px;font-weight:900;color:${cor};line-height:1;">${segCont[seg]||0}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">oport.</div></div>
+                    <div><div style="font-size:20px;font-weight:900;color:${cor};line-height:1;">${_fmtHome(segValor[seg]||0)}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">estimado/ano</div></div>
                 </div>
             </div>`;
         }).join('');
     }
 
-    // Gráfico 1: Qtd por segmento (bar horizontal)
+    const _barOpts = (padRight) => ({
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        layout: { padding: { right: padRight, top: 4, bottom: 4 } },
+        plugins: {
+            legend: { display: false },
+            datalabels: {
+                anchor: 'end', align: 'end',
+                font: { size: 12, weight: '800' }, color: '#444',
+                clamp: true
+            }
+        },
+        scales: {
+            x: { display: false, beginAtZero: true },
+            y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' }, color: '#444' } }
+        }
+    });
+
+    // Gráfico 1: TOP 10 por quantidade
     if(charts.homeSegQtd) charts.homeSegQtd.destroy();
     charts.homeSegQtd = new Chart(document.getElementById('chartHomeSegQtd'), {
         type: 'bar',
         data: {
-            labels: segLabelsQtd,
-            datasets: [{ data: segLabelsQtd.map(s=>segCont[s]),
-                backgroundColor: segLabelsQtd.map((_,i)=>SEG_PALETTE[i%SEG_PALETTE.length]),
-                borderRadius: 5, barThickness: 18 }]
+            labels: top10Qtd,
+            datasets: [{ data: top10Qtd.map(s=>segCont[s]),
+                backgroundColor: SEG_PALETTE,
+                borderRadius: 6, barThickness: 22 }]
         },
-        options: {
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            layout: { padding: { right: 50 } },
-            plugins: {
-                legend: { display: false },
-                datalabels: { anchor:'end', align:'end', font:{size:11,weight:'700'}, color:'#555',
-                    formatter: v => v }
-            },
-            scales: {
-                x: { display: false, beginAtZero: true },
-                y: { grid: { display: false }, ticks: { font:{size:11,weight:'600'} } }
+        options: { ..._barOpts(40),
+            plugins: { ..._barOpts(40).plugins,
+                datalabels: { ..._barOpts(40).plugins.datalabels, formatter: v => v + ' op.' }
             }
         }
     });
 
-    // Gráfico 2: Valor por segmento (bar horizontal)
+    // Gráfico 2: TOP 10 por valor
     if(charts.homeSegValor) charts.homeSegValor.destroy();
     charts.homeSegValor = new Chart(document.getElementById('chartHomeSegValor'), {
         type: 'bar',
         data: {
-            labels: segLabelsValor,
-            datasets: [{ data: segLabelsValor.map(s=>segValor[s]),
-                backgroundColor: segLabelsValor.map((_,i)=>SEG_PALETTE[i%SEG_PALETTE.length]),
-                borderRadius: 5, barThickness: 18 }]
+            labels: top10Valor,
+            datasets: [{ data: top10Valor.map(s=>segValor[s]),
+                backgroundColor: SEG_PALETTE,
+                borderRadius: 6, barThickness: 22 }]
         },
-        options: {
-            indexAxis: 'y',
-            maintainAspectRatio: false,
-            layout: { padding: { right: 70 } },
-            plugins: {
-                legend: { display: false },
-                datalabels: { anchor:'end', align:'end', font:{size:11,weight:'700'}, color:'#555',
-                    formatter: v => _fmtHome(v) }
-            },
-            scales: {
-                x: { display: false, beginAtZero: true },
-                y: { grid: { display: false }, ticks: { font:{size:11,weight:'600'} } }
+        options: { ..._barOpts(70),
+            plugins: { ..._barOpts(70).plugins,
+                datalabels: { ..._barOpts(70).plugins.datalabels, formatter: v => _fmtHome(v) }
             }
         }
     });
-    document.getElementById('hSegQtdSub').innerText = `${opsFiltCliente.filter(r=>r.status!=='PERDIDO').length} oportunidades ativas em ${segLabelsQtd.length} segmentos`;
-    document.getElementById('hSegValSub').innerText = `Pipeline total estimado ${_fmtHome(Object.values(segValor).reduce((a,b)=>a+b,0))}`;
+
+    const totalSeg = Object.values(segValor).reduce((a,b)=>a+b,0);
+    document.getElementById('hSegQtdSub').innerText = `Top 10 de ${Object.keys(segCont).length} segmentos · ${opsFiltCliente.filter(r=>r.status!=='PERDIDO'&&r.segmento).length} oportunidades com segmento`;
+    document.getElementById('hSegValSub').innerText = `Top 10 de ${Object.keys(segValor).length} segmentos · Pipeline total ${_fmtHome(totalSeg)}`;
 }
 
 // ---- LOADS INICIAIS ----
@@ -9235,103 +9242,100 @@ function renderizarFinanceiro() {
 }
 
 function _renderizarGraficosSegFin(segFin_plano, segFin_fat, segFin_ped) {
-    const SEG_PAL = ['#6941c6','#422c76','#ff2f69','#17a2b8','#f39c12','#27ae60','#007bff','#8e44ad',
-        '#c0392b','#1abc9c','#e67e22','#2980b9','#d35400','#16a085','#2c3e50','#e74c3c'];
+    const SEG_PAL = ['#6941c6','#422c76','#ff2f69','#17a2b8','#f39c12','#27ae60','#007bff','#8e44ad','#c0392b','#1abc9c'];
     const _fmtM = v => {
         if(v >= 1e6) return 'R$' + (v/1e6).toFixed(1) + 'M';
         if(v >= 1e3) return 'R$' + Math.round(v/1e3) + 'k';
-        return 'R$' + Math.round(v);
+        return v > 0 ? 'R$' + Math.round(v) : '';
     };
-    const allSegs = [...new Set([...Object.keys(segFin_fat), ...Object.keys(segFin_ped), ...Object.keys(segFin_plano)])];
-    const segLabels = allSegs.sort((a,b) => {
-        const ra = (segFin_fat[a]||0)+(segFin_ped[a]||0);
-        const rb = (segFin_fat[b]||0)+(segFin_ped[b]||0);
-        return rb - ra;
-    });
 
-    // Top cards
+    // Só segmentos com valor definido, TOP 10 por realizado
+    const allSegs = [...new Set([...Object.keys(segFin_fat), ...Object.keys(segFin_ped)])]
+        .filter(s => s && s !== '(sem segmento)');
+    const top10 = allSegs
+        .sort((a,b) => ((segFin_fat[b]||0)+(segFin_ped[b]||0)) - ((segFin_fat[a]||0)+(segFin_ped[a]||0)))
+        .slice(0, 10);
+
+    // Top 5 cards
     const topEl = document.getElementById('finSegTopCards');
     if (topEl) {
-        topEl.innerHTML = segLabels.slice(0,5).map((seg, i) => {
+        topEl.innerHTML = top10.slice(0,5).map((seg, i) => {
             const fat = segFin_fat[seg]||0, ped = segFin_ped[seg]||0, plano = segFin_plano[seg]||0;
             const real = fat + ped;
             const pct = plano > 0 ? ((real/plano)*100).toFixed(0) : '—';
-            const cor = SEG_PAL[i % SEG_PAL.length];
-            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:180px;flex:1;">
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#999;margin-bottom:4px;">Segmento</div>
-                <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;">${seg}</div>
-                <div style="display:flex;gap:14px;">
-                    <div><div style="font-size:16px;font-weight:900;color:#ff2f69;">${_fmtM(fat)}</div><div style="font-size:10px;color:#999;">faturado</div></div>
-                    <div><div style="font-size:16px;font-weight:900;color:#f39c12;">${_fmtM(ped)}</div><div style="font-size:10px;color:#999;">carteira</div></div>
-                    <div><div style="font-size:16px;font-weight:900;color:${cor};">${pct}%</div><div style="font-size:10px;color:#999;">atingimento</div></div>
+            const cor = SEG_PAL[i];
+            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:160px;flex:1;">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">#${i+1} segmento</div>
+                <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:8px;line-height:1.3;">${seg}</div>
+                <div style="display:flex;gap:12px;">
+                    <div><div style="font-size:16px;font-weight:900;color:#ff2f69;line-height:1;">${_fmtM(fat)}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">faturado</div></div>
+                    <div><div style="font-size:16px;font-weight:900;color:#f39c12;line-height:1;">${_fmtM(ped)}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">carteira</div></div>
+                    <div><div style="font-size:16px;font-weight:900;color:${cor};line-height:1;">${pct}%</div><div style="font-size:9px;color:#aaa;margin-top:2px;">ating.</div></div>
                 </div>
             </div>`;
         }).join('');
     }
 
-    // Gráfico 1: Faturado + Carteira por segmento (bar horizontal stacked)
+    const _finBarOpts = (padRight, stacked) => ({
+        indexAxis: 'y',
+        maintainAspectRatio: false,
+        layout: { padding: { right: padRight, top: 4, bottom: 4 } },
+        plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 }, padding: 14 } },
+            datalabels: { anchor:'end', align:'end', clamp:true, font:{size:11,weight:'700'}, color:'#444' }
+        },
+        scales: {
+            x: { stacked: !!stacked, display: false, beginAtZero: true },
+            y: { stacked: !!stacked, grid: { display: false }, ticks: { font: { size: 12, weight: '600' }, color: '#444' } }
+        }
+    });
+
+    // Gráfico 1: Faturado + Carteira (stacked, TOP 10)
     if(charts.finSegRealizado) charts.finSegRealizado.destroy();
     const cvs1 = document.getElementById('chartFinSegRealizado');
-    if (cvs1 && segLabels.length > 0) {
+    if (cvs1 && top10.length > 0) {
+        const opts1 = _finBarOpts(70, true);
+        opts1.plugins.datalabels = {
+            ...opts1.plugins.datalabels,
+            formatter: (v, ctx) => {
+                if (ctx.datasetIndex !== 1) return '';
+                const seg = ctx.chart.data.labels[ctx.dataIndex];
+                const tot = (segFin_fat[seg]||0) + (segFin_ped[seg]||0);
+                return tot > 0 ? _fmtM(tot) : '';
+            }
+        };
         charts.finSegRealizado = new Chart(cvs1, {
             type: 'bar',
             data: {
-                labels: segLabels,
+                labels: top10,
                 datasets: [
-                    { label:'Faturado', data: segLabels.map(s=>segFin_fat[s]||0), backgroundColor:'#ff2f69', borderRadius:4, stack:'r' },
-                    { label:'Pedidos em Casa', data: segLabels.map(s=>segFin_ped[s]||0), backgroundColor:'#f39c12', borderRadius:4, stack:'r' }
+                    { label:'Faturado',      data: top10.map(s=>segFin_fat[s]||0), backgroundColor:'#ff2f69', borderRadius:5, stack:'r', barThickness:22 },
+                    { label:'Pedidos em Casa', data: top10.map(s=>segFin_ped[s]||0), backgroundColor:'#f39c12', borderRadius:5, stack:'r', barThickness:22 }
                 ]
             },
-            options: {
-                indexAxis: 'y', maintainAspectRatio: false,
-                layout: { padding: { right: 70 } },
-                plugins: {
-                    legend: { position:'bottom', labels:{boxWidth:10,font:{size:11}} },
-                    datalabels: {
-                        anchor:'end', align:'end', font:{size:10,weight:'700'}, color:'#555',
-                        formatter:(v,ctx) => {
-                            if(ctx.datasetIndex !== 1) return '';
-                            const tot=(segFin_fat[ctx.chart.data.labels[ctx.dataIndex]]||0)+(segFin_ped[ctx.chart.data.labels[ctx.dataIndex]]||0);
-                            return tot>0?_fmtM(tot):'';
-                        }
-                    }
-                },
-                scales: {
-                    x: { stacked:true, display:false, beginAtZero:true },
-                    y: { stacked:true, grid:{display:false}, ticks:{font:{size:11,weight:'600'}} }
-                }
-            }
+            options: opts1
         });
     }
 
-    // Gráfico 2: Plano vs Realizado por segmento
+    // Gráfico 2: Plano vs Realizado (TOP 10 por realizado)
     if(charts.finSegPlanoReal) charts.finSegPlanoReal.destroy();
     const cvs2 = document.getElementById('chartFinSegPlanoReal');
-    if (cvs2 && segLabels.length > 0) {
+    if (cvs2 && top10.length > 0) {
+        const opts2 = _finBarOpts(70, false);
+        opts2.plugins.datalabels = {
+            ...opts2.plugins.datalabels,
+            formatter: v => v > 0 ? _fmtM(v) : ''
+        };
         charts.finSegPlanoReal = new Chart(cvs2, {
             type: 'bar',
             data: {
-                labels: segLabels,
+                labels: top10,
                 datasets: [
-                    { label:'Plano', data: segLabels.map(s=>segFin_plano[s]||0), backgroundColor:'#e0d9f5', borderRadius:4, barThickness:14 },
-                    { label:'Realizado', data: segLabels.map(s=>(segFin_fat[s]||0)+(segFin_ped[s]||0)), backgroundColor:'#6941c6', borderRadius:4, barThickness:14 }
+                    { label:'Plano',     data: top10.map(s=>segFin_plano[s]||0), backgroundColor:'#e0d9f5', borderRadius:5, barThickness:10 },
+                    { label:'Realizado', data: top10.map(s=>(segFin_fat[s]||0)+(segFin_ped[s]||0)), backgroundColor:'#6941c6', borderRadius:5, barThickness:10 }
                 ]
             },
-            options: {
-                indexAxis: 'y', maintainAspectRatio: false,
-                layout: { padding: { right: 70 } },
-                plugins: {
-                    legend: { position:'bottom', labels:{boxWidth:10,font:{size:11}} },
-                    datalabels: {
-                        anchor:'end', align:'end', font:{size:10,weight:'700'}, color:'#555',
-                        formatter: v => v>0 ? _fmtM(v) : ''
-                    }
-                },
-                scales: {
-                    x: { display:false, beginAtZero:true },
-                    y: { grid:{display:false}, ticks:{font:{size:11,weight:'600'}} }
-                }
-            }
+            options: opts2
         });
     }
 }
