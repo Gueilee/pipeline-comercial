@@ -2786,7 +2786,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
                 <!-- GALERIA DE FOTOS — tamanho real, sem restrição -->
                 <div id="lfv-gallery-wrap" style="background:#0f0f1a;position:relative;">
-                    <div id="lfv-main-photo" style="height:480px;position:relative;overflow:hidden;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)">
+                    <div id="lfv-main-photo" style="height:480px;position:relative;overflow:hidden;cursor:zoom-in;background:#0a0a14;display:flex;align-items:center;justify-content:center;" onclick="lfvAbrirLightbox(0)">
                         <div id="lfv-main-inner" style="width:100%;height:100%;background:linear-gradient(135deg,#1a1a2e,#2d1b69);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
                             <div style="font-size:64px;opacity:.3;">🏗️</div>
                             <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,.35);">Sem fotos cadastradas</div>
@@ -13736,7 +13736,7 @@ function _lfvGaleriaAtualizarDireto() {
     // Também atualiza a miniatura principal no lfv-main-photo para garantir
     const mainEl = document.getElementById('lfv-main-photo');
     if (mainEl && _lfvPhotos.length > 0 && !mainEl.querySelector('img')) {
-        mainEl.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
+        mainEl.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
     }
 }
 
@@ -14040,9 +14040,9 @@ function _lfvRenderGaleria() {
         return;
     }
 
-    // Foto principal
+    // Foto principal — contain: mostra a imagem completa sem cortar
     const mainImg = document.getElementById('lfv-main-photo');
-    mainImg.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
+    mainImg.innerHTML = `<img src="${_lfvPhotos[0]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(0)" loading="lazy">`;
 
     // Thumbnails
     thumbsEl.style.display = 'flex';
@@ -14059,7 +14059,7 @@ function _lfvRenderGaleria() {
 
 function lfvMainSwitch(idx) {
     const mainPhoto = document.getElementById('lfv-main-photo');
-    if (mainPhoto) mainPhoto.innerHTML = `<img src="${_lfvPhotos[idx]}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="lfvAbrirLightbox(${idx})" loading="lazy">`;
+    if (mainPhoto) mainPhoto.innerHTML = `<img src="${_lfvPhotos[idx]}" style="width:100%;height:100%;object-fit:contain;cursor:zoom-in;" onclick="lfvAbrirLightbox(${idx})" loading="lazy">`;
     document.querySelectorAll('#lfv-thumbs img').forEach((el,i) => {
         el.style.opacity = i===idx?'1':'.65';
         el.style.borderColor = i===idx?'#6941c6':'transparent';
