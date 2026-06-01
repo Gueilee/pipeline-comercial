@@ -13965,36 +13965,27 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    // Cores por categoria
-    function getFill(uf) {
-        if (ufsConv.has(uf))  return { color:'#86efac', opacity:'0.72', stroke:'#16a34a', hoverColor:'#4ade80', hoverOpacity:'0.88' };
-        if (ufsProsp.has(uf)) return { color:'#fde68a', opacity:'0.68', stroke:'#ca8a04', hoverColor:'#fbbf24', hoverOpacity:'0.84' };
-        return                         { color:'#fca5a5', opacity:'0.65', stroke:'#ef4444', hoverColor:'#f87171', hoverOpacity:'0.82' };
+    function getStyle(uf) {
+        if (!uf) return { weight:0.5, color:'#d1d5db', fillColor:'#e5e7eb', fillOpacity:0.15 };
+        if (ufsConv.has(uf))  return { weight:1.5, color:'#15803d', fillColor:'#86efac', fillOpacity:0.72 };
+        if (ufsProsp.has(uf)) return { weight:1.5, color:'#92400e', fillColor:'#fde68a', fillOpacity:0.68 };
+        return                         { weight:1.5, color:'#b91c1c', fillColor:'#fca5a5', fillOpacity:0.65 };
+    }
+    function getStyleHover(uf) {
+        if (ufsConv.has(uf))  return { weight:2.5, color:'#166534', fillColor:'#4ade80', fillOpacity:0.88 };
+        if (ufsProsp.has(uf)) return { weight:2.5, color:'#78350f', fillColor:'#fbbf24', fillOpacity:0.84 };
+        return                         { weight:2.5, color:'#991b1b', fillColor:'#f87171', fillOpacity:0.82 };
     }
 
-    // Aplica fill diretamente no elemento SVG path (único método 100% confiável)
-    function applyFillToLayer(layer, fillObj, isHover) {
-        const applyTo = (path) => {
-            if (!path) return;
-            path.style.fill = isHover ? fillObj.hoverColor : fillObj.color;
-            path.style.fillOpacity = isHover ? fillObj.hoverOpacity : fillObj.opacity;
-        };
-        if (layer._path) applyTo(layer._path);
-        // MultiPolygon cria sub-layers
-        if (layer._layers) Object.values(layer._layers).forEach(sub => applyTo(sub._path));
-    }
+    // Canvas renderer — desenha fills via Canvas 2D API, 100% independente de SVG/CSS
+    const canvasRender = L.canvas({ padding: 0.5 });
 
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        style: f => {
-            const uf = _licNormUF(f.properties?.sigla);
-            if (!uf) return { weight:0.5, color:'#d1d5db', fillOpacity:0, fill:false };
-            const fill = getFill(uf);
-            return { weight:1.5, color:fill.stroke, fillOpacity:0, fill:false };
-        },
+        renderer: canvasRender,
+        style: f => getStyle(_licNormUF(f.properties?.sigla)),
         onEachFeature: (feature, layer) => {
             const uf = _licNormUF(feature.properties?.sigla || '');
             if (!uf) return;
-            const fillObj = getFill(uf);
             const nome  = _LIC_UF_NOMES[uf] || feature.properties?.name || uf;
             const hasCov  = ufsConv.has(uf);
             const hasPros = ufsProsp.has(uf);
@@ -14008,22 +13999,11 @@ function renderizarLicGapAnalysis() {
                 `<div style="min-width:140px;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
                 {className:'lic-map-tooltip', sticky:true}
             );
-            layer.on('mouseover', e => { applyFillToLayer(e.target, fillObj, true); e.target.setStyle({weight:2.5}); e.target.bringToFront(); });
-            layer.on('mouseout',  e => { applyFillToLayer(e.target, fillObj, false); e.target.setStyle({weight:1.5}); });
-            layer.on('click', e => {
-                _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]});
-                const chip = document.getElementById('gap-uf-'+uf);
-                if (chip) { chip.scrollIntoView({behavior:'smooth',block:'nearest'}); chip.style.outline='2px solid #6941c6'; setTimeout(()=>{ chip.style.outline=''; },1600); }
-            });
+            layer.on('mouseover', e => { e.target.setStyle(getStyleHover(uf)); });
+            layer.on('mouseout',  e => { e.target.setStyle(getStyle(uf)); });
+            layer.on('click',     e => { _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]}); });
         }
     }).addTo(_licMap);
-
-    // Aplica fills via DOM após addTo (className no style function não funciona no Leaflet)
-    _licGeoJsonLayer.eachLayer(layer => {
-        const uf = _licNormUF(layer.feature?.properties?.sigla);
-        if (!uf) return;
-        applyFillToLayer(layer, getFill(uf), false);
-    });
 
     // ── Painel lateral ──
     const totalUFs = 27;
@@ -14062,9 +14042,9 @@ function renderizarLicGapAnalysis() {
         <div style="margin-bottom:12px;background:#f9f7ff;border-radius:10px;padding:9px 11px;">
             <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:7px;">Legenda</div>
             <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#374151;">
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#16a34a;opacity:.7;"></div>Verde claro — Licenciado ativo</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#ca8a04;opacity:.7;"></div>Amarelo — Em prospecção</div>
-                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#ef4444;opacity:.5;"></div>Rosa claro — Sem cobertura</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#86efac;border:1.5px solid #16a34a;"></div>Verde — Licenciado ativo</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#fde68a;border:1.5px solid #ca8a04;"></div>Amarelo — Em prospecção</div>
+                <div style="display:flex;align-items:center;gap:8px;"><div style="width:18px;height:11px;border-radius:3px;background:#fca5a5;border:1.5px solid #ef4444;"></div>Rosa — Sem cobertura</div>
             </div>
         </div>
 
@@ -14072,7 +14052,7 @@ function renderizarLicGapAnalysis() {
         <div style="margin-bottom:10px;">
             <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#15803d;margin-bottom:6px;">✔ Com licenciado</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px;">
-                ${convList.map(u=>`<span onclick="_licMapFocarUF('${u}')" style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;cursor:pointer;" title="${_LIC_UF_NOMES[u]||u}">${u}</span>`).join('')}
+                ${convList.map(u=>`<span style="background:#f0fdf4;color:#166534;border:1.5px solid #86efac;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;">${u}</span>`).join('')}
             </div>
         </div>` : ''}
 
@@ -14080,16 +14060,15 @@ function renderizarLicGapAnalysis() {
         <div style="margin-bottom:10px;">
             <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#a16207;margin-bottom:6px;">◑ Em prospecção</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px;">
-                ${emProsList.map(u=>`<span onclick="_licMapFocarUF('${u}')" id="gap-uf-${u}" style="background:#fffbeb;color:#92400e;border:1.5px solid #fde68a;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;cursor:pointer;" title="${_LIC_UF_NOMES[u]||u}">${u}</span>`).join('')}
+                ${emProsList.map(u=>`<span style="background:#fffbeb;color:#92400e;border:1.5px solid #fde68a;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;">${u}</span>`).join('')}
             </div>
         </div>` : ''}
 
         ${semCobList.length > 0 ? `
         <div>
-            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#b91c1c;margin-bottom:4px;">🎯 Oportunidades (${semCobList.length})</div>
-            <div style="font-size:10px;color:#9b8cc0;margin-bottom:6px;">Clique para centralizar no mapa</div>
+            <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#b91c1c;margin-bottom:8px;">🎯 Oportunidades (${semCobList.length} estados)</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px;">
-                ${semCobList.map(u=>`<span onclick="_licMapFocarUF('${u}')" id="gap-uf-${u}" style="background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;cursor:pointer;" title="${_LIC_UF_NOMES[u]||u}">${u}</span>`).join('')}
+                ${semCobList.map(u=>`<span style="background:#fef2f2;color:#b91c1c;border:1px solid #fca5a5;border-radius:6px;padding:3px 7px;font-size:11px;font-weight:700;">${u}</span>`).join('')}
             </div>
         </div>
         ` : `<div style="background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;font-size:12px;font-weight:700;color:#16a34a;">🎉 Cobertura completa!</div>`}
