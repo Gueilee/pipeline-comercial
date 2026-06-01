@@ -13270,9 +13270,9 @@ function fecharLicMapa() {
 function _licInicializarMapa() {
     if (_licMap) { _licMap.remove(); _licMap = null; }
     _licMap = L.map('lic-mapa-container', { center:[-15,-52], zoom:4, zoomControl:false, scrollWheelZoom:true, minZoom:3, maxZoom:14 });
-    // Uma só tile — light_all tem labels integrados; o GeoJSON fica no overlayPane acima
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution:'©<a href="https://openstreetmap.org">OpenStreetMap</a> ©<a href="https://carto.com">CARTO</a>', maxZoom:19,
+    // OpenStreetMap — fundo bege/bege-claro, contraste real com fills coloridos
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution:'©<a href="https://openstreetmap.org">OpenStreetMap</a>', maxZoom:19,
     }).addTo(_licMap);
     L.control.zoom({ position:'bottomright' }).addTo(_licMap);
     _licMap.on('movestart', () => _licMapEsconderHover());
@@ -13286,10 +13286,10 @@ function _licInicializarMapa() {
                 if (!uf) return;
                 try { _licUFBounds[uf] = L.geoJSON(feature).getBounds(); } catch(e) {}
             });
-            // Ativa Gap Analysis por padrão ao abrir o mapa
-            _licGapMode = true;
+            // Gap Analysis OFF por padrão — usuário ativa manualmente
+            _licGapMode = false;
             _licSincronizarBotaoGap();
-            renderizarLicGapAnalysis();
+            _licAtualizarChoropleth();
             _licAtualizarMarkers();
         })
         .catch(()=>{ _licAtualizarMarkers(); });
@@ -13965,24 +13965,15 @@ function renderizarLicGapAnalysis() {
     const m2ByUF = {};
     conv.forEach(l=>{ const u=_licNormUF(l.uf); if(u) m2ByUF[u]=(m2ByUF[u]||0)+(parseFloat(l.area_total_m2)||0); });
 
-    function getStyle(uf) {
-        if (!uf) return { weight:0.5, color:'#d1d5db', fillColor:'#e5e7eb', fillOpacity:0.15 };
-        if (ufsConv.has(uf))  return { weight:1.5, color:'#15803d', fillColor:'#86efac', fillOpacity:0.72 };
-        if (ufsProsp.has(uf)) return { weight:1.5, color:'#92400e', fillColor:'#fde68a', fillOpacity:0.68 };
-        return                         { weight:1.5, color:'#b91c1c', fillColor:'#fca5a5', fillOpacity:0.65 };
-    }
-    function getStyleHover(uf) {
-        if (ufsConv.has(uf))  return { weight:2.5, color:'#166534', fillColor:'#4ade80', fillOpacity:0.88 };
-        if (ufsProsp.has(uf)) return { weight:2.5, color:'#78350f', fillColor:'#fbbf24', fillOpacity:0.84 };
-        return                         { weight:2.5, color:'#991b1b', fillColor:'#f87171', fillOpacity:0.82 };
-    }
-
-    // Canvas renderer — desenha fills via Canvas 2D API, 100% independente de SVG/CSS
-    const canvasRender = L.canvas({ padding: 0.5 });
-
+    // SVG puro — mesma estrutura do _licAtualizarChoropleth que funciona
     _licGeoJsonLayer = L.geoJSON(_licGeoJsonData, {
-        renderer: canvasRender,
-        style: f => getStyle(_licNormUF(f.properties?.sigla)),
+        style: f => {
+            const uf = _licNormUF(f.properties?.sigla);
+            if (!uf) return { weight:0.5, color:'#d1d5db', fillColor:'#e5e7eb', fillOpacity:0.25 };
+            if (ufsConv.has(uf))  return { weight:2,   color:'#166534', fillColor:'#4ade80', fillOpacity:0.65 };
+            if (ufsProsp.has(uf)) return { weight:2,   color:'#92400e', fillColor:'#fde047', fillOpacity:0.60 };
+            return                         { weight:1.5, color:'#991b1b', fillColor:'#f87171', fillOpacity:0.55 };
+        },
         onEachFeature: (feature, layer) => {
             const uf = _licNormUF(feature.properties?.sigla || '');
             if (!uf) return;
@@ -13999,8 +13990,14 @@ function renderizarLicGapAnalysis() {
                 `<div style="min-width:140px;"><div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">${nome} <span style="font-size:10px;color:#9b8cc0;">(${uf})</span></div><div style="font-size:11px;">${statusHtml}</div></div>`,
                 {className:'lic-map-tooltip', sticky:true}
             );
-            layer.on('mouseover', e => { e.target.setStyle(getStyleHover(uf)); });
-            layer.on('mouseout',  e => { e.target.setStyle(getStyle(uf)); });
+            layer.on('mouseover', e => {
+                e.target.setStyle(hasCov
+                    ? { fillOpacity:0.85, weight:3, color:'#14532d' }
+                    : hasPros ? { fillOpacity:0.80, weight:3, color:'#78350f' }
+                              : { fillOpacity:0.75, weight:3, color:'#7f1d1d' });
+                e.target.bringToFront();
+            });
+            layer.on('mouseout',  e => { _licGeoJsonLayer.resetStyle(e.target); });
             layer.on('click',     e => { _licMap.fitBounds(e.target.getBounds(), {padding:[30,30]}); });
         }
     }).addTo(_licMap);
