@@ -739,6 +739,13 @@ header {
 .lic-chip{padding:4px 12px;border:1px solid #d4b8f5;border-radius:20px;background:#f0ebff;font-size:11px;color:#6941c6;cursor:pointer;font-family:inherit;transition:all .12s;}
 .lic-chip-on,.lic-chip:hover{background:#6941c6;border-color:#6941c6;color:#fff;}
 .lic-kpi-card{background:#fff;border:1px solid #e8e0f5;border-radius:10px;padding:14px 16px;}
+.lic-lic-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#faf8ff;border:1.5px solid #e0d9f5;border-radius:10px;flex-wrap:wrap;}
+.lic-lic-lbl{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;font-size:13px;font-weight:600;color:#2d1b69;}
+.lic-lic-lbl input[type=checkbox]{accent-color:#6941c6;width:16px;height:16px;cursor:pointer;}
+.lic-val-label{font-size:10px;font-weight:700;color:#9b8cc0;white-space:nowrap;}
+.lic-val-in{padding:5px 8px;border:1.5px solid #e0d9f5;border-radius:8px;font-family:inherit;font-size:12px;color:#2d1b69;outline:none;background:#fff;}
+.lic-val-in.vencendo{border-color:#f59e0b;background:#fffbeb;}
+.lic-val-in.vencida{border-color:#dc2626;background:#fef2f2;}
 
 /* Choropleth — classes diretas nos paths SVG do Leaflet */
 .lic-choro-covered  { fill:#86efac !important; fill-opacity:0.72 !important; stroke:#16a34a !important; stroke-width:1.5px !important; }
@@ -1697,7 +1704,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicAuditoria()" style="padding:7px 14px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-clipboard-check"></i> Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:7px 14px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-target"></i> Scorecard</button>
                         <button onclick="gerarBoardReport(event)" style="padding:7px 14px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;box-shadow:0 2px 8px rgba(45,27,105,.25);"><i class="ti ti-file-analytics"></i> Board Report</button>
-                        <button onclick="abrirStatusReport()" style="padding:7px 14px;background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;box-shadow:0 2px 8px rgba(15,23,42,.35);"><i class="ti ti-presentation"></i> Status Report</button>
+                        <button onclick="abrirStatusReport()" title="Apresentação executiva — tela cheia" style="padding:7px 12px;background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.35);"><i class="ti ti-presentation"></i></button>
 
                         <!-- Novo Lead com dropdown para Gerar link -->
                         <div style="position:relative;" id="lic-novol-wrap">
@@ -1716,7 +1723,6 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             </div>
                         </div>
 
-                        <button id="btn-lic-alertas" onclick="abrirLicAlertas()" style="padding:7px 14px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;position:relative;"><i class="ti ti-bell"></i> Alertas</button>
 
                         <!-- Especificações dropdown -->
                         <div style="position:relative;" id="spec-btn-wrap">
@@ -2318,14 +2324,14 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <label class="lic-chip-opt"><input type="checkbox" value="Agroquímicos">Agroquímicos</label>
                                         <label class="lic-chip-opt"><input type="checkbox" value="Eletrônicos de alto valor">Eletrônicos de alto valor</label>
                                     </div>
-                                    <div class="lic-section-divider">Licenças ativas</div>
-                                    <div class="lic-chip-sel" id="lf-licencas" style="margin-bottom:20px;">
-                                        <label class="lic-chip-opt"><input type="checkbox" value="ANTT">ANTT — perigosos</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="ANVISA">ANVISA</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="IBAMA">IBAMA</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="AVCB">AVCB (Bombeiros)</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="Licença ambiental">Licença ambiental</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="OEA">OEA — Receita Federal</label>
+                                    <div class="lic-section-divider">Licenças ativas — selecione e informe a validade</div>
+                                    <div id="lf-licencas" style="margin-bottom:20px;display:flex;flex-direction:column;gap:8px;">
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ANTT" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-antt')"> ANTT — perigosos</label><div id="lic-val-antt" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-antt" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ANVISA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-anvisa')"> ANVISA</label><div id="lic-val-anvisa" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-anvisa" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="IBAMA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-ibama')"> IBAMA</label><div id="lic-val-ibama" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-ibama" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="AVCB" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-avcb')"> AVCB (Bombeiros)</label><div id="lic-val-avcb" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-avcb" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Licença ambiental" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-ambiental')"> Licença ambiental</label><div id="lic-val-ambiental" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-ambiental" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="OEA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-oea')"> OEA — Receita Federal</label><div id="lic-val-oea" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-oea" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
                                     </div>
                                     <!-- Upload: Documentos de Licenças ativas -->
                                     <div style="margin-top:16px;padding:0 2px;">
@@ -2411,15 +2417,15 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                     </div>
                                 </div>
                                 <div class="lic-sec-body">
-                                    <div class="lic-section-divider">Certificações ativas</div>
-                                    <div class="lic-chip-sel" id="lf-certificacoes" style="margin-bottom:24px;">
-                                        <label class="lic-chip-opt"><input type="checkbox" value="ISO 9001">ISO 9001</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="ISO 14001">ISO 14001</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="OEA">OEA (Operador Econômico Autorizado)</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="ANVISA">ANVISA</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="INMETRO">INMETRO</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="Balanço auditado">Balanço auditado</label>
-                                        <label class="lic-chip-opt"><input type="checkbox" value="Nenhuma">Nenhuma</label>
+                                    <div class="lic-section-divider">Certificações ativas — selecione e informe a validade</div>
+                                    <div id="lf-certificacoes" style="margin-bottom:20px;display:flex;flex-direction:column;gap:8px;">
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ISO 9001" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-iso9001')"> ISO 9001</label><div id="lic-val-iso9001" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-iso9001" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ISO 14001" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-iso14001')"> ISO 14001</label><div id="lic-val-iso14001" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-iso14001" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="OEA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-oea-cert')"> OEA (Operador Econômico Autorizado)</label><div id="lic-val-oea-cert" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-oea" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ANVISA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-anvisa-cert')"> ANVISA</label><div id="lic-val-anvisa-cert" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-anvisa" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="INMETRO" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-inmetro')"> INMETRO</label><div id="lic-val-inmetro" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-inmetro" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Balanço auditado" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-balanco')"> Balanço auditado</label><div id="lic-val-balanco" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-balanco" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Nenhuma" class="lic-lic-chk"> Nenhuma</label></div>
                                     </div>
                                     <div class="lic-field-row">
                                         <div>
@@ -9942,7 +9948,7 @@ function renderizarLicenciamento() {
         const fee = parseFloat(l.fee_mensal) || 0;
         const ec = etapaCor[l.etapa] || '#6b7280';
         return `<tr style="border-bottom:1px solid #f3f4f6;cursor:pointer;" onclick="abrirFormLead('${l.id}')">
-            <td style="padding:10px 14px;font-weight:600;color:#111827;">${l.razao_social || '—'}</td>
+            <td style="padding:10px 14px;font-weight:600;color:#111827;">${l.razao_social || '—'} ${_licAlertaBadge(l)}</td>
             <td style="padding:10px 8px;color:#6b7280;">${l.uf || '—'}</td>
             <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${planoBg[l.plano]||'#f3f4f6'};color:${planoCor[l.plano]||'#374151'}">${l.plano || '—'}</span></td>
             <td style="padding:10px 8px;"><span style="padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:${ec}18;color:${ec};border:1px solid ${ec}44;">${l.etapa || '—'}</span></td>
@@ -10534,6 +10540,115 @@ function licUpdateImplant() {
 function licToggleWms(show) {
     const b = document.getElementById('lic-wms-block');
     if (b) b.style.display = show ? '' : 'none';
+}
+
+// ── Alertas integrados nos leads ─────────────────────────────────
+
+// Mapeamento: valor do checkbox → id do campo de validade
+const _LIC_VALIDADES_MAP = {
+    'ANTT':'lf-licval-antt','ANVISA':'lf-licval-anvisa','IBAMA':'lf-licval-ibama',
+    'AVCB':'lf-licval-avcb','Licença ambiental':'lf-licval-ambiental','OEA':'lf-licval-oea',
+    'ISO 9001':'lf-certval-iso9001','ISO 14001':'lf-certval-iso14001',
+    'OEA (Operador Econômico Autorizado)':'lf-certval-oea','ANVISA (cert)':'lf-certval-anvisa',
+    'INMETRO':'lf-certval-inmetro','Balanço auditado':'lf-certval-balanco'
+};
+
+function licMostrarValidade(checkbox, containerId) {
+    const div = document.getElementById(containerId);
+    if (div) div.style.display = checkbox.checked ? 'flex' : 'none';
+    if (!checkbox.checked) {
+        const inp = div?.querySelector('input[type=date]');
+        if (inp) { inp.value = ''; inp.className='lic-val-in'; }
+    }
+}
+
+function _licValidadeAlerta(input) {
+    if (!input.value) { input.className='lic-val-in'; return; }
+    const dias = Math.floor((new Date(input.value+' 00:00:00') - new Date()) / 86400000);
+    input.className = 'lic-val-in' + (dias < 0 ? ' vencida' : dias <= 30 ? ' vencendo' : '');
+}
+
+// Coleta validades do formulário
+function _licColetarValidades() {
+    const validades = {};
+    document.querySelectorAll('.lic-val-in').forEach(inp => {
+        if (inp.value && inp.id) {
+            const key = inp.id.replace('lf-licval-','').replace('lf-certval-','');
+            validades[key] = inp.value;
+        }
+    });
+    return validades;
+}
+
+// Preenche validades no formulário ao abrir um lead para edição
+function _licPreencherValidades(lead) {
+    const validades = lead.validades_documentos || {};
+    Object.entries(validades).forEach(([key, data]) => {
+        const inp = document.getElementById(`lf-licval-${key}`) || document.getElementById(`lf-certval-${key}`);
+        if (inp && data) {
+            inp.value = data;
+            _licValidadeAlerta(inp);
+            const row = inp.closest('.lic-lic-row');
+            if (row) {
+                const chk = row.querySelector('input[type=checkbox]');
+                if (chk) { chk.checked = true; }
+                const valDiv = inp.closest('[id^=lic-val-]');
+                if (valDiv) valDiv.style.display = 'flex';
+            }
+        }
+    });
+}
+
+// Cálculo de alertas por lead
+function _licGetAlertas(lead) {
+    const alertas = [];
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const difDias = dateStr => {
+        if (!dateStr) return null;
+        return Math.floor((new Date(dateStr+' 00:00:00') - hoje) / 86400000);
+    };
+
+    // Validades de documentos
+    const val = lead.validades_documentos || {};
+    Object.entries(val).forEach(([key, data]) => {
+        const dias = difDias(data);
+        if (dias === null) return;
+        if (dias < 0) alertas.push({nivel:'critico', msg:`${key.toUpperCase()}: VENCIDA há ${-dias}d`, icone:'🔴'});
+        else if (dias <= 7) alertas.push({nivel:'critico', msg:`${key.toUpperCase()}: vence em ${dias}d`, icone:'🔴'});
+        else if (dias <= 30) alertas.push({nivel:'alerta', msg:`${key.toUpperCase()}: vence em ${dias}d`, icone:'🟡'});
+    });
+
+    // Performance KPIs
+    const perf = getLicUltimoPeriodo?.(lead.id);
+    if (perf) {
+        const sg = kpiSaudeGeral?.(perf);
+        if (sg === 'vermelho') alertas.push({nivel:'critico', msg:'KPIs críticos no Scorecard', icone:'🔴'});
+        else if (sg === 'amarelo') alertas.push({nivel:'alerta', msg:'KPIs em atenção no Scorecard', icone:'🟡'});
+    }
+
+    return alertas;
+}
+
+// Badge de alertas para usar em cards e tabela
+function _licAlertaBadge(lead) {
+    const al = _licGetAlertas(lead);
+    if (!al.length) return '';
+    const criticos = al.filter(a=>a.nivel==='critico').length;
+    const cor = criticos>0?'#dc2626':'#d97706';
+    const bg  = criticos>0?'#fef2f2':'#fffbeb';
+    return `<span title="${al.map(a=>a.msg).join('\n')}" style="display:inline-flex;align-items:center;gap:3px;background:${bg};color:${cor};border:1px solid ${cor}33;border-radius:20px;padding:2px 7px;font-size:10px;font-weight:700;cursor:default;">🔔 ${al.length}</span>`;
+}
+
+// Seção de alertas para o full-view do licenciado
+function _lfvRenderAlertasLead(lead) {
+    const al = _licGetAlertas(lead);
+    if (!al.length) return '';
+    return `<div style="margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#dc2626;margin-bottom:8px;display:flex;align-items:center;gap:6px;">🔔 Alertas do lead (${al.length})</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+            ${al.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 13px;background:${a.nivel==='critico'?'#fef2f2':'#fffbeb'};border:1px solid ${a.nivel==='critico'?'#fca5a5':'#fcd34d'};border-left:3px solid ${a.nivel==='critico'?'#dc2626':'#d97706'};border-radius:8px;font-size:12px;font-weight:600;color:${a.nivel==='critico'?'#991b1b':'#92400e'};">${a.icone} ${a.msg}</div>`).join('')}
+        </div>
+    </div>`;
 }
 
 // ── CNPJ — Consulta BrasilAPI ─────────────────────────────────────
@@ -11185,11 +11300,19 @@ function abrirStatusReport() {
     document.getElementById('lic-sr-overlay').style.display = 'flex';
     _srRender();
     document.addEventListener('keydown', _srKeyNav);
+    // Entra em fullscreen automaticamente
+    const el = document.documentElement;
+    (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen||function(){}).call(el);
+}
+
+function _srFecharFs() {
+    (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||document.msExitFullscreen||function(){}).call(document);
 }
 
 function _srFechar() {
     document.getElementById('lic-sr-overlay').style.display = 'none';
     document.removeEventListener('keydown', _srKeyNav);
+    _srFecharFs();
 }
 
 function _srKeyNav(e) {
@@ -14667,6 +14790,8 @@ function _licMapAbrirFullView(lead) {
     // ── COLUNA DIREITA ──
     const aud = _audData[String(lead.id)];
     document.getElementById('lfv-body-right').innerHTML = `
+        <!-- Alertas do lead -->
+        ${_lfvRenderAlertasLead(lead)}
         <!-- Responsável -->
         ${lead.responsavel?`<div style="margin-bottom:18px;padding:14px 16px;background:#fff;border-radius:12px;border:1.5px solid #e0d9f5;">
             <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:6px;">Responsável comercial</div>
