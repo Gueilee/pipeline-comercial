@@ -1697,6 +1697,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button onclick="abrirLicAuditoria()" style="padding:7px 14px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-clipboard-check"></i> Auditoria</button>
                         <button onclick="abrirLicScorecard()" style="padding:7px 14px;background:#fff;border:1.5px solid #e0d9f5;color:#6941c6;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-target"></i> Scorecard</button>
                         <button onclick="gerarBoardReport(event)" style="padding:7px 14px;background:linear-gradient(135deg,#2d1b69,#6941c6);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;box-shadow:0 2px 8px rgba(45,27,105,.25);"><i class="ti ti-file-analytics"></i> Board Report</button>
+                        <button onclick="abrirStatusReport()" style="padding:7px 14px;background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;box-shadow:0 2px 8px rgba(15,23,42,.35);"><i class="ti ti-presentation"></i> Status Report</button>
 
                         <!-- Novo Lead com dropdown para Gerar link -->
                         <div style="position:relative;" id="lic-novol-wrap">
@@ -3382,6 +3383,31 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 </div>
 
         </div><!-- /page-licenciamento -->
+
+<!-- ── STATUS REPORT — Apresentação executiva fullscreen ── -->
+<div id="lic-sr-overlay" style="display:none;position:fixed;inset:0;z-index:15000;background:#0a0518;flex-direction:column;" onclick="_srClickNav(event)">
+
+    <!-- Barra de progresso superior -->
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.1);z-index:10;">
+        <div id="sr-progress" style="height:100%;background:linear-gradient(90deg,#6941c6,#a78bfa);transition:width .4s ease;width:0%;"></div>
+    </div>
+
+    <!-- Controles superiores -->
+    <div style="position:absolute;top:16px;right:20px;z-index:20;display:flex;align-items:center;gap:12px;">
+        <span id="sr-counter" style="font-size:12px;color:rgba(255,255,255,.45);font-weight:600;"></span>
+        <button onclick="event.stopPropagation();_srFechar()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;border-radius:8px;padding:6px 10px;font-family:inherit;backdrop-filter:blur(8px);">ESC</button>
+    </div>
+
+    <!-- Dica de navegação -->
+    <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:16px;">
+        <button onclick="event.stopPropagation();_srNav(-1)" id="sr-prev-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">‹</button>
+        <div id="sr-dots" style="display:flex;gap:6px;"></div>
+        <button onclick="event.stopPropagation();_srNav(1)" id="sr-next-btn" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);font-size:18px;cursor:pointer;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);">›</button>
+    </div>
+
+    <!-- Área do slide -->
+    <div id="sr-slide-container" style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 80px 80px;overflow:hidden;"></div>
+</div>
 
 <!-- ── Modal: Registrar Ocupação de Espaço ── -->
 <div id="lic-ocp-modal" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:1200;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)fecharModalOcupacao()">
@@ -11148,6 +11174,389 @@ async function _lfvCarregarOcupacao(leadId, totalM2) {
     }
 }
 
+// ══════════════════════════════════════════════════════════════
+// STATUS REPORT — Apresentação executiva full-screen
+// ══════════════════════════════════════════════════════════════
+let _srIdx = 0, _srSlides = [];
+
+function abrirStatusReport() {
+    _srSlides = _srBuildSlides();
+    _srIdx = 0;
+    document.getElementById('lic-sr-overlay').style.display = 'flex';
+    _srRender();
+    document.addEventListener('keydown', _srKeyNav);
+}
+
+function _srFechar() {
+    document.getElementById('lic-sr-overlay').style.display = 'none';
+    document.removeEventListener('keydown', _srKeyNav);
+}
+
+function _srKeyNav(e) {
+    if (e.key==='Escape') _srFechar();
+    if (e.key==='ArrowRight'||e.key===' ') _srNav(1);
+    if (e.key==='ArrowLeft') _srNav(-1);
+}
+
+function _srNav(dir) {
+    _srIdx = Math.max(0, Math.min(_srSlides.length-1, _srIdx+dir));
+    _srRender();
+}
+
+function _srClickNav(e) {
+    if (e.target.closest('button')) return;
+    const x = e.clientX, w = window.innerWidth;
+    _srNav(x > w/2 ? 1 : -1);
+}
+
+function _srRender() {
+    const c = document.getElementById('sr-slide-container');
+    const counter = document.getElementById('sr-counter');
+    const progress = document.getElementById('sr-progress');
+    const dots = document.getElementById('sr-dots');
+    if (!c) return;
+    const slide = _srSlides[_srIdx];
+    c.innerHTML = slide.html;
+    if (slide.onRender) setTimeout(slide.onRender, 80);
+    if (counter) counter.textContent = `${_srIdx+1} / ${_srSlides.length}`;
+    if (progress) progress.style.width = `${((_srIdx+1)/_srSlides.length)*100}%`;
+    if (dots) dots.innerHTML = _srSlides.map((_,i) =>
+        `<div onclick="event.stopPropagation();_srGoTo(${i})" style="width:${i===_srIdx?20:6}px;height:6px;border-radius:3px;background:${i===_srIdx?'#a78bfa':'rgba(255,255,255,.25)'};cursor:pointer;transition:all .3s;"></div>`
+    ).join('');
+    document.getElementById('sr-prev-btn').style.opacity = _srIdx===0?'.3':'1';
+    document.getElementById('sr-next-btn').style.opacity = _srIdx===_srSlides.length-1?'.3':'1';
+}
+
+function _srGoTo(idx) { _srIdx=idx; _srRender(); }
+
+// ── Helpers de slide ──────────────────────────────────────────
+const _srBg   = 'background:linear-gradient(135deg,#0f0722 0%,#1a0f3d 40%,#2d1b69 100%)';
+const _srCard = 'background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:16px;backdrop-filter:blur(10px);';
+const _srGlass= 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:28px 32px;';
+
+function _srSlideWrap(content, noPad) {
+    return `<div style="${_srBg};width:100%;min-height:calc(100vh - 120px);border-radius:20px;overflow:hidden;${noPad?'':'padding:48px 56px;box-sizing:border-box;'}display:flex;flex-direction:column;justify-content:center;position:relative;">
+        <!-- Círculos decorativos -->
+        <div style="position:absolute;top:-100px;right:-100px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(105,65,198,.25),transparent 70%);pointer-events:none;"></div>
+        <div style="position:absolute;bottom:-60px;left:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,.12),transparent 70%);pointer-events:none;"></div>
+        ${content}
+    </div>`;
+}
+
+function _srKpiCard(icon, label, val, sub, cor) {
+    return `<div style="${_srCard}padding:20px 22px;flex:1;min-width:0;">
+        <div style="font-size:24px;margin-bottom:8px;">${icon}</div>
+        <div style="font-size:28px;font-weight:900;color:${cor||'#fff'};font-family:'Courier New',monospace;line-height:1;">${val}</div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5);margin-top:4px;">${label}</div>
+        ${sub?`<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;">${sub}</div>`:''}
+    </div>`;
+}
+
+// ── Build slides ──────────────────────────────────────────────
+function _srBuildSlides() {
+    const slides = [];
+    const conv    = baseLicLeads.filter(l=>l.status==='Convertido');
+    const ativos  = baseLicLeads.filter(l=>l.status==='Ativo');
+    const perdidos= baseLicLeads.filter(l=>l.status==='Perdido');
+    const m2Tot   = conv.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+    const feeTot  = conv.reduce((s,l)=>s+(parseFloat(l.fee_mensal)||0),0);
+    const m2Disp  = conv.reduce((s,l)=>s+getLicDisponivelM2(l.id),0);
+    const estados = new Set(conv.filter(l=>l.uf).map(l=>l.uf.toUpperCase()));
+    const txConv  = baseLicLeads.length>0?((conv.length/baseLicLeads.length)*100).toFixed(0):0;
+    const hoje    = new Date();
+    const mesAno  = hoje.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+    const fmt     = n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(0)+'K':String(Math.round(n));
+    const fmtR    = n=>n>0?'R$'+n.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—';
+    const REGIOES = {Sul:['RS','SC','PR'],Sudeste:['SP','RJ','MG','ES'],'Centro-Oeste':['DF','GO','MT','MS'],Nordeste:['BA','PE','CE','RN','PB','AL','SE','MA','PI'],Norte:['AM','PA','AC','AP','RO','RR','TO']};
+
+    // ── Slide 1: Capa ──────────────────────────────────────────
+    slides.push({ html: _srSlideWrap(`
+        <div style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 200px);">
+            <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(105,65,198,.2);border:1px solid rgba(105,65,198,.4);border-radius:50px;padding:8px 20px;margin-bottom:28px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:#a78bfa;display:inline-block;"></span>
+                <span style="font-size:11px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.1em;">Vendemmia Comércio Internacional</span>
+            </div>
+            <h1 style="font-size:58px;font-weight:900;color:#fff;margin:0 0 12px;line-height:1.05;letter-spacing:-1px;">
+                Rede de<br><span style="background:linear-gradient(90deg,#a78bfa,#6ee7b7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Licenciamento</span>
+            </h1>
+            <div style="font-size:18px;color:rgba(255,255,255,.55);font-weight:500;margin-bottom:36px;">Status Report — ${mesAno}</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <span style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;">${conv.length} licenciados ativos</span>
+                <span style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:#a78bfa;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;">${fmt(m2Tot)} m² na rede</span>
+                <span style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#818cf8;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;">${estados.size} estados cobertos</span>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:28px;font-size:11px;color:rgba(255,255,255,.2);">← → para navegar · ESC para sair · Clique para avançar</div>
+    `) });
+
+    // ── Slide 2: Visão Geral ──────────────────────────────────
+    slides.push({ html: _srSlideWrap(`
+        <div style="margin-bottom:36px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a78bfa;margin-bottom:8px;">Visão Geral</div>
+            <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Indicadores da Rede</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+            ${_srKpiCard('🏪','Total de leads',baseLicLeads.length,`${txConv}% taxa de conversão`,'#fff')}
+            ${_srKpiCard('✅','Convertidos',conv.length,'licenciados ativos','#4ade80')}
+            ${_srKpiCard('🔄','Em prospecção',ativos.length,'leads em negociação','#fbbf24')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+            ${_srKpiCard('📐','m² total da rede',fmt(m2Tot)+' m²','capacidade instalada','#a78bfa')}
+            ${_srKpiCard('✅','m² disponíveis',fmt(m2Disp)+' m²','prontos para clientes','#4ade80')}
+            ${_srKpiCard('💰','Fee mensal recorrente',fmtR(feeTot),'receita da rede','#34d399')}
+        </div>
+        <!-- Barra de conversão -->
+        <div style="${_srCard}padding:18px 24px;margin-top:20px;display:flex;align-items:center;gap:20px;">
+            <div style="font-size:13px;color:rgba(255,255,255,.6);white-space:nowrap;">Pipeline de conversão</div>
+            <div style="flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;">
+                <div style="height:100%;width:${txConv}%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:4px;"></div>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#4ade80;white-space:nowrap;">${txConv}%</div>
+        </div>
+    `) });
+
+    // ── Slide 3: Cobertura Nacional ───────────────────────────
+    const regStats = Object.entries(REGIOES).map(([reg,ufs])=>{
+        const regConv = conv.filter(l=>ufs.includes((l.uf||'').toUpperCase()));
+        const regM2   = regConv.reduce((s,l)=>s+(parseFloat(l.area_total_m2)||0),0);
+        const cobertos= [...new Set(regConv.map(l=>(l.uf||'').toUpperCase()))].filter(Boolean);
+        return {reg, cobertos, total:ufs.length, m2:regM2};
+    });
+    const TODAS_UFS = Object.values(REGIOES).flat();
+    const ufsComLeads = new Set(conv.map(l=>(l.uf||'').toUpperCase()).filter(Boolean));
+    const gaps = TODAS_UFS.filter(u=>!ufsComLeads.has(u));
+    slides.push({ html: _srSlideWrap(`
+        <div style="margin-bottom:28px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a78bfa;margin-bottom:8px;">Cobertura</div>
+            <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Presença Nacional</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div>
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;">COBERTURA POR REGIÃO</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    ${regStats.map(r=>{
+                        const pct=r.total>0?Math.round(r.cobertos.length/r.total*100):0;
+                        const cor=pct>=50?'#4ade80':pct>0?'#fbbf24':'#f87171';
+                        return `<div style="${_srCard}padding:12px 16px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                                <span style="font-size:13px;font-weight:700;color:#fff;">${r.reg}</span>
+                                <span style="font-size:12px;color:${cor};font-weight:700;">${r.cobertos.length}/${r.total} UFs · ${fmt(r.m2)} m²</span>
+                            </div>
+                            <div style="height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;">
+                                <div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;"></div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+            <div>
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;">ESTADOS COM LICENCIADOS</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+                    ${[...ufsComLeads].sort().map(u=>`<span style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:#4ade80;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;">${u}</span>`).join('')}
+                    ${ufsComLeads.size===0?'<span style="color:rgba(255,255,255,.3);font-size:13px;">Nenhum ainda</span>':''}
+                </div>
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;">GAPS — SEM COBERTURA (${gaps.length} estados)</div>
+                <div style="display:flex;flex-wrap:wrap;gap:5px;">
+                    ${gaps.slice(0,18).map(u=>`<span style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);color:#f87171;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:600;">${u}</span>`).join('')}
+                    ${gaps.length>18?`<span style="color:rgba(255,255,255,.3);font-size:11px;padding:3px 0;">+${gaps.length-18} mais</span>`:''}
+                </div>
+                <div style="${_srCard}padding:14px 18px;margin-top:16px;text-align:center;">
+                    <div style="font-size:36px;font-weight:900;color:#a78bfa;">${Math.round(ufsComLeads.size/27*100)}%</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;">cobertura nacional</div>
+                </div>
+            </div>
+        </div>
+    `) });
+
+    // ── Slide 4: Licenciados em Destaque ──────────────────────
+    const top5 = conv.slice().sort((a,b)=>(parseFloat(b.area_total_m2)||0)-(parseFloat(a.area_total_m2)||0)).slice(0,6);
+    slides.push({ html: _srSlideWrap(`
+        <div style="margin-bottom:28px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#a78bfa;margin-bottom:8px;">Parceiros</div>
+            <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Licenciados da Rede</h2>
+        </div>
+        ${conv.length===0?`<div style="text-align:center;padding:60px;color:rgba(255,255,255,.3);">Nenhum licenciado convertido ainda.</div>`:`
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            ${top5.map((lead,i)=>{
+                const t=getLicTier(lead);
+                const m2=parseFloat(lead.area_total_m2)||0;
+                const disp=getLicDisponivelM2(lead.id);
+                const ocupPct=m2>0?Math.round((m2-disp)/m2*100):0;
+                const maxM2=parseFloat(top5[0]?.area_total_m2)||1;
+                const pct=Math.round(m2/maxM2*100);
+                const cor=ocupPct>=85?'#f87171':ocupPct>=70?'#fbbf24':'#4ade80';
+                return `<div style="${_srCard}padding:14px 20px;display:grid;grid-template-columns:32px 1fr auto auto;gap:16px;align-items:center;">
+                    <div style="font-size:18px;font-weight:900;color:rgba(255,255,255,.2);">${i+1}</div>
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:3px;">${lead.razao_social||'—'}</div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            ${t?`<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;background:${t.bg};color:${t.color};">${t.icon} ${t.name}</span>`:''}
+                            <span style="font-size:11px;color:rgba(255,255,255,.4);">${lead.uf||''} ${lead.polo_logistico?'· '+lead.polo_logistico:''}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:16px;font-weight:800;color:#a78bfa;">${fmt(m2)} m²</div>
+                        <div style="font-size:11px;color:${cor};font-weight:600;">${fmt(disp)} disp.</div>
+                    </div>
+                    <div style="width:80px;">
+                        <div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;">
+                            <div style="height:100%;width:${ocupPct}%;background:${cor};border-radius:3px;"></div>
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;text-align:right;">${ocupPct}% ocupado</div>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`}
+    `) });
+
+    // ── Slide 5: Disponibilidade de Espaço ────────────────────
+    slides.push({ html: _srSlideWrap(`
+        <div style="margin-bottom:28px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:8px;">Capacidade</div>
+            <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Disponibilidade de Espaço</h2>
+        </div>
+        ${conv.length===0?`<div style="text-align:center;padding:60px;color:rgba(255,255,255,.3);">Nenhum licenciado ativo.</div>`:`
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">
+            ${_srKpiCard('📐','m² total instalado',fmt(m2Tot)+' m²','','#a78bfa')}
+            ${_srKpiCard('🔒','m² ocupados',fmt(m2Tot-m2Disp)+' m²','por clientes ativos','#f87171')}
+            ${_srKpiCard('✅','m² disponíveis',fmt(m2Disp)+' m²','prontos para venda','#4ade80')}
+        </div>
+        <!-- Gauge geral -->
+        <div style="${_srCard}padding:18px 24px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                <span style="font-size:13px;font-weight:700;color:#fff;">Ocupação total da rede</span>
+                <span style="font-size:16px;font-weight:900;color:${(m2Tot-m2Disp)/m2Tot*100>=85?'#f87171':(m2Tot-m2Disp)/m2Tot*100>=70?'#fbbf24':'#4ade80'};">${m2Tot>0?Math.round((m2Tot-m2Disp)/m2Tot*100):0}%</span>
+            </div>
+            <div style="height:12px;background:rgba(255,255,255,.1);border-radius:6px;overflow:hidden;">
+                <div style="height:100%;width:${m2Tot>0?Math.min(100,Math.round((m2Tot-m2Disp)/m2Tot*100)):0}%;background:linear-gradient(90deg,#6941c6,#4ade80);border-radius:6px;transition:width .8s;"></div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            ${conv.slice(0,5).map(lead=>{
+                const m2=parseFloat(lead.area_total_m2)||0;
+                const disp=getLicDisponivelM2(lead.id);
+                const ocupPct=m2>0?Math.round((m2-disp)/m2*100):0;
+                const cor=ocupPct>=85?'#f87171':ocupPct>=70?'#fbbf24':'#4ade80';
+                return `<div style="display:flex;align-items:center;gap:12px;">
+                    <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);min-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${lead.razao_social||'—'}</div>
+                    <div style="flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;">
+                        <div style="height:100%;width:${ocupPct}%;background:${cor};border-radius:4px;"></div>
+                    </div>
+                    <div style="font-size:11px;color:${cor};font-weight:700;min-width:50px;text-align:right;">${ocupPct}%</div>
+                    <div style="font-size:11px;color:rgba(255,255,255,.4);min-width:80px;text-align:right;">${fmt(disp)} disp.</div>
+                </div>`;
+            }).join('')}
+        </div>`}
+    `) });
+
+    // ── Slide 6: Pipeline de Prospecção ──────────────────────
+    const etapas = ['Prospecção','Reunião executiva','Due diligence','MOU','Contrato','Onboarding'];
+    const etapaData = etapas.map(e=>({
+        label:e, n:baseLicLeads.filter(l=>l.etapa===e&&l.status==='Ativo').length
+    })).filter(e=>e.n>0);
+    slides.push({ html: _srSlideWrap(`
+        <div style="margin-bottom:28px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fbbf24;margin-bottom:8px;">Prospecção</div>
+            <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Pipeline Comercial</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div>
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:14px;">FUNIL POR ETAPA</div>
+                ${etapaData.length===0?`<div style="color:rgba(255,255,255,.3);font-size:13px;">Nenhum lead ativo em prospecção.</div>`:`
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    ${etapaData.map((e,i)=>{
+                        const maxN=Math.max(...etapaData.map(x=>x.n),1);
+                        const pct=Math.round(e.n/maxN*100);
+                        const cores=['#818cf8','#6941c6','#a78bfa','#7c3aed','#4ade80','#22c55e'];
+                        return `<div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-size:12px;color:rgba(255,255,255,.7);">${e.label}</span>
+                                <span style="font-size:12px;font-weight:700;color:#fff;">${e.n}</span>
+                            </div>
+                            <div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;">
+                                <div style="height:100%;width:${pct}%;background:${cores[i%cores.length]};border-radius:4px;"></div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>`}
+            </div>
+            <div>
+                <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:14px;">RESUMO DO PIPELINE</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    ${[
+                        {l:'Total na rede',v:baseLicLeads.length,c:'#fff'},
+                        {l:'Em negociação',v:ativos.length,c:'#fbbf24'},
+                        {l:'Convertidos',v:conv.length,c:'#4ade80'},
+                        {l:'Perdidos',v:perdidos.length,c:'#f87171'},
+                    ].map(r=>`<div style="${_srCard}padding:12px 18px;display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:13px;color:rgba(255,255,255,.7);">${r.l}</span>
+                        <span style="font-size:22px;font-weight:900;color:${r.c};">${r.v}</span>
+                    </div>`).join('')}
+                </div>
+            </div>
+        </div>
+    `) });
+
+    // ── Slide 7: Performance (só se tiver dados) ──────────────
+    const perfLeads = conv.filter(l=>getLicUltimoPeriodo(l.id));
+    if (perfLeads.length > 0) {
+        const verde=perfLeads.filter(l=>kpiSaudeGeral(getLicUltimoPeriodo(l.id))==='verde').length;
+        const amarelo=perfLeads.filter(l=>kpiSaudeGeral(getLicUltimoPeriodo(l.id))==='amarelo').length;
+        const vermelho=perfLeads.filter(l=>kpiSaudeGeral(getLicUltimoPeriodo(l.id))==='vermelho').length;
+        slides.push({ html: _srSlideWrap(`
+            <div style="margin-bottom:28px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#818cf8;margin-bottom:8px;">Operacional</div>
+                <h2 style="font-size:40px;font-weight:900;color:#fff;margin:0;">Performance da Rede</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+                ${_srKpiCard('🟢','Saudáveis',verde,'dentro dos KPIs','#4ade80')}
+                ${_srKpiCard('🟡','Em atenção',amarelo,'KPIs no limite','#fbbf24')}
+                ${_srKpiCard('🔴','Críticos',vermelho,'KPIs fora da meta','#f87171')}
+            </div>
+            <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;">SAÚDE POR LICENCIADO</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                ${perfLeads.slice(0,6).map(lead=>{
+                    const perf=getLicUltimoPeriodo(lead.id);
+                    const sg=kpiSaudeGeral(perf);
+                    const cor=sg==='verde'?'#4ade80':sg==='amarelo'?'#fbbf24':'#f87171';
+                    const ico=sg==='verde'?'✓':sg==='amarelo'?'!':'✕';
+                    const kpis=Object.keys(LIC_KPI_META).map(k=>{
+                        const v=perf?.[k]; if(v==null) return '';
+                        const s=kpiSaude(k,v);
+                        const c=s==='verde'?'#4ade80':s==='amarelo'?'#fbbf24':'#f87171';
+                        return `<span style="font-size:10px;color:${c};font-weight:700;">${LIC_KPI_META[k].label.replace('.','').substring(0,4)}: ${v}${LIC_KPI_META[k].unit}</span>`;
+                    }).filter(Boolean).join(' · ');
+                    return `<div style="${_srCard}padding:10px 16px;display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:14px;font-weight:900;color:${cor};min-width:20px;">${ico}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13px;font-weight:700;color:#fff;">${lead.razao_social||'—'}</div>
+                            ${kpis?`<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${kpis}</div>`:''}
+                        </div>
+                        <span style="font-size:10px;font-weight:700;color:${cor};background:${cor}1a;padding:3px 10px;border-radius:12px;">${sg==='verde'?'Saudável':sg==='amarelo'?'Atenção':'Crítico'}</span>
+                    </div>`;
+                }).join('')}
+            </div>
+        `) });
+    }
+
+    // ── Slide final: Encerramento ─────────────────────────────
+    slides.push({ html: _srSlideWrap(`
+        <div style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 200px);">
+            <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,#6941c6,#2d1b69);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 28px;box-shadow:0 0 60px rgba(105,65,198,.5);">🏪</div>
+            <h1 style="font-size:48px;font-weight:900;color:#fff;margin:0 0 12px;">Obrigado</h1>
+            <div style="font-size:18px;color:rgba(255,255,255,.5);margin-bottom:32px;">Vendemmia Comércio Internacional Ltda.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:600px;margin:0 auto 32px;">
+                ${_srKpiCard('🏪','Licenciados',conv.length,'','#a78bfa')}
+                ${_srKpiCard('📐','m² na rede',fmt(m2Tot),'','#4ade80')}
+                ${_srKpiCard('🗺','Estados',estados.size,'cobertos','#fbbf24')}
+            </div>
+            <div style="font-size:12px;color:rgba(255,255,255,.3);">Rede de Licenciamento Vendemmia · ${mesAno} · Pipeline de Parceiros</div>
+        </div>
+    `) });
+
+    return slides;
+}
+
 // ── Modal de ocupação ──────────────────────────────────────────
 function abrirModalOcupacao(leadId, totalM2) {
     _ocpLeadId  = leadId;
@@ -11475,6 +11884,8 @@ async function gerarBoardReport(e) {
             let srcY=0,remaining=canvas.height,page=0;
             while(remaining>0){
                 const h=Math.min(sliceH,remaining);
+                // Pula última fatia se representa menos de 12% de uma página (evita página em branco)
+                if(remaining<sliceH*0.12) break;
                 const sc=document.createElement('canvas'); sc.width=canvas.width; sc.height=h;
                 sc.getContext('2d').drawImage(canvas,0,srcY,canvas.width,h,0,0,canvas.width,h);
                 if(page>0) doc.addPage();
