@@ -13784,6 +13784,14 @@ async function _lfvCarregarAnexos(leadId) {
             .order('created_at');
         const anexos = data || [];
 
+        // ── Sincronizar galeria de fotos imediatamente ──
+        const novasUrls = anexos.filter(a => a.tipo?.startsWith('foto_armazem_')).map(a => a.url);
+        _lfvPhotos = novasUrls;
+        // Atualiza também o cache global para que o mapa reflita mudanças
+        _licMapAllAnexos = (_licMapAllAnexos || []).filter(a => a.lead_id !== leadId);
+        anexos.filter(a => a.tipo?.startsWith('foto_armazem_')).forEach(a => _licMapAllAnexos.push(a));
+        _lfvRenderGaleria();
+
         const _tipoLabel = tipo => ({
             contrato_social: 'Contrato Social',
             certificado: 'Certificado',
