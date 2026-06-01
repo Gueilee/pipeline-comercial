@@ -3383,6 +3383,59 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
         </div><!-- /page-licenciamento -->
 
+<!-- ── Modal: Registrar Ocupação de Espaço ── -->
+<div id="lic-ocp-modal" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.55);z-index:1200;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)fecharModalOcupacao()">
+    <div style="background:#fff;border-radius:20px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="background:linear-gradient(135deg,#059669,#047857);padding:20px 24px;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:space-between;">
+            <div>
+                <div style="font-size:15px;font-weight:800;color:#fff;"><i class="ti ti-building-warehouse"></i> Registrar Ocupação</div>
+                <div id="ocp-modal-empresa" style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;"></div>
+            </div>
+            <button onclick="fecharModalOcupacao()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:20px;cursor:pointer;border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+        <!-- Barra de capacidade -->
+        <div id="ocp-modal-barra" style="padding:16px 24px;background:#f0fdf4;border-bottom:1px solid #d1fae5;"></div>
+        <!-- Formulário -->
+        <div style="padding:20px 24px;">
+            <div style="display:grid;grid-template-columns:1fr;gap:14px;">
+                <div>
+                    <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Nome do cliente *</label>
+                    <input id="ocp-cliente" type="text" placeholder="Ex: Empresa XYZ Ltda" style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;box-sizing:border-box;outline:none;" oninput="this.style.borderColor='#6941c6'">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Área ocupada (m²) *</label>
+                        <input id="ocp-area" type="number" min="1" placeholder="Ex: 500" style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;box-sizing:border-box;outline:none;" oninput="_ocpPreviewArea(this)">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Fee mensal (R$)</label>
+                        <input id="ocp-fee" type="number" min="0" placeholder="Opcional" style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;box-sizing:border-box;outline:none;">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Início *</label>
+                        <input id="ocp-inicio" type="date" style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;box-sizing:border-box;outline:none;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Término (opcional)</label>
+                        <input id="ocp-fim" type="date" style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;box-sizing:border-box;outline:none;">
+                    </div>
+                </div>
+                <div>
+                    <label style="font-size:11px;font-weight:700;color:#6941c6;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">Observação</label>
+                    <textarea id="ocp-obs" rows="2" placeholder="Tipo de produto, condições especiais..." style="width:100%;padding:10px 12px;border:1.5px solid #e0d9f5;border-radius:10px;font-family:inherit;font-size:13px;color:#2d1b69;resize:none;box-sizing:border-box;outline:none;"></textarea>
+                </div>
+                <div id="ocp-aviso-capacidade" style="display:none;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;font-size:12px;color:#b91c1c;font-weight:600;"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:20px;">
+                <button onclick="fecharModalOcupacao()" style="flex:1;padding:11px;border:1.5px solid #e0d9f5;border-radius:10px;background:#fff;font-family:inherit;font-size:13px;font-weight:600;color:#6941c6;cursor:pointer;">Cancelar</button>
+                <button onclick="salvarOcupacao()" style="flex:2;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,#059669,#047857);font-family:inherit;font-size:13px;font-weight:800;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(5,150,105,.3);"><i class="ti ti-device-floppy"></i> Registrar ocupação</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ── Modal de confirmação customizado (substitui confirm() nativo) ── -->
 <div id="lic-confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(29,11,78,.5);z-index:10500;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)_licConfirmCancel()">
     <div style="background:#fff;border-radius:20px;padding:32px 28px;width:420px;max-width:92vw;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:licModalIn .18s ease;">
@@ -10966,9 +11019,247 @@ const LIC_KPI_META = {
     tempo_onboarding_dias:  { label:'Onboarding',        unit:'d',  icon:'<i class="ti ti-rocket"></i>',        up:false, verde:20,  amarelo:30  },
 };
 
-let _licPerfData = {};      // leadId → [{...performance records}]
+let _licPerfData  = {};      // leadId → [{...performance records}]
 let _licKpiLeadId = null;   // lead sendo editado no modal
 let _licScCharts  = {};
+let _licOcupacoes = {};     // leadId → [{ id, cliente_nome, area_m2, data_inicio, data_fim, status, fee_cliente }]
+let _ocpLeadId    = null;   // lead sendo editado no modal de ocupação
+let _ocpTotalM2   = 0;      // total m² do lead atual no modal
+
+// ── Helpers de ocupação ────────────────────────────────────────
+function getLicOcupadoM2(leadId) {
+    return (_licOcupacoes[String(leadId)] || [])
+        .filter(o => o.status === 'ativo')
+        .reduce((s, o) => s + (parseFloat(o.area_m2) || 0), 0);
+}
+function getLicDisponivelM2(leadId) {
+    const lead = baseLicLeads.find(l => String(l.id) === String(leadId));
+    const total = parseFloat(lead?.area_total_m2) || 0;
+    return Math.max(0, total - getLicOcupadoM2(leadId));
+}
+
+// ── Carregar ocupações do Supabase ─────────────────────────────
+async function carregarLicOcupacoes() {
+    try {
+        const { data } = await supabaseClient.from('lic_ocupacoes')
+            .select('*').eq('status','ativo').order('created_at');
+        _licOcupacoes = {};
+        (data || []).forEach(o => {
+            const key = String(o.lead_id);
+            if (!_licOcupacoes[key]) _licOcupacoes[key] = [];
+            _licOcupacoes[key].push(o);
+        });
+    } catch(e) { console.warn('lic_ocupacoes não carregada:', e.message); }
+}
+
+// ── Render da seção de ocupação na tela de detalhes ────────────
+async function _lfvCarregarOcupacao(leadId, totalM2) {
+    const el = document.getElementById('lfv-ocp-section');
+    if (!el) return;
+
+    // Recarrega ocupações frescas para este lead
+    try {
+        const { data } = await supabaseClient.from('lic_ocupacoes')
+            .select('*').eq('lead_id', leadId).order('created_at');
+        const ocps = (data || []);
+        _licOcupacoes[String(leadId)] = ocps.filter(o => o.status === 'ativo');
+
+        const ativos  = ocps.filter(o => o.status === 'ativo');
+        const ocupado = ativos.reduce((s,o) => s + (parseFloat(o.area_m2)||0), 0);
+        const dispon  = Math.max(0, totalM2 - ocupado);
+        const pct     = totalM2 > 0 ? Math.min(100, Math.round((ocupado/totalM2)*100)) : 0;
+        const corBarra= pct>=85?'linear-gradient(90deg,#dc2626,#b91c1c)':pct>=70?'linear-gradient(90deg,#f59e0b,#d97706)':'linear-gradient(90deg,#059669,#047857)';
+        const fmtM2   = n => n>=1000?(n/1000).toFixed(1)+'K':Math.round(n)+'';
+
+        el.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:800;color:#2d1b69;display:flex;align-items:center;gap:6px;">
+                    <i class="ti ti-building-warehouse" style="color:#059669;"></i> Ocupação do Armazém
+                </div>
+                <button onclick="abrirModalOcupacao('${leadId}',${totalM2})" style="padding:6px 14px;border:1.5px solid #d1fae5;border-radius:8px;background:#f0fdf4;font-family:inherit;font-size:11px;font-weight:700;color:#059669;cursor:pointer;display:flex;align-items:center;gap:5px;">
+                    <i class="ti ti-plus"></i> Registrar ocupação
+                </button>
+            </div>
+
+            <!-- Gauge visual -->
+            <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #a7f3d0;border-radius:16px;padding:18px 20px;margin-bottom:14px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;text-align:center;">
+                    <div>
+                        <div style="font-size:22px;font-weight:900;color:#2d1b69;font-family:'Courier New',monospace;line-height:1;">${fmtM2(totalM2)} <span style="font-size:11px;font-weight:400;color:#9b8cc0;">m²</span></div>
+                        <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#9b8cc0;margin-top:2px;">Total</div>
+                    </div>
+                    <div>
+                        <div style="font-size:22px;font-weight:900;color:#dc2626;font-family:'Courier New',monospace;line-height:1;">${fmtM2(ocupado)} <span style="font-size:11px;font-weight:400;color:#fca5a5;">m²</span></div>
+                        <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#9b8cc0;margin-top:2px;">Ocupado</div>
+                    </div>
+                    <div>
+                        <div style="font-size:22px;font-weight:900;color:#059669;font-family:'Courier New',monospace;line-height:1;">${fmtM2(dispon)} <span style="font-size:11px;font-weight:400;color:#6ee7b7;">m²</span></div>
+                        <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#9b8cc0;margin-top:2px;">Disponível</div>
+                    </div>
+                </div>
+                <!-- Barra de progresso -->
+                <div style="height:12px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;margin-bottom:6px;">
+                    <div style="height:100%;width:${pct}%;background:${corBarra};border-radius:6px;transition:width .6s ease;"></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:#6b7280;">
+                    <span>0 m²</span>
+                    <span style="font-weight:700;color:${pct>=85?'#dc2626':pct>=70?'#d97706':'#059669'};">${pct}% ocupado</span>
+                    <span>${fmtM2(totalM2)} m²</span>
+                </div>
+                ${pct>=85?`<div style="margin-top:8px;background:#fef2f2;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;color:#b91c1c;"><i class="ti ti-alert-triangle"></i> Capacidade quase esgotada — apenas ${fmtM2(dispon)} m² disponíveis</div>`:''}
+            </div>
+
+            <!-- Lista de clientes -->
+            ${ativos.length === 0 ? `
+                <div style="text-align:center;padding:18px 0;color:#9b8cc0;font-size:12px;">
+                    <i class="ti ti-building" style="font-size:24px;display:block;margin-bottom:6px;opacity:.4;"></i>
+                    Nenhuma ocupação registrada. O armazém está ${totalM2>0?'totalmente disponível':'sem área cadastrada'}.
+                </div>
+            ` : `
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#7c5cbf;margin-bottom:8px;letter-spacing:.05em;">${ativos.length} cliente${ativos.length!==1?'s':''} ocupando espaço</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    ${ativos.map(o => {
+                        const pctCliente = totalM2>0?Math.round((parseFloat(o.area_m2)||0)/totalM2*100):0;
+                        const desde = o.data_inicio ? new Date(o.data_inicio+'T00:00:00').toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}) : '—';
+                        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:#fff;border:1.5px solid #e8e0f5;border-radius:12px;">
+                            <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#dcfce7,#bbf7d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <i class="ti ti-building" style="color:#059669;font-size:16px;"></i>
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:13px;font-weight:700;color:#2d1b69;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.cliente_nome}</div>
+                                <div style="font-size:11px;color:#9b8cc0;margin-top:2px;">
+                                    <span style="color:#dc2626;font-weight:700;">${(parseFloat(o.area_m2)||0).toLocaleString('pt-BR')} m²</span>
+                                    (${pctCliente}% da capacidade)
+                                    · desde ${desde}
+                                    ${o.fee_cliente?` · R$ ${Number(o.fee_cliente).toLocaleString('pt-BR')}/mês`:''}
+                                </div>
+                            </div>
+                            <button onclick="_ocpEncerrar(${o.id},'${leadId}',${totalM2})" style="padding:5px 10px;border:1.5px solid #fca5a5;border-radius:8px;background:#fef2f2;font-family:inherit;font-size:11px;font-weight:700;color:#dc2626;cursor:pointer;flex-shrink:0;white-space:nowrap;" title="Encerrar contrato">
+                                <i class="ti ti-x"></i> Encerrar
+                            </button>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `}
+        `;
+    } catch(e) {
+        const el2 = document.getElementById('lfv-ocp-section');
+        if (el2) el2.innerHTML = '';
+    }
+}
+
+// ── Modal de ocupação ──────────────────────────────────────────
+function abrirModalOcupacao(leadId, totalM2) {
+    _ocpLeadId  = leadId;
+    _ocpTotalM2 = totalM2 || 0;
+    const lead  = baseLicLeads.find(l => String(l.id) === String(leadId));
+    document.getElementById('ocp-modal-empresa').textContent = lead?.razao_social || '—';
+    ['ocp-cliente','ocp-obs'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    ['ocp-area','ocp-fee'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('ocp-inicio').value = new Date().toISOString().split('T')[0];
+    document.getElementById('ocp-fim').value    = '';
+    document.getElementById('ocp-aviso-capacidade').style.display = 'none';
+    // Barra de capacidade no modal
+    const ocupado = getLicOcupadoM2(leadId);
+    const dispon  = Math.max(0, totalM2 - ocupado);
+    const pct     = totalM2 > 0 ? Math.min(100, Math.round(ocupado/totalM2*100)) : 0;
+    const cor     = pct>=85?'#dc2626':pct>=70?'#d97706':'#059669';
+    document.getElementById('ocp-modal-barra').innerHTML = `
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+            <span style="font-weight:700;color:#2d1b69;">${dispon.toLocaleString('pt-BR')} m² disponíveis</span>
+            <span style="color:#9b8cc0;">${totalM2.toLocaleString('pt-BR')} m² total</span>
+        </div>
+        <div style="height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${cor};border-radius:4px;"></div>
+        </div>
+        <div style="font-size:10px;color:${cor};font-weight:700;margin-top:4px;">${pct}% já ocupado · ${ocupado.toLocaleString('pt-BR')} m² em uso</div>`;
+    document.getElementById('lic-ocp-modal').style.display = 'flex';
+}
+
+function fecharModalOcupacao() {
+    document.getElementById('lic-ocp-modal').style.display = 'none';
+}
+
+function _ocpPreviewArea(input) {
+    const val     = parseFloat(input.value) || 0;
+    const ocupado = getLicOcupadoM2(_ocpLeadId);
+    const dispon  = Math.max(0, _ocpTotalM2 - ocupado);
+    const aviso   = document.getElementById('ocp-aviso-capacidade');
+    if (!aviso) return;
+    if (val > dispon && dispon > 0) {
+        aviso.style.display = 'block';
+        aviso.innerHTML = `<i class="ti ti-alert-triangle"></i> Atenção: você está tentando alocar ${val.toLocaleString('pt-BR')} m² mas só há ${dispon.toLocaleString('pt-BR')} m² disponíveis.`;
+        input.style.borderColor = '#dc2626';
+    } else {
+        aviso.style.display = 'none';
+        input.style.borderColor = '#059669';
+    }
+}
+
+async function salvarOcupacao() {
+    const cliente = document.getElementById('ocp-cliente')?.value?.trim();
+    const area    = parseFloat(document.getElementById('ocp-area')?.value);
+    const inicio  = document.getElementById('ocp-inicio')?.value;
+    if (!cliente) { showToast('Informe o nome do cliente.', 'error'); return; }
+    if (!area || area <= 0) { showToast('Informe a área em m².', 'error'); return; }
+    if (!inicio) { showToast('Informe a data de início.', 'error'); return; }
+
+    const btn = document.querySelector('#lic-ocp-modal button[onclick="salvarOcupacao()"]');
+    if (btn) { btn.disabled=true; btn.textContent='⏳ Salvando...'; }
+    try {
+        const { error } = await supabaseClient.from('lic_ocupacoes').insert([{
+            lead_id: parseInt(_ocpLeadId),
+            cliente_nome: cliente,
+            area_m2: area,
+            data_inicio: inicio,
+            data_fim: document.getElementById('ocp-fim')?.value || null,
+            fee_cliente: parseFloat(document.getElementById('ocp-fee')?.value)||null,
+            observacao: document.getElementById('ocp-obs')?.value || null,
+            status: 'ativo',
+            criado_por: EMAIL_USUARIO_LOGADO
+        }]);
+        if (error) throw error;
+        // Atualiza o campo ocupacao_percentual no lead
+        await _ocpSincronizarPercentual(_ocpLeadId, _ocpTotalM2);
+        fecharModalOcupacao();
+        showToast(`${area.toLocaleString('pt-BR')} m² registrados para ${cliente}!`, 'success');
+        _lfvCarregarOcupacao(_ocpLeadId, _ocpTotalM2);
+        carregarLicOcupacoes();
+    } catch(e) {
+        showToast('Erro ao salvar: '+e.message, 'error');
+    } finally {
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i> Registrar ocupação'; }
+    }
+}
+
+async function _ocpEncerrar(ocpId, leadId, totalM2) {
+    _licConfirm(
+        'Encerrar ocupação',
+        'Confirmar encerramento do contrato de ocupação? O espaço ficará disponível novamente.',
+        '🏭', 'Encerrar contrato', 'linear-gradient(135deg,#dc2626,#b91c1c)',
+        async () => {
+            await supabaseClient.from('lic_ocupacoes').update({ status:'encerrado', data_fim: new Date().toISOString().split('T')[0] }).eq('id', ocpId);
+            await _ocpSincronizarPercentual(leadId, totalM2);
+            showToast('Ocupação encerrada. Espaço liberado.', 'success');
+            _lfvCarregarOcupacao(leadId, totalM2);
+            carregarLicOcupacoes();
+        }
+    );
+}
+
+async function _ocpSincronizarPercentual(leadId, totalM2) {
+    // Atualiza ocupacao_percentual no lead baseado nas ocupações ativas
+    try {
+        const { data } = await supabaseClient.from('lic_ocupacoes').select('area_m2').eq('lead_id', leadId).eq('status','ativo');
+        const ocupado = (data||[]).reduce((s,o)=>s+(parseFloat(o.area_m2)||0),0);
+        const pct = totalM2>0 ? Math.min(100, Math.round(ocupado/totalM2*100)) : 0;
+        await supabaseClient.from('lic_leads').update({ ocupacao_percentual: pct }).eq('id', leadId);
+        // Atualiza localmente
+        const lead = baseLicLeads.find(l=>String(l.id)===String(leadId));
+        if (lead) lead.ocupacao_percentual = pct;
+        _licOcupacoes[String(leadId)] = (data||[]);
+    } catch(e){}
+}
 
 function kpiSaude(kpiKey, value) {
     if (value === null || value === undefined || value === '') return null;
@@ -13605,7 +13896,8 @@ function _licMapLimparFiltros() {
 async function abrirLicMapa() {
     document.getElementById('lic-view-tabela').style.display = 'none';
     document.getElementById('lic-view-mapa').style.display = 'flex';
-    // Pré-carrega fotos
+    // Pré-carrega fotos e ocupações em paralelo
+    carregarLicOcupacoes();
     _licMapPhotoCache = {};
     try {
         const { data } = await supabaseClient.from('lic_anexos').select('lead_id,url,tipo,nome_arquivo').like('tipo','foto_armazem%').order('created_at');
@@ -13712,9 +14004,15 @@ function _licAtualizarMarkers() {
         const coords=_licGetCoords(lead);
         if(!coords) return;
 
-        const area=parseFloat(lead.area_total_m2)||0;
-        const cor=lead.status==='Convertido'?'#16a34a':lead.status==='Perdido'?'#dc2626':'#6941c6';
-        const lbl=area>=1e6?(area/1e6).toFixed(1)+'M m²':area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
+        const area    = parseFloat(lead.area_total_m2)||0;
+        const dispon  = lead.status==='Convertido' ? getLicDisponivelM2(lead.id) : area;
+        const ocuPct  = area>0 ? Math.round((area-dispon)/area*100) : 0;
+        const cor     = lead.status==='Convertido'
+            ? (ocuPct>=85?'#dc2626':ocuPct>=70?'#d97706':'#16a34a')
+            : lead.status==='Perdido'?'#dc2626':'#6941c6';
+        const lbl     = lead.status==='Convertido' && area>0
+            ? (dispon>=1e3?(dispon/1e3).toFixed(0)+'K':Math.round(dispon))+' m² disp.'
+            : area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
 
         const icon=L.divIcon({
             className:'',
@@ -13933,6 +14231,9 @@ function _licMapAbrirFullView(lead) {
         </div>` : ''}
         `:''}
 
+        <!-- Ocupação de Espaço — carregado de forma assíncrona -->
+        <div id="lfv-ocp-section" style="margin-top:28px;"></div>
+
         <!-- Histórico completo do lead — carregado de forma assíncrona -->
         <div class="lfv-section-title" style="margin-top:28px;">📅 Histórico completo do lead</div>
         <div id="lfv-hist-section" style="min-height:60px;">
@@ -14020,7 +14321,8 @@ function _licMapAbrirFullView(lead) {
     fv.style.display = 'block';
     fv.scrollTop = 0;
 
-    // Carrega todos os anexos do lead de forma assíncrona
+    // Carrega ocupação, documentos e histórico de forma assíncrona
+    _lfvCarregarOcupacao(lead.id, parseFloat(lead.area_total_m2)||0);
     _lfvCarregarAnexos(lead.id);
 }
 
