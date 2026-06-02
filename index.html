@@ -10742,6 +10742,12 @@ function _licGetFormData() {
         ocupacao: parseFloat(b.querySelector('.lic-wh-ocup')?.value) || 0,
         paletes: b.querySelector('.lic-wh-paletes')?.value || '',
         pe_direito: b.querySelector('.lic-wh-pe')?.value || '',
+        cep:               b.querySelector('.lic-wh-cep')?.value || '',
+        lat:               parseFloat(b.querySelector('.lic-wh-lat')?.value) || null,
+        lng:               parseFloat(b.querySelector('.lic-wh-lng')?.value) || null,
+        endereco_logradouro: b.querySelector('.lic-wh-logradouro')?.value || '',
+        endereco_numero:     b.querySelector('.lic-wh-numero')?.value     || '',
+        endereco_bairro:     b.querySelector('.lic-wh-bairro')?.value     || '',
     }));
     const areaTotal = armazens.reduce((s, w) => s + w.area_m2, 0);
 
@@ -10872,6 +10878,38 @@ function licAddWarehouse(data) {
                 <div><label class="lic-field-label">Capacidade de páletes</label><input class="lic-in lic-wh-paletes" type="number" placeholder="Ex.: 3000" value="${d.paletes||''}"></div>
                 <div><label class="lic-field-label">Pé-direito (m)</label><input class="lic-in lic-wh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${d.pe_direito||''}"></div>
             </div>
+
+            <!-- ── LOCALIZAÇÃO DO ARMAZÉM (CEP → mapa) ── -->
+            <div style="background:linear-gradient(135deg,#f5f0ff,#ede8f8);border-radius:12px;padding:16px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#6941c6;margin-bottom:12px;display:flex;align-items:center;gap:7px;">
+                    <span style="font-size:16px;">📍</span> Localização exata no mapa
+                    <span style="font-size:10px;font-weight:500;color:#9b8cc0;">Digite o CEP para fixar este armazém no mapa</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;">
+                    <div style="flex:1;">
+                        <label class="lic-field-label">CEP</label>
+                        <input class="lic-in lic-wh-cep" placeholder="00000-000" maxlength="9"
+                            style="font-family:'Courier New',monospace;font-size:15px;letter-spacing:2px;font-weight:700;"
+                            oninput="licMascaraCEP(this)"
+                            value="${d.cep||''}">
+                    </div>
+                    <button onclick="licBuscarCEPWh('${id}')"
+                        style="padding:9px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#6941c6,#2d1b69);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;" id="${id}-cep-btn">
+                        🔍 Buscar CEP
+                    </button>
+                </div>
+                <div id="${id}-cep-preview" style="display:${d.cep?'':'none'};padding:8px 12px;background:#fff;border-left:3px solid #6941c6;border-radius:0 8px 8px 0;font-size:12px;color:#2d1b69;margin-bottom:8px;">
+                    ${d.cep ? `📍 ${d.cep}${d.endereco_logradouro?' · '+d.endereco_logradouro:''}${d.cidade?' — '+d.cidade:''}${d.uf?' / '+d.uf:''}` : ''}
+                </div>
+                <div class="lic-field-row" id="${id}-cep-fields" style="display:${d.endereco_logradouro||d.cep?'':'none'};margin-bottom:0;">
+                    <div><label class="lic-field-label">Logradouro</label><input class="lic-in lic-wh-logradouro" placeholder="Rua / Av." value="${d.endereco_logradouro||''}"></div>
+                    <div><label class="lic-field-label">Número</label><input class="lic-in lic-wh-numero" placeholder="Nº" value="${d.endereco_numero||''}"></div>
+                    <div><label class="lic-field-label">Bairro</label><input class="lic-in lic-wh-bairro" placeholder="Bairro" value="${d.endereco_bairro||''}"></div>
+                </div>
+                <input type="hidden" class="lic-wh-lat" value="${d.lat||''}">
+                <input type="hidden" class="lic-wh-lng" value="${d.lng||''}">
+            </div>
+
             <div style="border-top:1px solid #f0ebff;padding-top:14px;">
                 <label class="lic-field-label" style="margin-bottom:8px;">FOTOS DESTE ARMAZÉM</label>
                 <div class="lic-upload-zone" id="lic-uz-wh${n}" style="padding:14px;"
@@ -11296,6 +11334,70 @@ async function licBuscarCEP(cep) {
         } catch(e2) {
             showToast('CEP não encontrado. Verifique o número.', 'error');
             if (preview) { preview.style.display = 'none'; }
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '🔍 Buscar CEP'; }
+    }
+}
+
+// ── CEP por Armazém ──────────────────────────────────────────────
+async function licBuscarCEPWh(whId) {
+    const block = document.getElementById(whId);
+    if (!block) return;
+    const cepInput = block.querySelector('.lic-wh-cep');
+    const raw = (cepInput?.value || '').replace(/\D/g, '');
+    if (raw.length !== 8) { showToast('CEP inválido — digite 8 dígitos.', 'error'); return; }
+
+    const btn     = document.getElementById(whId + '-cep-btn');
+    const preview = document.getElementById(whId + '-cep-preview');
+    const fields  = document.getElementById(whId + '-cep-fields');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
+
+    const setWh = (cls, val) => { const el = block.querySelector(cls); if (el && val !== undefined) el.value = val; };
+
+    try {
+        const resp = await fetch(`https://brasilapi.com.br/api/cep/v2/${raw}`);
+        if (!resp.ok) throw new Error('BrasilAPI falhou');
+        const d = await resp.json();
+        if (d.error) throw new Error('CEP inválido');
+
+        setWh('.lic-wh-uf',        d.state    || '');
+        setWh('.lic-wh-cidade',    d.city      || '');
+        setWh('.lic-wh-logradouro', d.street   || '');
+        setWh('.lic-wh-bairro',    d.neighborhood || '');
+
+        const lat = d.location?.coordinates?.latitude;
+        const lng = d.location?.coordinates?.longitude;
+        setWh('.lic-wh-lat', lat || '');
+        setWh('.lic-wh-lng', lng || '');
+
+        if (fields)  fields.style.display = '';
+        if (preview) {
+            preview.style.display = '';
+            preview.style.borderLeftColor = lat ? '#6941c6' : '#d97706';
+            preview.innerHTML = `📍 ${raw.substring(0,5)}-${raw.substring(5)} · ${d.street ? d.street + ', ' : ''}${d.city} / ${d.state}${lat ? ` <span style="color:#6941c6;font-size:10px;font-weight:700;">&nbsp;✓ Coord. OK</span>` : ' <span style="color:#d97706;font-size:10px;">&nbsp;⚠ Sem coord. exata</span>'}`;
+        }
+        showToast(`CEP armazém: ${d.city} — ${d.state}${lat ? ' · Coordenadas OK' : ''}`, 'success');
+
+    } catch(e) {
+        try {
+            const r2 = await fetch(`https://viacep.com.br/ws/${raw}/json/`);
+            const d2 = await r2.json();
+            if (d2.erro) throw new Error('CEP não encontrado');
+            setWh('.lic-wh-uf',        d2.uf          || '');
+            setWh('.lic-wh-cidade',    d2.localidade  || '');
+            setWh('.lic-wh-logradouro', d2.logradouro || '');
+            setWh('.lic-wh-bairro',    d2.bairro      || '');
+            setWh('.lic-wh-lat', ''); setWh('.lic-wh-lng', '');
+            if (fields)  fields.style.display = '';
+            if (preview) {
+                preview.style.display = '';
+                preview.style.borderLeftColor = '#d97706';
+                preview.innerHTML = `📍 ${raw.substring(0,5)}-${raw.substring(5)} · ${d2.localidade} / ${d2.uf} <span style="color:#d97706;font-size:10px;">&nbsp;⚠ Sem coord. exata</span>`;
+            }
+            showToast(`CEP encontrado: ${d2.localidade} — ${d2.uf}`, 'info');
+        } catch(e2) {
+            showToast('CEP não encontrado. Verifique o número.', 'error');
         }
     } finally {
         if (btn) { btn.disabled = false; btn.innerHTML = '🔍 Buscar CEP'; }
@@ -14930,37 +15032,54 @@ function _licAtualizarMarkers() {
     if(filterCount) filterCount.textContent=leads.length<baseLicLeads.length?`(${baseLicLeads.length-leads.length} oculto${baseLicLeads.length-leads.length!==1?'s':''} por filtro)`:'';
 
     leads.forEach(lead=>{
-        const coords=_licGetCoords(lead);
-        if(!coords) return;
-
         const area    = parseFloat(lead.area_total_m2)||0;
         const dispon  = lead.status==='Convertido' ? getLicDisponivelM2(lead.id) : area;
         const ocuPct  = area>0 ? Math.round((area-dispon)/area*100) : 0;
-        const cor     = lead.status==='Convertido'
+        const corLead = lead.status==='Convertido'
             ? (ocuPct>=85?'#dc2626':ocuPct>=70?'#d97706':'#16a34a')
             : lead.status==='Perdido'?'#dc2626':'#6941c6';
-        const lbl     = lead.status==='Convertido' && area>0
-            ? (dispon>=1e3?(dispon/1e3).toFixed(0)+'K':Math.round(dispon))+' m² disp.'
-            : area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
 
-        const icon=L.divIcon({
-            className:'',
-            html:`<div class="lic-tag" style="background:${cor};"
-                    onmouseenter="_licMapMostrarHover(event,'${lead.id}')"
-                    onmouseleave="_licMapEsconderHover()">
-                <div class="lic-tag-area">${lbl}</div>
-                <div class="lic-tag-uf">${lead.uf||'BR'}${lead.polo_logistico?' · '+lead.polo_logistico.split(',')[0].trim():''}</div>
-                <div style="position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid ${cor};"></div>
-            </div>`,
-            iconSize:[110,48],
-            iconAnchor:[55,56],
+        // Usa armazéns com coords; se nenhum tiver, cai para coords do lead
+        const armazensComCoord = (Array.isArray(lead.armazens)?lead.armazens:[])
+            .filter(w => w.lat && w.lng);
+
+        const pontosParaMarcar = armazensComCoord.length > 0
+            ? armazensComCoord.map(w => ({
+                coords: [w.lat, w.lng],
+                lbl:    w.nome || `Armazém`,
+                sub:    w.cidade ? w.cidade + (w.uf ? ' / '+w.uf : '') : (lead.uf||'BR'),
+                m2:     w.area_m2 || 0,
+              }))
+            : (() => {
+                const c = _licGetCoords(lead);
+                if (!c) return [];
+                const lbl = lead.status==='Convertido' && area>0
+                    ? (dispon>=1e3?(dispon/1e3).toFixed(0)+'K':Math.round(dispon))+' m² disp.'
+                    : area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
+                return [{ coords: c, lbl, sub: (lead.uf||'BR')+(lead.polo_logistico?' · '+lead.polo_logistico.split(',')[0].trim():''), m2: area }];
+              })();
+
+        pontosParaMarcar.forEach(ponto => {
+            const m2Fmt = ponto.m2>=1e3 ? (ponto.m2/1e3).toFixed(0)+'K m²' : ponto.m2>0 ? ponto.m2+' m²' : '';
+            const icon=L.divIcon({
+                className:'',
+                html:`<div class="lic-tag" style="background:${corLead};"
+                        onmouseenter="_licMapMostrarHover(event,'${lead.id}')"
+                        onmouseleave="_licMapEsconderHover()">
+                    <div class="lic-tag-area">${ponto.lbl}${m2Fmt?' · '+m2Fmt:''}</div>
+                    <div class="lic-tag-uf">${ponto.sub}</div>
+                    <div style="position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid ${corLead};"></div>
+                </div>`,
+                iconSize:[130,48],
+                iconAnchor:[65,56],
+            });
+
+            const marker=L.marker(ponto.coords,{icon});
+            marker.on('click',()=>{ _licMapEsconderHover(); _licMapAbrirPanel(lead); });
+            marker.addTo(_licMap);
+            _licMapMarkers.push(marker);
+            bounds.push(ponto.coords);
         });
-
-        const marker=L.marker(coords,{icon});
-        marker.on('click',()=>{ _licMapEsconderHover(); _licMapAbrirPanel(lead); });
-        marker.addTo(_licMap);
-        _licMapMarkers.push(marker);
-        bounds.push(coords);
     });
 
     // Não faz auto-zoom — usuário controla o zoom manualmente
