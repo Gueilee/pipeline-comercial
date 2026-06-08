@@ -3865,38 +3865,62 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group" style="flex:2;">
-                    <label>Nome do Cliente *</label>
-                    <input type="text" id="ativ_cliente" placeholder="Razão social ou nome comercial" required>
+            <!-- Campos normais (empresa / contato) -->
+            <div id="ativDetalhesNormais">
+                <div class="form-row">
+                    <div class="form-group" style="flex:2;">
+                        <label>Nome do Cliente *</label>
+                        <input type="text" id="ativ_cliente" placeholder="Razão social ou nome comercial" required>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Data *</label>
+                        <input type="date" id="ativ_data" required>
+                    </div>
                 </div>
-                <div class="form-group" style="flex:1;">
-                    <label>Data *</label>
-                    <input type="date" id="ativ_data" required>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>CNPJ</label>
+                        <input type="text" id="ativ_cnpj" placeholder="00.000.000/0000-00" maxlength="18" oninput="mascaraCNPJ(this)">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex:1;">
+                        <label>Nome do Contato</label>
+                        <input type="text" id="ativ_nome_contato" placeholder="Nome da pessoa">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Cargo</label>
+                        <input type="text" id="ativ_cargo_contato" placeholder="Ex: Gerente de Logística">
+                    </div>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group" style="flex:1;">
-                    <label>CNPJ</label>
-                    <input type="text" id="ativ_cnpj" placeholder="00.000.000/0000-00" maxlength="18" oninput="mascaraCNPJ(this)">
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group" style="flex:1;">
-                    <label>Nome do Contato</label>
-                    <input type="text" id="ativ_nome_contato" placeholder="Nome da pessoa">
-                </div>
-                <div class="form-group" style="flex:1;">
-                    <label>Cargo</label>
-                    <input type="text" id="ativ_cargo_contato" placeholder="Ex: Gerente de Logística">
+            <!-- Modo lote: apenas para PRÉ VENDAS -->
+            <div id="ativModoLote" style="display:none;">
+                <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:16px 18px; margin-bottom:16px;">
+                    <div style="font-size:11px; font-weight:700; color:#1d4ed8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px;">📦 Lançamento em Lote — SDR / Pré Vendas</div>
+                    <div class="form-row" style="margin-bottom:0;">
+                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                            <label>Data *</label>
+                            <input type="date" id="ativ_data_lote" required>
+                        </div>
+                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                            <label>Quantidade *</label>
+                            <input type="number" id="ativ_quantidade" min="1" max="999" value="1" placeholder="Ex: 50" style="font-size:18px; font-weight:700; color:#1d4ed8;">
+                        </div>
+                        <div class="form-group" style="flex:2; margin-bottom:0;">
+                            <label>Observação <small style="color:#999; font-weight:400;">(opcional)</small></label>
+                            <input type="text" id="ativ_obs_lote" placeholder="Ex: SDRs semana 23">
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-group" style="margin-bottom:0;">
                 <label>Vendedor *</label>
-                <select id="ativ_vendedor" required></select>
+                <select id="ativ_vendedor" onchange="toggleModoPreVendas()" required></select>
             </div>
 
             <div class="modal-footer" style="margin-top:20px;">
@@ -4485,7 +4509,7 @@ function parseMesAno(mesAno) {
 // Gera a chave "YYYY-M" usada para gravar novos registros
 function chaveMetaMesAno(ano, mes) { return `${ano}-${mes}`; }
 
-// Conta atividades de um tipo/vendedor/mês exato em baseAtividades
+// Conta atividades de um tipo/vendedor/mês exato em baseAtividades (respeita campo quantidade)
 function _contarAtiv(tipo, vendedor, anoFiltro, mes) {
     return baseAtividades.filter(a => {
         if (tipo     && a.tipo     !== tipo)     return false;
@@ -4494,7 +4518,7 @@ function _contarAtiv(tipo, vendedor, anoFiltro, mes) {
         if (anoFiltro && p.ano !== anoFiltro)    return false;
         if (mes       && p.mes !== mes)           return false;
         return true;
-    }).length;
+    }).reduce((sum, a) => sum + (a.quantidade || 1), 0);
 }
 
 // Corte histórico: antes de Mai/2026 usa metas_mensais; Mai/2026 em diante usa atividades
@@ -7322,15 +7346,19 @@ function mascaraCNPJ(el) {
 
 function abrirModalAtividade() {
     document.getElementById('formAtividade').reset();
-    // Pre-preenche data com hoje
-    document.getElementById('ativ_data').value = new Date().toISOString().slice(0,10);
+    // Pre-preenche data com hoje (campos normal e lote)
+    const hoje = new Date().toISOString().slice(0,10);
+    document.getElementById('ativ_data').value      = hoje;
+    document.getElementById('ativ_data_lote').value = hoje;
+    document.getElementById('ativ_quantidade').value = '1';
     // Pre-preenche vendedor com o usuário logado (se for vendedor)
     const sel = document.getElementById('ativ_vendedor');
     if (sel && USUARIO_LOGADO) {
-        // Tenta casar e-mail do usuário com nome do vendedor via perfil
         const nomeLogado = _nomeVendedorLogado();
         if (nomeLogado) sel.value = nomeLogado;
     }
+    // Aplica modo correto conforme vendedor selecionado
+    toggleModoPreVendas();
     abrirModal('modalAtividade');
 }
 
@@ -7346,20 +7374,43 @@ function _nomeVendedorLogado() {
     return mapa[USUARIO_LOGADO] || '';
 }
 
+function toggleModoPreVendas() {
+    const isPV = document.getElementById('ativ_vendedor').value === 'PRÉ VENDAS';
+    document.getElementById('ativDetalhesNormais').style.display = isPV ? 'none' : '';
+    document.getElementById('ativModoLote').style.display        = isPV ? ''     : 'none';
+    const cliInput = document.getElementById('ativ_cliente');
+    cliInput.required = !isPV;
+    // sincroniza o campo de data do modo lote com o campo normal e vice-versa
+    if (isPV) {
+        const dataNormal = document.getElementById('ativ_data').value;
+        if (dataNormal) document.getElementById('ativ_data_lote').value = dataNormal;
+        document.getElementById('ativ_quantidade').focus();
+    }
+}
+
 async function salvarAtividade(e) {
     e.preventDefault();
-    const tipo   = document.querySelector('input[name="ativ_tipo"]:checked')?.value;
-    const data   = document.getElementById('ativ_data').value;
+    const tipo  = document.querySelector('input[name="ativ_tipo"]:checked')?.value;
+    const vend  = document.getElementById('ativ_vendedor').value;
+    const isPV  = vend === 'PRÉ VENDAS';
+    const data  = isPV
+        ? document.getElementById('ativ_data_lote').value
+        : document.getElementById('ativ_data').value;
+    if (!data) { showToast('Informe a data.', 'error'); return; }
     const [ano, mes] = data.split('-');
+    const qtd   = isPV ? Math.max(1, parseInt(document.getElementById('ativ_quantidade').value) || 1) : 1;
+    const obs   = isPV ? (document.getElementById('ativ_obs_lote').value.trim() || null) : null;
+
     const payload = {
-        vendedor:      document.getElementById('ativ_vendedor').value,
+        vendedor:       vend,
         tipo,
-        cliente:       document.getElementById('ativ_cliente').value.trim(),
-        cnpj:          document.getElementById('ativ_cnpj').value.trim() || null,
-        nome_contato:  document.getElementById('ativ_nome_contato').value.trim() || null,
-        cargo_contato: document.getElementById('ativ_cargo_contato').value.trim() || null,
+        cliente:        isPV ? (obs || 'PRÉ VENDAS') : document.getElementById('ativ_cliente').value.trim(),
+        cnpj:           isPV ? null : document.getElementById('ativ_cnpj').value.trim() || null,
+        nome_contato:   isPV ? null : document.getElementById('ativ_nome_contato').value.trim() || null,
+        cargo_contato:  isPV ? null : document.getElementById('ativ_cargo_contato').value.trim() || null,
         data_atividade: data,
-        mes_ano:       `${ano}-${parseInt(mes)}`
+        mes_ano:        `${ano}-${parseInt(mes)}`,
+        quantidade:     qtd
     };
     const { data: ins, error } = await supabaseClient.from('atividades').insert([payload]).select().single();
     if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
@@ -7367,7 +7418,8 @@ async function salvarAtividade(e) {
     fecharModal('modalAtividade');
     renderizarRadar();
     renderizarMetas();
-    showToast('Atividade registrada com sucesso!', 'success');
+    const label = tipo === 'REUNIÃO' ? (qtd > 1 ? 'reuniões registradas' : 'reunião registrada') : (qtd > 1 ? 'propostas registradas' : 'proposta registrada');
+    showToast(`✅ ${qtd} ${label}!`, 'success');
 }
 
 async function deletarAtividade(id) {
@@ -7388,9 +7440,9 @@ function renderizarRadar() {
 
     // KPIs — este mês
     const deste = baseAtividades.filter(a => a.mes_ano === chaveAtual);
-    document.getElementById('rKpiReunioes').textContent  = deste.filter(a => a.tipo === 'REUNIÃO').length;
-    document.getElementById('rKpiPropostas').textContent = deste.filter(a => a.tipo === 'PROPOSTA').length;
-    document.getElementById('rKpiEmpresas').textContent  = new Set(deste.map(a => (a.cnpj||a.cliente).replace(/\D/g,'') || a.cliente)).size;
+    document.getElementById('rKpiReunioes').textContent  = deste.filter(a => a.tipo === 'REUNIÃO').reduce((s,a) => s+(a.quantidade||1), 0);
+    document.getElementById('rKpiPropostas').textContent = deste.filter(a => a.tipo === 'PROPOSTA').reduce((s,a) => s+(a.quantidade||1), 0);
+    document.getElementById('rKpiEmpresas').textContent  = new Set(deste.filter(a => a.cliente && a.cnpj || (a.quantidade||1)===1).map(a => (a.cnpj||a.cliente).replace(/\D/g,'') || a.cliente)).size;
 
     // Popular filtro de vendedor
     const rFV = document.getElementById('rFiltroVend');
@@ -7425,21 +7477,27 @@ function renderizarRadar() {
         el.innerHTML = `<div class="radar-empty">Nenhuma atividade registrada ainda.<br><small>Clique em "Registrar Atividade" para começar.</small></div>`;
         return;
     }
-    el.innerHTML = lista.map(a => `
-        <div class="radar-item">
+    el.innerHTML = lista.map(a => {
+        const isLote = (a.quantidade||1) > 1;
+        return `
+        <div class="radar-item" style="${isLote?'background:#f0f7ff;border-left:3px solid #1d4ed8;':''}">
             <div>
                 <span class="radar-badge ${a.tipo==='REUNIÃO'?'reuniao':'proposta'}">${a.tipo}</span>
+                ${isLote ? `<div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-top:3px;text-align:center;">${a.quantidade}×</div>` : ''}
             </div>
             <div style="font-size:12px; font-weight:600; color:#555;">${fmtData(a.data_atividade)}</div>
             <div>
-                <div class="radar-cliente">${a.cliente}</div>
+                ${isLote
+                    ? `<span style="font-size:11px;background:#dbeafe;color:#1d4ed8;border-radius:8px;padding:2px 8px;font-weight:700;">lote ${a.quantidade}</span>
+                       <div style="font-size:11px;color:#777;margin-top:2px;">${a.cliente||'PRÉ VENDAS'}</div>`
+                    : `<div class="radar-cliente">${a.cliente||'—'}</div>`}
             </div>
             <div>
-                <div class="radar-cnpj" style="font-size:12px; color:#666;">${a.cnpj||'—'}</div>
+                <div class="radar-cnpj" style="font-size:12px; color:#666;">${isLote?'—':a.cnpj||'—'}</div>
             </div>
             <div>
-                <div class="radar-contato">${a.nome_contato||'—'}</div>
-                <div class="radar-cargo">${a.cargo_contato||''}</div>
+                <div class="radar-contato">${isLote?'—':a.nome_contato||'—'}</div>
+                <div class="radar-cargo">${isLote?'':a.cargo_contato||''}</div>
             </div>
             <div>
                 <div style="font-size:12px; font-weight:600; color:#422c76;">👤 ${a.vendedor||'—'}</div>
@@ -7447,7 +7505,8 @@ function renderizarRadar() {
             <div>
                 <button type="button" class="radar-del-btn" onclick="deletarAtividade('${a.id}')" title="Excluir">🗑</button>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 // ----------------------------------------------------
