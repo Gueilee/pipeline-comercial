@@ -1575,6 +1575,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="">Todos os Segmentos</option>
                 </select>
 
+                <select id="filtroFinVendedor" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:160px;">
+                    <option value="">Todos os Vendedores</option>
+                </select>
+
                 <span class="periodo-badge" id="finFiltrosBadge" style="display:none"></span>
             </div>
 
@@ -1727,6 +1731,32 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             <h4>Plano vs Realizado por Segmento — Top 10</h4>
                             <div style="height:340px; position:relative;">
                                 <canvas id="chartFinSegPlanoReal"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SEÇÃO: Faturado vs Orçado por Vendedor ── -->
+                <div style="margin-top:36px;">
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+                        <div style="width:8px; height:8px; border-radius:50%; background:#0369a1; flex-shrink:0;"></div>
+                        <div>
+                            <h3 style="margin:0; color:#0369a1; font-size:16px; font-weight:700;">Faturado vs Orçado por Vendedor</h3>
+                            <p style="margin:3px 0 0 0; font-size:12px; color:#999;">Desempenho individual: realizado × plano acumulado no período</p>
+                        </div>
+                    </div>
+                    <div id="finVendTopCards" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;"></div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <div class="chart-card" style="height:420px;">
+                            <h4>Faturado + Carteira por Vendedor</h4>
+                            <div style="height:340px; position:relative;">
+                                <canvas id="chartFinVendRealizado"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card" style="height:420px;">
+                            <h4>Plano vs Realizado por Vendedor</h4>
+                            <div style="height:340px; position:relative;">
+                                <canvas id="chartFinVendPlanoReal"></canvas>
                             </div>
                         </div>
                     </div>
@@ -6952,6 +6982,21 @@ async function carregarDados(){
     _populateSegSelect('filtroFinSegmento', 'Todos os Segmentos');
     _populateSegSelect('op_segmento', 'Selecione o segmento de mercado...');
 
+    // Popular select de vendedor do Financeiro
+    const _selVendFin = document.getElementById('filtroFinVendedor');
+    if (_selVendFin) {
+        const _curVendVal = _selVendFin.value;
+        const _allVendedores = [...new Set(
+            (baseResMensais||[]).map(r => r.vendedor).filter(v => v && v.trim() && v !== 'VENDEMMIA' && v !== 'SPOT')
+        )].sort();
+        _selVendFin.innerHTML = '<option value="">Todos os Vendedores</option>' +
+            _allVendedores.map(v => {
+                const label = v.split(' ').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' ');
+                return `<option value="${v}">${label}</option>`;
+            }).join('');
+        if (_curVendVal && _allVendedores.includes(_curVendVal)) _selVendFin.value = _curVendVal;
+    }
+
     setLoading(false);
     _popularSelectsAno();
     renderizar();
@@ -8988,6 +9033,7 @@ function renderizarFinanceiro() {
     const fFinQuatroPL = (document.getElementById('filtroFinQuatroPL')?.value || '').toUpperCase();
     const fFinStatus   = document.getElementById('filtroFinStatus').value.toUpperCase();
     const fFinSegmento = (document.getElementById('filtroFinSegmento')?.value || '');
+    const fFinVendedor = (document.getElementById('filtroFinVendedor')?.value || '');
     const buFiltroAtivo  = _allFinBUs.length  > 0 && _finBUsSelecionadas.size  < _allFinBUs.length;
     const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
     const currentMonthIndex = new Date().getMonth(); // 0=Jan … 11=Dez
@@ -8997,6 +9043,7 @@ function renderizarFinanceiro() {
     (base||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
     (baseResMensais||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
     const segFin_plano = {}, segFin_fat = {}, segFin_ped = {};
+    const vendFin_plano = {}, vendFin_fat = {}, vendFin_ped = {};
 
     baseResMensais.forEach(rm => {
         let bu       = rm.bu       ? rm.bu.toUpperCase().replace(/\s+/g,' ').trim()       : 'OUTROS';
@@ -9014,6 +9061,7 @@ function renderizarFinanceiro() {
         if (fFinQuatroPL && q4pl  !== fFinQuatroPL) return;
         if (fFinStatus   && status !== fFinStatus)  return;
         if (fFinSegmento && seg   !== fFinSegmento) return;
+        if (fFinVendedor && (rm.vendedor||'') !== fFinVendedor) return;
 
         const mesIdx  = (rm.mes_numero || 1) - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
@@ -9078,6 +9126,12 @@ function renderizarFinanceiro() {
         segFin_plano[seg] = (segFin_plano[seg]||0) + valPlan;
         if (isFat) segFin_fat[seg] = (segFin_fat[seg]||0) + valReal;
         if (isPed) segFin_ped[seg] = (segFin_ped[seg]||0) + valReal;
+
+        // Acumula por vendedor
+        const vend = rm.vendedor || 'Sem Vendedor';
+        vendFin_plano[vend] = (vendFin_plano[vend]||0) + valPlan;
+        if (isFat) vendFin_fat[vend] = (vendFin_fat[vend]||0) + valReal;
+        if (isPed) vendFin_ped[vend] = (vendFin_ped[vend]||0) + valReal;
     });
 
     // ── KPIs ──
@@ -9344,6 +9398,94 @@ function _renderizarGraficosSegFin(segFin_plano, segFin_fat, segFin_ped) {
                 ]
             },
             options: opts2
+        });
+    }
+
+    // ── VENDEDORES ──
+    // Ignora "VENDEMMIA" (conta genérica) e "SPOT" para não distorcer os gráficos individuais
+    const vendKeys = Object.keys(vendFin_fat).concat(Object.keys(vendFin_ped))
+        .filter(v => v && v !== 'Sem Vendedor')
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .sort((a,b) => ((vendFin_fat[b]||0)+(vendFin_ped[b]||0)) - ((vendFin_fat[a]||0)+(vendFin_ped[a]||0)));
+
+    const fmtVendName = v => v.split(' ').map(w=>w.charAt(0)+w.slice(1).toLowerCase()).join(' ');
+    const VEND_COLORS = ['#0369a1','#0891b2','#059669','#d97706','#7c3aed','#db2777','#ea580c','#65a30d','#6366f1','#0e7490','#be185d'];
+
+    // Top cards por vendedor (top 5)
+    const vendTopEl = document.getElementById('finVendTopCards');
+    if (vendTopEl) {
+        vendTopEl.innerHTML = vendKeys.slice(0,5).map((v, i) => {
+            const fat = vendFin_fat[v]||0, ped = vendFin_ped[v]||0, plano = vendFin_plano[v]||0;
+            const real = fat + ped;
+            const pct = plano > 0 ? ((real/plano)*100).toFixed(0) : '—';
+            const cor = VEND_COLORS[i % VEND_COLORS.length];
+            return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:12px 16px;min-width:160px;flex:1;">
+                <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">#${i+1} vendedor</div>
+                <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:8px;line-height:1.3;">${fmtVendName(v)}</div>
+                <div style="display:flex;gap:12px;">
+                    <div><div style="font-size:15px;font-weight:900;color:#ff2f69;line-height:1;">${_fmtM(fat)}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">faturado</div></div>
+                    <div><div style="font-size:15px;font-weight:900;color:#f39c12;line-height:1;">${_fmtM(ped)}</div><div style="font-size:9px;color:#aaa;margin-top:2px;">carteira</div></div>
+                    <div><div style="font-size:15px;font-weight:900;color:${cor};line-height:1;">${pct}%</div><div style="font-size:9px;color:#aaa;margin-top:2px;">ating.</div></div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Gráfico V1: Faturado + Carteira por Vendedor (stacked)
+    if(charts.finVendRealizado) charts.finVendRealizado.destroy();
+    const cvsV1 = document.getElementById('chartFinVendRealizado');
+    if (cvsV1 && vendKeys.length > 0) {
+        const optsV1 = _finBarOpts(70, true);
+        optsV1.plugins.datalabels = {
+            ...optsV1.plugins.datalabels,
+            formatter: (val, ctx) => {
+                if (ctx.datasetIndex !== 1) return '';
+                const vk = ctx.chart.data.labels[ctx.dataIndex];
+                const tot = (vendFin_fat[vk]||0) + (vendFin_ped[vk]||0);
+                return tot > 0 ? _fmtM(tot) : '';
+            }
+        };
+        optsV1.plugins.tooltip = {
+            callbacks: {
+                label: ctx => {
+                    const v = ctx.raw;
+                    return ctx.dataset.label + ': R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+                }
+            }
+        };
+        charts.finVendRealizado = new Chart(cvsV1, {
+            type: 'bar',
+            data: {
+                labels: vendKeys.map(fmtVendName),
+                datasets: [
+                    { label:'Faturado',       data: vendKeys.map(v=>vendFin_fat[v]||0), backgroundColor:'#ff2f69', borderRadius:5, stack:'r', barThickness:22 },
+                    { label:'Pedidos em Casa', data: vendKeys.map(v=>vendFin_ped[v]||0), backgroundColor:'#f39c12', borderRadius:5, stack:'r', barThickness:22 }
+                ]
+            },
+            options: optsV1
+        });
+    }
+
+    // Gráfico V2: Plano vs Realizado por Vendedor (grouped)
+    if(charts.finVendPlanoReal) charts.finVendPlanoReal.destroy();
+    const cvsV2 = document.getElementById('chartFinVendPlanoReal');
+    if (cvsV2 && vendKeys.length > 0) {
+        const optsV2 = _finBarOpts(70, false);
+        optsV2.plugins.datalabels = {
+            ...optsV2.plugins.datalabels,
+            formatter: v => v > 0 ? _fmtM(v) : ''
+        };
+        const vendRealizados = vendKeys.map(v=>(vendFin_fat[v]||0)+(vendFin_ped[v]||0));
+        charts.finVendPlanoReal = new Chart(cvsV2, {
+            type: 'bar',
+            data: {
+                labels: vendKeys.map(fmtVendName),
+                datasets: [
+                    { label:'Orçado (Plano)', data: vendKeys.map(v=>vendFin_plano[v]||0), backgroundColor:'#bfdbfe', borderRadius:5, barThickness:10 },
+                    { label:'Realizado',       data: vendRealizados, backgroundColor:'#0369a1', borderRadius:5, barThickness:10 }
+                ]
+            },
+            options: optsV2
         });
     }
 }
