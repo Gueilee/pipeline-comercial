@@ -2723,10 +2723,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                     </div>
                                 </div>
                                 <div class="lic-sec-body" style="padding:0;">
-                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Prospecção" class="lic-tracked"><div class="lic-funnel-dot">1</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Prospecção</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Proposta enviada</div></div></label>
-                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Reunião executiva" class="lic-tracked"><div class="lic-funnel-dot">2</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Reunião executiva</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">90–120 min agendados</div></div></label>
-                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Due diligence" class="lic-tracked"><div class="lic-funnel-dot">3</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Due diligence</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">NDA + DD cruzada</div></div></label>
-                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="MOU" class="lic-tracked"><div class="lic-funnel-dot">4</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">MOU</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Memorando assinado</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Prospecção" class="lic-tracked"><div class="lic-funnel-dot">1</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Prospecção</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Negociação inicial</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Reunião executiva" class="lic-tracked"><div class="lic-funnel-dot">2</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Reunião executiva</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Apresentação formal do projeto para a diretoria</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Due diligence" class="lic-tracked"><div class="lic-funnel-dot">3</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Due diligence</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">NDA + Matriz de Qualificação</div></div></label>
+                                    <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="MOU" class="lic-tracked"><div class="lic-funnel-dot">4</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">MOU</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Memorando de Entendimento</div></div></label>
                                     <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Contrato" class="lic-tracked"><div class="lic-funnel-dot">5</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Contrato</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Assinatura definitiva</div></div></label>
                                     <label class="lic-funnel-item"><input type="radio" name="lf-etapa" value="Onboarding" class="lic-tracked"><div class="lic-funnel-dot">6</div><div><div style="font-size:14px;font-weight:600;color:#2d1b69;">Onboarding</div><div style="font-size:12px;color:#9b8cc0;margin-top:2px;">Go-live em 90–120 dias</div></div></label>
                                 </div>
@@ -11698,10 +11698,10 @@ function licTierBadge(lead, compact) {
 // ── Kanban de Licenciamento ──────────────────────────────────────
 
 const LIC_KB_COLS = [
-    { etapa:'Prospecção',         sub:'Proposta enviada',          cor:'#6941c6', bg:'rgba(105,65,198,.08)',  bd:'rgba(105,65,198,.2)'  },
-    { etapa:'Reunião executiva',  sub:'90–120 min agendados',      cor:'#2563eb', bg:'rgba(37,99,235,.07)',   bd:'rgba(37,99,235,.18)'  },
-    { etapa:'Due diligence',      sub:'NDA + DD cruzada',          cor:'#d97706', bg:'rgba(217,119,6,.07)',   bd:'rgba(217,119,6,.2)'   },
-    { etapa:'MOU',                sub:'Memorando assinado',        cor:'#d85a30', bg:'rgba(216,90,48,.07)',   bd:'rgba(216,90,48,.2)'   },
+    { etapa:'Prospecção',         sub:'Negociação inicial',                              cor:'#6941c6', bg:'rgba(105,65,198,.08)',  bd:'rgba(105,65,198,.2)'  },
+    { etapa:'Reunião executiva',  sub:'Apresentação formal do projeto para a diretoria', cor:'#2563eb', bg:'rgba(37,99,235,.07)',   bd:'rgba(37,99,235,.18)'  },
+    { etapa:'Due diligence',      sub:'NDA + Matriz de Qualificação',                    cor:'#d97706', bg:'rgba(217,119,6,.07)',   bd:'rgba(217,119,6,.2)'   },
+    { etapa:'MOU',                sub:'Memorando de Entendimento',                       cor:'#d85a30', bg:'rgba(216,90,48,.07)',   bd:'rgba(216,90,48,.2)'   },
     { etapa:'Contrato',           sub:'Assinatura definitiva',     cor:'#4f46e5', bg:'rgba(79,70,229,.07)',   bd:'rgba(79,70,229,.18)'  },
     { etapa:'Onboarding',         sub:'Go-live em 90–120 dias',    cor:'#16a34a', bg:'rgba(22,163,74,.07)',   bd:'rgba(22,163,74,.18)'  },
     { etapa:'Perdido',            sub:'Motivo obrigatório',        cor:'#dc2626', bg:'rgba(220,38,38,.06)',   bd:'rgba(220,38,38,.18)'  },
