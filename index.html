@@ -1785,8 +1785,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                             <h2 style="margin:0;font-size:17px;color:#0d47a1;font-weight:800;white-space:nowrap;">Rede de Licenciamento</h2>
                             <div id="lic-filtros-status" style="display:flex;gap:4px;margin-top:3px;">
                                 <button onclick="setLicFiltro('',this)" class="lic-chip lic-chip-on" style="padding:2px 9px;font-size:10px;">Todos</button>
-                                <button onclick="setLicFiltro('Ativo',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">● Ativo</button>
+                                <button onclick="setLicFiltro('Prospecção',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">◈ Prospecção</button>
+                                <button onclick="setLicFiltro('Onboarding',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">◷ Onboarding</button>
                                 <button onclick="setLicFiltro('Convertido',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">✓ Convertido</button>
+                                <button onclick="setLicFiltro('Ativo',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">● Ativo</button>
                                 <button onclick="setLicFiltro('Perdido',this)" class="lic-chip" style="padding:2px 9px;font-size:10px;">✕ Perdido</button>
                             </div>
                         </div>
@@ -2660,7 +2662,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         </div>
                                         <div>
                                             <label class="lic-field-label">Status do lead</label>
-                                            <select class="lic-in" id="lf-status"><option value="Ativo">Ativo</option><option value="Convertido">Convertido</option><option value="Perdido">Perdido</option></select>
+                                            <select class="lic-in" id="lf-status"><option value="Prospecção">Prospecção</option><option value="Onboarding">Onboarding</option><option value="Convertido">Convertido</option><option value="Ativo">Ativo</option><option value="Perdido">Perdido</option></select>
                                         </div>
                                     </div>
                                     <!-- Campo "Motivo da perda" removido da seção 8 — gerenciado pelo Kanban -->
@@ -2865,8 +2867,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
         </select>
         <select id="lic-map-status" class="lic-map-filter-sel" onchange="_licMapFiltrarAplicar()">
             <option value="">● Todos os status</option>
-            <option value="Ativo">● Ativo</option>
+            <option value="Prospecção">◈ Prospecção</option>
+            <option value="Onboarding">◷ Onboarding</option>
             <option value="Convertido">✓ Convertido</option>
+            <option value="Ativo">● Ativo</option>
             <option value="Perdido">✕ Perdido</option>
         </select>
         <button id="lic-map-clear-btn" class="lic-map-filter-clear" onclick="_licMapLimparFiltros()">✕ Limpar filtros</button>
@@ -10315,8 +10319,10 @@ function _renderizarLicTabela(leads) {
     const planoCor = { 'Starter':'#475569','Pro':'#1e40af','Enterprise':'#166534','Custom':'#92400e' };
     const planoBg  = { 'Starter':'#f1f5f9','Pro':'#eff6ff','Enterprise':'#f0fdf4','Custom':'#fffbeb' };
     const statusStyle = {
-        'Ativo':'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;',
+        'Prospecção':'background:#f5f3ff;color:#5b21b6;border:1px solid #ddd6fe;',
+        'Onboarding':'background:#fffbeb;color:#92400e;border:1px solid #fcd34d;',
         'Convertido':'background:#f0fdf4;color:#166534;border:1px solid #86efac;',
+        'Ativo':'background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;',
         'Perdido':'background:#fef2f2;color:#991b1b;border:1px solid #fca5a5;',
     };
 
@@ -14930,6 +14936,7 @@ const _LIC_REGIONS = {
     Norte:['AM','RR','AP','PA','TO','RO','AC'],
 };
 const _LIC_REGION_COLORS = { Sul:'#6941c6',Sudeste:'#2563eb','Centro-Oeste':'#d97706',Nordeste:'#16a34a',Norte:'#0891b2' };
+const _LIC_STATUS_COR = {'Prospecção':'#6941c6','Onboarding':'#d97706','Convertido':'#16a34a','Ativo':'#2563eb','Perdido':'#dc2626'};
 
 let _licMap = null;
 let _licMapMarkers = [];
@@ -15123,7 +15130,7 @@ function _licAtualizarMarkers() {
         const ocuPct  = area>0 ? Math.round((area-dispon)/area*100) : 0;
         const corLead = lead.status==='Convertido'
             ? (ocuPct>=85?'#dc2626':ocuPct>=70?'#d97706':'#16a34a')
-            : lead.status==='Perdido'?'#dc2626':'#6941c6';
+            : (_LIC_STATUS_COR[lead.status] || '#6941c6');
 
         // Usa armazéns com coords; se nenhum tiver, cai para coords do lead
         const armazensComCoord = (Array.isArray(lead.armazens)?lead.armazens:[])
@@ -15903,7 +15910,7 @@ function renderizarLicMapaPanel() {
             ${Object.entries(_LIC_REGION_COLORS).map(([reg,cor])=>{const v=m2Region[reg]||0;const pct=Math.round((v/maxR)*100);return`<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:11px;font-weight:600;color:#2d1b69;">${reg}</span><span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${v>0?fmt(v)+' m²':'—'}</span></div><div style="height:5px;background:#f0ebff;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${cor};border-radius:3px;"></div></div></div>`;}).join('')}
         </div>
         ${ufRank.length>0?`<div style="margin-bottom:14px;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Top estados</div>${ufRank.map(([uf,v],i)=>`<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;"><div style="width:15px;height:15px;border-radius:50%;background:#f0ebff;border:1.5px solid #e0d9f5;font-size:8px;font-weight:700;color:#6941c6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div><div style="flex:1;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:11px;font-weight:700;color:#2d1b69;">${uf}</span><span style="font-size:10px;font-family:'Courier New',monospace;color:#6b7280;">${fmt(v)}</span></div><div style="height:4px;background:#f0ebff;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.round((v/maxUF)*100)}%;background:linear-gradient(90deg,#6941c6,#9b5de5);border-radius:2px;"></div></div></div></div>`).join('')}</div>`:''}
-        <div style="border-top:1px solid #ede8f8;padding-top:12px;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div><div style="display:flex;flex-direction:column;gap:5px;font-size:10px;color:#6b7280;"><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#16a34a;border:2px solid #fff;box-shadow:0 1px 5px rgba(22,163,74,.4);"></div>Convertido</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#6941c6;border:2px solid #fff;box-shadow:0 1px 5px rgba(105,65,198,.4);"></div>Ativo</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#dc2626;border:2px solid #fff;box-shadow:0 1px 5px rgba(220,38,38,.3);"></div>Perdido</div><div style="font-size:9px;color:#c4b5e8;margin-top:3px;">Tags = m² disponíveis</div></div></div>
+        <div style="border-top:1px solid #ede8f8;padding-top:12px;"><div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#9b8cc0;margin-bottom:8px;">Legenda</div><div style="display:flex;flex-direction:column;gap:5px;font-size:10px;color:#6b7280;"><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#6941c6;border:2px solid #fff;box-shadow:0 1px 5px rgba(105,65,198,.4);"></div>Prospecção</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#d97706;border:2px solid #fff;box-shadow:0 1px 5px rgba(217,119,6,.4);"></div>Onboarding</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#16a34a;border:2px solid #fff;box-shadow:0 1px 5px rgba(22,163,74,.4);"></div>Convertido</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#2563eb;border:2px solid #fff;box-shadow:0 1px 5px rgba(37,99,235,.4);"></div>Ativo</div><div style="display:flex;align-items:center;gap:7px;"><div style="width:14px;height:10px;border-radius:3px;background:#dc2626;border:2px solid #fff;box-shadow:0 1px 5px rgba(220,38,38,.3);"></div>Perdido</div><div style="font-size:9px;color:#c4b5e8;margin-top:3px;">Tags = m² disponíveis</div></div></div>
     `;
 }
 
