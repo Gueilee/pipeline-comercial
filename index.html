@@ -5675,6 +5675,23 @@ function renderizarMetas() {
         }
     });
 
+    // ── Per-vendedor: arrays mensais de faturado e pedidos (antes dos KPIs) ──
+    const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(v);
+    const _VEND_COLORS = ['#7c8cf8','#27ae60','#f39c12','#e74c3c'];
+    const _vendsMeta = Object.entries(METAS_MENSAIS).filter(([,m]) => (m.trading+m.armazem+m.transporte+m.analytics)>0);
+    const _vendFatArr = {}, _vendPedArr = {};
+    _vendsMeta.forEach(([vend]) => {
+        const fa = new Array(12).fill(0), pa = new Array(12).fill(0);
+        baseMetasMensais.filter(r => { const p=parseMesAno(r.mes_ano); return p.ano===periodoAno && r.vendedor===vend; })
+            .forEach(r => { const idx=parseMesAno(r.mes_ano).mes-1; if(idx>=0&&idx<12) fa[idx]+=(r.realizado_trading||0)+(r.realizado_armazem||0)+(r.realizado_transporte||0)+(r.realizado_analytics||0); });
+        (baseResMensais||[]).filter(r => r.ano==periodoAno && r.vendedor===vend && ['PEDIDOS EM CASA','FATURADO'].includes((r.status||'').toUpperCase().trim()))
+            .forEach(r => { const idx=(parseInt(r.mes_numero)||1)-1; const val=parseFloat(r.valor_realizado)||0; if(idx>=0&&idx<12){ if(_statusEfetivo(r)==='FATURADO') fa[idx]+=val; else pa[idx]+=val; } });
+        _vendFatArr[vend]=fa; _vendPedArr[vend]=pa;
+    });
+    const _sumPer = (arr, s, e) => arr.slice(s-1, e).reduce((a,b)=>a+b, 0);
+    // Corrige faturamento do período: usa _vendFatArr que combina metas_mensais + resultados_mensais
+    realPeriodo.faturamento = _vendsMeta.reduce((sum, [vend]) => sum + _sumPer(_vendFatArr[vend], periodoMesInicio, periodoMesFim), 0);
+
     // ── KPIs — refletem o período selecionado ──
     const labelPeriodo = numMeses === 12 ? 'no Ano' : numMeses === 1
         ? `em ${NOMES_MESES_SHORT[periodoMesInicio-1]}`
@@ -5693,21 +5710,6 @@ function renderizarMetas() {
     document.getElementById('metaRealizadoTotal').innerText = `R$ ${realPeriodo.faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
     document.getElementById('metaReunioesYTD').innerText    = `${realPeriodo.reuniao} / ${Math.round(metaPeriodo.reuniao)}`;
     document.getElementById('metaPropostasYTD').innerText   = `${realPeriodo.propostas} / ${metaPeriodo.propostas}`;
-
-    // ── Per-vendedor: arrays mensais de faturado e pedidos ──
-    const _fmtM = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(0)+'k' : String(v);
-    const _VEND_COLORS = ['#7c8cf8','#27ae60','#f39c12','#e74c3c'];
-    const _vendsMeta = Object.entries(METAS_MENSAIS).filter(([,m]) => (m.trading+m.armazem+m.transporte+m.analytics)>0);
-    const _vendFatArr = {}, _vendPedArr = {};
-    _vendsMeta.forEach(([vend]) => {
-        const fa = new Array(12).fill(0), pa = new Array(12).fill(0);
-        baseMetasMensais.filter(r => { const p=parseMesAno(r.mes_ano); return p.ano===periodoAno && r.vendedor===vend; })
-            .forEach(r => { const idx=parseMesAno(r.mes_ano).mes-1; if(idx>=0&&idx<12) fa[idx]+=(r.realizado_trading||0)+(r.realizado_armazem||0)+(r.realizado_transporte||0)+(r.realizado_analytics||0); });
-        (baseResMensais||[]).filter(r => r.ano==periodoAno && r.vendedor===vend && ['PEDIDOS EM CASA','FATURADO'].includes((r.status||'').toUpperCase().trim()))
-            .forEach(r => { const idx=(parseInt(r.mes_numero)||1)-1; const val=parseFloat(r.valor_realizado)||0; if(idx>=0&&idx<12){ if(_statusEfetivo(r)==='FATURADO') fa[idx]+=val; else pa[idx]+=val; } });
-        _vendFatArr[vend]=fa; _vendPedArr[vend]=pa;
-    });
-    const _sumPer = (arr, s, e) => arr.slice(s-1, e).reduce((a,b)=>a+b, 0);
 
     // ── GRÁFICO 1: Evolução Mensal ──
     if(charts.evolucao) charts.evolucao.destroy();
@@ -5736,7 +5738,7 @@ function renderizarMetas() {
                 } : {
                     anchor:'center', align:'center',
                     color:'#fff', font:{size:8,weight:'700'},
-                    display: ctx => (ctx.raw||0) > 0 ? 'auto' : false,
+                    display: ctx => (ctx.raw||0) >= 200000,
                     formatter: v => _fmtM(v)
                 }
             };
