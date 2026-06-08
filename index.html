@@ -5892,10 +5892,10 @@ function renderizarMetas() {
         let metaMes;
         if (fV) {
             const vm = METAS_MENSAIS[fV] || {};
-            metaMes = (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? Math.round(vm.reuniao||0) : 0;
+            metaMes = (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? Math.round(vm.reuniao_mensal?.[m] ?? (vm.reuniao||0)) : 0;
         } else {
             metaMes = Math.round(Object.values(METAS_MENSAIS).reduce((s, vm) =>
-                (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? s + (vm.reuniao||0) : s, 0));
+                (m >= (vm.mes_inicio||1) && m <= (vm.mes_fim||12)) ? s + (vm.reuniao_mensal?.[m] ?? (vm.reuniao||0)) : s, 0));
         }
         arrayMetaReuniao.push(metaMes);
 
