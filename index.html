@@ -4645,7 +4645,8 @@ let METAS_MENSAIS = {
     "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
     "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
     "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0, mes_inicio: 1, mes_fim: 12 },
-    "PRÉ VENDAS":        { reuniao: 215/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0, mes_inicio: 1, mes_fim: 12 }
+    "PRÉ VENDAS":        { reuniao: 201/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0, mes_inicio: 1, mes_fim: 12,
+                           reuniao_mensal: [0,15,15,15,15,15,18,18,18,18,18,18,18] }
 };
 
 // ── FUNÇÕES DE METAS ANUAIS ──
@@ -4672,6 +4673,7 @@ function _buildMetasMensais(ano) {
     if (sdrs.length > 0) {
         const team = novo['PRÉ VENDAS'] || { reuniao:0, propostas:0, trading:0, armazem:0, transporte:0, analytics:0, mes_inicio:1, mes_fim:12 };
         team.reuniao += sdrs.reduce((s, r) => s + (parseFloat(r.reuniao_mes) || 0), 0);
+        team.reuniao_mensal = [0,15,15,15,15,15,18,18,18,18,18,18,18];
         novo['PRÉ VENDAS'] = team;
     }
 
@@ -5618,10 +5620,10 @@ function renderizarMetas() {
     for (let _m = periodoMesInicio; _m <= periodoMesFim; _m++) {
         if (fV) {
             const vm = METAS_MENSAIS[fV] || {};
-            if (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) _reuniaoMetaPeriodo += (vm.reuniao||0);
+            if (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) _reuniaoMetaPeriodo += (vm.reuniao_mensal?.[_m] ?? (vm.reuniao||0));
         } else {
             _reuniaoMetaPeriodo += Object.values(METAS_MENSAIS).reduce((s, vm) =>
-                (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) ? s + (vm.reuniao||0) : s, 0);
+                (_m >= (vm.mes_inicio||1) && _m <= (vm.mes_fim||12)) ? s + (vm.reuniao_mensal?.[_m] ?? (vm.reuniao||0)) : s, 0);
         }
     }
 
