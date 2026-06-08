@@ -2430,6 +2430,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <label class="lic-chip-opt"><input type="checkbox" value="Agroquímicos">Agroquímicos</label>
                                         <label class="lic-chip-opt"><input type="checkbox" value="Eletrônicos de alto valor">Eletrônicos de alto valor</label>
                                     </div>
+                                    <div class="lic-field" style="margin-bottom:20px;">
+                                        <label class="lic-field-label">Outros tipos de carga</label>
+                                        <input class="lic-in" id="lf-cargas_outros" placeholder="Descreva outros tipos de carga não listados acima…">
+                                    </div>
                                     <div class="lic-section-divider">Licenças ativas — selecione e informe a validade</div>
                                     <div id="lf-licencas" style="margin-bottom:20px;display:flex;flex-direction:column;gap:8px;">
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="ANTT" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-antt')"> ANTT — perigosos</label><div id="lic-val-antt" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-antt" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
@@ -2438,6 +2442,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="AVCB" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-avcb')"> AVCB (Bombeiros)</label><div id="lic-val-avcb" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-avcb" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Licença ambiental" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-ambiental')"> Licença ambiental</label><div id="lic-val-ambiental" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-ambiental" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="OEA" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-oea')"> OEA — Receita Federal</label><div id="lic-val-oea" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-licval-oea" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
+                                        <div class="lic-lic-row" style="margin-top:4px;">
+                                            <label class="lic-lic-lbl" style="flex-shrink:0;">📝 Outras licenças:</label>
+                                            <input type="text" class="lic-val-in" id="lf-licencas_outras" style="flex:1;max-width:100%;" placeholder="Ex.: Licença Municipal, CETESB, CREA…">
+                                        </div>
                                     </div>
                                     <!-- Upload: Documentos de Licenças ativas -->
                                     <div style="margin-top:16px;padding:0 2px;">
@@ -2532,6 +2540,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="INMETRO" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-inmetro')"> INMETRO</label><div id="lic-val-inmetro" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-inmetro" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Balanço auditado" class="lic-lic-chk" onchange="licMostrarValidade(this,'lic-val-balanco')"> Balanço auditado</label><div id="lic-val-balanco" style="display:none;align-items:center;gap:6px;"><span class="lic-val-label">Validade:</span><input type="date" id="lf-certval-balanco" class="lic-val-in" onchange="_licValidadeAlerta(this)"></div></div>
                                         <div class="lic-lic-row"><label class="lic-lic-lbl"><input type="checkbox" value="Nenhuma" class="lic-lic-chk"> Nenhuma</label></div>
+                                        <div class="lic-lic-row" style="margin-top:4px;">
+                                            <label class="lic-lic-lbl" style="flex-shrink:0;">📝 Outras certificações:</label>
+                                            <input type="text" class="lic-val-in" id="lf-certif_outras" style="flex:1;max-width:100%;" placeholder="Ex.: ISO 45001, GPTW, FSSC 22000, certificação setorial…">
+                                        </div>
                                     </div>
                                     <div class="lic-field-row">
                                         <div>
@@ -10783,9 +10795,12 @@ function _licPreencherForm(lead) {
     _licSetChecks('lf-cargas_geral', lead.cargas_geral);
     _licSetChecks('lf-cargas_perigosas', lead.cargas_perigosas);
     _licSetChecks('lf-cargas_especiais', lead.cargas_especiais);
+    if (lead.cargas_outros)   { const el = document.getElementById('lf-cargas_outros');   if(el) el.value = lead.cargas_outros; }
     _licSetChecks('lf-licencas', lead.licencas);
+    if (lead.licencas_outras) { const el = document.getElementById('lf-licencas_outras'); if(el) el.value = lead.licencas_outras; }
     _licSetChecks('lf-sistemas_integrados', lead.sistemas_integrados);
     _licSetChecks('lf-certificacoes', lead.certificacoes);
+    if (lead.certif_outras)   { const el = document.getElementById('lf-certif_outras');   if(el) el.value = lead.certif_outras; }
 
     // Armazéns
     if (lead.armazens && Array.isArray(lead.armazens) && lead.armazens.length > 0) {
@@ -10838,11 +10853,12 @@ function _licGetFormData() {
         regiao_exclusividade: g('lf-regiao_exclusividade'), outras_ufs: g('lf-outras_ufs'),
         armazens, area_total_m2: areaTotal,
         cargas_geral: _licGetChecks('lf-cargas_geral'), cargas_perigosas: _licGetChecks('lf-cargas_perigosas'),
-        cargas_especiais: _licGetChecks('lf-cargas_especiais'), licencas: _licGetChecks('lf-licencas'),
+        cargas_especiais: _licGetChecks('lf-cargas_especiais'), cargas_outros: g('lf-cargas_outros'),
+        licencas: _licGetChecks('lf-licencas'), licencas_outras: g('lf-licencas_outras'),
         obs_cargas: g('lf-obs_cargas'),
         wms_atual: g('lf-wms_atual'), erp_atual: g('lf-erp_atual'),
         sistemas_integrados: _licGetChecks('lf-sistemas_integrados'), nivel_maturidade: gr('lf-maturidade'),
-        certificacoes: _licGetChecks('lf-certificacoes'),
+        certificacoes: _licGetChecks('lf-certificacoes'), certif_outras: g('lf-certif_outras'),
         otif_pct: parseFloat(g('lf-otif_pct')) || null, acuracidade_pct: parseFloat(g('lf-acuracidade_pct')) || null,
         plano: gr('lf-plano'),
         implantacao_wms: gr('lf-wms-yn'), wms_opcao: gr('lf-wms-opcao'),
