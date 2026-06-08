@@ -10833,6 +10833,7 @@ function _licGetFormData() {
         docas:   parseFloat(b.querySelector('.lic-wh-docas')?.value) || 0,
         ocupacao: parseFloat(b.querySelector('.lic-wh-ocup')?.value) || 0,
         paletes: b.querySelector('.lic-wh-paletes')?.value || '',
+        paletes_disp: parseInt(b.querySelector('.lic-wh-paletes-disp')?.value) || 0,
         pe_direito: b.querySelector('.lic-wh-pe')?.value || '',
         cep:               b.querySelector('.lic-wh-cep')?.value || '',
         lat:               parseFloat(b.querySelector('.lic-wh-lat')?.value) || null,
@@ -10969,7 +10970,11 @@ function licAddWarehouse(data) {
             </div>
             <div class="lic-field-row" style="margin-bottom:16px;">
                 <div><label class="lic-field-label">Capacidade de páletes</label><input class="lic-in lic-wh-paletes" type="number" placeholder="Ex.: 3000" value="${d.paletes||''}"></div>
+                <div><label class="lic-field-label">Posições Pallets Disponível</label><input class="lic-in lic-wh-paletes-disp" type="number" placeholder="Ex.: 1200" value="${d.paletes_disp||''}"></div>
+            </div>
+            <div class="lic-field-row" style="margin-bottom:16px;">
                 <div><label class="lic-field-label">Pé-direito (m)</label><input class="lic-in lic-wh-pe" type="number" placeholder="Ex.: 10" step="0.5" value="${d.pe_direito||''}"></div>
+                <div></div>
             </div>
 
             <!-- ── LOCALIZAÇÃO DO ARMAZÉM (CEP → mapa) ── -->
@@ -14811,6 +14816,7 @@ function _licBuildPDFHtml(lead, anexos, logoB64) {
                             ${w.docas>0?`<span style="font-size:11px;color:#6b7280;"><b>Docas:</b> ${w.docas}</span>`:''}
                             ${w.ocupacao>0?`<span style="font-size:11px;color:#6b7280;"><b>Ocupação:</b> ${w.ocupacao}%</span>`:''}
                             ${w.paletes?`<span style="font-size:11px;color:#6b7280;"><b>Páletes:</b> ${Number(w.paletes).toLocaleString('pt-BR')}</span>`:''}
+                            ${w.paletes_disp?`<span style="font-size:11px;color:#059669;font-weight:700;"><b>Pallets disp.:</b> ${Number(w.paletes_disp).toLocaleString('pt-BR')}</span>`:''}
                             ${w.pe_direito?`<span style="font-size:11px;color:#6b7280;"><b>Pé-dir.:</b> ${w.pe_direito}m</span>`:''}
                         </div>
                     </div>`).join('')}
@@ -15137,12 +15143,14 @@ function _licAtualizarMarkers() {
         const armazensComCoord = (Array.isArray(lead.armazens)?lead.armazens:[])
             .filter(w => w.lat && w.lng);
 
+        const totalPaletesDisp = (Array.isArray(lead.armazens)?lead.armazens:[]).reduce((s,w) => s + (parseInt(w.paletes_disp)||0), 0);
         const pontosParaMarcar = armazensComCoord.length > 0
             ? armazensComCoord.map(w => ({
                 coords: [w.lat, w.lng],
                 lbl:    w.nome || `Armazém`,
                 sub:    w.cidade ? w.cidade + (w.uf ? ' / '+w.uf : '') : (lead.uf||'BR'),
                 m2:     w.area_m2 || 0,
+                paletes_disp: parseInt(w.paletes_disp) || 0,
               }))
             : (() => {
                 const c = _licGetCoords(lead);
@@ -15150,18 +15158,19 @@ function _licAtualizarMarkers() {
                 const lbl = lead.status==='Convertido' && area>0
                     ? (dispon>=1e3?(dispon/1e3).toFixed(0)+'K':Math.round(dispon))+' m² disp.'
                     : area>=1e3?(area/1e3).toFixed(0)+'K m²':area>0?area+' m²':'Lead';
-                return [{ coords: c, lbl, sub: (lead.uf||'BR')+(lead.polo_logistico?' · '+lead.polo_logistico.split(',')[0].trim():''), m2: area }];
+                return [{ coords: c, lbl, sub: (lead.uf||'BR')+(lead.polo_logistico?' · '+lead.polo_logistico.split(',')[0].trim():''), m2: area, paletes_disp: totalPaletesDisp }];
               })();
 
         pontosParaMarcar.forEach(ponto => {
             const m2Fmt = ponto.m2>=1e3 ? (ponto.m2/1e3).toFixed(0)+'K m²' : ponto.m2>0 ? ponto.m2+' m²' : '';
+            const paletFmt = ponto.paletes_disp > 0 ? (ponto.paletes_disp>=1e3?(ponto.paletes_disp/1e3).toFixed(0)+'K':ponto.paletes_disp)+' plt' : '';
             const icon=L.divIcon({
                 className:'',
                 html:`<div class="lic-tag" style="background:${corLead};"
                         onmouseenter="_licMapMostrarHover(event,'${lead.id}')"
                         onmouseleave="_licMapEsconderHover()">
                     <div class="lic-tag-area">${ponto.lbl}${m2Fmt?' · '+m2Fmt:''}</div>
-                    <div class="lic-tag-uf">${ponto.sub}</div>
+                    <div class="lic-tag-uf">${ponto.sub}${paletFmt?' · '+paletFmt:''}</div>
                     <div style="position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid ${corLead};"></div>
                 </div>`,
                 iconSize:[130,48],
@@ -15319,7 +15328,8 @@ function _licMapAbrirFullView(lead) {
                 ${w.area_m2>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${Number(w.area_m2).toLocaleString('pt-BR')} m²</div><div class="lfv-wh-stat-lbl">Área total</div></div>`:''}
                 ${w.docas>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.docas}</div><div class="lfv-wh-stat-lbl">Docas</div></div>`:''}
                 ${w.ocupacao>0?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.ocupacao}%</div><div class="lfv-wh-stat-lbl">Ocupação</div></div>`:''}
-                ${w.paletes?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${Number(w.paletes).toLocaleString('pt-BR')}</div><div class="lfv-wh-stat-lbl">Páletes</div></div>`:''}
+                ${w.paletes?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${Number(w.paletes).toLocaleString('pt-BR')}</div><div class="lfv-wh-stat-lbl">Páletes total</div></div>`:''}
+                ${w.paletes_disp?`<div class="lfv-wh-stat" style="border:1px solid #bbf7d0;background:#f0fdf4;"><div class="lfv-wh-stat-val" style="color:#15803d;">${Number(w.paletes_disp).toLocaleString('pt-BR')}</div><div class="lfv-wh-stat-lbl" style="color:#166534;">Pallets disp.</div></div>`:''}
                 ${w.pe_direito?`<div class="lfv-wh-stat"><div class="lfv-wh-stat-val">${w.pe_direito}m</div><div class="lfv-wh-stat-lbl">Pé-direito</div></div>`:''}
             </div>
         </div>`).join('')}
