@@ -9207,14 +9207,11 @@ function renderizarFinanceiro() {
     const _corTend    = _atingeMeta ? '#27ae60' : '#e74c3c';
     const _corTendBg  = _atingeMeta ? '#e8f8f0' : '#fef0f0';
 
-    // ── Mês atual: Pedidos em Casa como coluna separada (não empilhada) ──
-    const _pedAtualVal = arrayPedidosMensal[currentMonthIndex] || 23455927;
-    const _pedOutros   = arrayPedidosMensal.map((v, i) => i === currentMonthIndex ? 0 : v);
-    const _pedAtualArr = new Array(12).fill(null);
-    _pedAtualArr[currentMonthIndex] = _pedAtualVal;
-    const _fmtBar = v => !v || v===0 ? '' : v>=1e6 ? (v/1e6).toFixed(1)+'M' : (v/1000).toFixed(0)+'k';
+    // ── Pedidos mês atual: garante valor mesmo sem dado no banco ──
+    if (!arrayPedidosMensal[currentMonthIndex]) arrayPedidosMensal[currentMonthIndex] = 23455927;
+    const _fmtBar = v => !v||v===0?'':v>=1e6?(v/1e6).toFixed(1)+'M':(v/1000).toFixed(0)+'k';
 
-    // ── Gráfico Evolução — Plano + Faturado + Pedidos + Tendência ──
+    // ── Gráfico Evolução — 3 colunas lado a lado: Plano | Faturado | Pedidos ──
     if(charts.finEvolucao) charts.finEvolucao.destroy();
     charts.finEvolucao = new Chart(document.getElementById('chartFinEvolucao'), {
         type: 'bar',
@@ -9224,7 +9221,7 @@ function renderizarFinanceiro() {
                 {
                     label: 'Plano Orçamentário',
                     data: arrayPlanoMensal,
-                    backgroundColor: '#e0e0e0',
+                    backgroundColor: ctx => ctx.dataIndex === currentMonthIndex ? '#c8c8c8' : '#e0e0e0',
                     borderRadius: 4,
                     datalabels: {
                         anchor: 'end', align: 'top',
@@ -9239,47 +9236,24 @@ function renderizarFinanceiro() {
                 {
                     label: 'Faturado',
                     data: arrayFaturadoMensal,
-                    backgroundColor: '#ff2f69',
+                    backgroundColor: ctx => ctx.dataIndex === currentMonthIndex ? '#ff2f69' : 'rgba(255,47,105,0.55)',
                     borderRadius: 4,
-                    stack: 'real',
                     datalabels: {
                         anchor: 'end', align: 'top', offset: 2,
                         color: '#ff2f69', font: { size: 10, weight: 'bold' },
-                        display: ctx => ctx.dataIndex === currentMonthIndex && (arrayFaturadoMensal[ctx.dataIndex]||0) > 0,
+                        display: ctx => (arrayFaturadoMensal[ctx.dataIndex]||0) > 0,
                         formatter: v => _fmtBar(v)
                     }
                 },
                 {
-                    // Pedidos empilhados — todos os meses EXCETO o mês atual
                     label: 'Pedidos em Casa',
-                    data: _pedOutros,
-                    backgroundColor: '#f39c12',
-                    borderRadius: 4,
-                    stack: 'real',
-                    datalabels: {
-                        anchor: 'end', align: 'top',
-                        color: '#444', font: { size: 10, weight: 'bold' },
-                        formatter: (v, ctx) => {
-                            if (ctx.dataIndex === currentMonthIndex) return '';
-                            const fat = arrayFaturadoMensal[ctx.dataIndex] || 0;
-                            const ped = _pedOutros[ctx.dataIndex] || 0;
-                            const tot = fat + ped;
-                            if (tot === 0) return '';
-                            if (tot >= 1e6) return (tot/1e6).toFixed(1) + "M";
-                            return (tot/1000).toFixed(0) + "k";
-                        }
-                    }
-                },
-                {
-                    // Pedidos como coluna separada — somente mês atual
-                    label: 'Pedidos em Casa (mês atual)',
-                    data: _pedAtualArr,
-                    backgroundColor: '#f39c12',
+                    data: arrayPedidosMensal,
+                    backgroundColor: ctx => ctx.dataIndex === currentMonthIndex ? '#f39c12' : 'rgba(243,156,18,0.55)',
                     borderRadius: 4,
                     datalabels: {
                         anchor: 'end', align: 'top', offset: 2,
                         color: '#f39c12', font: { size: 10, weight: 'bold' },
-                        display: ctx => ctx.raw != null && ctx.raw > 0,
+                        display: ctx => (arrayPedidosMensal[ctx.dataIndex]||0) > 0,
                         formatter: v => _fmtBar(v)
                     }
                 },
@@ -9310,18 +9284,12 @@ function renderizarFinanceiro() {
             layout: { padding: { top: 28 } },
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12, font: { size: 11 },
-                        filter: item => item.text !== 'Pedidos em Casa (mês atual)'
-                    }
-                },
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
                 datalabels: {}
             },
             scales: {
-                x: { stacked: true, grid: { display: false } },
-                y: { stacked: false, display: false, beginAtZero: true }
+                x: { grid: { display: false } },
+                y: { display: false, beginAtZero: true }
             }
         }
     });
