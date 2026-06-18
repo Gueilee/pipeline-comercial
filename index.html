@@ -1317,6 +1317,37 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <div id="homeSegTopCards" style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;"></div>
             </div>
 
+            <div class="home-connector" style="--c:#e91e8c;"></div>
+
+            <!-- SEÇÃO 07: Marketing & Geração de Demanda -->
+            <div class="home-section">
+                <div class="home-section-header">
+                    <div class="home-section-badge" style="background:#e91e8c;">07</div>
+                    <div class="hsh-text">
+                        <h3>Marketing &amp; Geração de Demanda</h3>
+                        <p>Funil de leads gerados pelo marketing — reuniões, propostas e clientes ganhos por canal de origem</p>
+                    </div>
+                </div>
+                <div id="mktKpis" class="home-kpis" style="grid-template-columns:repeat(4,1fr); margin-bottom:16px;"></div>
+                <div class="home-grid-2">
+                    <div class="home-chart-card" style="height:300px;">
+                        <h5>Funil de Conversão</h5>
+                        <p id="mktFunilSub">Reuniões → Propostas → Ganhos</p>
+                        <div style="height:220px; position:relative;">
+                            <canvas id="chartMktFunil"></canvas>
+                        </div>
+                    </div>
+                    <div class="home-chart-card" style="height:300px;">
+                        <h5>Leads por Canal de Origem</h5>
+                        <p id="mktOrigemSub">Distribuição das reuniões por canal</p>
+                        <div style="height:220px; position:relative;">
+                            <canvas id="chartMktOrigem"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div id="mktGanhosCards" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:14px;"></div>
+            </div>
+
         </div>
 
         <div id="page-kanban">
@@ -4971,6 +5002,7 @@ let baseMetasMensais=[];
 let baseResMensais = [];
 let baseSnapshotSemanal = null;
 let baseAtividades = [];
+let baseMktFunil = [];
 let baseMetasAnuais = [];
 let _listaVendedores = [];
 let charts={};
@@ -6879,6 +6911,132 @@ if(charts.homeStatusValor) charts.homeStatusValor.destroy();
     const totalSeg = Object.values(segValor).reduce((a,b)=>a+b,0);
     document.getElementById('hSegQtdSub').innerText = `Top 10 de ${Object.keys(segCont).length} segmentos · ${opsFiltCliente.filter(r=>r.status!=='PERDIDO'&&r.segmento).length} oportunidades com segmento`;
     document.getElementById('hSegValSub').innerText = `Top 10 de ${Object.keys(segValor).length} segmentos · Pipeline total ${_fmtHome(totalSeg)}`;
+
+    renderizarMktCard();
+}
+
+function renderizarMktCard() {
+    if (!baseMktFunil || !baseMktFunil.length) return;
+
+    const reunioes = baseMktFunil.filter(r => r.tipo_aba === 'REUNIAO');
+    const propostas = baseMktFunil.filter(r => r.tipo_aba === 'PROPOSTA');
+    const ganhos    = baseMktFunil.filter(r => r.tipo_aba === 'GANHO');
+
+    const txRP = reunioes.length ? Math.round(propostas.length / reunioes.length * 100) : 0;
+    const txPG = propostas.length ? Math.round(ganhos.length / propostas.length * 100) : 0;
+
+    // KPI boxes
+    const kpiEl = document.getElementById('mktKpis');
+    if (kpiEl) {
+        const kpis = [
+            { cor:'#7c3aed', icon:'🤝', val: reunioes.length,   lbl:'Reuniões',           sub: reunioes.filter(r=>r.etapa_mkt==='REUNIÃO REALIZADA').length + ' realizadas' },
+            { cor:'#e91e8c', icon:'📋', val: propostas.length,  lbl:'Propostas Geradas',  sub: 'avançaram no funil' },
+            { cor:'#f59e0b', icon:'📈', val: txRP + '%',        lbl:'Taxa Reun.→Prop.',   sub: 'conversão do funil' },
+            { cor:'#10b981', icon:'🏆', val: ganhos.length,     lbl:'Clientes Ganhos',    sub: txPG + '% das propostas' },
+        ];
+        kpiEl.innerHTML = kpis.map(k => `
+            <div class="home-kpi">
+                <div class="home-kpi-icon" style="background:${k.cor}22; font-size:20px;">${k.icon}</div>
+                <div>
+                    <h4 style="color:${k.cor};">${k.val}</h4>
+                    <p>${k.lbl}</p>
+                    <span>${k.sub}</span>
+                </div>
+            </div>`).join('');
+    }
+
+    // Chart 1: Funil horizontal
+    if (charts.mktFunil) charts.mktFunil.destroy();
+    charts.mktFunil = new Chart(document.getElementById('chartMktFunil'), {
+        type: 'bar',
+        data: {
+            labels: ['Reuniões', 'Propostas', 'Ganhos'],
+            datasets: [{
+                data: [reunioes.length, propostas.length, ganhos.length],
+                backgroundColor: ['#7c3aed', '#e91e8c', '#10b981'],
+                borderRadius: 8,
+                barThickness: 44
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end', align: 'end', clamp: true,
+                    font: { size: 15, weight: '900' }, color: '#333',
+                    formatter: v => v
+                }
+            },
+            scales: {
+                x: { display: false, beginAtZero: true },
+                y: { grid: { display: false }, ticks: { font: { size: 13, weight: '700' }, color: '#555' } }
+            }
+        }
+    });
+
+    // Chart 2: Origens donut (base = reuniões, empresa única)
+    const origemVisto = {};
+    reunioes.forEach(r => {
+        const key = (r.empresa || '').toUpperCase();
+        if (!origemVisto[key]) {
+            origemVisto[key] = r.origem || 'Outros';
+        }
+    });
+    const origemCount = {};
+    Object.values(origemVisto).forEach(o => { origemCount[o] = (origemCount[o] || 0) + 1; });
+    const origemLabels = Object.keys(origemCount).sort((a,b) => origemCount[b] - origemCount[a]);
+    const origemVals   = origemLabels.map(o => origemCount[o]);
+    const origemColors = ['#7c3aed','#e91e8c','#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6'];
+
+    if (charts.mktOrigem) charts.mktOrigem.destroy();
+    charts.mktOrigem = new Chart(document.getElementById('chartMktOrigem'), {
+        type: 'doughnut',
+        data: {
+            labels: origemLabels,
+            datasets: [{ data: origemVals, backgroundColor: origemColors, borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            cutout: '58%',
+            plugins: {
+                legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 }, padding: 10, color: '#444' } },
+                datalabels: {
+                    display: true, color: '#fff',
+                    font: { size: 10, weight: '700' },
+                    formatter: (v, ctx) => {
+                        const tot = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                        return v > 0 ? Math.round(v/tot*100)+'%' : '';
+                    }
+                }
+            }
+        }
+    });
+
+    document.getElementById('mktFunilSub').innerText =
+        `${reunioes.length} entradas · ${ganhos.length} convertidas em cliente`;
+    document.getElementById('mktOrigemSub').innerText =
+        `${origemLabels.length} canais · ${Object.keys(origemVisto).length} empresas únicas`;
+
+    // Cards de clientes ganhos
+    const ganhosEl = document.getElementById('mktGanhosCards');
+    if (ganhosEl) {
+        const cores = ['#7c3aed','#e91e8c','#10b981'];
+        ganhosEl.innerHTML = ganhos.length
+            ? ganhos.map((g, i) => {
+                const cor = cores[i % cores.length];
+                return `<div style="background:#fff;border:1.5px solid #eee;border-left:4px solid ${cor};border-radius:10px;padding:14px 18px;flex:1;min-width:220px;">
+                    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#bbb;margin-bottom:6px;">✅ Cliente Ganho</div>
+                    <div style="font-size:14px;font-weight:800;color:#222;margin-bottom:8px;">${g.empresa}</div>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                        <div style="font-size:11px;color:#555;"><span style="color:${cor};">⬤</span> ${g.origem}</div>
+                        <div style="font-size:11px;color:#888;">👤 ${g.vendedor}</div>
+                    </div>
+                </div>`;
+            }).join('')
+            : '<p style="color:#aaa;font-size:13px;">Nenhum ganho registrado ainda.</p>';
+    }
 }
 
 // ---- LOADS INICIAIS ----
@@ -6930,6 +7088,9 @@ async function carregarDados(){
 
     const { data: ativs } = await supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false });
     baseAtividades = ativs || [];
+
+    const { data: mkt } = await supabaseClient.from('mkt_funil').select('*');
+    baseMktFunil = mkt || [];
 
     await carregarMetasAnuais();
 
