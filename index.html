@@ -1564,6 +1564,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button type="button" id="btnCompararFin" class="btn-header btn-comparar" onclick="toggleModoCompFin()"><span>⚖️</span> Comparar</button>
+                    <button type="button" class="btn-header" onclick="abrirModalGerenciarOrigens()" style="background:#fce7f3; color:#be185d; border:1.5px solid #fbcfe8;"><span>📡</span> Gerenciar Origens</button>
                     <button type="button" id="btn-lancar-fin" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento</button>
                 </div>
             </div>
@@ -4513,6 +4514,53 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     </div>
 </div>
 
+<!-- ── MODAL GERENCIAR ORIGENS ── -->
+<div id="modalGerenciarOrigens" class="modal">
+    <div class="modal-content" style="width:860px; max-width:96vw; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+        <!-- Header -->
+        <div style="padding:20px 24px 16px; border-bottom:1.5px solid #f0ebff;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                    <h3 style="margin:0; font-size:16px; color:#422c76;">📡 Gerenciar Origens dos Clientes</h3>
+                    <p style="margin:4px 0 0; font-size:12px; color:#888;">Associe o canal de marketing a cada cliente do Financeiro.</p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+                    <span id="origBadgeSemOrigem" style="background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; border:1px solid #fecaca;"></span>
+                    <button type="button" class="btn-header" onclick="fecharModal('modalGerenciarOrigens')" style="background:#f0f0f0; color:#555;">✕ Fechar</button>
+                </div>
+            </div>
+            <!-- Filtros inline -->
+            <div style="display:flex; gap:8px; margin-top:14px; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="origBusca" placeholder="🔍 Buscar cliente..." oninput="_renderTabelaOrigens()"
+                    style="height:32px; padding:0 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:12px; min-width:200px;">
+                <div style="display:flex; gap:4px; background:#f4f4f4; padding:3px; border-radius:8px;">
+                    <button class="orig-pill ativo" id="origPillTodos"   onclick="_origSetPill('todos')"    style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:#422c76; color:#fff;">Todos</button>
+                    <button class="orig-pill"       id="origPillSem"     onclick="_origSetPill('sem')"      style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">Sem origem</button>
+                    <button class="orig-pill"       id="origPillCom"     onclick="_origSetPill('com')"      style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">Com origem</button>
+                </div>
+            </div>
+        </div>
+        <!-- Tabela -->
+        <div style="flex:1; overflow-y:auto; padding:0 24px 16px;">
+            <table id="tabelaOrigens" style="width:100%; border-collapse:collapse; margin-top:12px;">
+                <thead>
+                    <tr style="position:sticky; top:0; background:#fff; z-index:1;">
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px 8px 0; border-bottom:1.5px solid #f0ebff;">Cliente</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px; border-bottom:1.5px solid #f0ebff;">BU</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px; border-bottom:1.5px solid #f0ebff; min-width:220px;">Canal de Origem</th>
+                    </tr>
+                </thead>
+                <tbody id="origensBody"></tbody>
+            </table>
+        </div>
+        <!-- Footer -->
+        <div style="padding:14px 24px; border-top:1.5px solid #f0ebff; display:flex; justify-content:flex-end; gap:10px; background:#fafafa;">
+            <button type="button" class="btn-header" onclick="fecharModal('modalGerenciarOrigens')" style="background:#f0f0f0; color:#555;">Cancelar</button>
+            <button type="button" class="btn-header" onclick="salvarOrigensClientes()" style="background:#e91e8c; color:#fff; border-color:#e91e8c;" id="btnSalvarOrigens">💾 Salvar Origens</button>
+        </div>
+    </div>
+</div>
+
 <div id="modalHistoricoDetalhado" class="modal">
     <div class="modal-content" style="width: 550px; background: #fff;">
         <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
@@ -5054,6 +5102,7 @@ let baseResMensais = [];
 let baseSnapshotSemanal = null;
 let baseAtividades = [];
 let baseMktFunil = [];
+let baseOrigensClientes = [];
 let baseMetasAnuais = [];
 let _listaVendedores = [];
 let charts={};
@@ -5593,6 +5642,12 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
 
     // Captura status anterior ANTES de recarregar o array
     const statusAnterior = idValue ? (base.find(x => String(x.id) === String(idValue))?.status || '') : '';
+
+    // Sync origem para origens_clientes (fonte canônica do Financeiro)
+    if (nova_origem) {
+        await supabaseClient.from('origens_clientes')
+            .upsert({ cliente: novo_cliente, origem: nova_origem, updated_at: new Date().toISOString() }, { onConflict: 'cliente' });
+    }
 
     fecharModal('modalOportunidade');
     showToast("Oportunidade salva com sucesso!", "success");
@@ -7104,6 +7159,136 @@ function renderizarMktCard() {
     }
 }
 
+// ── GERENCIAR ORIGENS ──────────────────────────────────────────────────────────
+
+let _origFiltro = 'todos'; // 'todos' | 'sem' | 'com'
+
+function abrirModalGerenciarOrigens() {
+    _origFiltro = 'todos';
+    _origSetPill('todos');
+    document.getElementById('origBusca').value = '';
+    _renderTabelaOrigens();
+    abrirModal('modalGerenciarOrigens');
+}
+
+function _origSetPill(tipo) {
+    _origFiltro = tipo;
+    ['todos','sem','com'].forEach(t => {
+        const el = document.getElementById('origPill' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (!el) return;
+        el.style.background = t === tipo ? '#422c76' : 'transparent';
+        el.style.color      = t === tipo ? '#fff' : '#666';
+    });
+    _renderTabelaOrigens();
+}
+
+function _renderTabelaOrigens() {
+    // Monta mapa atual: cliente → origem (origens_clientes prioritário)
+    const mapaAtual = {};
+    (baseOrigensClientes||[]).forEach(r => { if (r.cliente) mapaAtual[r.cliente] = r.origem || ''; });
+    (base||[]).forEach(r => { if (r.cliente && r.origem && !mapaAtual[r.cliente]) mapaAtual[r.cliente] = r.origem; });
+
+    // Clientes únicos do Financeiro com BU
+    const clientesBU = {};
+    (baseResMensais||[]).forEach(r => {
+        if (!r.cliente) return;
+        if (!clientesBU[r.cliente]) clientesBU[r.cliente] = r.bu ? r.bu.toUpperCase().trim() : '—';
+    });
+
+    const busca = (document.getElementById('origBusca')?.value || '').toLowerCase();
+    const clientes = Object.keys(clientesBU).sort((a,b) => a.localeCompare(b,'pt-BR'))
+        .filter(c => {
+            if (busca && !c.toLowerCase().includes(busca)) return false;
+            const temOrigem = !!mapaAtual[c];
+            if (_origFiltro === 'sem' &&  temOrigem) return false;
+            if (_origFiltro === 'com' && !temOrigem) return false;
+            return true;
+        });
+
+    const semOrigem = Object.keys(clientesBU).filter(c => !mapaAtual[c]).length;
+    const badge = document.getElementById('origBadgeSemOrigem');
+    if (badge) badge.textContent = `${semOrigem} sem origem`;
+
+    const _origOpts = `
+        <option value="">— Sem origem —</option>
+        <option value="Tráfego Pago">📣 Tráfego Pago</option>
+        <option value="Contatos Site">🌐 Contatos Site</option>
+        <option value="Pit Stop 2025 (nurture)">🏎️ Pit Stop 2025</option>
+        <option value="Pit Stop 2026">🏎️ Pit Stop 2026</option>
+        <option value="Intermodal">🚢 Intermodal</option>
+        <option value="Contatos E-mail">✉️ Contatos E-mail</option>`;
+
+    const _buColor = { TRADING:'#422c76', ARMAZEM:'#17a2b8', TRANSPORTE:'#f39c12' };
+    const _origColorMap = {'Tráfego Pago':'#7c3aed','Contatos Site':'#be185d','Pit Stop 2025 (nurture)':'#854d0e','Pit Stop 2026':'#1e40af','Intermodal':'#065f46','Contatos E-mail':'#991b1b'};
+
+    const tbody = document.getElementById('origensBody');
+    if (!tbody) return;
+    tbody.innerHTML = clientes.map((cli, i) => {
+        const bu   = clientesBU[cli];
+        const orig = mapaAtual[cli] || '';
+        const buC  = _buColor[bu] || '#888';
+        const origC = orig ? _origColorMap[orig] || '#555' : '#ccc';
+        const dot   = orig ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${origC};margin-right:6px;"></span>` : '';
+        return `<tr style="border-bottom:1px solid #f5f5f5; ${i%2===0?'background:#fafafa;':''}">
+            <td style="padding:8px 10px 8px 0; font-size:12px; font-weight:600; color:#333;">${dot}${cli}</td>
+            <td style="padding:8px 10px;">
+                <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:${buC}18; color:${buC}; border:1px solid ${buC}33;">${bu}</span>
+            </td>
+            <td style="padding:8px 10px;">
+                <select data-cliente="${cli.replace(/"/g,'&quot;')}" class="orig-select"
+                    style="height:30px; padding:0 8px; border:1.5px solid ${orig?'#e91e8c44':'#e0e0e0'}; border-radius:8px; font-size:12px; background:#fff; width:100%; color:${orig?'#333':'#aaa'};"
+                    onchange="this.style.borderColor=this.value?'#e91e8c44':'#e0e0e0'; this.style.color=this.value?'#333':'#aaa';">
+                    ${_origOpts}
+                </select>
+            </td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="3" style="padding:24px; text-align:center; color:#bbb; font-size:13px;">Nenhum cliente encontrado.</td></tr>`;
+
+    // Define valores selecionados após render
+    tbody.querySelectorAll('.orig-select').forEach(sel => {
+        const cli = sel.getAttribute('data-cliente');
+        sel.value = mapaAtual[cli] || '';
+    });
+}
+
+async function salvarOrigensClientes() {
+    const btn = document.getElementById('btnSalvarOrigens');
+    btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+
+    const rows = [];
+    document.querySelectorAll('#origensBody .orig-select').forEach(sel => {
+        const cliente = sel.getAttribute('data-cliente');
+        const origem  = sel.value || null;
+        if (cliente) rows.push({ cliente, origem, updated_at: new Date().toISOString() });
+    });
+
+    if (!rows.length) { btn.textContent = '💾 Salvar Origens'; btn.disabled = false; return; }
+
+    // UPSERT em origens_clientes
+    const { error } = await supabaseClient.from('origens_clientes')
+        .upsert(rows, { onConflict: 'cliente' });
+
+    if (error) {
+        showToast('Erro ao salvar origens: ' + error.message, 'error');
+        btn.textContent = '💾 Salvar Origens'; btn.disabled = false;
+        return;
+    }
+
+    // Sync para oportunidades onde cliente bater
+    const comOrigem = rows.filter(r => r.origem);
+    for (const r of comOrigem) {
+        await supabaseClient.from('oportunidades')
+            .update({ origem: r.origem })
+            .eq('cliente', r.cliente)
+            .is('origem', null);
+    }
+
+    btn.textContent = '💾 Salvar Origens'; btn.disabled = false;
+    fecharModal('modalGerenciarOrigens');
+    showToast(`${rows.length} origens salvas com sucesso!`, 'success');
+    carregarDados();
+}
+
 // ---- LOADS INICIAIS ----
 async function carregarAuxiliares(){
     const { data: v } = await supabaseClient.from('vendedores').select('*');
@@ -7156,6 +7341,9 @@ async function carregarDados(){
 
     const { data: mkt } = await supabaseClient.from('mkt_funil').select('*');
     baseMktFunil = mkt || [];
+
+    const { data: oric } = await supabaseClient.from('origens_clientes').select('*');
+    baseOrigensClientes = oric || [];
 
     await carregarMetasAnuais();
 
@@ -9334,7 +9522,8 @@ function renderizarFinanceiro() {
     const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
     const currentMonthIndex = new Date().getMonth(); // 0=Jan … 11=Dez
 
-    // Mapear cliente → segmento e cliente → origem via oportunidades
+    // Mapear cliente → segmento e cliente → origem
+    // origens_clientes é a fonte canônica; oportunidades.origem como fallback
     const clienteSegMap = {};
     const clienteOrigemMap = {};
     (base||[]).forEach(r => {
@@ -9342,6 +9531,8 @@ function renderizarFinanceiro() {
         if (r.cliente && r.origem)   clienteOrigemMap[r.cliente] = r.origem;
     });
     (baseResMensais||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
+    // origens_clientes sobrescreve (é a fonte de verdade)
+    (baseOrigensClientes||[]).forEach(r => { if (r.cliente && r.origem) clienteOrigemMap[r.cliente] = r.origem; });
     const segFin_plano = {}, segFin_fat = {}, segFin_ped = {};
 
     baseResMensais.forEach(rm => {
