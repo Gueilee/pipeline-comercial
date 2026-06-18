@@ -169,7 +169,7 @@ header {
 .chart-card h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
 
 /* ── HOME / DASHBOARD ── */
-.home-filter-bar { display:flex; gap:10px; align-items:center; background:white; border-radius:12px; padding:12px 18px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px; flex-wrap:wrap; }
+.home-filter-bar { display:flex; gap:8px; align-items:center; background:white; border-radius:12px; padding:12px 18px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:24px; flex-wrap:nowrap; overflow-x:auto; }
 .home-filter-bar label { font-size:11px; font-weight:700; color:#aaa; letter-spacing:.5px; margin-right:-4px; white-space:nowrap; }
 .home-filter-bar select, .home-filter-bar input { height:34px; padding:0 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:12px; color:#555; background:#fff; outline:none; }
 .home-filter-bar select:focus, .home-filter-bar input:focus { border-color:var(--lilas); }
@@ -1118,7 +1118,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="">Todos os Vendedores</option>
                 </select>
                 <div class="home-filter-sep"></div>
-                <select id="homeCliente" onchange="renderizarHome()" style="min-width:150px; max-width:200px;">
+                <select id="homeCliente" onchange="renderizarHome()" style="min-width:130px; max-width:170px;">
                     <option value="">Todos os Clientes</option>
                 </select>
                 <div class="home-filter-sep"></div>
@@ -1136,7 +1136,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="PEDIDOS EM CASA">Pedidos em Casa</option>
                 </select>
                 <div class="home-filter-sep"></div>
-                <select id="homeSegmento" onchange="renderizarHome()" style="min-width:160px; max-width:220px;">
+                <select id="homeSegmento" onchange="renderizarHome()" style="min-width:140px; max-width:180px;">
                     <option value="">Todos os Segmentos</option>
                 </select>
                 <div style="flex:1"></div>
