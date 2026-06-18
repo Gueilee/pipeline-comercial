@@ -5881,7 +5881,7 @@ function renderizarMetas() {
     charts.unidade = new Chart(document.getElementById('chartUnidadeNegocio'), {
         type:'bar', data:{ labels:unidLabels, datasets:unidDatasets },
         options:{ maintainAspectRatio:false, layout:{padding:{top:36,bottom:12}},
-            plugins:{ legend:{position:'top', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
+            plugins:{ legend:{position:'bottom', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
             scales:{ y:{display:false, stacked:true}, x:{grid:{display:false}, ticks:{font:{size:12}}} } }
     });
 
