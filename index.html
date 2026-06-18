@@ -1569,11 +1569,11 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
             </div>
 
             <!-- Linha 2: Barra de Filtros -->
-            <div class="periodo-bar" style="gap:12px; margin-bottom:22px;">
+            <div class="periodo-bar" style="gap:8px; margin-bottom:22px; flex-wrap:nowrap; overflow-x:auto;">
                 <span class="periodo-label">🔍 Filtros</span>
                 <div class="periodo-sep"></div>
 
-                <input type="text" id="filtroFinCliente" class="input-search" placeholder="Buscar cliente..." oninput="debouncedRenderizarFin()" list="listaClientesFin" style="min-width:180px; height:36px; font-size:12px;">
+                <input type="text" id="filtroFinCliente" class="input-search" placeholder="Buscar cliente..." oninput="debouncedRenderizarFin()" list="listaClientesFin" style="min-width:150px; width:150px; height:36px; font-size:12px;">
                 <datalist id="listaClientesFin"></datalist>
 
                 <!-- MULTI-SELECT BU -->
@@ -1630,11 +1630,11 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="PEDIDOS EM CASA">Pedidos em Casa</option>
                 </select>
 
-                <select id="filtroFinSegmento" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:160px;">
+                <select id="filtroFinSegmento" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:140px;">
                     <option value="">Todos os Segmentos</option>
                 </select>
 
-                <select id="filtroFinOrigem" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:170px;">
+                <select id="filtroFinOrigem" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:150px;">
                     <option value="">Todas as Origens</option>
                     <option value="Tráfego Pago">Tráfego Pago</option>
                     <option value="Contatos Site">Contatos Site</option>
