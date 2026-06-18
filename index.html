@@ -4435,7 +4435,20 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="">Selecione o segmento de mercado...</option>
                 </select>
             </div>
-            
+
+            <div class="form-group">
+                <label>Canal de Origem <span style="color:#888; font-size:11px;">— como o cliente nos encontrou</span></label>
+                <select id="op_origem" style="border-left:3px solid #e91e8c;">
+                    <option value="">Sem origem / Prospecção direta</option>
+                    <option value="Tráfego Pago">📣 Tráfego Pago</option>
+                    <option value="Contatos Site">🌐 Contatos Site</option>
+                    <option value="Pit Stop 2025 (nurture)">🏎️ Pit Stop 2025</option>
+                    <option value="Pit Stop 2026">🏎️ Pit Stop 2026</option>
+                    <option value="Intermodal">🚢 Intermodal</option>
+                    <option value="Contatos E-mail">✉️ Contatos E-mail</option>
+                </select>
+            </div>
+
             <div class="form-row">
                 <div class="form-group" style="flex:1"><label>Data da Oportunidade</label><input type="date" id="op_data_oportunidade" required></div>
                 <div class="form-group" style="flex:1"><label>Previsão de Fechamento</label><input type="date" id="op_previsao_fechamento"></div>
@@ -5410,6 +5423,7 @@ function editarOportunidade(idParam) {
     document.getElementById('op_status').value = item.status || "";
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
     document.getElementById('op_segmento').value = item.segmento || "";
+    document.getElementById('op_origem').value = item.origem || "";
     document.getElementById('op_historico').value = item.historico || "";
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
@@ -5526,6 +5540,18 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     }
 
     const novo_segmento = document.getElementById('op_segmento').value || null;
+    const nova_origem   = document.getElementById('op_origem').value || null;
+
+    // Registra mudança de origem no histórico
+    if (idValue) {
+        const antigo = base.find(x => String(x.id) === String(idValue));
+        if (antigo && (antigo.origem || '') !== (nova_origem || '')) {
+            const agora = new Date();
+            const carimbo = `${agora.toLocaleDateString('pt-BR')} ${agora.getHours().toString().padStart(2,'0')}:${agora.getMinutes().toString().padStart(2,'0')} - USUÁRIO: ${USUARIO_LOGADO}`;
+            const logOrigem = `[${carimbo}] ORIGEM: "${antigo.origem || 'Sem origem'}" → "${nova_origem || 'Sem origem'}"`;
+            historico_atual = logOrigem + (historico_atual ? "\n" + historico_atual : "");
+        }
+    }
 
     const payload = {
     cliente: novo_cliente,
@@ -5541,6 +5567,7 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     status: novo_status,
     area: nova_area,
     segmento: novo_segmento,
+    origem: nova_origem,
     motivo_perda: novo_motivo || null,
     historico: historico_atual
 };
