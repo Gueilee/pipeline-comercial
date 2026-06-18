@@ -5914,7 +5914,9 @@ function renderizarMetas() {
     });
     const _sumPer = (arr, s, e) => arr.slice(s-1, e).reduce((a,b)=>a+b, 0);
     // Corrige faturamento do período: usa _vendFatArr que combina metas_mensais + resultados_mensais
-    realPeriodo.faturamento = _vendsMeta.reduce((sum, [vend]) => sum + _sumPer(_vendFatArr[vend], periodoMesInicio, periodoMesFim), 0);
+    realPeriodo.faturamento = fV
+        ? _sumPer(_vendFatArr[fV] || new Array(12).fill(0), periodoMesInicio, periodoMesFim)
+        : _vendsMeta.reduce((sum, [vend]) => sum + _sumPer(_vendFatArr[vend], periodoMesInicio, periodoMesFim), 0);
 
     // ── KPIs — refletem o período selecionado ──
     const labelPeriodo = numMeses === 12 ? 'no Ano' : numMeses === 1
