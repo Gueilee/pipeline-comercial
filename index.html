@@ -5805,7 +5805,7 @@ function renderizarMetas() {
     charts.evolucao = new Chart(document.getElementById('chartEvolucaoMensal'), {
         type:'bar', data:{ labels:NOMES_MESES_SHORT, datasets:ev1Datasets },
         options:{ maintainAspectRatio:false, layout:{padding:{top:28,bottom:8}},
-            plugins:{ legend:{position:'top', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
+            plugins:{ legend:{position:'bottom', labels:{boxWidth:12,font:{size:11}}}, datalabels:{} },
             scales:{ y:{display:false}, x:{grid:{display:false}, stacked:true} } }
     });
 
