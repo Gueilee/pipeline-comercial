@@ -1634,6 +1634,16 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="">Todos os Segmentos</option>
                 </select>
 
+                <select id="filtroFinOrigem" onchange="renderizarFinanceiro()" style="height:36px; padding:0 10px; border-radius:6px; border:1px solid #ddd; font-size:12px; background:white; min-width:170px;">
+                    <option value="">Todas as Origens</option>
+                    <option value="Tráfego Pago">Tráfego Pago</option>
+                    <option value="Contatos Site">Contatos Site</option>
+                    <option value="Pit Stop 2025 (nurture)">Pit Stop 2025</option>
+                    <option value="Pit Stop 2026">Pit Stop 2026</option>
+                    <option value="Intermodal">Intermodal</option>
+                    <option value="Contatos E-mail">Contatos E-mail</option>
+                </select>
+
                 <span class="periodo-badge" id="finFiltrosBadge" style="display:none"></span>
             </div>
 
@@ -9282,13 +9292,18 @@ function renderizarFinanceiro() {
     const fFinQuatroPL = (document.getElementById('filtroFinQuatroPL')?.value || '').toUpperCase();
     const fFinStatus   = document.getElementById('filtroFinStatus').value.toUpperCase();
     const fFinSegmento = (document.getElementById('filtroFinSegmento')?.value || '');
+    const fFinOrigem   = (document.getElementById('filtroFinOrigem')?.value || '');
     const buFiltroAtivo  = _allFinBUs.length  > 0 && _finBUsSelecionadas.size  < _allFinBUs.length;
     const catFiltroAtivo = _allFinCats.length > 0 && _finCatsSelecionadas.size < _allFinCats.length;
     const currentMonthIndex = new Date().getMonth(); // 0=Jan … 11=Dez
 
-    // Para gráficos de segmento: mapear cliente → segmento via resultados_mensais e oportunidades
+    // Mapear cliente → segmento e cliente → origem via oportunidades
     const clienteSegMap = {};
-    (base||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
+    const clienteOrigemMap = {};
+    (base||[]).forEach(r => {
+        if (r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento;
+        if (r.cliente && r.origem)   clienteOrigemMap[r.cliente] = r.origem;
+    });
     (baseResMensais||[]).forEach(r => { if(r.cliente && r.segmento) clienteSegMap[r.cliente] = r.segmento; });
     const segFin_plano = {}, segFin_fat = {}, segFin_ped = {};
 
@@ -9300,14 +9315,16 @@ function renderizarFinanceiro() {
         const tipo   = rm.tipo     ? rm.tipo.toUpperCase().replace(/\s+/g,' ').trim()     : '';
         const q4pl   = rm.quatro_pl ? rm.quatro_pl.toUpperCase().trim() : 'OUTROS';
         const seg    = rm.segmento || clienteSegMap[rm.cliente] || '(sem segmento)';
+        const origem = clienteOrigemMap[rm.cliente] || '';
 
         if (fFinCli      && !cliName.toLowerCase().includes(fFinCli)) return;
         if (buFiltroAtivo  && !_finBUsSelecionadas.has(bu))           return;
         if (catFiltroAtivo && !_finCatsSelecionadas.has(categoria))    return;
-        if (fFinTipo     && tipo  !== fFinTipo)     return;
-        if (fFinQuatroPL && q4pl  !== fFinQuatroPL) return;
-        if (fFinStatus   && status !== fFinStatus)  return;
-        if (fFinSegmento && seg   !== fFinSegmento) return;
+        if (fFinTipo     && tipo   !== fFinTipo)     return;
+        if (fFinQuatroPL && q4pl   !== fFinQuatroPL) return;
+        if (fFinStatus   && status !== fFinStatus)   return;
+        if (fFinSegmento && seg    !== fFinSegmento) return;
+        if (fFinOrigem   && origem !== fFinOrigem)   return;
 
         const mesIdx  = (rm.mes_numero || 1) - 1;
         const valPlan = parseFloat(rm.valor_planejado) || 0;
