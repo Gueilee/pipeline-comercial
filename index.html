@@ -8901,6 +8901,10 @@ function renderizarHistorico() {
         div.className = 'hist-item' + (String(_histSelected) === String(item.id) ? ' selected' : '');
         div.dataset.id = item.id;
         div.onclick = () => abrirDetalheHistorico(item.id);
+        const _origColorMap = {'Tráfego Pago':'#7c3aed','Contatos Site':'#be185d','Pit Stop 2025 (nurture)':'#854d0e','Pit Stop 2026':'#1e40af','Intermodal':'#065f46','Contatos E-mail':'#991b1b'};
+        const _origDot = item.origem
+            ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${_origColorMap[item.origem]||'#aaa'};margin-right:3px;vertical-align:middle;"></span><span style="font-size:9px;color:${_origColorMap[item.origem]||'#888'};font-weight:700;">${item.origem}</span>`
+            : '';
         div.innerHTML = `
             <div class="hist-item-top">
                 <div class="hist-item-name">${item.cliente || '—'}</div>
@@ -8910,6 +8914,7 @@ function renderizarHistorico() {
                 <span class="hist-bu-tag ${buClass}">${buGroup}</span>
                 <span class="hist-item-vend">👤 ${item.vendedor || '—'}</span>
             </div>
+            ${item.origem ? `<div style="padding:2px 0 3px;">${_origDot}</div>` : ''}
             <div class="hist-item-bot">
                 <span class="hist-valor-est">
                     <span style="color:#aaa; font-size:10px; font-weight:600;">Est. </span>R$ ${valFmt}
@@ -9100,6 +9105,11 @@ function abrirDetalheHistorico(id) {
                     <span class="hist-det-badge" style="background:#f5f5f5; color:#666;">👤 ${item.vendedor || '—'}</span>
                     ${item.cnpj ? `<span class="hist-det-badge" style="background:#f5f5f5; color:#666;">🪪 ${item.cnpj}</span>` : ''}
                     ${item.tipo ? `<span class="hist-det-badge" style="background:#f5f5f5; color:#666;">${item.tipo}</span>` : ''}
+                    ${item.origem ? (() => {
+                        const _os = {'Tráfego Pago':'background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;','Contatos Site':'background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;','Pit Stop 2025 (nurture)':'background:#fef9c3;color:#854d0e;border:1px solid #fef08a;','Pit Stop 2026':'background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;','Intermodal':'background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;','Contatos E-mail':'background:#fee2e2;color:#991b1b;border:1px solid #fecaca;'};
+                        const st = _os[item.origem] || 'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;';
+                        return `<span class="hist-det-badge" style="${st}">📡 ${item.origem}</span>`;
+                    })() : ''}
                 </div>
                 ${item.area ? `<div class="hist-det-cnpj">Área: ${item.area}</div>` : ''}
             </div>
