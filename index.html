@@ -4439,7 +4439,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
             <div class="form-group">
                 <label>Canal de Origem <span style="color:#888; font-size:11px;">— como o cliente nos encontrou</span></label>
-                <select id="op_origem" style="border-left:3px solid #e91e8c;">
+                <select id="op_origem" style="border-left:3px solid #e91e8c;" onchange="toggleOpOrigemCustom()">
                     <option value="">Sem origem / Prospecção direta</option>
                     <option value="Tráfego Pago">📣 Tráfego Pago</option>
                     <option value="Contatos Site">🌐 Contatos Site</option>
@@ -4447,7 +4447,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <option value="Pit Stop 2026">🏎️ Pit Stop 2026</option>
                     <option value="Intermodal">🚢 Intermodal</option>
                     <option value="Contatos E-mail">✉️ Contatos E-mail</option>
+                    <option value="__outra__">✏️ Outra origem...</option>
                 </select>
+                <input type="text" id="op_origem_custom" placeholder="Descreva o canal de origem..." maxlength="80"
+                    style="display:none; margin-top:6px; width:100%; height:34px; padding:0 10px; border:1.5px solid #e91e8c; border-radius:8px; font-size:12px; box-sizing:border-box;">
             </div>
 
             <div class="form-row">
@@ -5437,13 +5440,24 @@ function calcularMRR() {
         campoValorAno.value = "0.00";
     }
 }
+function toggleOpOrigemCustom() {
+    const sel = document.getElementById('op_origem');
+    const inp = document.getElementById('op_origem_custom');
+    if (!inp) return;
+    const show = sel.value === '__outra__';
+    inp.style.display = show ? 'block' : 'none';
+    if (show) { inp.value = ''; inp.focus(); }
+}
+
 function prepararNovo() {
     document.getElementById('formOportunidade').reset();
     document.getElementById('op_id').value = "";
     document.getElementById('modalTitulo').innerText = "Nova Oportunidade";
     document.getElementById('btnExcluir').style.display = "none";
     document.getElementById('op_data_oportunidade').valueAsDate = new Date();
-    document.getElementById('op_historico').value = ""; 
+    document.getElementById('op_historico').value = "";
+    document.getElementById('op_origem_custom').style.display = 'none';
+    document.getElementById('op_origem_custom').value = '';
     toggleMotivoPerda(); abrirModal('modalOportunidade');
 }
 
@@ -5472,7 +5486,21 @@ function editarOportunidade(idParam) {
     document.getElementById('op_status').value = item.status || "";
     document.getElementById('op_motivo_perda').value = item.motivo_perda || "";
     document.getElementById('op_segmento').value = item.segmento || "";
-    document.getElementById('op_origem').value = item.origem || "";
+    const _origemPredefinidas = ['','Tráfego Pago','Contatos Site','Pit Stop 2025 (nurture)','Pit Stop 2026','Intermodal','Contatos E-mail'];
+    const _origemValor = item.origem || '';
+    if (_origemPredefinidas.includes(_origemValor)) {
+        document.getElementById('op_origem').value = _origemValor;
+        document.getElementById('op_origem_custom').style.display = 'none';
+        document.getElementById('op_origem_custom').value = '';
+    } else if (_origemValor) {
+        document.getElementById('op_origem').value = '__outra__';
+        document.getElementById('op_origem_custom').value = _origemValor;
+        document.getElementById('op_origem_custom').style.display = 'block';
+    } else {
+        document.getElementById('op_origem').value = '';
+        document.getElementById('op_origem_custom').style.display = 'none';
+        document.getElementById('op_origem_custom').value = '';
+    }
     document.getElementById('op_historico').value = item.historico || "";
     document.getElementById('modalTitulo').innerText = "Editar Oportunidade";
     document.getElementById('btnExcluir').style.display = "block";
@@ -5589,7 +5617,8 @@ document.getElementById('formOportunidade').onsubmit = async (e) => {
     }
 
     const novo_segmento = document.getElementById('op_segmento').value || null;
-    const nova_origem   = document.getElementById('op_origem').value || null;
+    let nova_origem = document.getElementById('op_origem').value || null;
+    if (nova_origem === '__outra__') nova_origem = (document.getElementById('op_origem_custom').value || '').trim() || null;
 
     // Registra mudança de origem no histórico
     if (idValue) {
@@ -7171,6 +7200,17 @@ function abrirModalGerenciarOrigens() {
     abrirModal('modalGerenciarOrigens');
 }
 
+function _origSelectChange(sel) {
+    sel.style.borderColor = sel.value ? '#e91e8c44' : '#e0e0e0';
+    sel.style.color = sel.value ? '#333' : '#aaa';
+    const cli = sel.getAttribute('data-cliente');
+    const inp = sel.parentElement.querySelector('.orig-custom-input');
+    if (!inp) return;
+    const show = sel.value === '__outra__';
+    inp.style.display = show ? 'block' : 'none';
+    if (show) { inp.value = ''; inp.focus(); }
+}
+
 function _origSetPill(tipo) {
     _origFiltro = tipo;
     ['todos','sem','com'].forEach(t => {
@@ -7209,6 +7249,7 @@ function _renderTabelaOrigens() {
     const badge = document.getElementById('origBadgeSemOrigem');
     if (badge) badge.textContent = `${semOrigem} sem origem`;
 
+    const _origPred = ['Tráfego Pago','Contatos Site','Pit Stop 2025 (nurture)','Pit Stop 2026','Intermodal','Contatos E-mail'];
     const _origOpts = `
         <option value="">— Sem origem —</option>
         <option value="Tráfego Pago">📣 Tráfego Pago</option>
@@ -7216,7 +7257,8 @@ function _renderTabelaOrigens() {
         <option value="Pit Stop 2025 (nurture)">🏎️ Pit Stop 2025</option>
         <option value="Pit Stop 2026">🏎️ Pit Stop 2026</option>
         <option value="Intermodal">🚢 Intermodal</option>
-        <option value="Contatos E-mail">✉️ Contatos E-mail</option>`;
+        <option value="Contatos E-mail">✉️ Contatos E-mail</option>
+        <option value="__outra__">✏️ Outra origem...</option>`;
 
     const _buColor = { TRADING:'#422c76', ARMAZEM:'#17a2b8', TRANSPORTE:'#f39c12' };
     const _origColorMap = {'Tráfego Pago':'#7c3aed','Contatos Site':'#be185d','Pit Stop 2025 (nurture)':'#854d0e','Pit Stop 2026':'#1e40af','Intermodal':'#065f46','Contatos E-mail':'#991b1b'};
@@ -7226,20 +7268,28 @@ function _renderTabelaOrigens() {
     tbody.innerHTML = clientes.map((cli, i) => {
         const bu   = clientesBU[cli];
         const orig = mapaAtual[cli] || '';
+        const isCustom = orig && !_origPred.includes(orig);
+        const selectVal = isCustom ? '__outra__' : orig;
         const buC  = _buColor[bu] || '#888';
         const origC = orig ? _origColorMap[orig] || '#555' : '#ccc';
         const dot   = orig ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${origC};margin-right:6px;"></span>` : '';
+        const cliAttr = cli.replace(/"/g,'&quot;');
+        const customInput = `<input type="text" class="orig-custom-input" data-cliente="${cliAttr}"
+            placeholder="Descreva o canal..." maxlength="80"
+            style="display:${isCustom?'block':'none'}; margin-top:5px; width:100%; height:28px; padding:0 8px; border:1.5px solid #e91e8c; border-radius:6px; font-size:11px; box-sizing:border-box;"
+            value="${isCustom ? orig.replace(/"/g,'&quot;') : ''}">`;
         return `<tr style="border-bottom:1px solid #f5f5f5; ${i%2===0?'background:#fafafa;':''}">
             <td style="padding:8px 10px 8px 0; font-size:12px; font-weight:600; color:#333;">${dot}${cli}</td>
             <td style="padding:8px 10px;">
                 <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:${buC}18; color:${buC}; border:1px solid ${buC}33;">${bu}</span>
             </td>
             <td style="padding:8px 10px;">
-                <select data-cliente="${cli.replace(/"/g,'&quot;')}" class="orig-select"
+                <select data-cliente="${cliAttr}" class="orig-select"
                     style="height:30px; padding:0 8px; border:1.5px solid ${orig?'#e91e8c44':'#e0e0e0'}; border-radius:8px; font-size:12px; background:#fff; width:100%; color:${orig?'#333':'#aaa'};"
-                    onchange="this.style.borderColor=this.value?'#e91e8c44':'#e0e0e0'; this.style.color=this.value?'#333':'#aaa';">
+                    onchange="_origSelectChange(this)">
                     ${_origOpts}
                 </select>
+                ${customInput}
             </td>
         </tr>`;
     }).join('') || `<tr><td colspan="3" style="padding:24px; text-align:center; color:#bbb; font-size:13px;">Nenhum cliente encontrado.</td></tr>`;
@@ -7247,7 +7297,11 @@ function _renderTabelaOrigens() {
     // Define valores selecionados após render
     tbody.querySelectorAll('.orig-select').forEach(sel => {
         const cli = sel.getAttribute('data-cliente');
-        sel.value = mapaAtual[cli] || '';
+        const orig = mapaAtual[cli] || '';
+        const isCustom = orig && !_origPred.includes(orig);
+        sel.value = isCustom ? '__outra__' : orig;
+        sel.style.borderColor = orig ? '#e91e8c44' : '#e0e0e0';
+        sel.style.color = orig ? '#333' : '#aaa';
     });
 }
 
@@ -7258,7 +7312,11 @@ async function salvarOrigensClientes() {
     const rows = [];
     document.querySelectorAll('#origensBody .orig-select').forEach(sel => {
         const cliente = sel.getAttribute('data-cliente');
-        const origem  = sel.value || null;
+        let origem = sel.value || null;
+        if (origem === '__outra__') {
+            const inp = sel.parentElement.querySelector('.orig-custom-input');
+            origem = (inp?.value || '').trim() || null;
+        }
         if (cliente) rows.push({ cliente, origem, updated_at: new Date().toISOString() });
     });
 
