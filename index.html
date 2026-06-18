@@ -920,6 +920,20 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.card-origem {
+    display: inline-block;
+    margin-top: 4px;
+    margin-left: 4px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 9px;
+    font-weight: 700;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
 /* ── BADGE DE PERFIL ── */
 .perfil-badge {
     display: flex; align-items: center; gap: 5px;
@@ -1065,6 +1079,20 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                         <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Segmento',false)">Limpar</button>
                     </div>
                     <div id="kanSegmentoItems"></div>
+                </div>
+            </div>
+            <div class="multi-select-wrapper">
+                <button type="button" class="multi-select-btn" id="btnKanOrigem" onclick="toggleKanMs('Origem')">
+                    <span id="labelKanOrigem">Origem MKT</span>
+                    <span class="multi-select-badge" id="badgeKanOrigem" style="display:none"></span>
+                    <span class="multi-select-chevron">▼</span>
+                </button>
+                <div class="multi-select-dropdown" id="dropdownKanOrigem" style="min-width:220px;">
+                    <div class="multi-select-ctrl-row">
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Origem',true)">Selecionar todas</button>
+                        <button type="button" class="multi-select-ctrl" onclick="selectAllKan('Origem',false)">Limpar</button>
+                    </div>
+                    <div id="kanOrigemItems"></div>
                 </div>
             </div>
         </div>
@@ -7415,12 +7443,14 @@ function renderizar(){
     const tipoAtivo     = _kanTipos.size            < _allKanTipos.length;
     const statusAtivo   = _kanStatus.size           < _allKanStatus.length;
     const segmentoAtivo = _allKanSegmentos.length   > 0 && _kanSegmentos.size < _allKanSegmentos.length;
+    const origemAtivo   = _allKanOrigens.length     > 0 && _kanOrigens.size   < _allKanOrigens.length;
     const filtrados = base.filter(r => {
         if (fC && !(r.cliente && r.cliente.toLowerCase().includes(fC))) return false;
         if (vendAtivo     && !_kanVendedores.has(r.vendedor)) return false;
         if (areaAtivo     && !_kanAreas.has(r.area))          return false;
         if (statusAtivo   && !_kanStatus.has(r.status))       return false;
         if (segmentoAtivo && !_kanSegmentos.has(r.segmento))  return false;
+        if (origemAtivo   && !_kanOrigens.has(r.origem))      return false;
         if (tipoAtivo) {
             const t = (!r.tipo || r.tipo.trim() === '') ? 'NOVOS CLIENTES' : r.tipo.toUpperCase();
             const tNorm = (t === 'NOVO NEGÓCIO') ? 'NOVOS CLIENTES' : t;
@@ -7495,13 +7525,25 @@ function renderizar(){
             const _segBadge = itemDaVez.segmento
                 ? `<span class="card-segmento" title="${itemDaVez.segmento}">${itemDaVez.segmento}</span>`
                 : '';
+            const _origemStyles = {
+                'Tráfego Pago':            'background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;',
+                'Contatos Site':           'background:#fce7f3;color:#be185d;border:1px solid #fbcfe8;',
+                'Pit Stop 2025 (nurture)': 'background:#fef9c3;color:#854d0e;border:1px solid #fef08a;',
+                'Pit Stop 2026':           'background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;',
+                'Intermodal':              'background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;',
+                'Contatos E-mail':         'background:#fee2e2;color:#991b1b;border:1px solid #fecaca;',
+            };
+            const _origStyle = itemDaVez.origem ? (_origemStyles[itemDaVez.origem] || 'background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;') : '';
+            const _origBadge = itemDaVez.origem
+                ? `<span class="card-origem" style="${_origStyle}" title="Canal: ${itemDaVez.origem}">📡 ${itemDaVez.origem}</span>`
+                : '';
             let cardHTML = `<b>${itemDaVez.cliente}</b><span class="card-vend">${itemDaVez.vendedor || '—'}</span>`
                          + `<div class="card-mini">`
                          + `<div class="card-mini-item"><span class="cmi-label">Início</span><span class="cmi-val">${_inicio}</span></div>`
                          + `<div class="card-mini-item"><span class="cmi-label">Ano</span><span class="cmi-val">${_valAno}</span></div>`
                          + `<div class="card-mini-item"><span class="cmi-label">12m</span><span class="cmi-val">${_val12m}</span></div>`
                          + `</div>`
-                         + _segBadge;
+                         + _segBadge + _origBadge;
 
 
             card.innerHTML = cardHTML;
@@ -7699,6 +7741,7 @@ function renderizarRadar() {
 let _allKanVendedores = [];
 let _allKanAreas      = [];
 let _allKanSegmentos  = [];
+let _allKanOrigens    = [];
 const _allKanTipos    = ['UP-SELLING', 'CROSS-SELLING', 'NOVOS CLIENTES'];
 const _allKanStatus   = ['AINDA FRIO', 'FUP', 'MAIOR QUE 50%', 'EM FECHAMENTO', 'FECHADO', 'PERDIDO'];
 let _kanVendedores    = new Set();
@@ -7706,13 +7749,15 @@ let _kanAreas         = new Set();
 let _kanTipos         = new Set();
 let _kanStatus        = new Set();
 let _kanSegmentos     = new Set();
+let _kanOrigens       = new Set();
 
 const _kanMsCfg = {
-    Vendedor:  { allFn: ()=>_allKanVendedores, sel: ()=>_kanVendedores, label:'Vendedor',    labelId:'labelKanVendedor',  badgeId:'badgeKanVendedor',  itemsId:'kanVendedorItems',  dropId:'dropdownKanVendedor',  btnId:'btnKanVendedor'  },
-    Area:      { allFn: ()=>_allKanAreas,      sel: ()=>_kanAreas,      label:'Área',         labelId:'labelKanArea',      badgeId:'badgeKanArea',      itemsId:'kanAreaItems',      dropId:'dropdownKanArea',      btnId:'btnKanArea'      },
-    Tipo:      { allFn: ()=>_allKanTipos,      sel: ()=>_kanTipos,      label:'Tipo (Todos)', labelId:'labelKanTipo',      badgeId:'badgeKanTipo',      itemsId:'kanTipoItems',      dropId:'dropdownKanTipo',      btnId:'btnKanTipo'      },
-    Status:    { allFn: ()=>_allKanStatus,     sel: ()=>_kanStatus,     label:'Status',       labelId:'labelKanStatus',    badgeId:'badgeKanStatus',    itemsId:'kanStatusItems',    dropId:'dropdownKanStatus',    btnId:'btnKanStatus'    },
-    Segmento:  { allFn: ()=>_allKanSegmentos,  sel: ()=>_kanSegmentos,  label:'Segmento',     labelId:'labelKanSegmento',  badgeId:'badgeKanSegmento',  itemsId:'kanSegmentoItems',  dropId:'dropdownKanSegmento',  btnId:'btnKanSegmento'  },
+    Vendedor:  { allFn: ()=>_allKanVendedores, sel: ()=>_kanVendedores, label:'Vendedor',     labelId:'labelKanVendedor',  badgeId:'badgeKanVendedor',  itemsId:'kanVendedorItems',  dropId:'dropdownKanVendedor',  btnId:'btnKanVendedor'  },
+    Area:      { allFn: ()=>_allKanAreas,      sel: ()=>_kanAreas,      label:'Área',          labelId:'labelKanArea',      badgeId:'badgeKanArea',      itemsId:'kanAreaItems',      dropId:'dropdownKanArea',      btnId:'btnKanArea'      },
+    Tipo:      { allFn: ()=>_allKanTipos,      sel: ()=>_kanTipos,      label:'Tipo (Todos)',  labelId:'labelKanTipo',      badgeId:'badgeKanTipo',      itemsId:'kanTipoItems',      dropId:'dropdownKanTipo',      btnId:'btnKanTipo'      },
+    Status:    { allFn: ()=>_allKanStatus,     sel: ()=>_kanStatus,     label:'Status',        labelId:'labelKanStatus',    badgeId:'badgeKanStatus',    itemsId:'kanStatusItems',    dropId:'dropdownKanStatus',    btnId:'btnKanStatus'    },
+    Segmento:  { allFn: ()=>_allKanSegmentos,  sel: ()=>_kanSegmentos,  label:'Segmento',      labelId:'labelKanSegmento',  badgeId:'badgeKanSegmento',  itemsId:'kanSegmentoItems',  dropId:'dropdownKanSegmento',  btnId:'btnKanSegmento'  },
+    Origem:    { allFn: ()=>_allKanOrigens,    sel: ()=>_kanOrigens,    label:'Origem MKT',    labelId:'labelKanOrigem',    badgeId:'badgeKanOrigem',    itemsId:'kanOrigemItems',    dropId:'dropdownKanOrigem',    btnId:'btnKanOrigem'    },
 };
 
 function populateKanMultiSelect() {
@@ -7722,13 +7767,15 @@ function populateKanMultiSelect() {
     ])].sort();
     _allKanAreas      = [...new Set(base.map(i => i.area).filter(Boolean))].sort();
     _allKanSegmentos  = [...new Set(base.map(i => i.segmento).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+    _allKanOrigens    = [...new Set(base.map(i => i.origem).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
     // Inicializa com tudo selecionado (= sem filtro ativo)
     _kanVendedores = new Set(_allKanVendedores);
     _kanAreas      = new Set(_allKanAreas);
     _kanTipos      = new Set(_allKanTipos);
     _kanStatus     = new Set(_allKanStatus);
     _kanSegmentos  = new Set(_allKanSegmentos);
-    ['Vendedor','Area','Tipo','Status','Segmento'].forEach(_renderKanMs);
+    _kanOrigens    = new Set(_allKanOrigens);
+    ['Vendedor','Area','Tipo','Status','Segmento','Origem'].forEach(_renderKanMs);
 }
 
 function _renderKanMs(tipo) {
