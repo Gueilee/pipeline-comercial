@@ -1565,6 +1565,7 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button type="button" id="btnCompararFin" class="btn-header btn-comparar" onclick="toggleModoCompFin()"><span>⚖️</span> Comparar</button>
                     <button type="button" class="btn-header" onclick="abrirModalGerenciarOrigens()" style="background:#fce7f3; color:#be185d; border:1.5px solid #fbcfe8;"><span>📡</span> Gerenciar Origens</button>
+                    <button type="button" class="btn-header" onclick="abrirModalGerenciarVendedores()" style="background:#e8f0fe; color:#1a56db; border:1.5px solid #c3d9fd;"><span>👤</span> Gerenciar Vendedores</button>
                     <button type="button" id="btn-lancar-fin" class="btn-header btn-novo-meta" onclick="abrirLancamentoFin()"><span>⚡</span> Lançamento</button>
                 </div>
             </div>
@@ -4564,6 +4565,59 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
     </div>
 </div>
 
+<!-- ── MODAL GERENCIAR VENDEDORES ── -->
+<div id="modalGerenciarVendedores" class="modal">
+    <div class="modal-content" style="width:900px; max-width:96vw; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden;">
+        <!-- Header -->
+        <div style="padding:20px 24px 16px; border-bottom:1.5px solid #f0ebff;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                <div>
+                    <h3 style="margin:0; font-size:16px; color:#422c76;">👤 Gerenciar Vendedores por Cliente</h3>
+                    <p style="margin:4px 0 0; font-size:12px; color:#888;">Visualize e edite o vendedor responsável por cada cliente / BU.</p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+                    <span id="vendBadgeSemVendedor" style="background:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; border:1px solid #fecaca;"></span>
+                    <button type="button" class="btn-header" onclick="fecharModal('modalGerenciarVendedores')" style="background:#f0f0f0; color:#555;">✕ Fechar</button>
+                </div>
+            </div>
+            <!-- Filtros -->
+            <div style="display:flex; gap:8px; margin-top:14px; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="vendBusca" placeholder="🔍 Buscar cliente..." oninput="_renderTabelaVendedores()"
+                    style="height:32px; padding:0 10px; border:1px solid #e0e0e0; border-radius:8px; font-size:12px; min-width:200px;">
+                <div style="display:flex; gap:4px; background:#f4f4f4; padding:3px; border-radius:8px;">
+                    <button id="vendPillTodos"  onclick="_vendSetPill('todos')" style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:#422c76; color:#fff;">Todos</button>
+                    <button id="vendPillSem"    onclick="_vendSetPill('sem')"   style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">Sem vendedor</button>
+                    <button id="vendPillCom"    onclick="_vendSetPill('com')"   style="padding:4px 12px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">Com vendedor</button>
+                </div>
+                <div style="display:flex; gap:4px; background:#f4f4f4; padding:3px; border-radius:8px;">
+                    <button id="vendBuTodas"   onclick="_vendSetBu('todas')"    style="padding:4px 10px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:#1a56db; color:#fff;">Todas</button>
+                    <button id="vendBuVCI"     onclick="_vendSetBu('VCI')"      style="padding:4px 10px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">VCI</button>
+                    <button id="vendBuTRP"     onclick="_vendSetBu('TRP')"      style="padding:4px 10px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">TRP</button>
+                    <button id="vendBuARM"     onclick="_vendSetBu('ARM')"      style="padding:4px 10px; border:none; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; color:#666;">ARM</button>
+                </div>
+            </div>
+        </div>
+        <!-- Tabela -->
+        <div style="flex:1; overflow-y:auto; padding:0 24px 16px;">
+            <table style="width:100%; border-collapse:collapse; margin-top:12px;">
+                <thead>
+                    <tr style="position:sticky; top:0; background:#fff; z-index:1;">
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px 8px 0; border-bottom:1.5px solid #f0ebff;">Cliente</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px; border-bottom:1.5px solid #f0ebff; width:110px;">BU</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; color:#888; text-transform:uppercase; padding:8px 10px; border-bottom:1.5px solid #f0ebff; min-width:230px;">Vendedor</th>
+                    </tr>
+                </thead>
+                <tbody id="vendedoresBody"></tbody>
+            </table>
+        </div>
+        <!-- Footer -->
+        <div style="padding:14px 24px; border-top:1.5px solid #f0ebff; display:flex; justify-content:flex-end; gap:10px; background:#fafafa;">
+            <button type="button" class="btn-header" onclick="fecharModal('modalGerenciarVendedores')" style="background:#f0f0f0; color:#555;">Cancelar</button>
+            <button type="button" class="btn-header" onclick="salvarVendedoresClientes()" style="background:#1a56db; color:#fff; border-color:#1a56db;" id="btnSalvarVendedores">💾 Salvar Vendedores</button>
+        </div>
+    </div>
+</div>
+
 <div id="modalHistoricoDetalhado" class="modal">
     <div class="modal-content" style="width: 550px; background: #fff;">
         <h3 style="display:flex; align-items:center; gap:10px;"><span>⏳</span> Histórico Completo</h3>
@@ -7346,6 +7400,163 @@ async function salvarOrigensClientes() {
     btn.textContent = '💾 Salvar Origens'; btn.disabled = false;
     fecharModal('modalGerenciarOrigens');
     showToast(`${rows.length} origens salvas com sucesso!`, 'success');
+    carregarDados();
+}
+
+// ── GERENCIAR VENDEDORES ─────────────────────────────────────────────────────
+
+let _vendFiltro = 'todos';
+let _vendBuFiltro = 'todas';
+let _vendedorInicial = {}; // "cliente|bu" → vendedor original ao abrir modal
+
+function abrirModalGerenciarVendedores() {
+    _vendFiltro = 'todas';
+    _vendBuFiltro = 'todas';
+    _vendSetPill('todos');
+    _vendSetBu('todas');
+    document.getElementById('vendBusca').value = '';
+    _vendedorInicial = {};
+    // Registra estado inicial por (cliente|bu)
+    const visto = new Set();
+    (baseResMensais || []).forEach(r => {
+        if (!r.cliente || !r.bu) return;
+        const k = r.cliente + '|' + r.bu;
+        if (!visto.has(k)) { visto.add(k); _vendedorInicial[k] = r.vendedor || ''; }
+    });
+    _renderTabelaVendedores();
+    abrirModal('modalGerenciarVendedores');
+}
+
+function _vendSetPill(tipo) {
+    _vendFiltro = tipo;
+    ['todos','sem','com'].forEach(t => {
+        const el = document.getElementById('vendPill' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (!el) return;
+        el.style.background = t === tipo ? '#422c76' : 'transparent';
+        el.style.color      = t === tipo ? '#fff'    : '#666';
+    });
+    _renderTabelaVendedores();
+}
+
+function _vendSetBu(bu) {
+    _vendBuFiltro = bu;
+    ['todas','VCI','TRP','ARM'].forEach(b => {
+        const el = document.getElementById('vendBu' + (b === 'todas' ? 'Todas' : b));
+        if (!el) return;
+        el.style.background = b === bu ? '#1a56db' : 'transparent';
+        el.style.color      = b === bu ? '#fff'    : '#666';
+    });
+    _renderTabelaVendedores();
+}
+
+function _renderTabelaVendedores() {
+    // Combos únicos (cliente, bu) do Financeiro
+    const combos = {};
+    (baseResMensais || []).forEach(r => {
+        if (!r.cliente || !r.bu) return;
+        const k = r.cliente + '|' + r.bu;
+        if (!combos[k]) combos[k] = { cliente: r.cliente, bu: r.bu, vendedor: r.vendedor || '' };
+    });
+
+    const busca = (document.getElementById('vendBusca')?.value || '').toLowerCase();
+    const lista = Object.values(combos)
+        .sort((a, b) => a.cliente.localeCompare(b.cliente, 'pt-BR') || a.bu.localeCompare(b.bu))
+        .filter(({ cliente, bu, vendedor }) => {
+            if (busca && !cliente.toLowerCase().includes(busca)) return false;
+            if (_vendBuFiltro !== 'todas') {
+                if (_vendBuFiltro === 'ARM' && !bu.startsWith('ARM')) return false;
+                if (_vendBuFiltro !== 'ARM' && bu !== _vendBuFiltro) return false;
+            }
+            if (_vendFiltro === 'sem' &&  vendedor) return false;
+            if (_vendFiltro === 'com' && !vendedor) return false;
+            return true;
+        });
+
+    const semVend = Object.values(combos).filter(c => !c.vendedor).length;
+    const badge = document.getElementById('vendBadgeSemVendedor');
+    if (badge) badge.textContent = semVend ? `${semVend} sem vendedor` : '';
+
+    // Lista de vendedores disponíveis
+    const extras = [...new Set((baseResMensais || []).map(r => r.vendedor).filter(v => v && !_listaVendedores.includes(v)))];
+    const todosVend = [...new Set([..._listaVendedores, ...extras])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const optsVend = '<option value="">— Sem vendedor —</option>' +
+        todosVend.map(v => `<option value="${v.replace(/"/g,'&quot;')}">${v}</option>`).join('');
+
+    const _buColor = bu => bu === 'VCI' ? '#422c76' : bu === 'TRP' ? '#e67e22' : '#17a2b8';
+    const tbody = document.getElementById('vendedoresBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = lista.map(({ cliente, bu, vendedor }, i) => {
+        const buC = _buColor(bu);
+        const cliAttr = cliente.replace(/"/g, '&quot;');
+        const buAttr  = bu.replace(/"/g, '&quot;');
+        const semV    = !vendedor;
+        return `<tr style="border-bottom:1px solid #f5f5f5; ${i%2===0?'background:#fafafa;':''}">
+            <td style="padding:8px 10px 8px 0; font-size:12px; font-weight:600; color:#333;">${cliente}</td>
+            <td style="padding:8px 10px;">
+                <span style="font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; background:${buC}18; color:${buC}; border:1px solid ${buC}33;">${bu}</span>
+            </td>
+            <td style="padding:8px 10px;">
+                <select data-cliente="${cliAttr}" data-bu="${buAttr}" class="vend-select"
+                    style="height:30px; padding:0 8px; border:1.5px solid ${semV?'#e0e0e0':'#1a56db44'}; border-radius:8px; font-size:12px; background:#fff; width:100%; color:${semV?'#aaa':'#333'};"
+                    onchange="_vendSelectChange(this)">
+                    ${optsVend}
+                </select>
+            </td>
+        </tr>`;
+    }).join('') || `<tr><td colspan="3" style="padding:24px; text-align:center; color:#bbb; font-size:13px;">Nenhum cliente encontrado.</td></tr>`;
+
+    // Pré-seleciona valor atual
+    tbody.querySelectorAll('.vend-select').forEach(sel => {
+        const k = sel.getAttribute('data-cliente') + '|' + sel.getAttribute('data-bu');
+        const v = combos[k]?.vendedor || '';
+        sel.value = v;
+        sel.style.borderColor = v ? '#1a56db44' : '#e0e0e0';
+        sel.style.color       = v ? '#333'       : '#aaa';
+    });
+}
+
+function _vendSelectChange(sel) {
+    sel.style.borderColor = sel.value ? '#1a56db44' : '#e0e0e0';
+    sel.style.color       = sel.value ? '#333'      : '#aaa';
+}
+
+async function salvarVendedoresClientes() {
+    const btn = document.getElementById('btnSalvarVendedores');
+    btn.textContent = '⏳ Salvando...'; btn.disabled = true;
+
+    const alteracoes = [];
+    document.querySelectorAll('#vendedoresBody .vend-select').forEach(sel => {
+        const cliente = sel.getAttribute('data-cliente');
+        const bu      = sel.getAttribute('data-bu');
+        const novoV   = sel.value || null;
+        const k       = cliente + '|' + bu;
+        const atualV  = _vendedorInicial[k] || null;
+        if (novoV !== atualV) alteracoes.push({ cliente, bu, vendedor: novoV });
+    });
+
+    if (!alteracoes.length) {
+        showToast('Nenhuma alteração detectada.', 'info');
+        btn.textContent = '💾 Salvar Vendedores'; btn.disabled = false;
+        return;
+    }
+
+    let erros = 0;
+    for (const { cliente, bu, vendedor } of alteracoes) {
+        const { error } = await supabaseClient.from('resultados_mensais')
+            .update({ vendedor })
+            .eq('cliente', cliente)
+            .eq('bu', bu);
+        if (error) { erros++; console.error('Erro ao atualizar vendedor', cliente, bu, error); }
+    }
+
+    btn.textContent = '💾 Salvar Vendedores'; btn.disabled = false;
+    fecharModal('modalGerenciarVendedores');
+    if (erros) {
+        showToast(`${erros} erro(s) ao salvar. Verifique o console.`, 'error');
+    } else {
+        showToast(`${alteracoes.length} vendedor(es) atualizado(s) com sucesso!`, 'success');
+    }
     carregarDados();
 }
 
