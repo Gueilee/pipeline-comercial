@@ -7698,7 +7698,7 @@ async function carregarDados(){
 
 async function carregarDadosFinanceiros() {
     const [{ data: res }] = await Promise.all([
-        supabaseClient.from('resultados_mensais').select('*'),
+        supabaseClient.from('resultados_mensais').select('*').limit(10000),
         carregarSnapshotSemanal()
     ]);
     baseResMensais = res || [];
