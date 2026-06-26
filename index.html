@@ -7697,11 +7697,20 @@ async function carregarDados(){
 }
 
 async function carregarDadosFinanceiros() {
-    const [{ data: res }] = await Promise.all([
-        supabaseClient.from('resultados_mensais').select('*').limit(10000),
-        carregarSnapshotSemanal()
-    ]);
-    baseResMensais = res || [];
+    // Paginação manual para contornar o limite de 1000 linhas do PostgREST
+    let allRows = [], from = 0;
+    while (true) {
+        const { data } = await supabaseClient
+            .from('resultados_mensais')
+            .select('*')
+            .range(from, from + 999);
+        if (!data || !data.length) break;
+        allRows = allRows.concat(data);
+        if (data.length < 1000) break;
+        from += 1000;
+    }
+    await carregarSnapshotSemanal();
+    baseResMensais = allRows;
     populateMultiSelectFin();
 
     // Popular lista de clientes do Financeiro para o Auto-complete
