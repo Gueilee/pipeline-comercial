@@ -4725,8 +4725,8 @@ function _contarAtiv(tipo, vendedor, anoFiltro, mes) {
     }).reduce((sum, a) => sum + (a.quantidade || 1), 0);
 }
 
-// Corte histórico: antes de Mai/2026 usa metas_mensais; Mai/2026 em diante usa atividades
-const _CORTE_ANO = 2026, _CORTE_MES = 5;
+// Corte histórico: antes de Jan/2026 usa metas_mensais; Jan/2026 em diante usa atividades
+const _CORTE_ANO = 2026, _CORTE_MES = 1;
 function _isHistorico(ano, mes) { return ano < _CORTE_ANO || (ano === _CORTE_ANO && mes < _CORTE_MES); }
 
 function _realReuniao(vendedor, ano, mes) {
