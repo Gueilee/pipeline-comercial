@@ -7597,33 +7597,35 @@ async function carregarAuxiliares(){
 
 async function carregarDados(){
     setLoading(true);
-    const { data: ops } = await supabaseClient.from('oportunidades').select('*');
-    // Normaliza: garante que toda oportunidade use sempre 'id' minúsculo
-    base = (ops || []).map(item => {
-        if (item.id === undefined && item.ID !== undefined) item.id = item.ID;
-        return item;
-    });
-    
-    const { data: metas } = await supabaseClient.from('metas_mensais').select('*');
-    baseMetasMensais = metas || [];
 
-    const { data: ativs } = await supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false });
-    baseAtividades = ativs || [];
-
-    const { data: mkt } = await supabaseClient.from('mkt_funil').select('*');
-    baseMktFunil = mkt || [];
-
-    const { data: oric } = await supabaseClient.from('origens_clientes').select('*');
-    baseOrigensClientes = oric || [];
-
-    await carregarMetasAnuais();
+    // Todas as buscas independentes disparadas em paralelo — de 8 requests sequenciais para 1 batch
+    await Promise.all([
+        supabaseClient.from('oportunidades').select('*').then(({ data }) => {
+            base = (data || []).map(item => {
+                if (item.id === undefined && item.ID !== undefined) item.id = item.ID;
+                return item;
+            });
+        }),
+        supabaseClient.from('metas_mensais').select('*').then(({ data }) => {
+            baseMetasMensais = data || [];
+        }),
+        supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false }).then(({ data }) => {
+            baseAtividades = data || [];
+        }),
+        supabaseClient.from('mkt_funil').select('*').then(({ data }) => {
+            baseMktFunil = data || [];
+        }),
+        supabaseClient.from('origens_clientes').select('*').then(({ data }) => {
+            baseOrigensClientes = data || [];
+        }),
+        carregarMetasAnuais(),
+        carregarDadosFinanceiros()
+    ]);
 
     // Pré-seleciona o mês atual no filtro do radar
     const _rFM = document.getElementById('rFiltroMes');
     if (_rFM && !_rFM.value) _rFM.value = String(new Date().getMonth() + 1);
     renderizarRadar();
-
-    await carregarDadosFinanceiros();
 
     const clientesUnicos = [...new Set(base.map(item => item.cliente).filter(c => c))].sort();
     const dl = document.getElementById('listaClientes');
@@ -7697,19 +7699,24 @@ async function carregarDados(){
 }
 
 async function carregarDadosFinanceiros() {
-    // Paginação manual para contornar o limite de 1000 linhas do PostgREST
-    let allRows = [], from = 0;
-    while (true) {
-        const { data } = await supabaseClient
-            .from('resultados_mensais')
-            .select('*')
-            .range(from, from + 999);
-        if (!data || !data.length) break;
-        allRows = allRows.concat(data);
-        if (data.length < 1000) break;
-        from += 1000;
-    }
-    await carregarSnapshotSemanal();
+    // resultados_mensais (paginado) e snapshots_semanais em paralelo
+    const [allRows] = await Promise.all([
+        (async () => {
+            let rows = [], from = 0;
+            while (true) {
+                const { data } = await supabaseClient
+                    .from('resultados_mensais')
+                    .select('*')
+                    .range(from, from + 999);
+                if (!data || !data.length) break;
+                rows = rows.concat(data);
+                if (data.length < 1000) break;
+                from += 1000;
+            }
+            return rows;
+        })(),
+        carregarSnapshotSemanal()
+    ]);
     baseResMensais = allRows;
     populateMultiSelectFin();
 
