@@ -4725,25 +4725,19 @@ function _contarAtiv(tipo, vendedor, anoFiltro, mes) {
     }).reduce((sum, a) => sum + (a.quantidade || 1), 0);
 }
 
-// Corte histórico: antes de Jan/2026 usa metas_mensais; Jan/2026 em diante usa atividades
-const _CORTE_ANO = 2026, _CORTE_MES = 1;
-function _isHistorico(ano, mes) { return ano < _CORTE_ANO || (ano === _CORTE_ANO && mes < _CORTE_MES); }
-
+// Soma sempre as duas fontes: metas_mensais (legado Jan-Abr/2026) + atividades (sistema atual)
+// Não há sobreposição entre as fontes por vendedor/mês, então a soma é sempre correta
 function _realReuniao(vendedor, ano, mes) {
-    if (_isHistorico(ano, mes)) {
-        return baseMetasMensais
-            .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
-            .reduce((acc, r) => acc + (r.realizado_reuniao || 0), 0);
-    }
-    return _contarAtiv('REUNIÃO', vendedor || null, ano, mes);
+    const deMetas = baseMetasMensais
+        .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
+        .reduce((acc, r) => acc + (r.realizado_reuniao || 0), 0);
+    return deMetas + _contarAtiv('REUNIÃO', vendedor || null, ano, mes);
 }
 function _realProposta(vendedor, ano, mes) {
-    if (_isHistorico(ano, mes)) {
-        return baseMetasMensais
-            .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
-            .reduce((acc, r) => acc + (r.realizado_propostas || 0), 0);
-    }
-    return _contarAtiv('PROPOSTA', vendedor || null, ano, mes);
+    const deMetas = baseMetasMensais
+        .filter(r => { const p = parseMesAno(r.mes_ano); return p.ano === ano && p.mes === mes && (!vendedor || r.vendedor === vendedor); })
+        .reduce((acc, r) => acc + (r.realizado_propostas || 0), 0);
+    return deMetas + _contarAtiv('PROPOSTA', vendedor || null, ano, mes);
 }
 function _totalReunioes(vendedor, ano, mesInicio, mesFim) {
     let t = 0;
