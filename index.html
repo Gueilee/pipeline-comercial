@@ -4998,19 +4998,46 @@ async function autenticarSupabase() {
 
     if(!email || !pass) return;
 
-    btn.innerText = "Aguarde...";
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
-    btn.innerText = "ENTRAR";
+    btn.disabled = true;
+    msgDiv.style.display = 'none';
 
-    if (error) {
-        msgDiv.innerText = "E-mail ou senha incorretos!";
-        msgDiv.style.display = 'block';
-    } else {
-        USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
-        EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
-        await carregarPerfil(data.user.email);
-        iniciarSistema();
+    const MAX_TENTATIVAS = 5;
+    const ESPERA_MS = 4000;
+
+    for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
+        btn.innerText = tentativa === 1 ? "Aguarde..." : `Tentando... (${tentativa}/${MAX_TENTATIVAS})`;
+        if (tentativa > 1) {
+            msgDiv.style.color = '#e67e22';
+            msgDiv.innerText = `Servidor iniciando, aguarde... (tentativa ${tentativa} de ${MAX_TENTATIVAS})`;
+            msgDiv.style.display = 'block';
+        }
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
+        if (!error) {
+            btn.innerText = "ENTRAR";
+            btn.disabled = false;
+            msgDiv.style.display = 'none';
+            USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
+            EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
+            await carregarPerfil(data.user.email);
+            iniciarSistema();
+            return;
+        }
+
+        // Erro de credenciais (senha errada) — não adianta tentar de novo
+        const isCredentialError = error.status === 400 || (error.message && error.message.toLowerCase().includes('invalid'));
+        if (isCredentialError) break;
+
+        // Erro de rede/timeout (504) — espera e tenta novamente
+        if (tentativa < MAX_TENTATIVAS) await new Promise(r => setTimeout(r, ESPERA_MS));
     }
+
+    btn.innerText = "ENTRAR";
+    btn.disabled = false;
+    msgDiv.style.color = '#e74c3c';
+    msgDiv.innerText = "E-mail ou senha incorretos. Verifique seus dados e tente novamente.";
+    msgDiv.style.display = 'block';
 }
 
 function iniciarSistema() {
