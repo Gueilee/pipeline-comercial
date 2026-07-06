@@ -1505,15 +1505,15 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <div class="radar-kpis" style="margin-bottom:20px;">
                         <div class="radar-kpi" style="border-left-color:#1565c0;">
                             <span class="radar-kpi-val" id="rKpiReunioes">—</span>
-                            <span class="radar-kpi-label">Reuniões este mês</span>
+                            <span class="radar-kpi-label" id="rKpiLabelReunioes">Reuniões este mês</span>
                         </div>
                         <div class="radar-kpi" style="border-left-color:#c62828;">
                             <span class="radar-kpi-val" id="rKpiPropostas">—</span>
-                            <span class="radar-kpi-label">Propostas este mês</span>
+                            <span class="radar-kpi-label" id="rKpiLabelPropostas">Propostas este mês</span>
                         </div>
                         <div class="radar-kpi" style="border-left-color:#422c76;">
                             <span class="radar-kpi-val" id="rKpiEmpresas">—</span>
-                            <span class="radar-kpi-label">Empresas contactadas este mês</span>
+                            <span class="radar-kpi-label" id="rKpiLabelEmpresas">Empresas contactadas este mês</span>
                         </div>
                     </div>
 
@@ -8195,15 +8195,8 @@ async function deletarAtividade(id) {
 function renderizarRadar() {
     const mesAtual = new Date().getMonth() + 1;
     const anoAtual = new Date().getFullYear();
-    const chaveAtual = `${anoAtual}-${mesAtual}`;
 
-    // KPIs — este mês
-    const deste = baseAtividades.filter(a => a.mes_ano === chaveAtual);
-    document.getElementById('rKpiReunioes').textContent  = deste.filter(a => a.tipo === 'REUNIÃO').reduce((s,a) => s+(a.quantidade||1), 0);
-    document.getElementById('rKpiPropostas').textContent = deste.filter(a => a.tipo === 'PROPOSTA').reduce((s,a) => s+(a.quantidade||1), 0);
-    document.getElementById('rKpiEmpresas').textContent  = new Set(deste.filter(a => a.cliente && a.cnpj || (a.quantidade||1)===1).map(a => (a.cnpj||a.cliente).replace(/\D/g,'') || a.cliente)).size;
-
-    // Popular filtro de vendedor
+    // Popular filtro de vendedor (antes de ler os valores)
     const rFV = document.getElementById('rFiltroVend');
     const vendAtual = rFV ? rFV.value : '';
     if (rFV) {
@@ -8217,6 +8210,20 @@ function renderizarRadar() {
     const fMes  = document.getElementById('rFiltroMes')?.value  || '';
     const fTipo = document.getElementById('rFiltroTipo')?.value || '';
     const fVend = document.getElementById('rFiltroVend')?.value || '';
+
+    // KPIs — refletem o mesmo mês e vendedor filtrados na lista
+    const MESES_NOMES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const mesSufixo = fMes ? `em ${MESES_NOMES[parseInt(fMes)]}` : 'este mês';
+    document.getElementById('rKpiLabelReunioes').textContent  = `Reuniões ${mesSufixo}`;
+    document.getElementById('rKpiLabelPropostas').textContent = `Propostas ${mesSufixo}`;
+    document.getElementById('rKpiLabelEmpresas').textContent  = `Empresas contactadas ${mesSufixo}`;
+    let kpiBase = [...baseAtividades];
+    if (fMes)  kpiBase = kpiBase.filter(a => a.mes_ano && a.mes_ano.split('-')[1] === fMes);
+    else       kpiBase = kpiBase.filter(a => a.mes_ano === `${anoAtual}-${mesAtual}`);
+    if (fVend) kpiBase = kpiBase.filter(a => a.vendedor === fVend);
+    document.getElementById('rKpiReunioes').textContent  = kpiBase.filter(a => a.tipo === 'REUNIÃO').reduce((s,a) => s+(a.quantidade||1), 0);
+    document.getElementById('rKpiPropostas').textContent = kpiBase.filter(a => a.tipo === 'PROPOSTA').reduce((s,a) => s+(a.quantidade||1), 0);
+    document.getElementById('rKpiEmpresas').textContent  = new Set(kpiBase.filter(a => a.cliente && a.cnpj || (a.quantidade||1)===1).map(a => (a.cnpj||a.cliente).replace(/\D/g,'') || a.cliente)).size;
 
     let lista = [...baseAtividades].sort((a,b) => b.data_atividade.localeCompare(a.data_atividade));
     if (fMes)  lista = lista.filter(a => a.mes_ano && a.mes_ano.split('-')[1] === fMes);
