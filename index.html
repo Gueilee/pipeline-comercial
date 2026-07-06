@@ -6555,8 +6555,12 @@ function _statusEfetivo(r) {
     const mesAtual = agora.getMonth() + 1; // 1-12
     const rAno     = parseInt(r.ano) || 0;
     const rMes     = parseInt(r.mes_numero || r.mes) || 0;
-    if (!rAno || !rMes) return (r.status || '').toUpperCase().trim(); // sem data: mantém o banco
-    if (rAno < anoAtual || (rAno === anoAtual && rMes <= mesAtual)) return 'FATURADO';
+    if (!rAno || !rMes) return (r.status || '').toUpperCase().trim();
+    // Meses passados → sempre FATURADO
+    if (rAno < anoAtual || (rAno === anoAtual && rMes < mesAtual)) return 'FATURADO';
+    // Mês atual → respeita o status real do banco (pode ter FATURADO parcial + PEDIDOS EM CASA)
+    if (rAno === anoAtual && rMes === mesAtual) return (r.status || 'PEDIDOS EM CASA').toUpperCase().trim();
+    // Meses futuros → sempre PEDIDOS EM CASA
     return 'PEDIDOS EM CASA';
 }
 
@@ -9968,8 +9972,7 @@ function renderizarFinanceiro() {
     const _corTend    = _atingeMeta ? '#27ae60' : '#e74c3c';
     const _corTendBg  = _atingeMeta ? '#e8f8f0' : '#fef0f0';
 
-    // ── Pedidos mês atual: garante valor mesmo sem dado no banco ──
-    if (!arrayPedidosMensal[currentMonthIndex]) arrayPedidosMensal[currentMonthIndex] = 22075711.45;
+    // Pedidos mês atual vem direto do banco — sem fallback hardcoded
     const _fmtBar = v => !v||v===0?'':v>=1e6?(v/1e6).toFixed(1)+'M':(v/1000).toFixed(0)+'k';
 
     // ── Gráfico Evolução — 3 colunas lado a lado: Plano | Faturado | Pedidos ──
