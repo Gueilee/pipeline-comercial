@@ -8213,13 +8213,12 @@ function renderizarRadar() {
 
     // KPIs — refletem o mesmo mês e vendedor filtrados na lista
     const MESES_NOMES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    const mesSufixo = fMes ? `em ${MESES_NOMES[parseInt(fMes)]}` : 'este mês';
+    const mesSufixo = fMes ? `em ${MESES_NOMES[parseInt(fMes)]}` : 'no ano';
     document.getElementById('rKpiLabelReunioes').textContent  = `Reuniões ${mesSufixo}`;
     document.getElementById('rKpiLabelPropostas').textContent = `Propostas ${mesSufixo}`;
     document.getElementById('rKpiLabelEmpresas').textContent  = `Empresas contactadas ${mesSufixo}`;
     let kpiBase = [...baseAtividades];
-    if (fMes)  kpiBase = kpiBase.filter(a => a.mes_ano && a.mes_ano.split('-')[1] === fMes);
-    else       kpiBase = kpiBase.filter(a => a.mes_ano === `${anoAtual}-${mesAtual}`);
+    if (fMes) kpiBase = kpiBase.filter(a => a.mes_ano && a.mes_ano.split('-')[1] === fMes);
     if (fVend) kpiBase = kpiBase.filter(a => a.vendedor === fVend);
     document.getElementById('rKpiReunioes').textContent  = kpiBase.filter(a => a.tipo === 'REUNIÃO').reduce((s,a) => s+(a.quantidade||1), 0);
     document.getElementById('rKpiPropostas').textContent = kpiBase.filter(a => a.tipo === 'PROPOSTA').reduce((s,a) => s+(a.quantidade||1), 0);
