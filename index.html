@@ -3991,8 +3991,8 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
                     <div style="font-size:11px; font-weight:700; color:#1d4ed8; text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px;">📦 Lançamento em Lote — SDR / Pré Vendas</div>
                     <div class="form-row" style="margin-bottom:0;">
                         <div class="form-group" style="flex:1; margin-bottom:0;">
-                            <label>Data *</label>
-                            <input type="date" id="ativ_data_lote" required>
+                            <label>Mês *</label>
+                            <input type="month" id="ativ_data_lote" required>
                         </div>
                         <div class="form-group" style="flex:1; margin-bottom:0;">
                             <label>Quantidade *</label>
@@ -8108,7 +8108,7 @@ function abrirModalAtividade() {
     // Pre-preenche data com hoje (campos normal e lote)
     const hoje = new Date().toISOString().slice(0,10);
     document.getElementById('ativ_data').value      = hoje;
-    document.getElementById('ativ_data_lote').value = hoje;
+    document.getElementById('ativ_data_lote').value = hoje.slice(0,7); // YYYY-MM para o picker de mês
     document.getElementById('ativ_quantidade').value = '1';
     // Pre-preenche vendedor com o usuário logado (se for vendedor)
     const sel = document.getElementById('ativ_vendedor');
@@ -8139,10 +8139,7 @@ function toggleModoPreVendas() {
     document.getElementById('ativModoLote').style.display        = isPV ? ''     : 'none';
     const cliInput = document.getElementById('ativ_cliente');
     cliInput.required = !isPV;
-    // sincroniza o campo de data do modo lote com o campo normal e vice-versa
     if (isPV) {
-        const dataNormal = document.getElementById('ativ_data').value;
-        if (dataNormal) document.getElementById('ativ_data_lote').value = dataNormal;
         document.getElementById('ativ_quantidade').focus();
     }
 }
@@ -8167,7 +8164,7 @@ async function salvarAtividade(e) {
         cnpj:           isPV ? null : document.getElementById('ativ_cnpj').value.trim() || null,
         nome_contato:   isPV ? null : document.getElementById('ativ_nome_contato').value.trim() || null,
         cargo_contato:  isPV ? null : document.getElementById('ativ_cargo_contato').value.trim() || null,
-        data_atividade: data,
+        data_atividade: isPV ? `${data}-01` : data,
         mes_ano:        `${ano}-${parseInt(mes)}`,
         quantidade:     qtd
     };
