@@ -7642,10 +7642,23 @@ async function carregarDados(){
             });
         }),
         supabaseClient.from('metas_mensais').select('*').then(({ data }) => {
-            baseMetasMensais = data || [];
+            baseMetasMensais = (data || []).map(r => ({
+                ...r,
+                realizado_trading:   Number(r.realizado_trading)   || 0,
+                realizado_armazem:   Number(r.realizado_armazem)   || 0,
+                realizado_transporte:Number(r.realizado_transporte)|| 0,
+                realizado_analytics: Number(r.realizado_analytics) || 0,
+                realizado_reuniao:   Number(r.realizado_reuniao)   || 0,
+                realizado_propostas: Number(r.realizado_propostas) || 0,
+                trading_mes:   Number(r.trading_mes)   || 0,
+                armazem_mes:   Number(r.armazem_mes)   || 0,
+                transporte_mes:Number(r.transporte_mes)|| 0,
+                analytics_mes: Number(r.analytics_mes) || 0,
+                reuniao_mes:   Number(r.reuniao_mes)   || 0,
+            }));
         }),
         supabaseClient.from('atividades').select('*').order('data_atividade', { ascending: false }).then(({ data }) => {
-            baseAtividades = data || [];
+            baseAtividades = (data || []).map(a => ({ ...a, quantidade: Number(a.quantidade) || 1 }));
         }),
         supabaseClient.from('mkt_funil').select('*').then(({ data }) => {
             baseMktFunil = data || [];
@@ -8180,7 +8193,7 @@ async function salvarAtividade(e) {
     };
     const { data: ins, error } = await supabaseClient.from('atividades').insert([payload]).select().single();
     if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
-    baseAtividades.unshift(ins);
+    baseAtividades.unshift({ ...ins, quantidade: Number(ins.quantidade) || 1 });
     fecharModal('modalAtividade');
     renderizarRadar();
     renderizarMetas();
