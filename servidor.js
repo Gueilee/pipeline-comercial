@@ -121,7 +121,7 @@ function authMiddleware(req, res, next) {
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 const app = express();
-app.use(cors({ origin: '*', methods: ['GET','POST','PATCH','DELETE','HEAD','OPTIONS'] }));
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'] }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
