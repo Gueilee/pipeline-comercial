@@ -14,7 +14,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/supabase-shim.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
@@ -5169,8 +5169,8 @@ const pluginCentroRosca = {
     }
 };
 
-const SUPABASE_URL = "https://geojgcncmtbjebftosor.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdlb2pnY25jbXRiamViZnRvc29yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MTQ3NjcsImV4cCI6MjA4ODI5MDc2N30.64DJvhw5O-1g05Pwmblth-rUK7-p1GZM-HPsaytB7BA";
+const SUPABASE_URL = "http://pipeline-api.vendemm.ia.br";
+const SUPABASE_KEY = "local-dev-key";
 const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 

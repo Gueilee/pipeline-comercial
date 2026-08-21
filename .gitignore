@@ -1,0 +1,31 @@
+# Dependências
+node_modules/
+
+# Ambiente (nunca commitar)
+.env
+
+# Arquivos de trabalho locais
+*.xlsx
+*.sql
+*.gz
+*.backup
+*.dump
+uploads/
+diagnostico_*.js
+executar_*.js
+gerar_update_*.js
+export_supabase.js
+importar_*.js
+tipar_*.js
+setup_auth.js
+criar_*.js
+listar_*.js
+*_insert_*.sql
+*_delete.sql
+batch_*.sql
+batches*.json
+*.txt
+
+# OS
+.DS_Store
+Thumbs.db
