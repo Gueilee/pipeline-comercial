@@ -976,9 +976,10 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 
     <div class="login-box" id="box-nova-senha" style="display: none;">
         <img src="Pipeline.png" alt="Logo" onerror="this.style.display='none'">
-        <h2>Criar Nova Senha</h2>
+        <h2 id="nova-senha-titulo">Criar Nova Senha</h2>
+        <p id="nova-senha-subtitulo" style="display:none; font-size:12px; color:#666; margin-top:-10px; margin-bottom:15px; text-align:center;">Este é seu primeiro acesso. Crie uma senha pessoal para continuar.</p>
         <div id="nova-senha-msg" class="msg-box"></div>
-        <input type="password" id="nova_senha_1" placeholder="Nova senha (mín. 6 caracteres)">
+        <input type="password" id="nova_senha_1" placeholder="Nova senha (mín. 8 caracteres)">
         <input type="password" id="nova_senha_2" placeholder="Confirme a nova senha">
         <button class="btn-login" onclick="salvarNovaSenha()" id="btn-salvar-senha" style="background: #27ae60;">SALVAR E ENTRAR</button>
     </div>
@@ -5020,6 +5021,15 @@ async function autenticarSupabase() {
             msgDiv.style.display = 'none';
             USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
             EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
+
+            // Primeiro acesso — força criação de senha pessoal antes de entrar
+            if (data.user.user_metadata && data.user.user_metadata.primeiro_acesso) {
+                document.getElementById('nova-senha-titulo').innerText = 'Crie sua senha pessoal';
+                document.getElementById('nova-senha-subtitulo').style.display = 'block';
+                trocarTelaLogin('box-nova-senha');
+                return;
+            }
+
             await carregarPerfil(data.user.email);
             iniciarSistema();
             return;
@@ -17323,8 +17333,12 @@ async function salvarNovaSenha() {
     const msgDiv = document.getElementById('nova-senha-msg');
     const btn = document.getElementById('btn-salvar-senha');
 
-    if(senha1.length < 6) {
-        msgDiv.innerHTML = "<span class='msg-error'>A senha deve ter no mínimo 6 caracteres.</span>";
+    if(senha1.length < 8) {
+        msgDiv.innerHTML = "<span class='msg-error'>A senha deve ter no mínimo 8 caracteres.</span>";
+        return;
+    }
+    if(senha1 === 'Vendemmia@2026') {
+        msgDiv.innerHTML = "<span class='msg-error'>Não é permitido usar a senha temporária. Escolha uma senha pessoal.</span>";
         return;
     }
     if(senha1 !== senha2) {
@@ -17352,17 +17366,18 @@ async function salvarNovaSenha() {
 
         msgDiv.innerHTML = `<span class='msg-error'>Erro: ${msgErro}</span>`;
     } else {
-        msgDiv.innerHTML = "<span class='msg-success'>Senha atualizada com sucesso! Iniciando sistema...</span>";
-        
-        if(data && data.user) {
-            USUARIO_LOGADO = data.user.email.split('@')[0].toUpperCase();
-            EMAIL_USUARIO_LOGADO = data.user.email.toLowerCase();
-            await carregarPerfil(data.user.email);
+        msgDiv.innerHTML = "<span class='msg-success'>Senha salva! Entrando no sistema...</span>";
+
+        const emailRef = (data && data.user && data.user.email) ? data.user.email : EMAIL_USUARIO_LOGADO;
+        if(emailRef) {
+            USUARIO_LOGADO = emailRef.split('@')[0].toUpperCase();
+            EMAIL_USUARIO_LOGADO = emailRef.toLowerCase();
+            await carregarPerfil(emailRef);
         }
 
         setTimeout(() => {
             iniciarSistema();
-        }, 2000);
+        }, 1500);
     }
 }
 </script>

@@ -158,7 +158,7 @@ app.post('/auth/v1/token', async (req, res) => {
       access_token: token,
       token_type: 'bearer',
       expires_in: 2592000,
-      user: { id: user.id, email: user.email, user_metadata: { perfil: user.perfil } }
+      user: { id: user.id, email: user.email, user_metadata: { perfil: user.perfil, primeiro_acesso: user.primeiro_acesso } }
     });
   } catch (e) {
     res.status(500).json({ error_description: e.message });
@@ -200,7 +200,7 @@ app.put('/auth/v1/user', authMiddleware, async (req, res) => {
   if (!password) return res.status(400).json({ message: 'password obrigatório' });
   try {
     const hash = await bcrypt.hash(password, 10);
-    await pool.query('UPDATE pipeline_auth SET senha_hash = $1 WHERE email = $2', [hash, req.user.email]);
+    await pool.query('UPDATE pipeline_auth SET senha_hash = $1, primeiro_acesso = false WHERE email = $2', [hash, req.user.email]);
     res.json({ user: { email: req.user.email } });
   } catch (e) {
     res.status(500).json({ message: e.message });
