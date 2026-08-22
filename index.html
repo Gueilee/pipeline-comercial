@@ -7859,8 +7859,8 @@ function renderizarComparativoSemanal() {
         const atualFat = a.faturado_ytd;
         totalAtual += atualFat;
         const prevRow = hasSnapshot ? baseSnapshotSemanal.rows.find(r => r.bu === bu) : null;
-        const prevFat = prevRow ? prevRow.faturado_ytd : null;
-        if (prevFat !== null) { hasPrev = true; totalPrev += prevFat; }
+        const prevFat = prevRow != null && prevRow.faturado_ytd != null ? Number(prevRow.faturado_ytd) : null;
+        if (prevFat !== null && !isNaN(prevFat)) { hasPrev = true; totalPrev += prevFat; }
         const delta = prevFat !== null ? atualFat - prevFat : null;
         const color = BU_COLORS[bu] || '#666';
 
