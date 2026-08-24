@@ -70,7 +70,9 @@ window.supabase = {
         if (_method === 'POST' || _method === 'PATCH') hdrs['Prefer'] = 'return=representation';
 
         const opts = { method: _head ? 'HEAD' : _method, headers: hdrs };
-        if (_body) opts.body = JSON.stringify(Array.isArray(_body) ? _body : [_body]);
+        if (_body) opts.body = JSON.stringify(
+          _method === 'PATCH' ? _body : (Array.isArray(_body) ? _body : [_body])
+        );
 
         try {
           const r   = await fetch(`${url}/rest/v1/${table}?${p}`, opts);
