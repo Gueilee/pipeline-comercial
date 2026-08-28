@@ -637,6 +637,14 @@ header {
 .col-fechado { background-color: #e8f5e9; } .col-fechado h4 { background-color: var(--bg-fechado); }
 .col-perdido { background-color: #fdedec; } .col-perdido h4 { background-color: var(--bg-perdido); }
 
+.kan-totalizador { margin: 8px 8px 2px; padding: 10px 12px; background: rgba(255,255,255,0.88); border-radius: 9px; box-shadow: 0 1px 5px rgba(0,0,0,0.07); }
+.kan-tot-count { font-size: 11px; font-weight: 600; color: #888; letter-spacing: 0.4px; margin-bottom: 7px; }
+.kan-tot-count strong { color: #333; font-size: 13px; }
+.kan-tot-vals { display: flex; gap: 6px; }
+.kan-tot-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 5px 4px 4px; border-radius: 7px; background: #f5f6f8; border-top: 3px solid var(--col-color, #ccc); }
+.kan-tot-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #aaa; letter-spacing: 0.5px; }
+.kan-tot-val { font-size: 14px; font-weight: 800; color: #1a1a2e; margin-top: 2px; letter-spacing: -0.3px; }
+
 .card{ background:white; padding:10px 12px 8px; margin: 10px; border-radius:6px; font-size:11px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; cursor: grab; transition: 0.2s; border: 1px solid rgba(0,0,0,0.05); }
 .card:active { cursor: grabbing; }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -8036,9 +8044,25 @@ function renderizar(){
     colunas.forEach(s => {
         const col = document.createElement('div'); col.className = `column ${s.cl}`;
         col.ondragover = allowDrop; col.ondragleave = leaveDrop; col.ondrop = (e) => drop(e, s.n);
-        col.innerHTML = `<h4>${s.n}</h4><div class="column-body" style="padding:10px; min-height:500px;"></div>`;
+        const colItems = filtrados.filter(f => f.status === s.n);
+        const _totAno = colItems.reduce((acc, r) => acc + (parseFloat(r.valor_estimado_ano) || 0), 0);
+        const _tot12m = colItems.reduce((acc, r) => acc + (parseFloat(r.valor_anualizado)    || 0), 0);
+        const _fmtTot = v => {
+            if (!v) return '—';
+            if (v >= 1000000) return 'R$ ' + (v/1000000).toFixed(1).replace('.',',') + 'M';
+            if (v >= 1000)    return 'R$ ' + Math.round(v/1000) + 'k';
+            return 'R$ ' + Math.round(v);
+        };
+        const _totHTML = `<div class="kan-totalizador" style="--col-color:${s.border}">
+          <div class="kan-tot-count"><strong>${colItems.length}</strong> oportunidade${colItems.length !== 1 ? 's' : ''}</div>
+          <div class="kan-tot-vals">
+            <div class="kan-tot-item"><span class="kan-tot-label">Ano</span><span class="kan-tot-val">${_fmtTot(_totAno)}</span></div>
+            <div class="kan-tot-item"><span class="kan-tot-label">12M</span><span class="kan-tot-val">${_fmtTot(_tot12m)}</span></div>
+          </div>
+        </div>`;
+        col.innerHTML = `<h4>${s.n}</h4>${_totHTML}<div class="column-body" style="padding:10px; min-height:500px;"></div>`;
         const b = col.querySelector('.column-body');
-        filtrados.filter(f => f.status === s.n)
+        colItems
                  .sort((a, b) => (parseFloat(b.valor_anualizado) || 0) - (parseFloat(a.valor_anualizado) || 0))
                  .forEach(itemDaVez => {
             
