@@ -4837,8 +4837,7 @@ function _atualizarBadge() {
 // ── DICIONÁRIO DE METAS MENSAIS (fallback hardcoded; sobrescrito por _buildMetasMensais quando metas_anuais existir)
 let METAS_MENSAIS = {
     "ANDREA HEUCHLING":  { reuniao: 5,  propostas: 3, trading: 625000.00,    armazem: 600000.00, transporte: 145833.33, analytics: 0, mes_inicio: 1, mes_fim: 12 },
-    "GUILHERME ALMEIDA": { reuniao: 5,  propostas: 3, trading: 2083333.33,   armazem: 150000.00, transporte: 87500.00,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
-    "MICHELE SILVA":     { reuniao: 5,  propostas: 3, trading: 1250000.00,   armazem: 100000.00, transporte: 58333.33,  analytics: 0, mes_inicio: 1, mes_fim: 12 },
+    "BRUNO ANDRADE":     { reuniao: 10, propostas: 6, trading: 3333333.33,   armazem: 250000.00, transporte: 145833.33, analytics: 0, mes_inicio: 1, mes_fim: 12 },
     "RAFAEL SANTOS":     { reuniao: 5,  propostas: 3, trading: 208333.33,    armazem: 150000.00, transporte: 416666.67, analytics: 0, mes_inicio: 1, mes_fim: 12 },
     "PRÉ VENDAS":        { reuniao: 201/12, propostas: 0, trading: 0,        armazem: 0,         transporte: 0,         analytics: 0, mes_inicio: 1, mes_fim: 12,
                            reuniao_mensal: [0,15,15,15,15,15,18,18,18,18,18,18,18] }
@@ -8171,10 +8170,11 @@ function abrirModalAtividade() {
 function _nomeVendedorLogado() {
     // Mapeia e-mail → nome do vendedor conforme tabela perfis/vendedores
     const mapa = {
-        'mssilva@vendemmia.com.br':   'MICHELE SILVA',
+        'mssilva@vendemmia.com.br':   'BRUNO ANDRADE',
         'cmoreno@vendemmia.com.br':   'PRÉ VENDAS',
         'rasantos@vendemmia.com.br':  'RAFAEL SANTOS',
-        'galmeida@vendemmia.com.br':  'GUILHERME ALMEIDA',
+        'galmeida@vendemmia.com.br':  'BRUNO ANDRADE',
+        'bandrade@vendemmia.com.br':  'BRUNO ANDRADE',
         'aheuchling@vendemmia.com.br':'ANDREA HEUCHLING'
     };
     return mapa[USUARIO_LOGADO] || '';
