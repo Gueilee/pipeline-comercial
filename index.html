@@ -293,10 +293,12 @@ header {
 .vend-tipo-badge.vendedor { background:#e8f4fd; color:#1565c0; }
 #modalConfigurarMeta .modal-close { display:none !important; }
 
-.radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
-.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 36px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
+.radar-table-header { display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 70px; gap:16px; padding:8px 18px; background:#f7f5fb; border-radius:8px; margin-bottom:6px; font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:.6px; }
+.radar-item { background:white; border-radius:12px; padding:14px 18px; box-shadow:0 2px 6px rgba(0,0,0,.05); display:grid; grid-template-columns:100px 90px 1fr 140px 1fr 160px 70px; align-items:center; gap:16px; border:1px solid #f0f0f0; transition:box-shadow .2s; }
 .radar-del-btn { background:none; border:none; cursor:pointer; color:#ccc; font-size:16px; padding:4px; border-radius:6px; transition:color .2s, background .2s; line-height:1; }
 .radar-del-btn:hover { color:#c0392b; background:#fce4ec; }
+.radar-edit-btn { background:none; border:none; cursor:pointer; color:#bbb; font-size:15px; padding:4px; border-radius:6px; transition:color .2s, background .2s; line-height:1; }
+.radar-edit-btn:hover { color:#1565c0; background:#e8f4fd; }
 .radar-item:hover { box-shadow:0 4px 14px rgba(0,0,0,.1); }
 .radar-badge { display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.5px; white-space:nowrap; }
 .radar-badge.reuniao  { background:#e8f4fd; color:#1565c0; border:1.5px solid #90caf9; }
@@ -3943,10 +3945,11 @@ select.lic-in{appearance:none;cursor:pointer;background-image:url("data:image/sv
 <div id="modalAtividade" class="modal">
     <div class="modal-content" style="max-width:520px;">
         <div class="modal-header">
-            <h3>📞 Registrar Atividade</h3>
+            <h3 id="modalAtividadeTitulo">📞 Registrar Atividade</h3>
             <button type="button" class="modal-close" onclick="fecharModal('modalAtividade')">✕</button>
         </div>
         <form id="formAtividade" onsubmit="salvarAtividade(event)">
+        <input type="hidden" id="ativ_edit_id" value="">
             <!-- Tipo -->
             <div class="form-group" style="margin-bottom:18px;">
                 <label style="margin-bottom:8px; display:block;">Tipo de Atividade</label>
@@ -8151,6 +8154,8 @@ function mascaraCNPJ(el) {
 
 function abrirModalAtividade() {
     document.getElementById('formAtividade').reset();
+    document.getElementById('ativ_edit_id').value = '';
+    document.getElementById('modalAtividadeTitulo').textContent = '📞 Registrar Atividade';
     // Pre-preenche data com hoje (campos normal e lote)
     const hoje = new Date().toISOString().slice(0,10);
     document.getElementById('ativ_data').value      = hoje;
@@ -8163,6 +8168,41 @@ function abrirModalAtividade() {
         if (nomeLogado) sel.value = nomeLogado;
     }
     // Aplica modo correto conforme vendedor selecionado
+    toggleModoPreVendas();
+    abrirModal('modalAtividade');
+}
+
+function editarAtividade(id) {
+    const a = baseAtividades.find(x => String(x.id) === String(id));
+    if (!a) return;
+    document.getElementById('formAtividade').reset();
+    document.getElementById('ativ_edit_id').value = id;
+    document.getElementById('modalAtividadeTitulo').textContent = '✏️ Editar Atividade';
+
+    // Tipo
+    const isPV = (a.quantidade || 1) > 1 || a.vendedor === 'PRÉ VENDAS';
+    const tipoEl = document.querySelector(`input[name="ativ_tipo"][value="${a.tipo}"]`);
+    if (tipoEl) tipoEl.checked = true;
+
+    // Vendedor
+    const selV = document.getElementById('ativ_vendedor');
+    if (selV && a.vendedor) selV.value = a.vendedor;
+
+    if (isPV) {
+        // Modo lote
+        const [ano, mes] = (a.mes_ano || '').split('-');
+        document.getElementById('ativ_data_lote').value = mes ? `${ano}-${mes.padStart(2,'0')}` : '';
+        document.getElementById('ativ_quantidade').value = a.quantidade || 1;
+        document.getElementById('ativ_obs_lote').value   = a.cliente !== 'PRÉ VENDAS' ? (a.cliente || '') : '';
+    } else {
+        // Modo normal
+        document.getElementById('ativ_data').value          = a.data_atividade ? a.data_atividade.slice(0,10) : '';
+        document.getElementById('ativ_cliente').value       = a.cliente        || '';
+        document.getElementById('ativ_cnpj').value          = a.cnpj           || '';
+        document.getElementById('ativ_nome_contato').value  = a.nome_contato   || '';
+        document.getElementById('ativ_cargo_contato').value = a.cargo_contato  || '';
+    }
+
     toggleModoPreVendas();
     abrirModal('modalAtividade');
 }
@@ -8215,14 +8255,30 @@ async function salvarAtividade(e) {
         mes_ano:        `${ano}-${parseInt(mes)}`,
         quantidade:     qtd
     };
-    const { data: ins, error } = await supabaseClient.from('atividades').insert([payload]).select().single();
-    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
-    baseAtividades.unshift({ ...ins, quantidade: Number(ins.quantidade) || 1 });
-    fecharModal('modalAtividade');
-    renderizarRadar();
-    renderizarMetas();
-    const label = tipo === 'REUNIÃO' ? (qtd > 1 ? 'reuniões registradas' : 'reunião registrada') : (qtd > 1 ? 'propostas registradas' : 'proposta registrada');
-    showToast(`✅ ${qtd} ${label}!`, 'success');
+
+    const editId = document.getElementById('ativ_edit_id').value;
+
+    if (editId) {
+        // EDITAR registro existente
+        const { error } = await supabaseClient.from('atividades').update(payload).eq('id', editId);
+        if (error) { showToast('Erro ao editar: ' + error.message, 'error'); return; }
+        const idx = baseAtividades.findIndex(a => String(a.id) === String(editId));
+        if (idx !== -1) baseAtividades[idx] = { ...baseAtividades[idx], ...payload, quantidade: Number(qtd) || 1 };
+        fecharModal('modalAtividade');
+        renderizarRadar();
+        renderizarMetas();
+        showToast('✅ Atividade atualizada!', 'success');
+    } else {
+        // NOVO registro
+        const { data: ins, error } = await supabaseClient.from('atividades').insert([payload]).select().single();
+        if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+        baseAtividades.unshift({ ...ins, quantidade: Number(ins.quantidade) || 1 });
+        fecharModal('modalAtividade');
+        renderizarRadar();
+        renderizarMetas();
+        const label = tipo === 'REUNIÃO' ? (qtd > 1 ? 'reuniões registradas' : 'reunião registrada') : (qtd > 1 ? 'propostas registradas' : 'proposta registrada');
+        showToast(`✅ ${qtd} ${label}!`, 'success');
+    }
 }
 
 async function deletarAtividade(id) {
@@ -8311,7 +8367,8 @@ function renderizarRadar() {
             <div>
                 <div style="font-size:12px; font-weight:600; color:#422c76;">👤 ${a.vendedor||'—'}</div>
             </div>
-            <div>
+            <div style="display:flex; gap:4px; align-items:center;">
+                <button type="button" class="radar-edit-btn" onclick="editarAtividade('${a.id}')" title="Editar">✏️</button>
                 <button type="button" class="radar-del-btn" onclick="deletarAtividade('${a.id}')" title="Excluir">🗑</button>
             </div>
         </div>`;
